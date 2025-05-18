@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OS Dashboard - SaaS</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <!-- Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <div id="app">
+    <div class="os-container">
+      <!-- NEW: Main content area for desktop and widgets -->
+      <div class="main-content-area">
+        <!-- Desktop area -->
+        <div class="desktop-area" id="desktop-area">
+          <!-- Desktop icons -->
+          <div class="desktop-icons">
+            <div class="desktop-icon" data-app="my-files">
+              <div class="icon-container blue-icon">
+                <i class="fas fa-folder"></i>
+              </div>
+              <span>My Files</span>
+            </div>
+            
+            <div class="desktop-icon" data-app="trash">
+              <div class="icon-container gray-icon">
+                <i class="fas fa-trash"></i>
+              </div>
+              <span>Trash Bin</span>
+            </div>
+            
+            <div class="desktop-icon" data-app="app-store">
+              <div class="icon-container blue-app-icon">
+                <i class="fas fa-store"></i>
+              </div>
+              <span>AppStore</span>
+            </div>
+            
+            <div class="desktop-icon" data-app="settings">
+              <div class="icon-container green-icon">
+                <i class="fas fa-cog"></i>
+              </div>
+              <span>Settings</span>
+            </div>
+            
+            <div class="desktop-icon" data-app="site-builder">
+              <div class="icon-container cyan-icon">
+                <i class="fas fa-globe"></i>
+              </div>
+              <span>SiteBuilder</span>
+            </div>
+            
+            <div class="desktop-icon" data-app="wallet">
+              <div class="icon-container pink-icon">
+                <i class="fas fa-wallet"></i>
+              </div>
+              <span>Wallet</span>
+            </div>
+
+            <div class="desktop-icon" data-app="photoshop">
+              <div class="icon-container blue-icon">
+                <i class="fas fa-palette"></i>
+              </div>
+              <span>Photoshop</span>
+            </div>
+          </div>
+          
+          <!-- Windows area for opened apps -->
+          <div class="windows-container" id="windows-container"></div>
+
+          <!-- Right sidebar widgets START -->
+          <!-- <div class="sidebar-widgets"> ... entire block removed ... </div> -->
+          <!-- Right sidebar widgets END -->
+
+          <div id="drag-selector" class="hidden"></div> <!-- Drag selector element -->
+
+        </div> <!-- End desktop-area -->
+
+        <!-- Widgets Screen START -->
+        <div id="widgets-screen">
+          <!-- Notifications widget -->
+          <div class="widget">
+            <div class="widget-header">
+              <span>Notifications</span>
+            </div>
+            <div class="widget-content notification-widget">
+              <div class="big-number">23</div>
+              <div class="widget-subtitle">No more events today</div>
+            </div>
+          </div>
+          
+          <!-- Disk space widget -->
+          <div class="widget">
+            <div class="widget-header">
+              <span>Disk space</span>
+            </div>
+            <div class="widget-content disk-space-widget">
+              <div class="big-number">23%</div>
+              <div class="progress-bar">
+                <div class="progress" style="width: 23%"></div>
+              </div>
+              <div class="widget-subtitle">15 GB / 50 GB</div>
+            </div>
+          </div>
+          
+          <!-- Email widget -->
+          <div class="widget">
+            <div class="widget-content email-widget">
+              <div class="widget-icon"><i class="fas fa-headphones"></i></div>
+              <div class="widget-data">
+                <div class="big-number">23</div>
+                <div class="widget-subtitle">Unread emails</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Messages widget -->
+          <div class="widget">
+            <div class="widget-content messages-widget">
+              <div class="widget-icon"><i class="fas fa-dollar-sign"></i></div>
+              <div class="widget-data">
+                <div class="big-number">23</div>
+                <div class="widget-subtitle">Unread messages</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Usage stats widgets -->
+          <div class="widget">
+            <div class="widget-content stats-widget">
+              <div class="stat-item">
+                <div class="stat-item-main">
+                    <span class="stat-item-title">Disk usage</span>
+                    <span class="stat-item-price">$257,25</span>
+                </div>
+                <div class="stat-item-chart chart-blue"></div> 
+                <div class="stat-item-value">
+                    <span class="big-number">125,5</span>
+                    <span class="stats-unit">GB</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="widget">
+            <div class="widget-content stats-widget">
+              <div class="stat-item">
+                <div class="stat-item-main">
+                    <span class="stat-item-title">Processing</span>
+                    <span class="stat-item-price">$257,25</span>
+                </div>
+                <div class="stat-item-chart chart-blue"></div> 
+                <div class="stat-item-value">
+                    <span class="big-number">50</span>
+                    <span class="stats-unit">PP</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="widget">
+            <div class="widget-content stats-widget">
+              <div class="stat-item">
+                <div class="stat-item-main">
+                    <span class="stat-item-title">Traffic</span>
+                    <span class="stat-item-price">$257,25</span>
+                </div>
+                <div class="stat-item-chart chart-red"></div> 
+                <div class="stat-item-value">
+                    <span class="big-number">12,5</span>
+                    <span class="stats-unit">GB</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Cost estimation widget -->
+          <div class="widget">
+            <div class="widget-header">
+              <span>Cost estimation so far:</span>
+            </div>
+            <div class="widget-content cost-widget">
+              <div class="cost-info">
+                <div class="cost-currency">$</div>
+                <div class="cost-amount">275</div>
+              </div>
+              <div class="days-left">
+                <div class="days-number">25</div>
+                <div class="days-text">Days left</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- LEI widget -->
+          <div class="widget lei-widget">
+            <div class="widget-content">
+              <div class="lei-header">
+                <div class="lei-icon"><img src="img/coin-icon.png" alt="LEI"></div>
+                <div class="lei-amount">2 587</div>
+                <div class="lei-currency">lei</div>
+              </div>
+              <div class="lei-main-content">
+                <div class="lei-chart-area">
+                  <div class="lei-chart-container">
+                    <!-- Placeholder for actual bar chart elements -->
+                     <div class="lei-chart-bars">
+                        <!-- Example bars - heights and colors would be dynamic in a real app -->
+                        <div class="bar" style="height: 60%; background: linear-gradient(to top, #4A90E2 30%, #F5A623 30%, #F5A623 60%, #BD10E0 60%);"></div>
+                        <div class="bar" style="height: 40%; background: linear-gradient(to top, #4A90E2 50%, #F5A623 50%);"></div>
+                        <div class="bar" style="height: 80%; background: linear-gradient(to top, #4A90E2 20%, #F5A623 20%, #F5A623 40%, #BD10E0 40%, #BD10E0 70%, #7ED321 70%);"></div>
+                        <div class="bar" style="height: 50%; background: linear-gradient(to top, #4A90E2 60%, #F5A623 60%);"></div>
+                        <div class="bar" style="height: 30%; background-color: #4A90E2;"></div>
+                        <div class="bar" style="height: 20%; background-color: #F5A623;"></div>
+                      </div>
+                  </div>
+                  <div class="time-indicators">
+                    <span>6 AM</span>
+                    <span>12 PM</span>
+                    <span>6 PM</span>
+                  </div>
+                </div>
+                <div class="lei-side-info">
+                  <div class="lei-side-item"><i class="fas fa-chart-line"></i> <span>58m</span></div>
+                  <div class="lei-side-item"><i class="fas fa-users"></i> <span>22m</span></div> 
+                  <div class="lei-side-item"><i class="fab fa-youtube"></i> <span>18m</span></div>
+                  <div class="lei-side-item"><i class="fab fa-whatsapp"></i> <span>9m</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div> <!-- Widgets Screen END -->
+        <div id="widgets-scroll-handle"></div>
+      </div> <!-- End main-content-area -->
+      
+      <!-- Taskbar -->
+      <div class="taskbar">
+        <div class="start-button" id="start-button">
+          <i class="fas fa-th"></i>
+        </div>
+        
+        <div class="search-container">
+          <input type="text" placeholder="Search" class="search-input">
+          <i class="fas fa-search search-icon"></i>
+        </div>
+
+        <div class="taskbar-app-icons" id="taskbar-app-icons">
+          <!-- Dynamically added app icons will go here -->
+        </div>
+        
+        <div class="taskbar-right">
+          <div class="taskbar-icon">
+            <i class="fas fa-bell"></i>
+          </div>
+          <div class="taskbar-icon">
+            <i class="fas fa-search"></i>
+          </div>
+          <div class="taskbar-icon">
+            <i class="fas fa-cog"></i>
+          </div>
+          <div class="taskbar-time">
+            <span id="current-time">22:30</span>
+            <span class="date">Apr 23</span>
+          </div>
+          <div class="taskbar-user">
+            <img src="img/avatar.png" alt="User" class="user-avatar">
+          </div>
+        </div>
+      </div>
+      
+      <!-- Start Menu -->
+      <div class="start-menu" id="start-menu">
+        <!-- New Profile/Site Header -->
+        <div class="start-menu-profile-header">
+          <div class="site-logo-container">
+            <img src="img/squarelogo-placeholder.png" alt="Site Logo" class="site-logo-square">
+          </div>
+          <div class="user-greeting">Welcome Andrei</div>
+          <div class="user-site-url">mywebsite.ro</div>
+        </div>
+
+        <!-- Main menu content: App Grid + Right Sidebar -->
+        <div class="start-menu-body">
+          <!-- Left Panel (App Grid) - Reusing existing class for now, might need specific styling -->
+          <div class="start-menu-left-panel">
+            <div class="installed-apps-header">
+              <h3>Installed apps</h3>
+              <a href="#" class="category-link"><i class="fas fa-sliders-h"></i> Category</a>
+            </div>
+            <!-- JS will populate app grid sections here (e.g., .app-grid-section with .app-grid) -->
+          </div>
+
+          <!-- New Right Sidebar -->
+          <div class="start-menu-right-sidebar">
+            <div class="menu-section">
+              <h3>WEBSITE</h3>
+              <ul class="menu-links-list">
+                <li><a href="#" class="menu-item"><i class="fas fa-rocket"></i><span>Website Builder</span><i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="#" class="menu-item"><i class="fas fa-box-open"></i><span>Products</span></a></li>
+                <li><a href="#" class="menu-item"><i class="fas fa-search-dollar"></i><span>SEO</span><i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="#" class="menu-item"><i class="fas fa-chart-pie"></i><span>Analytics</span><i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="#" class="menu-item"><i class="fas fa-bullhorn"></i><span>Marketing</span><i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="#" class="menu-item"><i class="fas fa-wallet"></i><span>Digital Wallet</span></a></li>
+              </ul>
+            </div>
+            <div class="menu-section">
+              <h3>SETTINGS</h3>
+              <ul class="menu-links-list">
+                <li><a href="#" class="menu-item" data-app="settings-sm"><i class="fas fa-cog"></i><span>Settings</span><i class="fas fa-chevron-right"></i></a></li>
+                <li><a href="#" class="menu-item"><i class="fas fa-cogs"></i><span>Apps Integrations</span></a></li>
+                <li><a href="#" class="menu-item"><i class="fas fa-bell"></i><span>Notifications</span></a></li>
+                <li><a href="#" class="menu-item"><i class="fas fa-language"></i><span>Languages</span></a></li>
+                <li><a href="#" class="menu-item"><i class="fas fa-users-cog"></i><span>Administrators</span></a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- New Bottom Footer with Search and Logout -->
+        <div class="start-menu-footer">
+          <div class="start-menu-search-bar-bottom">
+            <i class="fas fa-search search-icon-bottom"></i>
+            <input type="text" id="start-menu-search-input-bottom" class="start-menu-search-input-bottom" placeholder="Search apps (windows key)">
+          </div>
+          <button class="start-menu-logout-button">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Log Out</span>
+          </button>
+        </div>
+      </div>
+      <!-- End Start Menu -->
+
+    </div>
+    
+    <!-- Templates for windows -->
+    <template id="file-explorer-template">
+      <div class="window" id="file-explorer-window">
+        <div class="window-header">
+          <div class="window-title">
+            <div class="window-icon pink-icon">
+              <i class="fas fa-folder"></i>
+            </div>
+            <span>File Explorer</span>
+          </div>
+          <div class="window-controls">
+            <button class="window-minimize"><i class="fas fa-minus"></i></button>
+            <button class="window-maximize"><i class="fas fa-expand"></i></button>
+            <button class="window-close"><i class="fas fa-times"></i></button>
+          </div>
+        </div>
+        <div class="window-toolbar">
+          <button class="toolbar-button"><i class="fas fa-arrow-left"></i></button>
+          <button class="toolbar-button"><i class="fas fa-arrow-right"></i></button>
+          <button class="toolbar-button"><i class="fas fa-arrow-up"></i></button>
+          <button class="toolbar-button"><i class="fas fa-home"></i></button>
+          <div class="path-breadcrumb">
+            <span class="breadcrumb-separator">></span>
+            <span class="breadcrumb-item">My files</span>
+          </div>
+          <div class="toolbar-right">
+            <button class="toolbar-button"><i class="fas fa-th-large"></i></button>
+            <button class="toolbar-button"><i class="fas fa-search"></i></button>
+          </div>
+        </div>
+        <div class="window-content">
+          <div class="file-explorer-sidebar">
+            <div class="sidebar-section">
+              <div class="sidebar-item active">
+                <i class="fas fa-hdd"></i>
+                <span>My files</span>
+              </div>
+              <div class="sidebar-item">
+                <i class="fas fa-desktop"></i>
+                <span>Desktop</span>
+              </div>
+              <div class="sidebar-item">
+                <i class="fas fa-file-alt"></i>
+                <span>Documents</span>
+              </div>
+              <div class="sidebar-item">
+                <i class="fas fa-image"></i>
+                <span>Media</span>
+              </div>
+              <div class="sidebar-item">
+                <i class="fas fa-share-alt"></i>
+                <span>Shared files</span>
+              </div>
+              <div class="sidebar-item">
+                <i class="fas fa-globe"></i>
+                <span>Website</span>
+              </div>
+              <div class="sidebar-item">
+                <i class="fas fa-trash"></i>
+                <span>Trash</span>
+              </div>
+            </div>
+            
+            <div class="sidebar-section">
+              <h4>Drives</h4>
+              <div class="sidebar-item">
+                <i class="fab fa-google-drive"></i>
+                <span>Google Drive</span>
+              </div>
+              <div class="sidebar-item">
+                <i class="fab fa-dropbox"></i>
+                <span>Dropbox</span>
+              </div>
+              <div class="sidebar-item">
+                <i class="fas fa-box"></i>
+                <span>Box</span>
+              </div>
+              <div class="sidebar-item">
+                <i class="fab fa-microsoft"></i>
+                <span>One Drive</span>
+              </div>
+            </div>
+            
+            <div class="sidebar-section">
+              <h4>Shared with me</h4>
+              <div class="sidebar-item">
+                <i class="fas fa-globe"></i>
+                <span>website.ro</span>
+              </div>
+            </div>
+            
+            <div class="sidebar-section">
+              <h4>PC local files</h4>
+              <div class="sidebar-item">
+                <i class="fas fa-folder-open"></i>
+                <span>Mapped folder</span>
+              </div>
+            </div>
+            
+            <div class="sidebar-add">
+              <button class="add-drive-button">
+                <i class="fas fa-plus"></i>
+                <span>Add new drive</span>
+              </button>
+            </div>
+          </div>
+          
+          <div class="file-explorer-content">
+            <div class="files-grid">
+              <div class="file-item folder">
+                <div class="file-icon">
+                  <i class="fas fa-folder"></i>
+                </div>
+                <div class="file-name">Desktop</div>
+                <div class="file-info">3 GB</div>
+              </div>
+              
+              <div class="file-item folder">
+                <div class="file-icon">
+                  <i class="fas fa-folder"></i>
+                </div>
+                <div class="file-name">Website</div>
+                <div class="file-info">13 GB</div>
+              </div>
+              
+              <div class="file-item folder">
+                <div class="file-icon">
+                  <i class="fas fa-folder"></i>
+                </div>
+                <div class="file-name">Documents</div>
+                <div class="file-info">18.5 GB</div>
+              </div>
+              
+              <div class="file-item folder">
+                <div class="file-icon">
+                  <i class="fas fa-folder"></i>
+                </div>
+                <div class="file-name">Media</div>
+                <div class="file-info">72.5 MB</div>
+              </div>
+              
+              <div class="file-item folder">
+                <div class="file-icon">
+                  <i class="fas fa-folder"></i>
+                </div>
+                <div class="file-name">Shared files</div>
+                <div class="file-info">5 MB</div>
+              </div>
+              
+              <div class="file-item folder">
+                <div class="file-icon">
+                  <i class="fas fa-trash"></i>
+                </div>
+                <div class="file-name">Trash</div>
+                <div class="file-info">125 MB</div>
+              </div>
+            </div>
+            
+            <div class="disk-info">
+              <div class="disk-icon">
+                <i class="fas fa-hdd"></i>
+              </div>
+              <div class="disk-details">
+                <div class="disk-name">My Files</div>
+                <div class="disk-space">327.7 GB free of 233 GB</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="window-statusbar">
+          <div class="status-left">21 items</div>
+          <div class="status-right">5 items selected</div>
+        </div>
+      </div>
+    </template>
+
+    <!-- Settings App Template START -->
+    <template id="settings-app-template">
+      <div class="window settings-app-window" id="settings-app-window">
+        <div class="window-header settings-header">
+          <div class="settings-window-controls">
+            <button class="window-control-btn red"></button>
+            <button class="window-control-btn yellow"></button>
+            <button class="window-control-btn green"></button>
+          </div>
+          <div class="settings-header-title">
+            <!-- Title will be set by JS based on selected section -->
+          </div>
+           <div class="window-controls classic-controls" style="display:none;"> <!-- Standard controls, hidden by default but available -->
+            <button class="window-minimize"><i class="fas fa-minus"></i></button>
+            <button class="window-maximize"><i class="fas fa-expand"></i></button>
+            <button class="window-close"><i class="fas fa-times"></i></button>
+          </div>
+        </div>
+        <div class="settings-app-body">
+          <div class="settings-sidebar">
+            <div class="settings-sidebar-search">
+              <i class="fas fa-search"></i>
+              <input type="text" placeholder="Search">
+            </div>
+            <div class="settings-user-profile">
+              <img src="img/avatar.png" alt="User" class="profile-avatar">
+              <div class="profile-info">
+                <span class="profile-name">Michael Muchmore</span>
+                <span class="profile-id">Apple ID</span>
+              </div>
+            </div>
+            <nav class="settings-nav">
+              <ul>
+                <li><a href="#" data-section="family"><i class="fas fa-users"></i> Family</a></li>
+                <li><a href="#" data-section="suggestions" class="has-badge"><i class="fas fa-lightbulb"></i> Apple ID Suggestions <span class="badge">2</span></a></li>
+                <li><a href="#" data-section="wifi"><i class="fas fa-wifi"></i> Wi-Fi</a></li>
+                <li><a href="#" data-section="bluetooth"><i class="fab fa-bluetooth-b"></i> Bluetooth</a></li>
+                <li><a href="#" data-section="network"><i class="fas fa-globe"></i> Network</a></li>
+                <li><a href="#" data-section="notifications"><i class="fas fa-bell"></i> Notifications</a></li>
+                <li><a href="#" data-section="sound"><i class="fas fa-volume-up"></i> Sound</a></li>
+                <li><a href="#" data-section="focus"><i class="fas fa-moon"></i> Focus</a></li>
+                <li><a href="#" data-section="screentime"><i class="fas fa-hourglass-half"></i> Screen Time</a></li>
+                <li><a href="#" data-section="general"><i class="fas fa-cog"></i> General</a></li>
+                <li><a href="#" data-section="appearance" class="active"><i class="fas fa-palette"></i> Appearance</a></li>
+              </ul>
+            </nav>
+          </div>
+          <div class="settings-content">
+            <div class="settings-content-header">
+              <div class="settings-nav-arrows">
+                <button><i class="fas fa-chevron-left"></i></button>
+                <button><i class="fas fa-chevron-right"></i></button>
+              </div>
+              <h2>Appearance</h2>
+            </div>
+            <div class="settings-section-content appearance-content">
+              <div class="setting-group">
+                <label class="group-title">Appearance</label>
+                <div class="appearance-options">
+                  <div class="appearance-option" data-theme="light">
+                    <img src="img/placeholder-light-theme.png" alt="Light Theme Preview">
+                    <span>Light</span>
+                  </div>
+                  <div class="appearance-option active" data-theme="dark">
+                    <img src="img/placeholder-dark-theme.png" alt="Dark Theme Preview">
+                    <span>Dark</span>
+                  </div>
+                  <div class="appearance-option" data-theme="auto">
+                    <img src="img/placeholder-auto-theme.png" alt="Auto Theme Preview">
+                    <span>Auto</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="setting-group">
+                <label class="group-title">Accent color</label>
+                <div class="accent-color-options">
+                  <div class="color-swatch multicolor active" title="Multicolor"></div>
+                  <div class="color-swatch blue" style="background-color: #007aff;" title="Blue"></div>
+                  <div class="color-swatch purple" style="background-color: #af52de;" title="Purple"></div>
+                  <div class="color-swatch pink" style="background-color: #ff2d55;" title="Pink"></div>
+                  <div class="color-swatch red" style="background-color: #ff3b30;" title="Red"></div>
+                  <div class="color-swatch orange" style="background-color: #ff9500;" title="Orange"></div>
+                  <div class="color-swatch yellow" style="background-color: #ffcc00;" title="Yellow"></div>
+                  <div class="color-swatch green" style="background-color: #34c759;" title="Green"></div>
+                  <div class="color-swatch gray" style="background-color: #8e8e93;" title="Graphite"></div>
+                </div>
+              </div>
+
+              <div class="setting-row">
+                <label for="highlight-color">Highlight color</label>
+                <div class="select-wrapper">
+                  <select id="highlight-color">
+                    <option value="accent">Accent Color</option>
+                    <option value="graphite">Graphite</option>
+                  </select>
+                  <i class="fas fa-chevron-down"></i>
+                </div>
+              </div>
+
+              <div class="setting-row">
+                <label for="sidebar-icon-size">Sidebar icon size</label>
+                <div class="select-wrapper">
+                  <select id="sidebar-icon-size">
+                    <option value="small">Small</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="large">Large</option>
+                  </select>
+                  <i class="fas fa-chevron-down"></i>
+                </div>
+              </div>
+
+              <div class="setting-row">
+                <label for="allow-wallpaper-tinting">Allow wallpaper tinting in windows</label>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="allow-wallpaper-tinting" checked>
+                  <span class="slider round"></span>
+                </label>
+              </div>
+              
+              <div class="setting-group padded">
+                <label class="group-title">Show scroll bars</label>
+                <div class="radio-group">
+                  <div class="radio-option">
+                    <input type="radio" id="scroll-auto" name="show-scrollbars" value="auto" checked>
+                    <label for="scroll-auto">Automatically based on mouse or trackpad</label>
+                  </div>
+                  <div class="radio-option">
+                    <input type="radio" id="scroll-scrolling" name="show-scrollbars" value="scrolling">
+                    <label for="scroll-scrolling">When scrolling</label>
+                  </div>
+                  <div class="radio-option">
+                    <input type="radio" id="scroll-always" name="show-scrollbars" value="always">
+                    <label for="scroll-always">Always</label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="setting-group padded">
+                <label class="group-title">Click in the scroll bar to</label>
+                <div class="radio-group">
+                  <div class="radio-option">
+                    <input type="radio" id="click-next-page" name="scrollbar-click" value="next" checked>
+                    <label for="click-next-page">Jump to the next page</label>
+                  </div>
+                  <div class="radio-option">
+                    <input type="radio" id="click-spot" name="scrollbar-click" value="spot">
+                    <label for="click-spot">Jump to the spot that\'s clicked</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Other sections (General, Wi-Fi, etc.) would go here, hidden by default -->
+          </div>
+        </div>
+      </div>
+    </template>
+    <!-- Settings App Template END -->
+
+    <!-- AppStore App Template -->
+    <template id="app-store-template">
+      <div class="window app-store-window" style="width: 1000px; height: 700px;">
+        <!-- Standard Window Header (will be populated by JS) -->
+        <div class="window-header">
+          <div class="window-title">
+            <div class="window-icon blue-app-icon"> <!-- Or a specific AppStore icon -->
+              <i class="fas fa-store"></i>
+            </div>
+            <span>AppStore</span>
+          </div>
+          <div class="window-controls">
+            <button class="window-minimize" title="Minimize"></button>
+            <button class="window-maximize" title="Maximize"></button>
+            <button class="window-close" title="Close"></button>
+          </div>
+        </div>
+        <!-- AppStore Specific Content -->
+        <div class="app-store-body">
+          <div class="app-store-sidebar">
+            <div class="app-store-search-container">
+              <i class="fas fa-search"></i>
+              <input type="text" placeholder="Search" class="app-store-search-input">
+            </div>
+            <nav class="app-store-nav">
+              <ul>
+                <li><a href="#" class="active"><i class="fas fa-star"></i> Discover</a></li>
+                <li><a href="#"><i class="fas fa-paint-brush"></i> Create</a></li>
+                <li><a href="#"><i class="fas fa-briefcase"></i> Work</a></li>
+                <li><a href="#"><i class="fas fa-gamepad"></i> Play</a></li>
+                <li><a href="#"><i class="fas fa-wrench"></i> Develop</a></li>
+                <li><a href="#"><i class="fas fa-folder"></i> Categories</a></li>
+                <li><a href="#"><i class="fas fa-arrow-down"></i> Updates <span class="app-store-badge">1</span></a></li>
+              </ul>
+            </nav>
+          </div>
+          <div class="app-store-main-content">
+            <section class="app-store-hero-section">
+              <img src="img/appstore/hero-placeholder.png" alt="Featured App">
+              <div class="hero-content">
+                <span class="hero-kicker">BEHIND THE SCENES</span>
+                <h2>Put a Spin on It</h2>
+                <p>How djay Pro 2 blends music and tech.</p>
+              </div>
+            </section>
+
+            <section class="app-store-feature-cards">
+              <div class="feature-card">
+                <img src="img/appstore/card1-placeholder.png" alt="Feature 1">
+                <div class="feature-card-content">
+                  <span class="card-kicker">FROM THE EDITORS</span>
+                  <h3>The All-New Mac App Store</h3>
+                  <p>Reimagined from the ground up.</p>
+                </div>
+              </div>
+              <div class="feature-card">
+                <img src="img/appstore/card2-placeholder.png" alt="Feature 2">
+                <div class="feature-card-content">
+                  <span class="card-kicker">LIFE HACK</span>
+                  <h3>Master the Menu Bar</h3>
+                  <p>How to keep your favorite apps top of screen at all times.</p>
+                </div>
+              </div>
+              <div class="feature-card">
+                <img src="img/appstore/card3-placeholder.png" alt="Feature 3">
+                <div class="feature-card-content">
+                  <span class="card-kicker">EDITORS' CHOICE</span>
+                  <h3>A Beautiful Puzzler</h3>
+                  <p>Unravel the brain-bending challenges of The Witness.</p>
+                </div>
+              </div>
+            </section>
+
+            <section class="app-store-list-section">
+              <div class="list-header">
+                <h2>Top Paid</h2>
+                <a href="#" class="see-all-link">See All</a>
+              </div>
+              <ul class="app-list">
+                <!-- Placeholder Items -->
+                <li class="app-list-item">
+                  <img src="img/appstore/app-icon-placeholder.png" alt="App Icon" class="app-icon">
+                  <div class="app-info">
+                    <span class="app-name">1. Logic Pro X</span>
+                    <span class="app-category">Music creation...</span>
+                  </div>
+                  <button class="app-price-button">$49.99</button>
+                </li>
+                <li class="app-list-item">
+                  <img src="img/appstore/app-icon-placeholder.png" alt="App Icon" class="app-icon">
+                  <div class="app-info">
+                    <span class="app-name">2. Magnet</span>
+                    <span class="app-category">Organize your...</span>
+                  </div>
+                  <button class="app-price-button">$0.99</button>
+                </li>
+                <li class="app-list-item">
+                  <img src="img/appstore/app-icon-placeholder.png" alt="App Icon" class="app-icon">
+                  <div class="app-info">
+                    <span class="app-name">3. Adware Doctor:Anti</span>
+                    <span class="app-category">Utilities</span>
+                  </div>
+                  <button class="app-price-button">$4.99</button>
+                </li>
+              </ul>
+            </section>
+
+            <section class="app-store-list-section">
+              <div class="list-header">
+                <h2>Top Free</h2>
+                <a href="#" class="see-all-link">See All</a>
+              </div>
+              <ul class="app-list">
+                <!-- Placeholder Items -->
+                <li class="app-list-item">
+                  <img src="img/appstore/app-icon-placeholder.png" alt="App Icon" class="app-icon">
+                  <div class="app-info">
+                    <span class="app-name">1. Example Free App</span>
+                    <span class="app-category">Productivity</span>
+                  </div>
+                  <button class="app-get-button">GET</button>
+                </li>
+                 <li class="app-list-item">
+                  <img src="img/appstore/app-icon-placeholder.png" alt="App Icon" class="app-icon">
+                  <div class="app-info">
+                    <span class="app-name">2. Another Free Utility</span>
+                    <span class="app-category">Utilities</span>
+                  </div>
+                  <button class="app-get-button">GET</button>
+                </li>
+              </ul>
+            </section>
+          </div>
+        </div>
+      </div>
+    </template>
+    <!-- End of AppStore App Template -->
+
+    <!-- Calculator App Template -->
+    <template id="calculator-app-template">
+      <div class="window calculator-window" style="width: 530px; height: 560px;">
+        <!-- Standard Window Header (will be populated by JS) -->
+        <div class="window-header">
+          <div class="window-title">
+            <div class="window-icon gray-icon">
+              <i class="fas fa-calculator"></i>
+            </div>
+            <span>Calculator</span>
+          </div>
+          <div class="window-controls">
+            <button class="window-minimize" title="Minimize"></button>
+            <button class="window-maximize" title="Maximize" disabled></button>
+            <button class="window-close" title="Close"></button>
+          </div>
+        </div>
+        <!-- Calculator Specific Content -->
+        <div class="calculator-body">
+          <!-- New Inner Header for Calculator Type & Keep on Top -->
+          <div class="calculator-app-header">
+            <button class="calc-header-btn" id="calc-menu-btn"><i class="fas fa-bars"></i></button>
+            <span class="calc-type-title">Standard</span>
+            <button class="calc-header-btn" id="calc-pin-btn"><i class="fas fa-thumbtack"></i></button>
+          </div>
+
+          <div class="calculator-main-content">
+            <div class="calculator-input-area">
+              <div class="calculator-display">
+                <div class="calculator-history" id="calc-history"></div>
+                <div class="calculator-current-input" id="calc-current-input">0</div>
+              </div>
+              <div class="calculator-buttons">
+                <!-- Row 1: Memory Controls (5 buttons) -->
+                <button class="calc-btn calc-btn-mem" data-action="memory-clear">MC</button>
+                <button class="calc-btn calc-btn-mem" data-action="memory-recall">MR</button>
+                <button class="calc-btn calc-btn-mem" data-action="memory-add">M+</button>
+                <button class="calc-btn calc-btn-mem" data-action="memory-subtract">M-</button>
+                <button class="calc-btn calc-btn-mem" data-action="memory-store">MS</button>
+                
+                <!-- Row 2: Functions -->
+                <button class="calc-btn calc-btn-lightgray" data-action="percent">%</button>
+                <button class="calc-btn calc-btn-lightgray" data-action="clear-entry">CE</button>
+                <button class="calc-btn calc-btn-lightgray" data-action="clear">C</button>
+                <button class="calc-btn calc-btn-lightgray" data-action="backspace"><i class="fas fa-backspace"></i></button>
+                
+                <!-- Row 3: Functions -->
+                <button class="calc-btn calc-btn-lightgray" data-action="inverse">1/x</button>
+                <button class="calc-btn calc-btn-lightgray" data-action="square">x²</button>
+                <button class="calc-btn calc-btn-lightgray" data-action="sqrt">√x</button>
+                <button class="calc-btn calc-btn-operator" data-action="divide">÷</button>
+
+                <!-- Row 4: Numbers & Operators -->
+                <button class="calc-btn calc-btn-num" data-value="7">7</button>
+                <button class="calc-btn calc-btn-num" data-value="8">8</button>
+                <button class="calc-btn calc-btn-num" data-value="9">9</button>
+                <button class="calc-btn calc-btn-operator" data-action="multiply">×</button>
+
+                <!-- Row 5: Numbers & Operators -->
+                <button class="calc-btn calc-btn-num" data-value="4">4</button>
+                <button class="calc-btn calc-btn-num" data-value="5">5</button>
+                <button class="calc-btn calc-btn-num" data-value="6">6</button>
+                <button class="calc-btn calc-btn-operator" data-action="subtract">−</button>
+
+                <!-- Row 6: Numbers & Operators -->
+                <button class="calc-btn calc-btn-num" data-value="1">1</button>
+                <button class="calc-btn calc-btn-num" data-value="2">2</button>
+                <button class="calc-btn calc-btn-num" data-value="3">3</button>
+                <button class="calc-btn calc-btn-operator" data-action="add">+</button>
+
+                <!-- Row 7: Numbers & Operators -->
+                <button class="calc-btn calc-btn-num" data-action="negate">+/-</button>
+                <button class="calc-btn calc-btn-num" data-value="0">0</button>
+                <button class="calc-btn calc-btn-num" data-action="decimal">.</button>
+                <button class="calc-btn calc-btn-equals" data-action="equals">=</button>
+              </div>
+            </div>
+            <div class="calculator-history-memory-panel">
+              <div class="calc-panel-tabs">
+                <button class="calc-panel-tab active" data-tab="history">History</button>
+                <button class="calc-panel-tab" data-tab="memory">Memory</button>
+              </div>
+              <div class="calc-panel-content">
+                <div class="calc-history-content" id="calc-history-list">
+                  <p>There's no history yet.</p>
+                </div>
+                <div class="calc-memory-content hidden" id="calc-memory-list">
+                  <p>There's nothing saved in memory.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </template>
+    <!-- End of Calculator App Template -->
+
+    <!-- Photoshop App Template -->
+    <template id="photoshop-app-template">
+      <div class="window photoshop-window" style="width: 90vw; height: 85vh;"> <!-- Default large size -->
+        <!-- Standard Window Header -->
+        <div class="window-header">
+          <div class="window-title">
+            <div class="window-icon blue-icon"> <!-- Consistent icon color -->
+              <i class="fas fa-palette"></i>
+            </div>
+            <span>Photoshop</span>
+          </div>
+          <div class="window-controls">
+            <button class="window-minimize" title="Minimize"></button>
+            <button class="window-maximize" title="Maximize"></button>
+            <button class="window-close" title="Close"></button>
+          </div>
+        </div>
+        <!-- Photoshop Specific Content (iframe) -->
+        <div class="window-content photoshop-content">
+          <iframe src="https://www.photopea.com/" style="width: 100%; height: 100%; border: none;"></iframe>
+        </div>
+      </div>
+    </template>
+    <!-- End of Photoshop App Template -->
+
+  </div>
+
+  <!-- Context Menu Structure (hidden by default) -->
+  <div id="context-menu" class="context-menu hidden">
+    <!-- Context menu items will be populated by JavaScript -->
+  </div>
+  
+  <script src="js/app.js"></script>
+</body>
+</html> 

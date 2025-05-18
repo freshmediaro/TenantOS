@@ -1,0 +1,2841 @@
+:root {
+  --primary-bg: #0c0021;
+  --secondary-bg: #111133;
+  --window-bg: #0c0021;
+  --window-header: #111133;
+  --text-color: #fff;
+  --border-color: rgba(255, 255, 255, 0.1);
+  --accent-color: #ff1b6b;
+  --green-accent: #00cc66;
+  --blue-accent: #1a73e8;
+  --cyan-accent: #00bbcc;
+  --red-accent: #ff3a30;
+  --purple-accent: #a142f4;
+  --orange-accent: #ff9500;
+  --icon-bg-blue: #4f6bfe;
+  --icon-bg-green: #68c23d;
+  --icon-bg-pink: #ff3b8d;
+  --icon-bg-cyan: #00c8d5;
+  --icon-bg-gray: #5a6377;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+    Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  background-color: var(--primary-bg);
+  color: var(--text-color);
+  overflow: hidden;
+  height: 100vh;
+  font-size: 14px;
+}
+
+#app {
+  height: 100vh;
+  width: 100vw;
+  position: relative;
+  overflow: hidden;
+}
+
+/* OS Container */
+.os-container {
+  display: grid; /* RESTORED: Grid for main layout + taskbar */
+  grid-template-rows: 1fr auto; /* RESTORED: Main content takes 1fr, taskbar takes auto */
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+  background: radial-gradient(circle at center, rgba(128, 0, 128, 0.3), transparent 70%);
+}
+
+/* NEW: Main Content Area (holds desktop and widgets) */
+.main-content-area {
+  display: flex;
+  flex-direction: row; /* Desktop and Widgets side-by-side */
+  height: 100%; /* Fill the 1fr row of os-container */
+  position: relative; /* ADDED: Needed for absolute positioning of #widgets-screen within it */
+  overflow: hidden; /* Prevent content overflow from creating scrollbars */
+}
+
+/* Desktop Area */
+.desktop-area {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+  z-index: 2; /* Ensure desktop area is above widgets-screen */
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Desktop Icons */
+.desktop-icons {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--grid-cell-width, 80px), 1fr));
+  grid-auto-rows: minmax(var(--grid-cell-height, 100px), auto);
+  gap: var(--grid-gap, 20px); 
+  padding: var(--grid-gap, 20px); 
+  position: relative;
+  z-index: 10; /* UPDATED: Relative to desktop-area */
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  align-items: start; /* Align items (icons) to the start of their grid cell along the column axis */
+  /* background-color: rgba(255, 0, 0, 0.2); */ /* REMOVE TEST BACKGROUND */
+  flex-grow: 1; /* Allow icon grid to fill space within .desktop-area */
+  overflow-y: auto; /* Allow scrolling for icons if they exceed space */
+  /* width: 100%; height: 100%; are existing and should be fine */
+}
+
+.desktop-icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Horizontal centering of icon-container and span */
+  justify-content: flex-start; /* Align icon-container and span to the top of the .desktop-icon box */
+  text-align: center;
+  cursor: pointer;
+  width: var(--grid-cell-width, 80px); /* Use variable for consistency */
+  height: var(--grid-cell-height, 100px); /* Give icon a defined height matching cell min-height */
+  transition: all 0.2s;
+  /* background-color: rgba(0, 255, 0, 0.2); */ /* REMOVE TEST BACKGROUND */
+  /* border: 1px solid yellow; */ /* REMOVE TEST BORDER */
+}
+
+.desktop-icon:hover {
+  transform: scale(1.05);
+}
+
+.icon-container {
+  width: 50px;
+  height: 50px;
+  border-radius: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.icon-container i {
+  font-size: 24px;
+  color: white;
+}
+
+.blue-icon {
+  background-color: var(--icon-bg-blue);
+}
+
+.green-icon {
+  background-color: var(--icon-bg-green);
+}
+
+.pink-icon {
+  background-color: var(--icon-bg-pink);
+}
+
+.cyan-icon {
+  background-color: var(--icon-bg-cyan);
+}
+
+.gray-icon {
+  background-color: var(--icon-bg-gray);
+}
+
+.blue-app-icon {
+  background-color: var(--blue-accent);
+}
+
+.desktop-icon span {
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  user-select: none; /* Prevent text selection */
+}
+
+/* Taskbar */
+.taskbar {
+  height: 50px;
+  background-color: rgba(10, 10, 40, 0.8);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  border-top: 1px solid var(--border-color);
+  z-index: 1000; /* Above most elements but below start menu */
+  /* Taskbar is outside the flex layout of os-container's main content area now */
+  /* Need to ensure os-container accommodates taskbar. Let's wrap main content. */
+}
+
+.start-button {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background-color: var(--accent-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 15px;
+  cursor: pointer;
+}
+
+.start-button i {
+  font-size: 18px;
+  color: white;
+}
+
+.search-container {
+  height: 35px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  padding: 0 15px;
+  flex: 1;
+  max-width: 220px;
+  position: relative;
+}
+
+.search-input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: white;
+  width: 100%;
+}
+
+.search-icon {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* Taskbar App Icons */
+.taskbar-app-icons {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  margin-left: 10px; /* Space from search or start button */
+}
+
+.taskbar-app-icon {
+  width: 40px;
+  height: 40px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  border-bottom: 3px solid transparent;
+}
+
+.taskbar-app-icon:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.taskbar-app-icon.active {
+  background-color: rgba(255, 255, 255, 0.25);
+  border-bottom: 3px solid var(--accent-color);
+}
+
+.taskbar-app-icon.minimized {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-bottom: 3px solid rgba(255, 255, 255, 0.3);
+}
+
+.taskbar-app-icon i {
+  font-size: 18px;
+  color: var(--text-color);
+}
+
+.taskbar-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+}
+
+.taskbar-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 10px;
+  cursor: pointer;
+}
+
+.taskbar-icon:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.taskbar-time {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin-left: 15px;
+  margin-right: 15px;
+}
+
+.date {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.taskbar-user {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.user-avatar, .menu-user-avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background-color: #5a6377;
+}
+
+/* Start Menu - General Adjustments for New Layout */
+.start-menu {
+  position: absolute; /* Ensure positioning context */
+  bottom: 60px; /* Adjusted for 50px taskbar + 10px gap */
+  left: 10px; /* Keep or adjust as needed for horizontal position */
+  width: 720px; /* Increased width for new layout */
+  max-height: calc(100vh - 50px); /* Slightly more top/bottom margin from screen edges */
+  background-color: #1C1C2E; /* Darker, less saturated purple from target */
+  border-radius: 16px; /* More rounded corners */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); /* Restore shadow for elevation */
+  overflow: hidden; /* Keep, handled by flex children if they scroll */
+  z-index: 1100; /* Ensure it's above the taskbar (taskbar is 1000) */
+  backdrop-filter: blur(20px); /* Restore blur */
+  border: 1px solid rgba(255, 255, 255, 0.08); /* Adjusted border for new theme */
+  display: none; /* Hidden by default, JS will toggle */
+  flex-direction: column; /* Main container is a column */
+  padding: 0; /* Remove global padding, sections will manage their own */
+}
+
+/* NEW: Profile Header Area */
+.start-menu-profile-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 25px 20px 20px 20px; /* Generous padding */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.site-logo-container {
+  margin-bottom: 15px;
+}
+
+.site-logo-square {
+  width: 72px; /* Larger logo */
+  height: 72px;
+  background-color: #fff; /* Assuming white background for placeholder */
+  border-radius: 12px; /* Rounded corners for logo */
+  object-fit: contain; /* Or cover, depending on logo aspect ratio */
+}
+
+.user-greeting {
+  font-size: 18px; /* Larger greeting text */
+  font-weight: 600;
+  color: #E0E0E0;
+  margin-bottom: 4px;
+}
+
+.user-site-url {
+  font-size: 13px;
+  color: #A0A0B0; /* Softer color for URL */
+}
+
+/* NEW: Start Menu Body (App Grid + Right Sidebar) */
+.start-menu-body {
+  display: flex;
+  flex-grow: 1;
+  overflow: hidden; /* Contains scrolling children */
+  padding: 20px 25px; /* Padding around the two main panels */
+  gap: 25px; /* Gap between left panel and right sidebar */
+}
+
+/* Adjustments for Left Panel (App Grid) */
+.start-menu-left-panel {
+  flex-grow: 1; /* Takes up remaining space */
+  /* width: 60%; */ /* No longer fixed percentage, flex handles it */
+  padding: 0; /* Remove old padding */
+  border-right: none; /* Remove old border, gap handles separation */
+  overflow-y: auto; /* Allow scrolling for apps */
+  max-height: calc(100vh - 280px); /* Estimate based on header/footer heights */
+  max-width: 400px;
+}
+
+.installed-apps-header {
+  /* display: flex; */
+  /* justify-content: space-between; */
+  /* align-items: center; */
+  margin-bottom: 15px;
+  padding-right: 5px; /* Align category link better if needed */
+}
+
+.installed-apps-header h3 {
+  font-size: 18px; /* Slightly larger */
+  font-weight: 500;
+  color: #E0E0E0;
+}
+
+.category-link {
+  /* font-size: 12px; */
+  color: #A0A0B0;
+  /* text-decoration: none; */
+}
+.category-link i {
+  /* margin-right: 5px; */
+  font-size: 13px; /* Slightly larger icon */
+}
+
+.app-grid-section {
+    margin-top: 15px;
+}
+/* App Grid specific adjustments (if any beyond current) */
+.app-grid-section h4 {
+  font-size: 12px; /* Slightly larger category titles */
+  color: #A0A0B0;
+  /* text-transform: uppercase; */
+  margin-bottom: 12px;
+  /* margin-top: 15px; */
+}
+
+.app-grid-section:first-child h4 {
+    margin-top: 0;
+}
+
+.app-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 15px;
+}
+
+.app-grid-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.app-grid-item:hover {
+  background-color: rgba(255, 255, 255, 0.07);
+}
+
+.app-icon-bg {
+  width: 50px;
+  height: 50px;
+  border-radius: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  color: white;
+}
+
+.app-icon-bg i {
+  font-size: 22px;
+}
+
+.pink-bg { background-color: #E53E6E; }
+.green-bg { background-color: #00C853; }
+.purple-bg { background-color: #6C59CB; }
+
+.app-grid-item span {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.85);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* NEW: Right Sidebar */
+.start-menu-right-sidebar {
+  width: 240px; /* Fixed width for the sidebar */
+  flex-shrink: 0; /* Prevent shrinking */
+  padding-left: 25px; /* Space from the left panel (if gap isn't enough or for border) */
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  overflow-y: auto;
+  max-height: calc(100vh - 280px); /* Match left panel */
+}
+
+.start-menu-right-sidebar .menu-section {
+  margin-bottom: 25px;
+}
+
+.start-menu-right-sidebar .menu-section:last-child {
+  margin-bottom: 0;
+}
+
+.start-menu-right-sidebar .menu-section h3 {
+  font-size: 13px;
+  font-weight: 500;
+  color: #A0A0B0; /* Softer color for section titles */
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.menu-links-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.menu-links-list li a.menu-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 0; /* Vertical padding only, rely on parent for horizontal */
+  color: #C0C0D0; /* Lighter text for items */
+  text-decoration: none;
+  font-size: 14px;
+  border-radius: 6px;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.menu-links-list li a.menu-item:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: #FFFFFF;
+}
+
+.menu-links-list li a.menu-item i:first-child { /* Icon before text */
+  width: 20px; /* Alignment */
+  margin-right: 12px;
+  font-size: 15px;
+  text-align: center;
+  color: #A0A0B0; /* Default icon color */
+}
+
+.menu-links-list li a.menu-item:hover i:first-child {
+  color: #FFFFFF;
+}
+
+.menu-links-list li a.menu-item span {
+  flex-grow: 1;
+}
+
+.menu-links-list li a.menu-item i.fa-chevron-right { /* Chevron icon */
+  font-size: 10px;
+  color: #707080; /* Dimmed chevron */
+  margin-left: auto;
+}
+
+.menu-links-list li a.menu-item:hover i.fa-chevron-right {
+  color: #A0A0B0;
+}
+
+
+/* NEW: Footer (Search Bar + Logout) */
+.start-menu-footer {
+  display: flex;
+  align-items: center;
+  padding: 15px 25px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background-color: rgba(0,0,0,0.15); /* Slightly darker footer background */
+}
+
+/* Updated Search Bar Styling for Footer */
+.start-menu-footer .start-menu-search-bar-bottom {
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.04); /* Darker search input bg */
+  border-radius: 8px;
+  padding: 10px 15px; /* More padding */
+}
+
+.start-menu-footer .search-icon-bottom {
+  color: #808090; /* Dimmer search icon */
+  margin-right: 10px;
+  font-size: 15px;
+}
+
+.start-menu-footer .start-menu-search-input-bottom {
+  flex-grow: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-color);
+  font-size: 14px;
+}
+
+.start-menu-footer .start-menu-search-input-bottom::placeholder {
+  color: #808090;
+}
+
+/* NEW: Logout Button */
+.start-menu-logout-button {
+  display: flex;
+  align-items: center;
+  background: none;
+  border: none;
+  color: #A0A0B0;
+  font-size: 14px;
+  padding: 10px 15px;
+  margin-left: 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.start-menu-logout-button:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: #FFFFFF;
+}
+
+.start-menu-logout-button i {
+  margin-right: 8px;
+  font-size: 15px;
+}
+
+/* Cleanup/Override old styles that might conflict */
+.start-menu-top-header { display: none; } /* Replaced by start-menu-profile-header */
+.start-menu-search-bar-top { display: none; } /* Replaced by footer search */
+.start-menu-main-content { /* Replaced by start-menu-body */
+  padding: 0;
+  /* any other conflicting styles */
+}
+.start-menu-right-panel { display: none; } /* Replaced by start-menu-right-sidebar */
+.start-menu-bottom-bar { display: none; } /* Replaced by start-menu-footer */
+
+/* Windows Container */
+.windows-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 20;
+  pointer-events: none;
+}
+.windows-container > * {
+  pointer-events: all;
+}
+
+/* Window Styling */
+.window {
+  position: absolute;
+  background-color: var(--window-bg);
+  border-radius: 12px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  resize: both;
+  min-width: 700px;
+  min-height: 500px;
+  border: 1px solid var(--border-color);
+}
+
+.window-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--window-header);
+  padding: 4px 10px;
+  cursor: grab;
+}
+
+.window-title {
+  display: flex;
+  align-items: center;
+}
+
+.window-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 10px;
+}
+
+.window-controls {
+  display: flex;
+  align-items: center; /* Vertically align buttons if needed */
+}
+
+.window-controls button {
+  background-color: transparent;
+  border: none;
+  color: var(--text-color); /* Icon color, will be overridden by pseudo-elements */
+  padding: 0;
+  margin-left: 2px; /* Minimal margin between buttons */
+  cursor: pointer;
+  width: 26px; /* Standard width for Win11 controls */
+  height: 32px; /* Standard height for Win11 controls */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative; /* For pseudo-elements */
+  transition: background-color 0.15s ease;
+}
+
+.window-controls button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.window-controls button.window-close:hover {
+  background-color: #E81123; /* Win11 close hover red */
+}
+
+.window-controls button.window-close:hover::before,
+.window-controls button.window-close:hover::after {
+  background-color: white; /* X becomes white on red hover */
+}
+
+/* Remove Font Awesome <i> elements if they exist, we use pseudo-elements now */
+.window-controls button i {
+  display: none;
+}
+
+/* Minimize Button (-) */
+.window-minimize::before {
+  content: '';
+  position: absolute;
+  width: 10px;
+  height: 1px;
+  background-color: var(--text-color);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* Maximize Button (□) */
+.window-maximize::before {
+  content: '';
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border: 1px solid var(--text-color);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* Restore Button (겹치는 사각형) - shown when .window-restore is active */
+.window-maximize.window-restore::before {
+  /* Main square (bottom right) */
+  content: '';
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border: 1px solid var(--text-color);
+  top: calc(50% + 1px); /* Adjust to visually center */
+  left: calc(50% + 1px);
+  transform: translate(-50%, -50%);
+  background-color: var(--window-header); /* Match header to seem "on top" */
+}
+
+.window-maximize.window-restore::after {
+  /* Secondary square (top left) */
+  content: '';
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border: 1px solid var(--text-color);
+  top: calc(50% - 2px); /* Adjust to visually center */
+  left: calc(50% - 2px);
+  transform: translate(-50%, -50%);
+  /* No background for this one, it's "behind" */
+}
+
+/* Close Button (X) */
+.window-close::before,
+.window-close::after {
+  content: '';
+  position: absolute;
+  width: 15px;
+  height: 1px;
+  background-color: var(--text-color);
+  top: 50%;
+  left: 50%;
+}
+
+.window-close::before {
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.window-close::after {
+  transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+.window-toolbar {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.toolbar-button {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  width: 30px;
+  height: 30px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 5px;
+}
+
+.toolbar-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.path-breadcrumb {
+  display: flex;
+  align-items: center;
+  margin-left: 10px;
+  flex: 1;
+}
+
+.breadcrumb-separator {
+  margin: 0 8px;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.toolbar-right {
+  margin-left: auto;
+  display: flex;
+}
+
+.window-content {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+.file-explorer-sidebar {
+  width: 220px;
+  border-right: 1px solid var(--border-color);
+  padding: 15px 0;
+  overflow-y: auto;
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-section {
+  margin-bottom: 20px;
+}
+
+.sidebar-section h4 {
+  padding: 0 15px;
+  margin-bottom: 10px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 15px;
+  cursor: pointer;
+}
+
+.sidebar-item:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-item.active {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+.sidebar-item i {
+  width: 20px;
+  margin-right: 8px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.sidebar-add {
+  padding: 0 15px;
+}
+
+.add-drive-button {
+  display: flex;
+  align-items: center;
+  background: none;
+  border: none;
+  color: var(--accent-color);
+  cursor: pointer;
+  width: 100%;
+  padding: 8px 0;
+  border-top: 1px solid var(--border-color);
+}
+
+.add-drive-button i {
+  margin-right: 8px;
+}
+
+.file-explorer-content {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  position: relative;
+}
+
+.files-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 20px;
+}
+
+.file-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  padding: 10px;
+  border-radius: 8px;
+  text-align: center;
+  transition: 0.2s ease;
+}
+
+.file-item:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Style for selected file items in File Explorer */
+.file-item.selected .file-icon {
+  outline: 2px dashed rgba(0, 120, 212, 0.7); /* Blue dash, more visible in window context */
+  background-color: rgba(0, 120, 212, 0.15);
+}
+
+.file-item.selected .file-name {
+  background-color: #0078D4; /* Windows selection blue */
+  color: white;
+  border-radius: 3px; /* Slight rounding for the text background */
+  padding: 0 2px; /* Small padding for text background */
+}
+
+.file-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.file-icon i {
+  font-size: 40px;
+  color: var(--blue-accent);
+}
+
+.folder .file-icon {
+  color: var(--accent-color);
+}
+
+.file-name {
+  font-size: 12px;
+  margin-bottom: 5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 100%;
+}
+
+.file-info {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.disk-info {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  padding: 15px 20px;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-top: 1px solid var(--border-color);
+}
+
+.disk-icon {
+  width: 32px;
+  height: 32px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 15px;
+}
+
+.disk-name {
+  font-weight: 500;
+  margin-bottom: 3px;
+}
+
+.disk-space {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.window-statusbar {
+  height: 30px;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  background-color: var(--window-header);
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.status-right {
+  margin-left: auto;
+}
+
+/* NEW: Widgets Screen (replaces .sidebar-widgets) */
+#widgets-screen {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 280px;
+  height: 100%;
+  box-sizing: border-box;
+  background-color: rgba(12, 0, 33, 0.8);
+  backdrop-filter: blur(10px);
+  padding: 15px;
+  overflow-y: hidden;
+  z-index: 1;
+  pointer-events: auto;
+  scrollbar-width: thin;
+  -ms-overflow-style: none;
+  user-select: none;
+  transition: overflow-y 0.2s;
+}
+
+#widgets-screen::-webkit-scrollbar {
+  width: 8px;
+}
+
+#widgets-screen::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#widgets-screen::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+#widgets-screen::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.4);
+}
+
+#widgets-scroll-handle {
+  position: absolute;
+  top: 0;
+  right: 280px; /* Align with left edge of widgets panel */
+  width: 20px;
+  height: 100%;
+  z-index: 100;
+  background: transparent;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+#widgets-scroll-handle:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Widget Styling - Check for dependencies on old .sidebar-widgets class */
+.widget {
+  background-color: #1e1e2fb5; /* Darker, slightly purplish-black from image */
+  backdrop-filter: blur(18px); /* Existing blur is fine, maybe slightly more if needed */
+  border-radius: 18px; /* More pronounced rounding */
+  overflow: hidden;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+  border: none; /* No border on the widget itself as per design */
+  color: #E0E0E0; /* General light text color for widgets */
+  user-select: none; /* Prevent text selection within widgets */
+  margin-bottom: 15px; /* ADDED for spacing between widgets */
+}
+
+.widget:last-child {
+  margin-bottom: 0; /* REMOVE margin for the last widget */
+}
+
+.widget-header {
+  padding: 12px 18px; /* Adjusted padding */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05); /* Very subtle border */
+  font-size: 13px;
+  font-weight: 500; 
+  /* Default color set in .widget, specific overrides below */
+}
+
+/* For Notifications widget header title */
+.widget:has(.notification-widget) .widget-header span {
+  color: #FF6B6B; /* Reddish color for Notifications title */
+  font-weight: 600;
+}
+
+/* For Disk Space and Stats widgets header titles (if they use .widget-header) */
+.widget:has(.disk-space-widget) .widget-header span,
+.widget:has(.stats-widget) .widget-header span {
+  color: #E0E0E0; /* White/light gray */
+  font-weight: 500;
+}
+
+.widget-content {
+  padding: 18px; /* Adjusted padding */
+}
+
+.widget .big-number {
+  font-size: 40px; /* Default big number size */
+  font-weight: 600; /* Bolder */
+  color: #FFFFFF;
+  line-height: 1.1;
+}
+
+.widget .widget-subtitle {
+  font-size: 13px;
+  color: #8A8A9E; /* Lighter gray for subtitles */
+  margin-top: 6px;
+}
+
+/* Notification Widget */
+.notification-widget {
+  text-align: left; /* Align text to left */
+  padding-top: 5px; /* Adjust padding if .widget-header is used */
+  padding-bottom: 5px;
+}
+.notification-widget .big-number {
+  font-size: 48px; /* As per design */
+  margin-bottom: 2px;
+}
+
+/* Disk Space Widget */
+.disk-space-widget {
+ padding-top: 5px;
+ padding-bottom: 5px;
+}
+.disk-space-widget .big-number {
+  font-size: 48px; /* As per design, includes % */
+  margin-bottom: 8px;
+}
+.disk-space-widget .progress-bar {
+  height: 10px; /* Slightly thicker */
+  background-color: #30304A; /* Darker track */
+  border-radius: 5px;
+  margin: 10px 0;
+}
+.disk-space-widget .progress {
+  background-color: #4CAF50; /* Bright green */
+  border-radius: 5px;
+}
+
+/* Email & Messages Widget (Icon Widgets) */
+.email-widget, .messages-widget {
+  display: flex;
+  align-items: center;
+  gap: 15px; /* Space between icon and text block */
+  padding: 12px 18px; /* Adjusted padding to match general widget content if no header */
+}
+
+.widget-icon { /* This is the container for the icon like headphones/dollar */
+  width: 40px;
+  height: 40px;
+  border-radius: 12px; /* Rounded square like design */
+  background-color: transparent; /* Icon bg is not distinct in design */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0; /* Gap handles spacing */
+}
+
+.widget-icon i {
+  font-size: 22px; /* Larger icons */
+  color: #FFFFFF; /* White icons */
+}
+
+.widget-data .big-number {
+  font-size: 32px; /* Slightly smaller for these widgets */
+  font-weight: 500;
+  margin-bottom: 0;
+}
+.widget-data .widget-subtitle {
+  font-size: 12px;
+  color: #8A8A9E;
+  margin-top: 2px;
+}
+
+/* Stats Widgets (Disk, Processing, Traffic) */
+.stats-widget .widget-header {
+  padding-bottom: 8px; /* Less space under header */
+}
+.stats-widget .widget-content {
+  display: flex;
+  flex-direction: column; 
+  gap: 12px; /* Space between each stat row */
+}
+
+/* Individual stat row structure (new approach) */
+.stat-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.stat-item-main {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; 
+}
+
+.stat-item-title {
+    font-size: 14px;
+    color: #E0E0E0;
+    font-weight: 500;
+}
+
+.stat-item-price {
+    font-size: 12px;
+    color: #8A8A9E; /* Gray for price */
+}
+
+.stat-item-chart {
+  width: 50px; /* Adjust as needed */
+  height: 20px; /* Adjust as needed */
+  /* background placeholder defined in earlier CSS with .chart-blue, .chart-red */
+  margin: 0 10px; /* Give some space */
+}
+
+.stat-item-value {
+  text-align: right;
+}
+
+.stat-item-value .big-number {
+  font-size: 22px; /* Smaller big number */
+  color: #FFFFFF;
+  font-weight: 500;
+}
+
+.stat-item-value .stats-unit {
+  font-size: 14px;
+  color: #8A8A9E;
+  margin-left: 4px;
+  font-weight: normal;
+}
+
+/* Cost Estimation Widget */
+.cost-widget .widget-header span {
+  font-size: 13px;
+  color: #8A8A9E; /* Subtitle-like color */
+  font-weight: normal;
+}
+
+.cost-widget .widget-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 10px;
+}
+
+.cost-widget .cost-info .cost-currency {
+  font-size: 32px; /* Larger currency symbol */
+  font-weight: 500;
+  color: #E0E0E0; /* Light gray */
+  margin-right: 2px;
+}
+
+.cost-widget .cost-info .cost-amount {
+  font-size: 44px; /* Large amount */
+  font-weight: 600;
+  color: #FFFFFF;
+}
+
+.cost-widget .days-left {
+  width: 60px; /* Adjust size */
+  height: 60px;
+  border: 4px solid #007AFF; /* Blue circle */
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 5px;
+}
+.cost-widget .days-left::before { content: none; } /* Remove previous pseudo-element border style */
+
+.cost-widget .days-number {
+  position: static; /* Remove absolute positioning */
+  transform: none;
+  font-size: 20px;
+  font-weight: 600;
+  color: #FFFFFF;
+  line-height: 1;
+}
+
+.cost-widget .days-text {
+  position: static;
+  transform: none;
+  font-size: 10px;
+  color: #8A8A9E;
+  line-height: 1.2;
+  white-space: normal; /* Allow wrapping if needed */
+  text-align: center;
+}
+
+/* LEI Widget */
+.lei-widget {
+  background-color: #2A2A3D; /* Slightly different background for this distinct widget */
+}
+.lei-widget .widget-content {
+  padding: 15px;
+}
+
+.lei-widget .lei-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+  padding: 0; /* No extra padding */
+}
+
+.lei-widget .lei-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  /* background-color: #f0f0f0; From previous. Keep if image has transparency */
+  margin-right: 10px;
+}
+.lei-widget .lei-icon img {
+  width: 100%;
+  height: 100%;
+  /* background-color: #ddd; From previous. Not needed if image is opaque */
+}
+
+.lei-widget .lei-amount {
+  font-size: 28px;
+  font-weight: 600;
+  color: #FFFFFF;
+  margin-right: 6px;
+}
+.lei-widget .lei-currency {
+  font-size: 18px;
+  color: #8A8A9E; /* Lighter gray */
+  align-self: baseline; /* Align with bottom of amount */
+  margin-top: 6px; /* Adjust alignment */
+  margin-right:0; /* Remove auto */
+}
+
+/* LEI Chart and Side Info */
+.lei-main-content {
+    display: flex;
+    gap: 15px;
+}
+
+.lei-chart-area {
+    flex-grow: 1;
+}
+
+.lei-widget .lei-chart-container {
+  height: 120px; /* Adjusted height */
+  margin-bottom: 5px;
+  /* Placeholder for actual bar chart - for now, a simple background */
+  background: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.3)); 
+  border-radius: 4px;
+  border: 1px solid rgba(255,255,255,0.05);
+  position: relative; /* For time indicators */
+}
+
+/* Styling for actual bars if they were to be implemented with divs */
+.lei-chart-bars {
+    display: flex;
+    height: 100%;
+    align-items: flex-end;
+    justify-content: space-around;
+    padding: 0 10px;
+}
+.bar {
+    width: 10%; /* Example */
+    background-color: #4A90E2; /* Example color */
+    border-radius: 2px 2px 0 0;
+}
+/* Add more .bar1, .bar2 with different heights and stacked colors if needed */
+
+.lei-widget .time-indicators {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: #8A8A9E;
+  padding: 0 5px; /* Adjust padding */
+  margin-top:0;
+}
+
+.lei-side-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 80px; /* Fixed width for side info */
+}
+
+.lei-side-item {
+    display: flex;
+    align-items: center;
+    font-size: 11px;
+    color: #B0B0C0;
+}
+
+.lei-side-item i {
+    margin-right: 6px;
+    font-size: 14px;
+}
+/* Colors for specific icons in LEI side info */
+.lei-side-item .fa-chart-line { color: #4CAF50; } /* Green for graph */
+.lei-side-item .fa-users { color: #9C27B0; } /* Example for Discord/community - using users for now */
+.lei-side-item .fa-youtube { color: #FF0000; } /* Red for YouTube */
+.lei-side-item .fa-whatsapp { color: #25D366; } /* Green for WhatsApp */
+
+
+/* Remove old .lei-timeline as it's replaced by .lei-side-info */
+.lei-timeline { display: none; }
+.lei-chart.chart-green { display:none; } /* Remove old trend indicator as it is part of side info */
+
+/* Remove unused stats header/footer if new structure is complete */
+.widget-stats-header, .widget-stats-footer {
+    /* display: none; */ /* Comment out or remove once HTML is updated */
+}
+
+/* Hide default widget icon container for email/messages if icon is directly in content */
+.email-widget .widget-icon-container, 
+.messages-widget .widget-icon-container {
+    display: none; /* If the i tag is moved directly into .widget-content */
+}
+
+/* Start Menu App Grid Item */
+.start-menu-app-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  border-radius: 8px;
+  background-color: rgba(255, 255, 255, 0.1); /* Slightly lighter than app grid background */
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  text-align: center;
+  width: 100px; /* Fixed width */
+  height: 100px; /* Fixed height */
+  box-sizing: border-box;
+}
+
+.start-menu-app-item:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.start-menu-app-icon-bg {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.start-menu-app-icon-bg i {
+  font-size: 24px;
+  color: #fff; /* Default icon color, can be overridden by specific bg classes if needed */
+}
+
+.start-menu-app-item span {
+  font-size: 12px;
+  color: #f0f0f0;
+  white-space: normal; /* Allow text wrapping */
+  overflow-wrap: break-word; /* Break long words */
+  word-break: break-word; /* Ensure word breaks */
+  line-height: 1.2;
+}
+
+.start-menu-category-header {
+  grid-column: 1 / -1; /* Span all columns */
+  margin-top: 15px;
+  margin-bottom: 10px;
+  font-size: 0.8rem;
+  color: #aaa;
+  text-transform: uppercase;
+  font-weight: 600;
+  padding-left: 5px; /* Align with grid gap */
+}
+.start-menu-category-header:first-child {
+  margin-top: 0;
+}
+
+/* Background color classes for Start Menu App Icons */
+.blue-bg { background-color: #0078d4; }
+.green-bg { background-color: #107c10; }
+.blue-app-bg { background-color: #005a9e; } /* A slightly different blue for "App Store" if needed */
+.gray-bg { background-color: #555; }
+.orange-bg { background-color: #ca5010; }
+.red-bg { background-color: #d93b3b; }
+.purple-bg { background-color: #8f4bc6; }
+.teal-bg { background-color: #008272; }
+.indigo-bg { background-color: #4f4db3; }
+.blue-grey-bg { background-color: #607d8b; }
+.amber-bg { background-color: #ffc107; }
+.cyan-bg { background-color: #00bcd4; }
+.pink-bg { background-color: #e91e63; }
+.deep-purple-bg { background-color: #673ab7; }
+.light-green-bg { background-color: #8bc34a; }
+.lime-bg { background-color: #cddc39; }
+.black-bg { background-color: #222; }
+
+
+/* Ensure these colors provide good contrast with white icons */
+.amber-bg i, .lime-bg i { color: #333; } /* Darker icon for light backgrounds */
+
+
+/* Ensure Start Menu search inputs have IDs for JS targeting */
+/* If .start-menu-search-bar-top input and .start-menu-search-bar-bottom input don't have IDs,
+   they were selected by class in JS. This is fine.
+   However, the JS used getElementById for them:
+   const startMenuSearchTop = document.getElementById(\'start-menu-search-top\');
+   const startMenuSearchBottom = document.getElementById(\'start-menu-search-bottom\');
+   So, index.html needs to have these IDs on the INPUT elements themselves, not the containers.
+*/
+
+/* Settings App Styles */
+.settings-app-window {
+  min-width: 800px; /* Adjusted min-width */
+  min-height: 600px;
+  background-color: #2e2e2e; /* Dark background like macOS settings */
+  border-radius: 10px;
+  border: 1px solid #4a4a4a;
+}
+
+.settings-header {
+  background-color: #3c3c3c; /* Slightly lighter header */
+  padding: 8px 12px;
+  height: 38px; /* macOS like title bar height */
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; /* Align controls to left */
+  position: relative;
+  cursor: default; /* Default cursor for header, draggable part will be handled by JS if needed */
+}
+
+.settings-window-controls {
+  display: flex;
+  align-items: center;
+  margin-right: auto; /* Push title to center if it was there */
+}
+
+.window-control-btn {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: none;
+  margin-right: 8px;
+  padding: 0;
+}
+
+.window-control-btn.red { background-color: #ff5f57; }
+.window-control-btn.yellow { background-color: #febc2e; }
+.window-control-btn.green { background-color: #28c840; }
+
+.settings-header-title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 13px;
+  font-weight: 500;
+  color: #d1d1d1;
+}
+
+.settings-app-body {
+  display: flex;
+  height: calc(100% - 38px); /* Full height minus header */
+}
+
+.settings-sidebar {
+  width: 240px;
+  background-color: rgba(40, 40, 40, 0.8); /* Semi-transparent dark sidebar */
+  backdrop-filter: blur(10px);
+  padding: 15px 0;
+  border-right: 1px solid #202020;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.settings-sidebar-search {
+  display: flex;
+  align-items: center;
+  background-color: rgba(0,0,0,0.2);
+  border-radius: 6px;
+  padding: 6px 10px;
+  margin: 0 15px 20px 15px;
+}
+
+.settings-sidebar-search i {
+  color: #888;
+  font-size: 13px;
+  margin-right: 8px;
+}
+
+.settings-sidebar-search input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #ccc;
+  font-size: 13px;
+  width: 100%;
+}
+
+.settings-user-profile {
+  display: flex;
+  align-items: center;
+  padding: 0 20px 20px 20px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.profile-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  margin-right: 12px;
+  background-color: #555; /* Fallback */
+}
+
+.profile-info .profile-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #e0e0e0;
+  display: block;
+}
+
+.profile-info .profile-id {
+  font-size: 12px;
+  color: #999;
+}
+
+.settings-nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.settings-nav li a {
+  display: flex;
+  align-items: center;
+  padding: 10px 20px;
+  text-decoration: none;
+  color: #ccc;
+  font-size: 13px;
+  border-radius: 6px;
+  margin: 2px 10px;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.settings-nav li a:hover {
+  background-color: rgba(255,255,255,0.08);
+  color: #fff;
+}
+
+.settings-nav li a.active {
+  background-color: #007aff;
+  color: #fff;
+  font-weight: 500;
+}
+
+.settings-nav li a i {
+  width: 24px; /* For alignment */
+  margin-right: 10px;
+  font-size: 15px;
+  text-align: center;
+}
+.settings-nav li a.active i {
+  color: #fff; /* Ensure icon color is white on active blue background */
+}
+
+.settings-nav li a.has-badge {
+  position: relative;
+}
+
+.badge {
+  background-color: #ff3b30;
+  color: white;
+  font-size: 10px;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 10px;
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.settings-content {
+  flex: 1;
+  padding: 0;
+  background-color: #252525; /* Main content area background */
+  overflow-y: auto;
+}
+
+.settings-content-header {
+  display: flex;
+  align-items: center;
+  padding: 10px 20px;
+  border-bottom: 1px solid #1c1c1c;
+  background-color: #333;
+  height: 44px;
+}
+
+.settings-nav-arrows button {
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 14px;
+  padding: 5px;
+  cursor: pointer;
+}
+
+.settings-nav-arrows button:hover {
+  color: #bbb;
+}
+
+.settings-content-header h2 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #e0e0e0;
+  margin-left: 15px;
+}
+
+.settings-section-content {
+  padding: 25px 30px;
+}
+
+.setting-group {
+  margin-bottom: 30px;
+}
+.setting-group.padded {
+  padding: 20px;
+  background-color: rgba(0,0,0,0.15);
+  border-radius: 8px;
+}
+
+.group-title {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: #aaa;
+  margin-bottom: 15px;
+}
+
+.appearance-options {
+  display: flex;
+  gap: 20px;
+}
+
+.appearance-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  padding: 10px;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  transition: border-color 0.2s ease;
+}
+
+.appearance-option img {
+  width: 100px; /* Adjust as needed */
+  height: 75px;  /* Adjust as needed */
+  border-radius: 6px;
+  margin-bottom: 8px;
+  background-color: #555; /* Placeholder bg */
+  object-fit: cover;
+}
+
+.appearance-option span {
+  font-size: 12px;
+  color: #bbb;
+}
+
+.appearance-option.active {
+  border-color: #007aff;
+}
+.appearance-option.active span {
+  color: #007aff;
+  font-weight: 500;
+}
+
+.accent-color-options {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.color-swatch {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid transparent;
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.2) inset;
+  transition: border-color 0.2s ease;
+}
+
+.color-swatch.multicolor {
+  background: conic-gradient(from 180deg at 50% 50%, #ffcc00 0deg, #ff9500 60deg, #ff2d55 120deg, #af52de 180deg, #007aff 240deg, #34c759 300deg, #ffcc00 360deg);
+}
+
+.color-swatch.active {
+  border-color: #fff; /* White border for active swatch */
+  box-shadow: 0 0 0 2px #007aff, 0 0 0 1px rgba(0,0,0,0.2) inset; /* Blue outer ring */
+}
+
+.setting-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.setting-group.padded .setting-row:last-child {
+  border-bottom: none;
+}
+
+.setting-row label {
+  font-size: 13px;
+  color: #ddd;
+}
+
+.select-wrapper {
+  position: relative;
+}
+
+.select-wrapper select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-color: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 5px;
+  padding: 6px 25px 6px 10px;
+  color: #ddd;
+  font-size: 13px;
+  cursor: pointer;
+  outline: none;
+}
+
+.select-wrapper i {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: #888;
+  font-size: 10px;
+}
+
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 22px;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #555; /* Off state */
+  transition: .4s;
+  border-radius: 22px;
+}
+
+.slider:before {
+  position: absolute;
+  content: '';
+  height: 18px;
+  width: 18px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #34c759; /* Green for on state */
+}
+
+input:checked + .slider:before {
+  transform: translateX(18px);
+}
+
+.radio-group .radio-option {
+  margin-bottom: 10px;
+}
+.radio-group .radio-option:last-child {
+  margin-bottom: 0;
+}
+
+.radio-group .radio-option input[type=\"radio\"] {
+  display: none; /* Hide default radio */
+}
+
+.radio-group .radio-option label {
+  font-size: 13px;
+  color: #ccc;
+  position: relative;
+  padding-left: 28px;
+  cursor: pointer;
+  line-height: 20px;
+}
+
+/* Custom radio button */
+.radio-group .radio-option label:before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 1px;
+  width: 18px;
+  height: 18px;
+  border: 1px solid #777;
+  border-radius: 50%;
+  background-color: transparent;
+}
+
+.radio-group .radio-option input[type=\"radio\"]:checked + label:before {
+  border-color: #007aff;
+}
+
+/* Custom radio button inner dot */
+.radio-group .radio-option input[type=\"radio\"]:checked + label:after {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 6px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #007aff;
+}
+
+/* Ensure classic window controls can be styled if ever used for settings */
+.settings-app-window .classic-controls button {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  margin-left: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.settings-app-window .classic-controls .window-minimize { background-color: #ffbd44; }
+.settings-app-window .classic-controls .window-maximize { background-color: #00ca4e; }
+.settings-app-window .classic-controls .window-close { background-color: #ff605c; }
+.settings-app-window .classic-controls button i { font-size: 10px; color: rgba(0,0,0,0.6); }
+
+/* Context Menu Styles */
+.context-menu {
+  position: absolute;
+  z-index: 2000; /* Will be overridden by #context-menu id selector for higher specificity if needed */
+  background-color: #1f1f1f; /* Dark background, slightly lighter than pure black */
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 6px 0;
+  min-width: 220px;
+  /* display: none; */ /* REMOVED: Visibility will be controlled by .hidden class */
+  display: block; /* Or flex, if its children require it directly. Block is fine for now. */
+  font-size: 13px;
+  color: #e0e0e0;
+}
+
+.context-menu.hidden {
+  display: none !important; /* Ensure this hides it */
+}
+
+.context-menu-item,
+.context-menu-submenu-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 15px;
+  cursor: default; /* Changed from pointer to default, action on click */
+  white-space: nowrap;
+  transition: background-color 0.1s ease;
+}
+
+.context-menu-item:hover,
+.context-menu-submenu-item:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.context-menu-item.disabled,
+.context-menu-submenu-item.disabled {
+  color: #777;
+  pointer-events: none;
+}
+
+.context-menu-item i,
+.context-menu-submenu-item i {
+  width: 20px; /* For alignment */
+  margin-right: 12px;
+  text-align: center;
+  font-size: 14px;
+  color: #b0b0b0; /* Default icon color */
+}
+
+.context-menu-item.disabled i,
+.context-menu-submenu-item.disabled i {
+  color: #555;
+}
+
+.context-menu-item span,
+.context-menu-submenu-item span {
+  flex-grow: 1;
+}
+
+.context-menu-shortcut {
+  color: #999;
+  margin-left: auto;
+  padding-left: 20px;
+}
+
+.context-menu-separator {
+  height: 1px;
+  background-color: rgba(255, 255, 255, 0.1);
+  margin: 5px 0;
+}
+
+/* Submenu handling (basic for now) */
+.context-menu-submenu-item.has-submenu::after {
+  content: '\f0da'; /* Font Awesome chevron-right */
+  font-family: 'Font Awesome 6 Free';
+  font-weight: 900;
+  margin-left: 10px;
+  font-size: 10px;
+}
+
+/* Specific icon colors if needed */
+.context-menu-item .fa-trash { color: #ff6b6b; }
+.context-menu-item .fa-folder-plus { color: #54a0ff; }
+
+/* Drag Selector */
+#drag-selector {
+    position: absolute;
+    border: 1px solid #0078D4; /* Windows selection blue */
+    background-color: rgba(0, 120, 212, 0.3); /* Semi-transparent blue */
+    z-index: 100; /* Above desktop icons, below windows */
+}
+
+#drag-selector.hidden {
+    display: none;
+}
+
+/* Styling for selected desktop icons */
+.desktop-icon.selected img {
+    outline: 2px dashed rgba(0, 0, 0, 0.5); /* Example: dashed outline */
+    background-color: rgba(0, 120, 212, 0.2); /* Light blueish background for the icon itself */
+}
+.desktop-icon.selected span {
+    background-color: #0078D4; /* Selected text background like Windows */
+    color: white;
+}
+
+/* Ensure context menu is above drag selector if they somehow overlap (though unlikely) */
+#context-menu {
+    /* ... existing styles ... */
+    z-index: 10000; /* Highest z-index */
+}
+
+/* AppStore App Styles */
+.app-store-window .window-content { /* Override generic .window-content padding if any */
+  padding: 0;
+  background-color: #1e1e1e; /* Dark background for AppStore */
+  overflow: hidden; /* Prevent double scrollbars if main content scrolls */
+}
+
+.app-store-body {
+  display: flex;
+  height: 100%; /* Fill the window content area */
+  width: 100%;
+}
+
+.app-store-sidebar {
+  width: 220px;
+  background-color: #2c2c2c; /* Slightly lighter than main content */
+  padding: 20px 0;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #383838;
+}
+
+.app-store-search-container {
+  display: flex;
+  align-items: center;
+  background-color: #3a3a3a;
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin: 0 15px 25px 15px;
+}
+
+.app-store-search-container i {
+  color: #8e8e8e;
+  font-size: 14px;
+  margin-right: 8px;
+}
+
+.app-store-search-input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #e0e0e0;
+  font-size: 14px;
+  width: 100%;
+}
+
+.app-store-search-input::placeholder {
+  color: #8e8e8e;
+}
+
+.app-store-nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.app-store-nav li a {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  text-decoration: none;
+  color: #b0b0b0;
+  font-size: 15px;
+  font-weight: 500;
+  border-radius: 0; /* No rounding for individual items for now */
+  margin: 0;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  position: relative;
+}
+
+.app-store-nav li a:hover {
+  color: #ffffff;
+}
+
+.app-store-nav li a.active {
+  background-color: #007aff; /* macOS blue for active */
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.app-store-nav li a i {
+  width: 24px;
+  margin-right: 10px;
+  font-size: 16px;
+  text-align: center;
+}
+
+.app-store-badge {
+  background-color: #5e5e5e; /* Gray badge */
+  color: white;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 6px;
+  border-radius: 10px;
+  margin-left: auto;
+}
+
+.app-store-nav li a.active .app-store-badge {
+  background-color: #ffffff;
+  color: #007aff; /* Blue text on white badge for active */
+}
+
+.app-store-main-content {
+  flex-grow: 1;
+  padding: 30px;
+  overflow-y: auto;
+  background-color: #1e1e1e; /* AppStore main dark background */
+}
+
+.app-store-hero-section {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 30px;
+}
+
+.app-store-hero-section img {
+  width: 100%;
+  height: auto;
+  display: block;
+  max-height: 350px; /* Limit hero image height */
+  object-fit: cover;
+}
+
+.app-store-hero-section .hero-content {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  color: #fff;
+  max-width: 60%;
+}
+
+.hero-kicker {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #a0a0a0; /* Light gray kicker */
+  margin-bottom: 5px;
+  display: block;
+}
+
+.app-store-hero-section .hero-content h2 {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+
+.app-store-hero-section .hero-content p {
+  font-size: 16px;
+  color: #d0d0d0;
+}
+
+.app-store-feature-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 25px;
+  margin-bottom: 40px;
+}
+
+.feature-card {
+  background-color: #2c2c2c; /* Card background */
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.feature-card img {
+  width: 100%;
+  height: 160px; /* Fixed height for card images */
+  object-fit: cover;
+  display: block;
+}
+
+.feature-card-content {
+  padding: 15px;
+}
+
+.feature-card-content .card-kicker {
+  font-size: 11px;
+  font-weight: 500;
+  color: #8e8e8e;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+  display: block;
+}
+
+.feature-card-content h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #e0e0e0;
+  margin-bottom: 4px;
+}
+
+.feature-card-content p {
+  font-size: 13px;
+  color: #a0a0a0;
+  line-height: 1.4;
+}
+
+.app-store-list-section {
+  margin-bottom: 40px;
+}
+
+.app-store-list-section .list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.app-store-list-section .list-header h2 {
+  font-size: 22px;
+  font-weight: 600;
+  color: #e0e0e0;
+}
+
+.see-all-link {
+  font-size: 14px;
+  color: #007aff; /* macOS blue link */
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.see-all-link:hover {
+  text-decoration: underline;
+}
+
+.app-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.app-list-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #383838; /* Separator */
+}
+
+.app-list-item:last-child {
+  border-bottom: none;
+}
+
+.app-list-item .app-icon {
+  width: 54px; /* Larger app icons in list */
+  height: 54px;
+  border-radius: 12px; /* macOS style icon rounding */
+  margin-right: 15px;
+  object-fit: cover;
+  background-color: #4a4a4a; /* Placeholder bg */
+}
+
+.app-info {
+  flex-grow: 1;
+}
+
+.app-name {
+  font-size: 15px;
+  font-weight: 500;
+  color: #e0e0e0;
+  display: block;
+  margin-bottom: 2px;
+}
+
+.app-category {
+  font-size: 13px;
+  color: #8e8e8e;
+}
+
+.app-price-button, .app-get-button {
+  background-color: #3a3a3a; /* Darker button background */
+  color: #007aff; /* Blue text */
+  border: 1px solid #4a4a4a; /* Subtle border */
+  border-radius: 15px; /* Pill shape */
+  padding: 6px 15px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  margin-left: 15px;
+}
+
+.app-price-button:hover, .app-get-button:hover {
+  background-color: #4a4a4a;
+}
+
+.app-get-button {
+  color: #007aff;
+}
+
+/* Calculator App Styles - Redesigned for Windows 11 Look */
+.calculator-window {
+  min-width: 320px; /* Base width for button area */
+  /* width: 530px; Set by inline style in template for now */
+  min-height: 500px; 
+  background-color: #1f1f1f; 
+  border-color: #3c3c3c;
+  /* box-shadow: 0 8px 25px rgba(0,0,0,0.5); */ /* Optional: Deeper shadow */
+}
+
+.calculator-window .window-header {
+  background-color: #1f1f1f;
+  border-bottom: none; /* No border below main window header */
+}
+
+.calculator-window .window-title span {
+  font-weight: normal; /* Standard font weight for app title */
+  font-size: 12px; /* Standard app title size */
+}
+
+.calculator-body {
+  display: flex;
+  flex-direction: column; /* Main body is a column (app-header + main-content) */
+  height: 100%;
+  padding: 0; /* No padding on the body itself */
+}
+
+.calculator-app-header {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  flex-shrink: 0;
+  /* border-bottom: 1px solid #303030; */ /* Optional: Separator below this header */
+}
+
+.calc-header-btn {
+  background: none;
+  border: none;
+  color: #e0e0e0;
+  font-size: 16px;
+  padding: 6px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.calc-header-btn:hover {
+  background-color: rgba(255,255,255,0.1);
+}
+
+.calc-type-title {
+  font-size: 18px; /* Larger "Standard" text */
+  font-weight: 600;
+  color: #ffffff;
+  margin-left: 12px;
+  margin-right: auto; /* Pushes pin button to the right */
+}
+
+#calc-pin-btn i {
+  font-size: 14px; /* Smaller pin icon */
+}
+
+
+.calculator-main-content {
+  display: flex; /* Side-by-side: input-area and history-panel */
+  flex-grow: 1;
+  overflow: hidden; /* Prevent content overflow issues */
+}
+
+.calculator-input-area {
+  display: flex;
+  flex-direction: column;
+  width: 320px; /* Fixed width for display + buttons part */
+  flex-shrink: 0;
+  padding: 0px 8px 8px 8px; /* Padding from original design */
+}
+
+.calculator-display {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  padding: 16px 12px; /* Adjusted padding */
+  min-height: 90px; /* Adjusted min-height */
+  flex-shrink: 0;
+  border-bottom: 1px solid #303030; /* Separator below display */
+  margin-bottom: 8px; /* Space before memory buttons */
+}
+
+.calculator-history {
+  font-size: 13px; /* Smaller history */
+  color: #a0a0a0;
+  min-height: 18px;
+  margin-bottom: 2px;
+}
+
+.calculator-current-input {
+  font-size: 40px; /* Slightly smaller main display for balance */
+  font-weight: 600; /* Bold like Windows calc */
+  color: #ffffff;
+  line-height: 1.1;
+}
+
+.calculator-buttons {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(6, 1fr); /* 5 normal rows + 1 memory row */
+  gap: 3px; /* Tighter gap from image */
+  flex-grow: 1;
+}
+
+/* Memory Buttons (MC, MR, etc.) - Top row in button grid */
+.calc-btn-mem {
+  background-color: transparent !important; /* !important to override .calc-btn if needed */
+  color: #e0e0e0 !important;
+  font-size: 12px !important;
+  font-weight: normal !important;
+  padding: 8px 0; /* Adjust padding */
+  height: 36px; /* Explicit height for memory buttons row */
+}
+.calc-btn-mem:hover {
+  background-color: rgba(255,255,255,0.08) !important;
+}
+/* Make the memory buttons occupy the first row of the grid */
+.calculator-buttons button[data-action^="memory"] {
+  grid-row: 1;
+}
+.calculator-buttons button[data-action="memory-clear"] { grid-column: 1; }
+.calculator-buttons button[data-action="memory-recall"] { grid-column: 2; }
+.calculator-buttons button[data-action="memory-add"] { grid-column: 3; }
+.calculator-buttons button[data-action="memory-subtract"] { grid-column: 4; }
+.calculator-buttons button[data-action="memory-store"] { grid-column: 5; } /* This assumes a 5-column grid for this row */
+
+/* Re-adjust calculator-buttons to be 4 columns wide FOR THE REST OF THE BUTTONS, and memory buttons to span correctly */
+/* This is tricky. Better: Have memory buttons outside this grid or adjust the grid structure. */
+/* For now, let's style them and assume HTML places them. We have 5 memory buttons. */
+/* The grid is 4 columns. So memory-store will wrap. */
+/* Let's assume we want a 5-button row for memory. We'll need a separate container or specific grid setup. */
+/* The current CSS has grid-template-rows: repeat(6, 1fr); this means 6 rows of buttons below memory. */
+/* Let's make calculator-buttons a 4-column grid, and memory-store will wrap. This is not ideal. */
+/*
+  Revised approach for memory buttons:
+  They will be styled, but their placement in a 5-button row within a 4-column grid
+  means the 5th button will wrap. We'll live with this for CSS simplicity for now
+  unless HTML is further changed to put them in their own flex container.
+  The current HTML implies they are the first items in the 4-column grid.
+*/
+.calculator-buttons {
+  grid-template-rows: auto repeat(6, 1fr); /* First row auto for memory, then 6 for rest */
+}
+.calc-btn-mem { grid-row: 1; } /* All memory buttons are in the first conceptual row */
+/* MC, MR, M+, M- will take columns 1,2,3,4. MS will wrap. This is not as per image. */
+/* Correcting the button grid for memory buttons to be on one line and the rest below */
+.calculator-buttons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: auto repeat(6, 1fr); /* 'auto' for memory row, 6 for others */
+    gap: 3px;
+    flex-grow: 1;
+}
+/* Explicitly place memory buttons in the first row using grid-column */
+.calc-btn.calc-btn-mem[data-action="memory-clear"]    { grid-column: 1 / span 1; grid-row: 1;}
+.calc-btn.calc-btn-mem[data-action="memory-recall"]   { grid-column: 2 / span 1; grid-row: 1;}
+.calc-btn.calc-btn-mem[data-action="memory-add"]      { grid-column: 3 / span 1; grid-row: 1;}
+.calc-btn.calc-btn-mem[data-action="memory-subtract"] { grid-column: 4 / span 1; grid-row: 1;}
+/* We only have 4 columns, the 5th button (MS) will wrap by default if not handled.
+   The image shows MC MR M+ M- MS. This is 5 buttons.
+   The overall button grid is 4 columns. This needs a rethink or simplification.
+   For now, I'll assume MS is the 5th button that wraps to the next line with current grid.
+   To fit 5 memory buttons on one row above a 4-column grid, they need their OWN container.
+   I will assume the HTML edit created .calc-btn-mem and they are the first 5 buttons.
+   The grid is 4 columns. So `MS` will be on row 2, col 1. This is not like the image.
+
+   Simplification: The image has MC, MR, M+, M-, MS on one row, above the 4x6 grid.
+   The HTML I generated has them as the first 5 buttons inside the main grid.
+   Let's adjust the grid-template-rows.
+*/
+.calculator-buttons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-auto-rows: minmax(0, 1fr); /* Make rows flexible */
+    /* grid-template-rows: auto repeat(6, 1fr); /* Row for memory + 6 rows */
+    gap: 3px;
+    flex-grow: 1;
+}
+/* Target specific memory buttons - this doesn't force them into 5 columns if parent is 4 */
+
+
+.calc-btn {
+  background-color: #2c2c2c; /* Slightly lighter dark gray from image for function buttons */
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px; /* Slightly smaller base font for buttons */
+  font-weight: normal; /* Lighter font weight */
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.1s ease;
+  outline: none;
+  min-height: 48px; /* Ensure buttons have good height */
+}
+.calc-btn:hover { background-color: #3c3c3c; }
+.calc-btn:active { background-color: #4a4a4a; transform: scale(0.98); }
+
+/* Memory buttons - specific style from image (transparent BG, text color) */
+.calc-btn-mem {
+  background-color: #1f1f1f !important; /* Match main calc BG - transparent feel */
+  color: #e0e0e0 !important;
+  font-size: 13px !important; /* Smaller font for memory buttons */
+}
+.calc-btn-mem:hover {
+  background-color: #2a2a2a !important;
+}
+
+/* Light gray buttons (%, CE, C, backspace, 1/x, x^2, sqrt(x) ) */
+.calc-btn-lightgray {
+  background-color: #2c2c2c; /* Same as general .calc-btn now */
+}
+
+/* Number buttons (0-9, ., +/-) */
+.calc-btn-num {
+  background-color: #373737; /* Darker than functions, lighter than ops - specific shade from image */
+  font-weight: 600; /* Numbers are bold */
+  font-size: 18px; /* Larger font for numbers */
+}
+.calc-btn-num:hover { background-color: #454545; }
+.calc-btn-num:active { background-color: #535353; }
+
+
+/* Operator buttons (+, -, x, /) */
+.calc-btn-operator {
+  background-color: #2c2c2c; /* Same as function buttons */
+  font-size: 20px; /* Larger symbols for operators */
+}
+.calc-btn-operator.active-operator {
+    background-color: #005A9E; /* Active operator color */
+    color: white;
+}
+
+/* Equals button */
+.calc-btn-equals {
+  background-color: #7f69ee; /* Specific purple from image for equals */
+  color: white;
+  font-size: 22px;
+}
+.calc-btn-equals:hover { background-color: #937ff1; }
+.calc-btn-equals:active { background-color: #a38ff3; }
+
+.calculator-buttons button[data-action="backspace"] i {
+  font-size: 16px; /* Adjusted icon size */
+}
+
+/* History / Memory Panel */
+.calculator-history-memory-panel {
+  width: 210px; /* Width of the side panel */
+  flex-shrink: 0;
+  background-color: #1f1f1f; /* Same as calc background */
+  padding: 0 12px 12px 12px;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid #303030; /* Separator */
+}
+
+.calc-panel-tabs {
+  display: flex;
+  flex-shrink: 0;
+  margin-bottom: 10px;
+  margin-top: 12px; /* Align with calculator-app-header roughly */
+}
+
+.calc-panel-tab {
+  background: none;
+  border: none;
+  color: #a0a0a0;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 10px 12px; /* More padding for tabs */
+  cursor: pointer;
+  flex-grow: 1; /* Make tabs share space */
+  text-align: center;
+  border-bottom: 2px solid transparent;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.calc-panel-tab:hover {
+  color: #ffffff;
+}
+
+.calc-panel-tab.active {
+  color: #ffffff;
+  border-bottom-color: #7f69ee; /* Purple underline for active tab */
+}
+
+.calc-panel-content {
+  flex-grow: 1;
+  overflow-y: auto;
+}
+
+.calc-panel-content p {
+  font-size: 13px;
+  color: #888888; /* "There's no history yet" color */
+  text-align: center;
+  margin-top: 20px;
+}
+
+.calc-history-content.hidden,
+.calc-memory-content.hidden {
+  display: none;
+}
+
+/* Ensure disabled maximize button is styled */
+.calculator-window .window-maximize[disabled] {
+    opacity: 0.4;
+    cursor: default;
+}
+.calculator-window .window-maximize[disabled]:hover {
+    background-color: transparent;
+}
+.calculator-window .window-maximize[disabled]::before {
+    border-color: rgba(255,255,255,0.4);
+}
+
+/* Photoshop App Styles */
+.photoshop-window {
+  min-width: 200px !important; /* Allow smaller resize */
+  min-height: 200px !important; /* Allow smaller resize */
+}
+
+.photoshop-window .window-content, /* Target the generic content area if it's used */
+.photoshop-content { /* Target the specific div holding the iframe */
+  padding: 0; /* Remove any default window content padding */
+  display: flex; /* Ensure it's a flex container if not already */
+  flex-grow: 1; /* Ensure it takes up all available space */
+  overflow: hidden; /* Prevent scrollbars on this container */
+}
+
+.photoshop-content iframe {
+  flex-grow: 1; /* Make iframe fill the container */
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* Responsive Styles */
+@media (max-width: 1023px) { /* Tablet and Mobile */
+  .desktop-area {
+    padding: 0 !important; /* Remove padding to allow windows to fill screen */
+  }
+
+  .window {
+    width: 100% !important;
+    height: 100% !important;
+    top: 0 !important;
+    left: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+    resize: none !important;
+    min-width: initial !important; /* Remove desktop min-width */
+    min-height: initial !important; /* Remove desktop min-height */
+  }
+
+  .window-maximize {
+    display: none !important; /* Hide maximize button */
+  }
+
+  /* Adjust window header for smaller screens */
+  .window-header {
+    padding: 2px 8px !important; /* Slightly reduce padding */
+  }
+
+  /* Optionally, hide desktop icons, widgets, and adjust taskbar on smaller screens */
+  /* For now, focusing on window behavior as requested */
+  /*
+  .desktop-icons {
+    display: none !important;
+  }
+  .sidebar-widgets {
+    display: none !important;
+  }
+  .taskbar {
+    padding: 0 10px !important;
+  }
+  .taskbar .search-container {
+    display: none; 
+  }
+  */
+}
+
+@media (max-width: 767px) { /* Mobile specific adjustments (if any more are needed later) */
+
+    .taskbar-right, .search-container, .start-menu-right-sidebar {
+        display: none;
+    }
+.taskbar {
+    justify-content: center;
+    width: 94%;
+    margin: auto;
+    border-radius: 15px;
+    margin-bottom: 15px;
+    height: 65px;
+}
+
+.start-menu {
+    width: 100%;
+    left: 0;
+    max-height: 100%;
+    bottom: 80px;
+}
+.start-button {
+    width: 50px;
+    height: 50px; }
+
+  .window-header { 
+    display: flex !important; 
+    /* justify-content: space-between !important; */ /* Changed to allow margin-left: auto on controls */
+    align-items: center !important;
+    padding: 2px 8px !important; 
+  }
+
+  .window-title { 
+    flex-grow: 1; 
+    flex-shrink: 1; 
+    min-width: 0; 
+    margin-right: 5px; /* Space between title and controls */
+    display: flex; 
+    align-items: center; 
+  }
+
+  .window-title .window-icon { 
+    width: 18px;
+    height: 18px;
+    margin-right: 6px;
+    flex-shrink: 0; 
+  }
+
+  .window-title .window-icon i { 
+    font-size: 12px;
+  }
+
+  .window-title span { 
+    font-size: 13px; 
+    white-space: nowrap; 
+    overflow: hidden; 
+    text-overflow: ellipsis; 
+    display: block; /* Or inline-block if preferred, block is fine for ellipsis */
+    min-width: 0; 
+  }
+
+  .window-controls { 
+    flex-shrink: 0; 
+    margin-left: auto; /* This should keep it to the right */
+    display: flex; 
+    align-items: center;
+  }
+
+  .window-controls button {
+    width: 22px; 
+    height: 28px;
+  }
+
+  .window-controls button.window-close {
+    display: flex !important; 
+  }
+
+  .window-controls button.window-close::before,
+  .window-controls button.window-close::after {
+    width: 12px; 
+  }
+}
+  
