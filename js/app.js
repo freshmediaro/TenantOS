@@ -9,6 +9,11 @@ function toggleWidgetsScreen() {
 }
 // To test, call from console: toggleWidgetsScreen()
 
+
+document.addEventListener('contextmenu', function (event) {
+  event.preventDefault(); // This disables the browser's context menu
+});
+
 // if no Webkit browser
 (function(){
   let isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
