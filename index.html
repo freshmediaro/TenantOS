@@ -2,7 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0" />
+  <meta name="HandheldFriendly" content="true" />
+
   <title>OS Dashboard - SaaS</title>
   <link rel="stylesheet" href="css/styles.css">
   <!-- Font Awesome for icons -->
@@ -24,7 +26,7 @@
               <span>My Files</span>
             </div>
             
-            <div class="desktop-icon" data-app="trash">
+            <div class="desktop-icon" data-app="trash"> 
               <div class="icon-container gray-icon">
                 <i class="fas fa-trash"></i>
               </div>
@@ -75,6 +77,57 @@
           <!-- Right sidebar widgets END -->
 
           <div id="drag-selector" class="hidden"></div> <!-- Drag selector element -->
+
+          <!-- Taskbar (must be inside .desktop-area for mobile swipe to work) -->
+          <div class="taskbar">
+            <div class="start-button" id="start-button">
+              <i class="fas fa-th"></i>
+            </div>
+            <div class="search-container">
+              <input type="text" placeholder="Search" class="search-input">
+              <i class="fas fa-search search-icon"></i>
+            </div>
+            <div class="taskbar-app-icons" id="taskbar-app-icons"></div>
+            <div class="taskbar-right">
+              <div class="taskbar-icon">
+                <button id="notifications-btn" class="taskbar-user-btn" style="background: none; border: none; padding: 0; margin: 0; cursor: pointer; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
+                  <i class="fas fa-bell"></i>
+                </button>
+              </div>
+              <div class="taskbar-icon">
+                <button id="wallet-btn" class="taskbar-user-btn" style="background: none; border: none; padding: 0; margin: 0; cursor: pointer; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
+                  <i class="fas fa-wallet"></i>
+                </button>
+              </div>
+              <div class="taskbar-icon">
+                <button id="fullscreen-btn" class="taskbar-user-btn" style="background: none; border: none; padding: 0; margin: 0; cursor: pointer; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
+                  <i class="fas fa-expand"></i>
+                </button>
+              </div>
+              <div class="taskbar-icon">
+                <button id="global-search-btn" class="taskbar-search-btn" style="background: none; border: none; padding: 0; margin: 0; cursor: pointer; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
+                  <i class="fas fa-search"></i>
+                </button>
+              </div>
+              <div class="taskbar-icon">
+                <button id="app-launcher-btn" class="taskbar-user-btn" style="background: none; border: none; padding: 0; margin: 0; cursor: pointer; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
+                  <i class="fas fa-th"></i>
+                </button>
+              </div>
+              <div class="taskbar-time">
+                <span id="current-time">22:30</span>
+                <span class="date">Mie. 25 Aprilie</span>
+              </div>
+              <div class="taskbar-user">
+                <button id="ai-chat-btn" class="taskbar-user-btn" style="background: none; border: none; padding: 0; margin: 0; cursor: pointer;">
+                  <img src="img/alien.png" alt="User" class="user-avatar">
+                </button>
+              </div>
+              <button id="widgets-toggle-btn" class="taskbar-icon" style="width: 20px; height: 36px; margin-left: 8px; display: flex; align-items: center; justify-content: center; background: none; border: none; cursor: pointer; font-size: 18px;">
+                <span id="widgets-toggle-arrow"><i class="fas fa-chevron-right"></i></span>
+              </button>
+            </div>
+          </div>
 
         </div> <!-- End desktop-area -->
 
@@ -234,41 +287,6 @@
         <div id="widgets-scroll-handle"></div>
       </div> <!-- End main-content-area -->
       
-      <!-- Taskbar -->
-      <div class="taskbar">
-        <div class="start-button" id="start-button">
-          <i class="fas fa-th"></i>
-        </div>
-        
-        <div class="search-container">
-          <input type="text" placeholder="Search" class="search-input">
-          <i class="fas fa-search search-icon"></i>
-        </div>
-
-        <div class="taskbar-app-icons" id="taskbar-app-icons">
-          <!-- Dynamically added app icons will go here -->
-        </div>
-        
-        <div class="taskbar-right">
-          <div class="taskbar-icon">
-            <i class="fas fa-bell"></i>
-          </div>
-          <div class="taskbar-icon">
-            <i class="fas fa-search"></i>
-          </div>
-          <div class="taskbar-icon">
-            <i class="fas fa-cog"></i>
-          </div>
-          <div class="taskbar-time">
-            <span id="current-time">22:30</span>
-            <span class="date">Mie. 25 Aprilie</span>
-          </div>
-          <div class="taskbar-user">
-            <img src="img/alien.png" alt="User" class="user-avatar">
-          </div>
-        </div>
-      </div>
-      
       <!-- Start Menu -->
       <div class="start-menu" id="start-menu">
         <!-- New Profile/Site Header 
@@ -335,9 +353,13 @@
     
     <!-- Templates for windows -->
     <template id="file-explorer-template">
-      <div class="window" id="file-explorer-window">
+      <div class="window file-explorer-window" id="file-explorer-window">
         <div class="window-header">
+          <button class="menu-toggle">
+            <i class="fas fa-bars"></i>
+          </button>
           <div class="window-title">
+
             <div class="window-icon pink-icon">
               <i class="fas fa-folder"></i>
             </div>
@@ -345,12 +367,16 @@
           </div>
           <div class="window-controls">
             <button class="window-minimize"><i class="fas fa-minus"></i></button>
+            <button class="window-popout" title="Pop out"><i class="fas fa-up-right-from-square"></i></button>
             <button class="window-maximize"><i class="fas fa-expand"></i></button>
             <button class="window-close"><i class="fas fa-times"></i></button>
           </div>
         </div>
         
         <div class="window-content">
+          <!-- Add overlay for mobile sidebar -->
+          <div class="sidebar-overlay"></div>
+          
           <div class="file-explorer-sidebar">
             <div class="sidebar-section">
               <div class="sidebar-item active">
@@ -515,24 +541,23 @@
 
     <!-- Settings App Template START -->
     <template id="settings-app-template">
-      <div class="window settings-app-window" id="settings-app-window">
-        <div class="window-header settings-header">
-          <div class="settings-window-controls">
-            <button class="window-control-btn red"></button>
-            <button class="window-control-btn yellow"></button>
-            <button class="window-control-btn green"></button>
+      <div class="window file-explorer-window" id="settings-app-window">
+        <div class="window-header">
+          <button class="menu-toggle"><i class="fas fa-bars"></i></button>
+          <div class="window-title">
+            <div class="window-icon green-icon"><i class="fas fa-cog"></i></div>
+            <span>Settings</span>
           </div>
-          <div class="settings-header-title">
-            <!-- Title will be set by JS based on selected section -->
-          </div>
-           <div class="window-controls classic-controls" style="display:none;"> <!-- Standard controls, hidden by default but available -->
+          <div class="window-controls">
             <button class="window-minimize"><i class="fas fa-minus"></i></button>
+            <button class="window-popout" title="Pop out"><i class="fas fa-up-right-from-square"></i></button>
             <button class="window-maximize"><i class="fas fa-expand"></i></button>
             <button class="window-close"><i class="fas fa-times"></i></button>
           </div>
         </div>
-        <div class="settings-app-body">
-          <div class="settings-sidebar">
+        <div class="window-content">
+          <div class="sidebar-overlay"></div>
+          <div class="file-explorer-sidebar">
             <div class="settings-sidebar-search">
               <i class="fas fa-search"></i>
               <input type="text" placeholder="Search">
@@ -547,7 +572,7 @@
             <nav class="settings-nav">
               <ul>
                 <li><a href="#" data-section="family"><i class="fas fa-users"></i> Family</a></li>
-                <li><a href="#" data-section="suggestions" class="has-badge"><i class="fas fa-lightbulb"></i> Apple ID Suggestions <span class="badge">2</span></a></li>
+                <li><a href="#" data-section="suggestions" class="has-badge"><i class="fas fa-lightbulb"></i> Suggestions <span class="badge">2</span></a></li>
                 <li><a href="#" data-section="wifi"><i class="fas fa-wifi"></i> Wi-Fi</a></li>
                 <li><a href="#" data-section="bluetooth"><i class="fab fa-bluetooth-b"></i> Bluetooth</a></li>
                 <li><a href="#" data-section="network"><i class="fas fa-globe"></i> Network</a></li>
@@ -560,7 +585,7 @@
               </ul>
             </nav>
           </div>
-          <div class="settings-content">
+          <div class="file-explorer-content">
             <div class="settings-content-header">
               <div class="settings-nav-arrows">
                 <button><i class="fas fa-chevron-left"></i></button>
@@ -599,6 +624,17 @@
                   <div class="color-swatch yellow" style="background-color: #ffcc00;" title="Yellow"></div>
                   <div class="color-swatch green" style="background-color: #34c759;" title="Green"></div>
                   <div class="color-swatch gray" style="background-color: #8e8e93;" title="Graphite"></div>
+                </div>
+              </div>
+
+              <div class="setting-group">
+                <label class="group-title">Popout window close behavior</label>
+                <div class="select-wrapper">
+                  <select id="popout-close-behavior">
+                    <option value="close">Close for good</option>
+                    <option value="restore">Open back where it was popped out from</option>
+                  </select>
+                  <i class="fas fa-chevron-down"></i>
                 </div>
               </div>
 
@@ -660,7 +696,7 @@
                   </div>
                   <div class="radio-option">
                     <input type="radio" id="click-spot" name="scrollbar-click" value="spot">
-                    <label for="click-spot">Jump to the spot that\'s clicked</label>
+                    <label for="click-spot">Jump to the spot that's clicked</label>
                   </div>
                 </div>
               </div>
@@ -674,136 +710,140 @@
 
     <!-- AppStore App Template -->
     <template id="app-store-template">
-      <div class="window app-store-window" style="width: 1000px; height: 700px;">
-        <!-- Standard Window Header (will be populated by JS) -->
+      <div class="window app-store-window" id="app-store-window">
         <div class="window-header">
+          <button class="menu-toggle"><i class="fas fa-bars"></i></button>
           <div class="window-title">
-            <div class="window-icon blue-app-icon"> <!-- Or a specific AppStore icon -->
+            <div class="window-icon blue-app-icon">
               <i class="fas fa-store"></i>
             </div>
-            <span>AppStore</span>
+            <span>Appstore</span>
           </div>
           <div class="window-controls">
-            <button class="window-minimize" title="Minimize"></button>
-            <button class="window-maximize" title="Maximize"></button>
-            <button class="window-close" title="Close"></button>
+            <button class="window-minimize"><i class="fas fa-minus"></i></button>
+            <button class="window-popout" title="Pop out"><i class="fas fa-up-right-from-square"></i></button>
+            <button class="window-maximize"><i class="fas fa-expand"></i></button>
+            <button class="window-close"><i class="fas fa-times"></i></button>
           </div>
         </div>
-        <!-- AppStore Specific Content -->
-        <div class="app-store-body">
-          <div class="app-store-sidebar">
-            <div class="app-store-search-container">
-              <i class="fas fa-search"></i>
-              <input type="text" placeholder="Search" class="app-store-search-input">
-            </div>
-            <nav class="app-store-nav">
-              <ul>
-                <li><a href="#" class="active"><i class="fas fa-star"></i> Discover</a></li>
-                <li><a href="#"><i class="fas fa-paint-brush"></i> Create</a></li>
-                <li><a href="#"><i class="fas fa-briefcase"></i> Work</a></li>
-                <li><a href="#"><i class="fas fa-gamepad"></i> Play</a></li>
-                <li><a href="#"><i class="fas fa-wrench"></i> Develop</a></li>
-                <li><a href="#"><i class="fas fa-folder"></i> Categories</a></li>
-                <li><a href="#"><i class="fas fa-arrow-down"></i> Updates <span class="app-store-badge">1</span></a></li>
-              </ul>
-            </nav>
-          </div>
-          <div class="app-store-main-content">
-            <section class="app-store-hero-section">
-              <img src="img/appstore/hero-placeholder.png" alt="Featured App">
-              <div class="hero-content">
-                <span class="hero-kicker">BEHIND THE SCENES</span>
-                <h2>Put a Spin on It</h2>
-                <p>How djay Pro 2 blends music and tech.</p>
+        <div class="window-content">
+          <div class="app-store-body">
+            <aside class="app-store-sidebar">
+              <div class="app-store-search-container">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Search" class="app-store-search-input">
               </div>
-            </section>
-
-            <section class="app-store-feature-cards">
-              <div class="feature-card">
-                <img src="img/appstore/card1-placeholder.png" alt="Feature 1">
-                <div class="feature-card-content">
-                  <span class="card-kicker">FROM THE EDITORS</span>
-                  <h3>The All-New Mac App Store</h3>
-                  <p>Reimagined from the ground up.</p>
+              <nav class="app-store-nav">
+                <ul>
+                  <li><a href="#" class="active"><i class="fas fa-star"></i> Must Have</a></li>
+                  <li><a href="#"><i class="fas fa-thumbs-up"></i> Recommanded</a></li>
+                  <li><a href="#"><i class="fas fa-bullhorn"></i> Marketing</a></li>
+                  <li><a href="#"><i class="fas fa-briefcase"></i> Business & Finance</a></li>
+                  <li><a href="#"><i class="fas fa-users"></i> Social Media</a></li>
+                  <li><a href="#"><i class="fas fa-chart-line"></i> Productivity</a></li>
+                </ul>
+                <div style="margin: 24px 0 0 0; border-top: 1px solid #333; padding-top: 16px;">
+                  <div style="color: #aaa; font-size: 13px; margin-bottom: 8px;">Website</div>
+                  <ul>
+                    <li><a href="#"><i class="fas fa-utensils"></i> Food ordering</a></li>
+                    <li><a href="#"><i class="fas fa-shopping-cart"></i> Ecommerce</a></li>
+                    <li><a href="#"><i class="fas fa-calendar-alt"></i> Bookings</a></li>
+                    <li><a href="#"><i class="fas fa-user-clock"></i> Appointments</a></li>
+                    <li><a href="#"><i class="fas fa-ticket-alt"></i> Tickets</a></li>
+                    <li><a href="#"><i class="fas fa-plug"></i> Website Plugins</a></li>
+                  </ul>
+                </div>
+              </nav>
+              <div style="margin-top: auto;">
+                <button class="app-store-installed-btn" style="width: 100%; background: #23242a; color: #bfc2d1; border: none; border-radius: 10px; padding: 12px 0; font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 24px;">
+                  <span style="background: #3a7afe; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;"><i class="fas fa-th-large" style="color: #fff;"></i></span>
+                  Installed apps
+                  <i class="fas fa-chevron-down" style="margin-left: auto; font-size: 13px;"></i>
+                </button>
+              </div>
+            </aside>
+            <main class="app-store-main-content" style="background: #23242a;">
+              <h1 style="font-size: 2.2rem; color: #bfc2d1; font-weight: 400; margin: 0 0 18px 0; letter-spacing: 0.01em;">Must have</h1>
+              <div style="display: flex; gap: 32px; margin-bottom: 32px;">
+                <div class="appstore-card" style="background: #232335; border-radius: 16px; padding: 32px 32px 24px 32px; flex: 1; min-width: 320px; max-width: 420px; display: flex; flex-direction: column; justify-content: space-between;">
+                  <div style="display: flex; align-items: flex-start; justify-content: space-between;">
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                      <span style="color: #fff; font-size: 1.1rem; font-weight: 600;">Email Marketing</span>
+                      <span style="color: #bfc2d1; font-size: 1rem;">Free</span>
+                      <span style="color: #ffeb3b; font-size: 1.1rem;">★★★★★</span>
+                      <span style="color: #bfc2d1; font-size: 0.95rem; margin-top: 8px;">Aceasta aplicatie iti ofera tot ce este nevoie pentru a putea sa faci ceea ce faci si mai bine decat este sa faci</span>
+                    </div>
+                    <div style="width: 56px; height: 56px; background: #ff1866; border-radius: 12px;"></div>
+                  </div>
+                  <button style="margin-top: 24px; align-self: flex-end; background: #232335; color: #fff; border: 2px solid #fff; border-radius: 12px; padding: 8px 28px; font-size: 1.1rem; font-weight: 600;">Get</button>
+                </div>
+                <div class="appstore-card" style="background: #232335; border-radius: 16px; padding: 32px 32px 24px 32px; flex: 1; min-width: 320px; max-width: 420px; display: flex; flex-direction: column; justify-content: space-between;">
+                  <div style="display: flex; align-items: flex-start; justify-content: space-between;">
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                      <span style="color: #fff; font-size: 1.1rem; font-weight: 600;">Email Marketing</span>
+                      <span style="color: #bfc2d1; font-size: 1rem;">Free</span>
+                      <span style="color: #ffeb3b; font-size: 1.1rem;">★★★★★</span>
+                      <span style="color: #bfc2d1; font-size: 0.95rem; margin-top: 8px;">Aceasta aplicatie iti ofera tot ce este nevoie pentru a putea sa faci ceea ce faci si mai bine decat este sa faci</span>
+                    </div>
+                    <div style="width: 56px; height: 56px; background: #ff1866; border-radius: 12px;"></div>
+                  </div>
+                  <button style="margin-top: 24px; align-self: flex-end; background: #232335; color: #fff; border: 2px solid #fff; border-radius: 12px; padding: 8px 28px; font-size: 1.1rem; font-weight: 600;">Get</button>
                 </div>
               </div>
-              <div class="feature-card">
-                <img src="img/appstore/card2-placeholder.png" alt="Feature 2">
-                <div class="feature-card-content">
-                  <span class="card-kicker">LIFE HACK</span>
-                  <h3>Master the Menu Bar</h3>
-                  <p>How to keep your favorite apps top of screen at all times.</p>
+              <h2 style="font-size: 2rem; color: #bfc2d1; font-weight: 400; margin: 0 0 18px 0; letter-spacing: 0.01em;">Marketing</h2>
+              <div style="display: flex; gap: 32px; margin-bottom: 32px;">
+                <div class="appstore-card" style="background: #232335; border-radius: 16px; padding: 32px 32px 24px 32px; flex: 1; min-width: 320px; max-width: 420px; display: flex; flex-direction: column; justify-content: space-between;">
+                  <div style="display: flex; align-items: flex-start; justify-content: space-between;">
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                      <span style="color: #fff; font-size: 1.1rem; font-weight: 600;">CRM App</span>
+                      <span style="color: #bfc2d1; font-size: 1rem;">Free</span>
+                      <span style="color: #ffeb3b; font-size: 1.1rem;">★★★★★</span>
+                      <span style="color: #bfc2d1; font-size: 0.95rem; margin-top: 8px;">Edit files in photoshop for all of your files</span>
+                    </div>
+                    <div style="width: 56px; height: 56px; background: #ff1866; border-radius: 12px;"></div>
+                  </div>
+                  <button style="margin-top: 24px; align-self: flex-end; background: #232335; color: #fff; border: 2px solid #fff; border-radius: 12px; padding: 8px 28px; font-size: 1.1rem; font-weight: 600;">Get</button>
+                </div>
+                <div class="appstore-card" style="background: #232335; border-radius: 16px; padding: 32px 32px 24px 32px; flex: 1; min-width: 320px; max-width: 420px; display: flex; flex-direction: column; justify-content: space-between;">
+                  <div style="display: flex; align-items: flex-start; justify-content: space-between;">
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                      <span style="color: #fff; font-size: 1.1rem; font-weight: 600;">Photoshop</span>
+                      <span style="color: #bfc2d1; font-size: 1rem;">Free</span>
+                      <span style="color: #ffeb3b; font-size: 1.1rem;">★★★★★</span>
+                      <span style="color: #bfc2d1; font-size: 0.95rem; margin-top: 8px;">Edit files in photoshop</span>
+                    </div>
+                    <div style="width: 56px; height: 56px; background: #ff1866; border-radius: 12px;"></div>
+                  </div>
+                  <button style="margin-top: 24px; align-self: flex-end; background: #232335; color: #fff; border: 2px solid #fff; border-radius: 12px; padding: 8px 28px; font-size: 1.1rem; font-weight: 600;">Get</button>
                 </div>
               </div>
-              <div class="feature-card">
-                <img src="img/appstore/card3-placeholder.png" alt="Feature 3">
-                <div class="feature-card-content">
-                  <span class="card-kicker">EDITORS' CHOICE</span>
-                  <h3>A Beautiful Puzzler</h3>
-                  <p>Unravel the brain-bending challenges of The Witness.</p>
+              <div style="display: flex; gap: 32px; margin-bottom: 32px;">
+                <div class="appstore-card" style="background: #232335; border-radius: 16px; padding: 32px 32px 24px 32px; flex: 1; min-width: 320px; max-width: 420px; display: flex; flex-direction: column; justify-content: space-between;">
+                  <div style="display: flex; align-items: flex-start; justify-content: space-between;">
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                      <span style="color: #fff; font-size: 1.1rem; font-weight: 600;">CRM App</span>
+                      <span style="color: #bfc2d1; font-size: 1rem;">In app purch.</span>
+                      <span style="color: #ffeb3b; font-size: 1.1rem;">★★★★★</span>
+                      <span style="color: #bfc2d1; font-size: 0.95rem; margin-top: 8px;">Edit files in photoshop for all of your files</span>
+                    </div>
+                    <div style="width: 56px; height: 56px; background: #ff1866; border-radius: 12px;"></div>
+                  </div>
+                  <button style="margin-top: 24px; align-self: flex-end; background: #232335; color: #fff; border: 2px solid #fff; border-radius: 12px; padding: 8px 28px; font-size: 1.1rem; font-weight: 600;">Get</button>
+                </div>
+                <div class="appstore-card" style="background: #232335; border-radius: 16px; padding: 32px 32px 24px 32px; flex: 1; min-width: 320px; max-width: 420px; display: flex; flex-direction: column; justify-content: space-between;">
+                  <div style="display: flex; align-items: flex-start; justify-content: space-between;">
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                      <span style="color: #fff; font-size: 1.1rem; font-weight: 600;">Photoshop</span>
+                      <span style="color: #bfc2d1; font-size: 1rem;">Free</span>
+                      <span style="color: #ffeb3b; font-size: 1.1rem;">★★★★★</span>
+                      <span style="color: #bfc2d1; font-size: 0.95rem; margin-top: 8px;">Edit files in photoshop</span>
+                    </div>
+                    <div style="width: 56px; height: 56px; background: #ff1866; border-radius: 12px;"></div>
+                  </div>
+                  <button style="margin-top: 24px; align-self: flex-end; background: #232335; color: #fff; border: 2px solid #fff; border-radius: 12px; padding: 8px 28px; font-size: 1.1rem; font-weight: 600;">Get</button>
                 </div>
               </div>
-            </section>
-
-            <section class="app-store-list-section">
-              <div class="list-header">
-                <h2>Top Paid</h2>
-                <a href="#" class="see-all-link">See All</a>
-              </div>
-              <ul class="app-list">
-                <!-- Placeholder Items -->
-                <li class="app-list-item">
-                  <img src="img/appstore/app-icon-placeholder.png" alt="App Icon" class="app-icon">
-                  <div class="app-info">
-                    <span class="app-name">1. Logic Pro X</span>
-                    <span class="app-category">Music creation...</span>
-                  </div>
-                  <button class="app-price-button">$49.99</button>
-                </li>
-                <li class="app-list-item">
-                  <img src="img/appstore/app-icon-placeholder.png" alt="App Icon" class="app-icon">
-                  <div class="app-info">
-                    <span class="app-name">2. Magnet</span>
-                    <span class="app-category">Organize your...</span>
-                  </div>
-                  <button class="app-price-button">$0.99</button>
-                </li>
-                <li class="app-list-item">
-                  <img src="img/appstore/app-icon-placeholder.png" alt="App Icon" class="app-icon">
-                  <div class="app-info">
-                    <span class="app-name">3. Adware Doctor:Anti</span>
-                    <span class="app-category">Utilities</span>
-                  </div>
-                  <button class="app-price-button">$4.99</button>
-                </li>
-              </ul>
-            </section>
-
-            <section class="app-store-list-section">
-              <div class="list-header">
-                <h2>Top Free</h2>
-                <a href="#" class="see-all-link">See All</a>
-              </div>
-              <ul class="app-list">
-                <!-- Placeholder Items -->
-                <li class="app-list-item">
-                  <img src="img/appstore/app-icon-placeholder.png" alt="App Icon" class="app-icon">
-                  <div class="app-info">
-                    <span class="app-name">1. Example Free App</span>
-                    <span class="app-category">Productivity</span>
-                  </div>
-                  <button class="app-get-button">GET</button>
-                </li>
-                 <li class="app-list-item">
-                  <img src="img/appstore/app-icon-placeholder.png" alt="App Icon" class="app-icon">
-                  <div class="app-info">
-                    <span class="app-name">2. Another Free Utility</span>
-                    <span class="app-category">Utilities</span>
-                  </div>
-                  <button class="app-get-button">GET</button>
-                </li>
-              </ul>
-            </section>
+            </main>
           </div>
         </div>
       </div>
@@ -812,7 +852,7 @@
 
     <!-- Calculator App Template -->
     <template id="calculator-app-template">
-      <div class="window calculator-window" style="width: 530px; height: 560px;">
+      <div class="window calculator-window calculator-window-default-size">
         <!-- Standard Window Header (will be populated by JS) -->
         <div class="window-header">
           <div class="window-title">
@@ -822,9 +862,10 @@
             <span>Calculator</span>
           </div>
           <div class="window-controls">
-            <button class="window-minimize" title="Minimize"></button>
-            <button class="window-maximize" title="Maximize" disabled></button>
-            <button class="window-close" title="Close"></button>
+            <button class="window-minimize" title="Minimize"><i class="fas fa-minus"></i></button>
+            <button class="window-popout" title="Pop out"><i class="fas fa-up-right-from-square"></i></button>
+            <button class="window-maximize" title="Maximize" disabled><i class="fas fa-expand"></i></button>
+            <button class="window-close" title="Close"><i class="fas fa-times"></i></button>
           </div>
         </div>
         <!-- Calculator Specific Content -->
@@ -909,7 +950,7 @@
 
     <!-- Photoshop App Template -->
     <template id="photoshop-app-template">
-      <div class="window photoshop-window" style="width: 90vw; height: 85vh;"> <!-- Default large size -->
+      <div class="window photoshop-window photoshop-window-default-size">
         <!-- Standard Window Header -->
         <div class="window-header">
           <div class="window-title">
@@ -919,9 +960,10 @@
             <span>Photoshop</span>
           </div>
           <div class="window-controls">
-            <button class="window-minimize" title="Minimize"></button>
-            <button class="window-maximize" title="Maximize"></button>
-            <button class="window-close" title="Close"></button>
+            <button class="window-minimize" title="Minimize"><i class="fas fa-minus"></i></button>
+            <button class="window-popout" title="Pop out"><i class="fas fa-up-right-from-square"></i></button>
+            <button class="window-maximize" title="Maximize"><i class="fas fa-expand"></i></button>
+            <button class="window-close" title="Close"><i class="fas fa-times"></i></button>
           </div>
         </div>
         <!-- Photoshop Specific Content (iframe) -->
@@ -937,6 +979,52 @@
   <!-- Context Menu Structure (hidden by default) -->
   <div id="context-menu" class="context-menu hidden">
     <!-- Context menu items will be populated by JavaScript -->
+  </div>
+  
+  <div id="ai-chat-window" class="ai-chat-window" style="display: none;">
+    <button id="ai-chat-close-btn" class="ai-chat-close-btn" aria-label="Close chat" style="position: absolute; top: 12px; right: 16px; background: none; border: none; color: #fff; font-size: 22px; cursor: pointer; z-index: 10;">&times;</button>
+    <div class="ai-chat-window-inner" style="height: calc(100vh - 50px); margin-top: 0; display: flex; flex-direction: column;">
+      <!-- Chat content goes here -->
+    </div>
+  </div>
+  
+  <div id="global-search-overlay" class="global-search-overlay" style="display: none;">
+    <div class="global-search-center">
+      <div class="global-search-bar">
+        <i class="fas fa-search global-search-icon"></i>
+        <input type="text" id="global-search-input" class="global-search-input" placeholder="Search everything anywhere" autocomplete="off" />
+        <button class="global-search-mic" aria-label="Voice search"><i class="fas fa-microphone"></i></button>
+        <div class="global-search-dropdown">
+          <button id="global-search-dropdown-btn" class="global-search-dropdown-btn">
+            <span id="global-search-selected">Everywhere</span>
+            <i class="fas fa-chevron-down"></i>
+          </button>
+          <div id="global-search-dropdown-list" class="global-search-dropdown-list" style="display: none;">
+            <div class="dropdown-item selected" data-value="Everywhere"><i class="fas fa-search"></i> Everywhere</div>
+            <div class="dropdown-item" data-value="Documents"><i class="fas fa-file-alt"></i> Documents</div>
+            <div class="dropdown-item" data-value="Photos"><i class="fas fa-image"></i> Photos</div>
+            <div class="dropdown-item" data-value="Videos"><i class="fas fa-music"></i> Videos</div>
+            <div class="dropdown-item" data-value="Apps"><i class="fas fa-th"></i> Apps</div>
+            <div class="dropdown-item" data-value="Emails"><i class="fas fa-envelope"></i> Emails</div>
+            <div class="dropdown-item" data-value="Orders"><i class="fas fa-box"></i> Orders</div>
+            <div class="dropdown-item" data-value="Users"><i class="fas fa-user"></i> Users</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div id="notifications-panel" class="notifications-panel" style="display: none;"></div>
+  
+  <div id="wallet-sidebar" class="wallet-sidebar" style="display: none;">
+    <div class="wallet-sidebar-header">
+      <button class="wallet-menu-toggle" aria-label="Menu"><i class="fas fa-bars"></i></button>
+      <div class="wallet-header-center"><i class="fas fa-wallet"></i> <span>Wallet</span></div>
+      <button class="wallet-close-btn" aria-label="Close"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="wallet-sidebar-content">
+      <!-- Wallet content goes here -->
+    </div>
   </div>
   
   <script src="js/app.js"></script>
