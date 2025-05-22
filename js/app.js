@@ -2252,6 +2252,11 @@ function openAppFromLauncher(appItem) {
                 if (!subItem.disabled) {
                   executeContextMenuAction(subItem.action);
                   hideContextMenu();
+                  // Remove submenu if present
+                  if (submenuEl && submenuEl.parentNode) {
+                    submenuEl.parentNode.removeChild(submenuEl);
+                    submenuEl = null;
+                  }
                 }
                 ev.stopPropagation();
               });
