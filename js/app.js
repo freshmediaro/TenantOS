@@ -2,6 +2,52 @@
 // This app is now tested and compatible with all major browsers. If you find a browser-specific bug, please report it.
 // [ ... other globally defined functions or variables if any ... ]
 
+
+
+
+
+ // In setupFileExplorerInteraction or after creating the File Explorer window:
+ function setupSidebarToggleForFileExplorer(fileExplorerWindow) {
+  const sidebar = fileExplorerWindow.querySelector('.file-explorer-sidebar');
+  const toggleLabel = fileExplorerWindow.querySelector('#file-explorer-sidebar-toggle-label');
+  const toggle = fileExplorerWindow.querySelector('#file-explorer-sidebar-toggle');
+  if (!sidebar || !toggle) return;
+  // Only show toggle on desktop
+  function updateToggleVisibility() {
+    if (window.innerWidth > 500) {
+      toggleLabel.style.display = '';
+      // Set initial state: ON = collapsed, OFF = expanded
+      if (toggle.checked) {
+        sidebar.classList.add('sidebar-collapsed');
+        sidebar.setAttribute('data-user-collapsed', 'true');
+      } else {
+        sidebar.classList.remove('sidebar-collapsed');
+        sidebar.setAttribute('data-user-collapsed', 'false');
+      }
+    } else {
+      toggleLabel.style.display = 'none';
+      sidebar.classList.remove('sidebar-collapsed');
+      toggle.checked = false;
+      sidebar.removeAttribute('data-user-collapsed');
+    }
+  }
+  updateToggleVisibility();
+  window.addEventListener('resize', updateToggleVisibility);
+  toggle.addEventListener('change', function() {
+    if (window.innerWidth > 500) {
+      if (toggle.checked) {
+        sidebar.classList.add('sidebar-collapsed');
+        sidebar.setAttribute('data-user-collapsed', 'true');
+      } else {
+        sidebar.classList.remove('sidebar-collapsed');
+        sidebar.setAttribute('data-user-collapsed', 'false');
+      }
+      if (typeof updateSidebarForWindow === 'function') updateSidebarForWindow(fileExplorerWindow);
+    }
+  });
+}
+
+
 document.addEventListener('keydown', function(e) {
   const active = document.activeElement;
   if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable)) return;
@@ -47,12 +93,12 @@ document.addEventListener('keydown', function(e) {
 });
 
 // Function to toggle the widgets screen
-function toggleWidgetsScreen() {
-  const widgetsScreen = document.getElementById('widgets-screen');
-  if (widgetsScreen) {
-    widgetsScreen.classList.toggle('active');
-  }
-}
+// function toggleWidgetsScreen() {
+//   const widgetsScreen = document.getElementById('widgets-screen');
+//   if (widgetsScreen) {
+//     widgetsScreen.classList.toggle('active');
+//   }
+// }
 // To test, call from console: toggleWidgetsScreen()
 
 
@@ -80,7 +126,6 @@ document.addEventListener('contextmenu', function (event) {
 });
 
 document.addEventListener('DOMContentLoaded', function() {
-  console.log('SCRIPT EXECUTION: DOMContentLoaded START');
 
   // DOM Elements
   const startButton = document.getElementById('start-button');
@@ -97,12 +142,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const desktopArea = document.getElementById('desktop-area'); 
   const desktopIconsContainer = document.querySelector('.desktop-icons');
   
-  console.log('[Init]DOMContentLoaded - Script Start (Restored Version)');
-  console.log('[Init] desktopIconsContainer element selected:', desktopIconsContainer);
-  if (!desktopIconsContainer) console.error('[Init] CRITICAL: .desktop-icons container NOT FOUND!');
-  console.log('[Init] desktopArea element selected:', desktopArea);
-  if (!desktopArea) console.error('[Init] CRITICAL: #desktop-area NOT FOUND!');
-  console.log('[Init] Number of .desktop-icon elements found:', desktopIcons.length);
+
   
   // Templates
   const fileExplorerTemplate = document.getElementById('file-explorer-template');
@@ -412,16 +452,19 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function openApp(appName, appTitle, iconClassFromClick, iconBgClassFromClick, iconElementForAnim) {
-    for (const id in openWindows) {
+    // Allow multiple windows only for 'my-files'
+    if (appName !== 'my-files') {
+      for (const id in openWindows) {
         if (openWindows[id].name === appName && openWindows[id].element && !openWindows[id].element.classList.contains('minimized')) {
-            makeWindowActive(openWindows[id].element);
-            return;
+          makeWindowActive(openWindows[id].element);
+          return;
         }
         if (openWindows[id].name === appName && openWindows[id].element && openWindows[id].element.classList.contains('minimized')) {
-            toggleMinimizeWindow(openWindows[id].element, openWindows[id].taskbarIcon);
-            makeWindowActive(openWindows[id].element);
-            return;
+          toggleMinimizeWindow(openWindows[id].element, openWindows[id].taskbarIcon);
+          makeWindowActive(openWindows[id].element);
+          return;
         }
+      }
     }
     windowIdCounter++;
     const windowId = `window-${windowIdCounter}`;
@@ -452,7 +495,10 @@ document.addEventListener('DOMContentLoaded', function() {
         windowElement = createWindowFromTemplate('file-explorer', windowId, true); // true = delay content
         appTitle = 'File Explorer';
         isFileExplorer = true;
-        delayedContentLoader = () => setupFileExplorerInteraction(windowElement);
+        delayedContentLoader = () => {
+          setupFileExplorerInteraction(windowElement);
+          setupSidebarToggleForFileExplorer(windowElement);
+        };
         break;
       case 'settings': 
       case 'settings-sm':
@@ -651,17 +697,28 @@ document.addEventListener('DOMContentLoaded', function() {
         e.stopPropagation();
         const currentTaskbarIcon = openWindows[windowId] ? openWindows[windowId].taskbarIcon : null;
         // --- Animation: close effect ---
+        windowElement._isClosing = true;
+        windowElement.classList.remove('window-anim-open', 'window-anim-maximize', 'window-anim-close');
+        windowElement.classList.remove('maximized');
+        if (maximizeButton) maximizeButton.classList.remove('window-restore');
         windowElement.classList.add('window-anim-close');
+        // Remove all event listeners from controls
+        if (closeButton) closeButton.replaceWith(closeButton.cloneNode(true));
+        if (minimizeButton) minimizeButton.replaceWith(minimizeButton.cloneNode(true));
+        if (maximizeButton) maximizeButton.replaceWith(maximizeButton.cloneNode(true));
         windowElement.addEventListener('animationend', function handler(ev) {
+          windowElement.classList.remove('window-anim-open', 'window-anim-maximize', 'window-anim-close');
           if (ev.animationName === 'windowClose') {
-            windowElement.remove();
-            if (currentTaskbarIcon) currentTaskbarIcon.remove();
+            // Remove taskbar icon
+            if (currentTaskbarIcon && currentTaskbarIcon.parentNode) currentTaskbarIcon.parentNode.removeChild(currentTaskbarIcon);
+            // Remove window from openWindows
             delete openWindows[windowId];
+            windowElement.remove();
             if (activeWindow === windowElement) activeWindow = null;
             updateTaskbarActiveState(); 
-            windowElement.removeEventListener('animationend', handler);
+            windowElement._isClosing = false;
           }
-        });
+        }, { once: true });
         // ---
       });
     }
@@ -687,53 +744,59 @@ document.addEventListener('DOMContentLoaded', function() {
       maximizeButton.addEventListener('click', function(e) {
         e.stopPropagation();
         if (window.innerWidth <= MOBILE_BREAKPOINT) return;
-
+        windowElement.classList.remove('window-anim-open', 'window-anim-maximize', 'window-anim-close');
         const desktopRect = windowsContainer.getBoundingClientRect();
         const maxWidth = Math.min(desktopRect.width, window.innerWidth);
         const maxHeight = Math.min(desktopRect.height, window.innerHeight);
-
         const isMaximized = windowElement.classList.contains('maximized');
-
         if (isMaximized) {
-          // RESTORE to previous windowed size/position
+          // --- RESTORE ---
           windowElement.classList.remove('maximized');
           maximizeButton.classList.remove('window-restore');
-          // Also ensure no snap state remains
-          // (No extra snap class, but this is where you'd clear it if you had one)
-          if (windowElement._preSnapRect) {
-            console.log('Restoring, clearing _preSnapRect', windowElement._preSnapRect);
-            windowElement.style.width = windowElement._preSnapRect.width;
-            windowElement.style.height = windowElement._preSnapRect.height;
-            windowElement.style.left = windowElement._preSnapRect.left;
-            windowElement.style.top = windowElement._preSnapRect.top;
-            windowElement._preSnapRect = null;
-          } else if (windowElement.dataset.prevWidth && windowElement.dataset.prevHeight && windowElement.dataset.prevLeft && windowElement.dataset.prevTop) {
-            windowElement.style.width = windowElement.dataset.prevWidth;
-            windowElement.style.height = windowElement.dataset.prevHeight;
-            windowElement.style.left = windowElement.dataset.prevLeft;
-            windowElement.style.top = windowElement.dataset.prevTop;
-          } else {
-            positionWindowCenter(windowElement);
-          }
+          // Use previous size for smooth transition
+          let prevWidth = windowElement.dataset.prevWidth || windowElement.style.width;
+          let prevHeight = windowElement.dataset.prevHeight || windowElement.style.height;
+          // Calculate centered position for the previous size
+          const desktopRect = windowsContainer.getBoundingClientRect();
+          const width = parseInt(prevWidth, 10) || 800;
+          const height = parseInt(prevHeight, 10) || 600;
+          const left = Math.round((desktopRect.width - width) / 2);
+          const top = Math.round((desktopRect.height - height) / 2);
+          // Set transition before changing values
+          windowElement.style.transition = 'width 0.32s cubic-bezier(0.4,0,0.2,1), height 0.32s cubic-bezier(0.4,0,0.2,1), left 0.32s cubic-bezier(0.4,0,0.2,1), top 0.32s cubic-bezier(0.4,0,0.2,1)';
+          windowElement.style.width = width + 'px';
+          windowElement.style.height = height + 'px';
+          windowElement.style.left = left + 'px';
+          windowElement.style.top = top + 'px';
           windowElement.style.resize = '';
           makeWindowDraggable(windowElement);
           makeWindowActive(windowElement);
+          windowElement.addEventListener('transitionend', function handler(ev) {
+            if (["width","height","left","top"].includes(ev.propertyName)) {
+              windowElement.style.transition = '';
+              windowElement.removeEventListener('transitionend', handler);
+            }
+          });
         } else {
-          // Only save windowed state if not maximized
-          saveWindowedState(windowElement);
+          // --- MAXIMIZE ---
+          // Save current rect for restore
+          windowElement.dataset.prevWidth = windowElement.style.width || windowElement.offsetWidth + 'px';
+          windowElement.dataset.prevHeight = windowElement.style.height || windowElement.offsetHeight + 'px';
+          windowElement.dataset.prevLeft = windowElement.style.left || windowElement.offsetLeft + 'px';
+          windowElement.dataset.prevTop = windowElement.style.top || windowElement.offsetTop + 'px';
+          windowElement.style.transition = 'width 0.32s cubic-bezier(0.4,0,0.2,1), height 0.32s cubic-bezier(0.4,0,0.2,1), left 0.32s cubic-bezier(0.4,0,0.2,1), top 0.32s cubic-bezier(0.4,0,0.2,1)';
           windowElement.style.width = `${maxWidth}px`;
           windowElement.style.height = `${maxHeight}px`;
           windowElement.style.left = '0px';
           windowElement.style.top = '0px';
-          windowElement.classList.add('window-anim-maximize');
-          windowElement.addEventListener('animationend', function handler(ev) {
-            if (ev.animationName === 'windowMaximize') {
-              windowElement.classList.remove('window-anim-maximize');
-              windowElement.removeEventListener('animationend', handler);
+          windowElement.style.resize = 'none';
+          windowElement.addEventListener('transitionend', function handler(ev) {
+            if (["width","height","left","top"].includes(ev.propertyName)) {
+              windowElement.classList.add('maximized');
+              windowElement.style.transition = '';
+              windowElement.removeEventListener('transitionend', handler);
             }
           });
-          windowElement.style.resize = 'none';
-          windowElement.classList.add('maximized');
           maximizeButton.classList.add('window-restore');
           if (header) {
             header.onmousedown = null;
@@ -770,25 +833,26 @@ document.addEventListener('DOMContentLoaded', function() {
         // --- Cross-browser: Write HTML immediately after open ---
         const doc = popoutWin.document;
         doc.open();
-        doc.write('<!DOCTYPE html><html><head><title>App Popout</title>');
+        doc.write(`<!DOCTYPE html><html><head><title>${windowElement.querySelector('.window-title span')?.textContent || 'App Popout'}</title>`);
         // Copy stylesheets
         Array.from(document.styleSheets).forEach(sheet => {
           if (sheet.href) doc.write(`<link rel="stylesheet" href="${sheet.href}">`);
         });
+        // Inject main JS file for popout functionality
+        doc.write('<script src="js/app.js"></script>');
         doc.write('</head><body style="background: var(--primary-bg); margin:0;">');
-        // Only window-content (NO window-header)
-        const content = windowElement.querySelector('.window-content') || windowElement.querySelector('.calculator-body') || windowElement.querySelector('.photoshop-content');
-        if (content) {
-          // Clone and adjust style for full size
-          const tempDiv = document.createElement('div');
-          tempDiv.innerHTML = content.outerHTML;
-          const mainContent = tempDiv.firstElementChild;
-          if (mainContent) {
-            mainContent.style.width = '100vw';
-            mainContent.style.height = '100vh';
-            mainContent.style.boxSizing = 'border-box';
-            doc.write(mainContent.outerHTML);
-          }
+        // Write the entire window element, not just .window-content
+        if (windowElement) {
+          // Remove any existing inline styles that would conflict
+          windowElement.style.position = '';
+          windowElement.style.left = '';
+          windowElement.style.top = '';
+          windowElement.style.width = '';
+          windowElement.style.height = '';
+          // Write the .window element
+          doc.write(windowElement.outerHTML);
+          // Add style to make .window fill the viewport in the popout and hide the window header
+          doc.write('<style>.window{position:fixed!important;top:0!important;left:0!important;width:100vw!important;height:100vh!important;max-width:none!important;max-height:none!important;min-width:0!important;min-height:0!important;z-index:1!important;} .window-header{display:none!important;}</style>');
         }
         doc.write('</body></html>');
         doc.close();
@@ -833,7 +897,7 @@ document.addEventListener('DOMContentLoaded', function() {
           const restoreApp = () => {
             // Use appName and appTitle to reopen
             const info = popoutWin._poppedOutAppInfo;
-            if (info && info.appName) {
+            if (!window._loggingOut && info && info.appName) {
               openApp(info.appName, info.appTitle, info.iconClass, info.iconBgClass);
             }
           };
@@ -845,6 +909,35 @@ document.addEventListener('DOMContentLoaded', function() {
             }
           }, 500);
         }
+        // ... existing code ...
+        // At the top of the file, after other globals:
+        window._allPopoutWindows = window._allPopoutWindows || [];
+        // ... existing code ...
+        // In the popoutButton click handler, after 'if (!popoutWin) return;':
+        window._allPopoutWindows.push(popoutWin);
+        // ... existing code ...
+        // In the logout button event handler:
+        const logOutButton = document.querySelector('.start-menu-logout-button') || document.querySelector('.logout-button');
+        if (logOutButton) {
+          logOutButton.addEventListener('click', () => {
+            if(startMenu) startMenu.style.display = 'none';
+            // Set a global flag to indicate logout in progress
+            window._loggingOut = true;
+            // Close all popout windows
+            if (window._allPopoutWindows && Array.isArray(window._allPopoutWindows)) {
+              window._allPopoutWindows = window._allPopoutWindows.filter(win => {
+                if (win && !win.closed) {
+                  try { win.close(); } catch (e) {}
+                  return false;
+                }
+                return false;
+              });
+            }
+            // Optionally, clear the flag after a short delay
+            setTimeout(() => { window._loggingOut = false; }, 2000);
+          });
+        }
+        // ... existing code ...
       });
     }
     windowElement.addEventListener('mousedown', function(e) {
@@ -987,6 +1080,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
   function makeWindowActive(windowElement) {
+    if (!windowElement || windowElement._isClosing) return;
     if (activeWindow === windowElement && !windowElement.classList.contains('minimized')) return; 
     if (activeWindow && openWindows[activeWindow.id]) {
       activeWindow.classList.remove('active');
@@ -1033,6 +1127,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let snapType = null;
     let wasMaximizedBeforeDrag = false;
     let prevRect = null;
+    let snapHintDelayTimer = null;
 
     if (header) {
       header.onmousedown = dragMouseDown;
@@ -1126,26 +1221,38 @@ document.addEventListener('DOMContentLoaded', function() {
       } else if (mouseX >= vw - SNAP_SIDE) {
         newSnapType = 'right';
       }
+      // --- Snap hint delay logic ---
       if (newSnapType !== snapType) {
-        snapType = newSnapType;
+        // If leaving a snap zone, clear any pending timer and hide overlay
+        if (snapHintDelayTimer) {
+          clearTimeout(snapHintDelayTimer);
+          snapHintDelayTimer = null;
+        }
         if (snapOverlay) {
+          snapOverlay.style.display = 'none';
           snapOverlay.innerHTML = '';
-          if (snapType) {
-            snapHint = document.createElement('div');
-            snapHint.className = 'snap-hint';
-            if (snapType === 'maximize') snapHint.classList.add('snap-hint-maximize');
-            if (snapType === 'left') snapHint.classList.add('snap-hint-left');
-            if (snapType === 'right') snapHint.classList.add('snap-hint-right');
-            snapOverlay.appendChild(snapHint);
-            snapOverlay.style.display = 'block';
-          } else {
-            snapOverlay.style.display = 'none';
-          }
+        }
+        snapType = newSnapType;
+        if (snapType) {
+          // Start a 1s timer before showing the snap hint
+          snapHintDelayTimer = setTimeout(() => {
+            if (snapType === newSnapType && snapOverlay) {
+              snapHint = document.createElement('div');
+              snapHint.className = 'snap-hint';
+              if (snapType === 'maximize') snapHint.classList.add('snap-hint-maximize');
+              if (snapType === 'left') snapHint.classList.add('snap-hint-left');
+              if (snapType === 'right') snapHint.classList.add('snap-hint-right');
+              snapOverlay.appendChild(snapHint);
+              snapOverlay.style.display = 'block';
+            }
+            snapHintDelayTimer = null;
+          }, 400);
         }
       }
     }
 
     function closeDragElement(e) {
+      const maximizeButton = windowElement.querySelector('.window-maximize');
       document.onmouseup = null;
       document.onmousemove = null;
       header.style.cursor = 'grab';
@@ -1154,68 +1261,69 @@ document.addEventListener('DOMContentLoaded', function() {
         snapOverlay.innerHTML = '';
       }
       // Snap action
-      if (snapType === 'maximize') {
-        // Maximize
-        const desktopRect = windowsContainer.getBoundingClientRect();
-        const maxWidth = Math.min(desktopRect.width, window.innerWidth);
-        const maxHeight = Math.min(desktopRect.height, window.innerHeight);
-        saveWindowedState(windowElement);
-        windowElement.style.width = `${maxWidth}px`;
-        windowElement.style.height = `${maxHeight}px`;
-        windowElement.style.left = '0px';
-        windowElement.style.top = '0px';
-        windowElement.style.resize = 'none';
-        windowElement.classList.add('maximized');
-        const maximizeButton = windowElement.querySelector('.window-maximize');
-        if (maximizeButton) maximizeButton.classList.add('window-restore');
-        if (header) header.onmousedown = null;
-        if (header) header.style.cursor = 'default';
-      } else if (snapType === 'left') {
-        saveWindowedState(windowElement);
-        // Snap to left, height stops at taskbar
-        const taskbar = document.querySelector('.taskbar');
-        const desktopRect = windowsContainer.getBoundingClientRect();
-        windowElement.style.width = Math.floor(window.innerWidth / 2) + 'px';
-        windowElement.style.height = desktopRect.height + 'px';
-        windowElement.style.left = '0px';
-        windowElement.style.top = '0px';
-        windowElement.style.resize = 'none';
-        windowElement.classList.add('maximized');
-        const maximizeButton = windowElement.querySelector('.window-maximize');
-        if (maximizeButton) maximizeButton.classList.add('window-restore');
-        if (header) header.onmousedown = null;
-        if (header) header.style.cursor = 'default';
-      } else if (snapType === 'right') {
-        saveWindowedState(windowElement);
-        // Snap to right, height stops at taskbar
-        const taskbar = document.querySelector('.taskbar');
-        const desktopRect = windowsContainer.getBoundingClientRect();
-        windowElement.style.width = Math.floor(window.innerWidth / 2) + 'px';
-        windowElement.style.height = desktopRect.height + 'px';
-        windowElement.style.left = Math.floor(window.innerWidth / 2) + 'px';
-        windowElement.style.top = '0px';
-        windowElement.style.resize = 'none';
-        windowElement.classList.add('maximized');
-        const maximizeButton = windowElement.querySelector('.window-maximize');
-        if (maximizeButton) maximizeButton.classList.add('window-restore');
-        if (header) header.onmousedown = null;
-        if (header) header.style.cursor = 'default';
-      } else {
-        // Not snapped, restore drag state if needed
-        windowElement.classList.remove('maximized');
-        if (maximizeButton) maximizeButton.classList.remove('window-restore');
-        if (wasMaximizedBeforeDrag) {
-          windowElement.style.width = prevRect.width;
-          windowElement.style.height = prevRect.height;
-          windowElement.style.left = prevRect.left;
-          windowElement.style.top = prevRect.top;
-          windowElement.style.resize = '';
-          if (header) header.onmousedown = dragMouseDown;
-          if (header) header.style.cursor = 'grab';
+      if (snapType === 'maximize' || snapType === 'left' || snapType === 'right') {
+        // Save current rect for restore (before snapping)
+        windowElement.dataset.prevWidth = windowElement.style.width || windowElement.offsetWidth + 'px';
+        windowElement.dataset.prevHeight = windowElement.style.height || windowElement.offsetHeight + 'px';
+        windowElement.dataset.prevLeft = windowElement.style.left || windowElement.offsetLeft + 'px';
+        windowElement.dataset.prevTop = windowElement.style.top || windowElement.offsetTop + 'px';
+        // Snap with animation
+        windowElement.classList.add('window-anim-snap-zoom');
+        windowElement.style.transition = 'width 0.32s cubic-bezier(0.4,0,0.2,1), height 0.32s cubic-bezier(0.4,0,0.2,1), left 0.32s cubic-bezier(0.4,0,0.2,1), top 0.32s cubic-bezier(0.4,0,0.2,1)';
+        let snapTarget = {};
+        if (snapType === 'maximize') {
+          const desktopRect = windowsContainer.getBoundingClientRect();
+          snapTarget = {
+            width: `${Math.min(desktopRect.width, window.innerWidth)}px`,
+            height: `${Math.min(desktopRect.height, window.innerHeight)}px`,
+            left: '0px',
+            top: '0px'
+          };
+        } else if (snapType === 'left') {
+          const desktopRect = windowsContainer.getBoundingClientRect();
+          snapTarget = {
+            width: Math.floor(window.innerWidth / 2) + 'px',
+            height: desktopRect.height + 'px',
+            left: '0px',
+            top: '0px'
+          };
+        } else if (snapType === 'right') {
+          const desktopRect = windowsContainer.getBoundingClientRect();
+          snapTarget = {
+            width: Math.floor(window.innerWidth / 2) + 'px',
+            height: desktopRect.height + 'px',
+            left: Math.floor(window.innerWidth / 2) + 'px',
+            top: '0px'
+          };
         }
+        // Set snapped values (triggers transition)
+        windowElement.style.width = snapTarget.width;
+        windowElement.style.height = snapTarget.height;
+        windowElement.style.left = snapTarget.left;
+        windowElement.style.top = snapTarget.top;
+        windowElement.style.resize = 'none';
+        windowElement.addEventListener('animationend', function handler() {
+          windowElement.classList.remove('window-anim-snap-zoom');
+          windowElement.removeEventListener('animationend', handler);
+        });
+        windowElement.addEventListener('transitionend', function handler(ev) {
+          if (["width","height","left","top"].includes(ev.propertyName)) {
+            windowElement.style.transition = '';
+            windowElement.removeEventListener('transitionend', handler);
+          }
+        });
+        windowElement.classList.add('maximized');
+        if (maximizeButton) maximizeButton.classList.add('window-restore');
+        if (header) header.onmousedown = null;
+        if (header) header.style.cursor = 'default';
+        saveWindowedState(windowElement);
       }
       snapType = null;
       snapHint = null;
+      if (snapHintDelayTimer) {
+        clearTimeout(snapHintDelayTimer);
+        snapHintDelayTimer = null;
+      }
     }
   }
 
@@ -1304,24 +1412,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const appSections = startMenuLeftPanel.querySelectorAll('.app-grid-section');
     appSections.forEach(section => {
       const appItems = [];
-startMenuApps.forEach(app => {
-  // ... create appItem, add listeners, etc ...
-  grid.appendChild(appItem);
-  appItems.push(appItem);
-}); // <-- End of forEach
+      startMenuApps.forEach(app => {
+        // ... create appItem, add listeners, etc ...
+        grid.appendChild(appItem);
+        appItems.push(appItem);
+      }); // <-- End of forEach
 
-// Now define the function here:
-function openAppFromLauncher(appItem) {
-  appItems.forEach(item => item.classList.remove('selected'));
-  appItem.classList.add('selected');
-  openApp(
-    appItem.getAttribute('data-app-id') || appItem.getAttribute('data-app-name'),
-    appItem.querySelector('span').textContent,
-    appItem.querySelector('i').className.split(' ').find(cls => cls.startsWith('fa-')),
-    appItem.className.split(' ').find(cls => cls.endsWith('-icon'))
-  );
-  closeLauncher();
-}
+      // Now define the function here:
       function openAppFromLauncher(appItem) {
         appItems.forEach(item => item.classList.remove('selected'));
         appItem.classList.add('selected');
@@ -1361,6 +1458,20 @@ function openAppFromLauncher(appItem) {
   if (logOutButton) {
     logOutButton.addEventListener('click', () => {
       if(startMenu) startMenu.style.display = 'none';
+      // Set a global flag to indicate logout in progress
+      window._loggingOut = true;
+      // Close all popout windows
+      if (window._allPopoutWindows && Array.isArray(window._allPopoutWindows)) {
+        window._allPopoutWindows = window._allPopoutWindows.filter(win => {
+          if (win && !win.closed) {
+            try { win.close(); } catch (e) {}
+            return false;
+          }
+          return false;
+        });
+      }
+      // Optionally, clear the flag after a short delay
+      setTimeout(() => { window._loggingOut = false; }, 2000);
     });
   }
   
@@ -1552,8 +1663,115 @@ function openAppFromLauncher(appItem) {
         window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applySystemTheme);
       }
     }
+    // --- Ensure mobile sidebar logic is initialized for Settings app ---
+    if (typeof setupMobileSidebarForWindow === 'function') {
+      setupMobileSidebarForWindow(settingsWindowElement);
+    }
+
+    // --- iOS-style mobile navigation ---
+    function isMobile() { return window.innerWidth <= 767; }
+    const mobileContainer = settingsWindowElement.querySelector('.settings-mobile-container');
+    const sidebar = settingsWindowElement.querySelector('.settings-mobile-sidebar');
+    const panel = settingsWindowElement.querySelector('.settings-mobile-panel');
+    const headerBackBtn = settingsWindowElement.querySelector('.window-header .back-btn');
+    const windowTitle = settingsWindowElement.querySelector('.window-title');
+    const titleChevron = windowTitle ? windowTitle.querySelector('.chevron') : null;
+    const titlePanelTitle = windowTitle ? windowTitle.querySelector('.panel-title') : null;
+    const windowEl = settingsWindowElement;
+
+    if (mobileContainer && sidebar && panel && headerBackBtn && windowTitle && titleChevron && titlePanelTitle) {
+      function showPanel(section, label) {
+        // Set panel title in header
+        titlePanelTitle.textContent = label;
+        windowTitle.classList.add('show-detail');
+        // Fill panel options
+        panel.querySelector('.settings-mobile-options').innerHTML = getSectionOptionsHTML(section);
+        // Slide to panel
+        mobileContainer.classList.add('show-panel');
+        windowEl.classList.add('show-panel');
+      }
+      // Sidebar button click
+      sidebar.querySelectorAll('button[data-section]').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const section = this.getAttribute('data-section');
+          let label = this.childNodes[1] ? this.childNodes[1].textContent.trim() : this.textContent.trim();
+          showPanel(section, label);
+        });
+      });
+      // Back button in window header (mobile only)
+      headerBackBtn.addEventListener('click', function() {
+        if (isMobile()) {
+          mobileContainer.classList.remove('show-panel');
+          windowEl.classList.remove('show-panel');
+          windowTitle.classList.remove('show-detail');
+        }
+      });
+      // Responsive: reset panel on resize
+      window.addEventListener('resize', function() {
+        if (!isMobile()) {
+          mobileContainer.classList.remove('show-panel');
+          windowEl.classList.remove('show-panel');
+          windowTitle.classList.remove('show-detail');
+        }
+      });
+    }
+
+    // ...existing code...
   }
-  
+
+  // Returns HTML for each section's options (customize as needed)
+  function getSectionOptionsHTML(section) {
+    switch (section) {
+      case 'wifi':
+        return `
+          <li><label>Wi-Fi</label><input type="checkbox" checked></li>
+          <li><label>Network Name</label><span>MyWiFi</span></li>
+        `;
+      case 'appearance':
+        return `
+          <li><label>Theme</label>
+            <select>
+              <option>Light</option>
+              <option selected>Dark</option>
+              <option>Auto</option>
+            </select>
+          </li>
+          <li><label>Accent Color</label>
+            <select>
+              <option>Blue</option>
+              <option>Purple</option>
+              <option>Pink</option>
+              <option>Red</option>
+              <option>Orange</option>
+              <option>Yellow</option>
+              <option>Green</option>
+              <option>Gray</option>
+            </select>
+          </li>
+        `;
+      case 'notifications':
+        return `<li><label>Allow Notifications</label><input type="checkbox" checked></li>`;
+      case 'sound':
+        return `<li><label>Volume</label><input type="range" min="0" max="100" value="80"></li>`;
+      case 'bluetooth':
+        return `<li><label>Bluetooth</label><input type="checkbox"></li>`;
+      case 'network':
+        return `<li><label>Network</label><span>Ethernet</span></li>`;
+      case 'focus':
+        return `<li><label>Focus Mode</label><input type="checkbox"></li>`;
+      case 'screentime':
+        return `<li><label>Screen Time</label><span>2h 30m today</span></li>`;
+      case 'general':
+        return `<li><label>About</label><span>Device Info</span></li>`;
+      case 'family':
+        return `<li><label>Family Sharing</label><input type="checkbox"></li>`;
+      case 'suggestions':
+        return `<li><label>Suggestions</label><span>2 new</span></li>`;
+      default:
+        return `<li><span>No options for this section yet.</span></li>`;
+    }
+  }
+
   function setupCalculatorApp(calculatorWindowElement) {
     const displayHistory = calculatorWindowElement.querySelector('#calc-history');
     const displayCurrentInput = calculatorWindowElement.querySelector('#calc-current-input');
@@ -2092,6 +2310,14 @@ function openAppFromLauncher(appItem) {
         const contentRect = fileExplorerContentArea.getBoundingClientRect();
         let currentX = e.clientX - contentRect.left + fileExplorerContentArea.scrollLeft;
         let currentY = e.clientY - contentRect.top + fileExplorerContentArea.scrollTop;
+        // Clamp Y so drag selector does not go over the statusbar
+        const statusbar = fileExplorerWindow.querySelector('.window-statusbar');
+        if (statusbar) {
+          const statusbarHeight = statusbar.offsetHeight;
+          const maxY = fileExplorerContentArea.offsetHeight - statusbarHeight;
+          if (currentY > maxY) currentY = maxY;
+          if (fileSelectorStartY > maxY) fileSelectorStartY = maxY;
+        }
         const newLeft = Math.min(currentX, fileSelectorStartX);
         const newTop = Math.min(currentY, fileSelectorStartY);
         const newWidth = Math.abs(currentX - fileSelectorStartX);
@@ -2129,13 +2355,24 @@ function openAppFromLauncher(appItem) {
 
     if (menuToggle && sidebar && overlay) {
       menuToggle.addEventListener('click', () => {
+        const isShowing = !sidebar.classList.contains('show');
         sidebar.classList.toggle('show');
         overlay.classList.toggle('show');
+        if (window.innerWidth <= 767) {
+          if (isShowing) {
+            contentArea.classList.add('sidebar-push-active');
+          } else {
+            contentArea.classList.remove('sidebar-push-active');
+          }
+        }
       });
 
       overlay.addEventListener('click', () => {
         sidebar.classList.remove('show');
         overlay.classList.remove('show');
+        if (window.innerWidth <= 767) {
+          contentArea.classList.remove('sidebar-push-active');
+        }
       });
 
       // Close sidebar on item click for mobile
@@ -2145,6 +2382,7 @@ function openAppFromLauncher(appItem) {
           if (window.innerWidth <= 767) {
             sidebar.classList.remove('show');
             overlay.classList.remove('show');
+            contentArea.classList.remove('sidebar-push-active');
           }
         });
       });
@@ -2155,13 +2393,20 @@ function openAppFromLauncher(appItem) {
       if (window.innerWidth > 767) {
         sidebar.classList.remove('show');
         overlay.classList.remove('show');
+        contentArea.classList.remove('sidebar-push-active');
       }
     });
+
+   
+    // After creating the File Explorer window, call:
+    // setupSidebarToggleForFileExplorer(fileExplorerWindow);
   }
 
   function hideContextMenu() {
     if(contextMenu) contextMenu.classList.add('hidden');
   }
+
+  //Right Click menu for desktop, file explorer, and taskbar and icons
 
   if (desktopArea) {
     desktopArea.addEventListener('contextmenu', function(e) {
@@ -2175,24 +2420,117 @@ function openAppFromLauncher(appItem) {
           menuItems.push({ label: 'Pin to Start', action: 'pin-to-start', icon: 'fa-thumbtack' });
           menuItems.push({ type: 'separator' });
           menuItems.push({ label: 'Delete', action: 'delete-icon', icon: 'fa-trash' });
-      } else if (e.target.closest('.file-explorer-content .file-item')) {
-          currentContextMenuTarget = e.target.closest('.file-item');
-          menuItems.push({ label: 'Open', action: 'open-file', icon: 'fa-folder-open'});
-          menuItems.push({ label: 'Copy', action: 'copy-file', icon: 'fa-copy'});
-          menuItems.push({ label: 'Paste', action: 'paste-file', icon: 'fa-paste', disabled: true }); 
-          menuItems.push({ type: 'separator' });
-          menuItems.push({ label: 'Delete', action: 'delete-file', icon: 'fa-trash'});
-      } else { // Desktop background
-          menuItems.push({ label: 'View', icon: 'fa-eye', subItems: [
+       
+       } else if (e.target.closest('.file-explorer-content .file-item')) {
+        currentContextMenuTarget = e.target.closest('.file-item');
+        menuItems.push({ label: 'Open', action: 'open-file', icon: 'fa-folder-open'});
+        menuItems.push({ label: 'Open in new window', action: 'open-in-new-window', icon: 'fa-window-restore'});
+        menuItems.push({ label: 'Download', action: 'download', icon: 'fa-download'});
+        menuItems.push({ label: 'Preview', action: 'preview', icon: 'fa-eye'});
+        menuItems.push({ label: 'Upload files in this folder', action: 'upload-files', icon: 'fa-upload'});
+        menuItems.push({ label: 'Move Into New Folder', action: 'into-new-folder', icon: 'fa-folder-plus'});
+        menuItems.push({ type: 'separator' });
+        menuItems.push({ label: 'Copy', action: 'copy-file', icon: 'fa-copy'});
+        menuItems.push({ label: 'Cut', action: 'cut-file', icon: 'fa-scissors'});
+        menuItems.push({ label: 'Duplicate', action: 'duplicate-file', icon: 'fa-clone'});
+        menuItems.push({ type: 'separator' });
+        menuItems.push({ label: 'Delete file', action: 'into-trash', icon: 'fa-trash'});
+        menuItems.push({ label: 'Rename', action: 'rename', icon: 'fa-i-cursor'});
+        menuItems.push({ label: 'Create archive', action: 'create-archive', icon: 'fa-file-archive', subItems: [
+          { label: 'ZIP', action: 'archive-zip', icon: 'fa-file-archive' },
+          { label: 'TAR', action: 'archive-tar', icon: 'fa-file-archive' }
+        ]});
+        menuItems.push({ type: 'separator' });
+        menuItems.push({ label: 'Select all', action: 'select-all', icon: 'fa-check-square'});
+        menuItems.push({ label: 'Invert selection', action: 'invert-selection', icon: 'fa-random'});
+        menuItems.push({ label: 'Add to Favorites', action: 'add-folder-to-favorites', icon: 'fa-share-square'});
+        menuItems.push({ label: 'Get info', action: 'get-info', icon: 'fa-info-circle'});
+      } else if (e.target.closest('.file-explorer-content .file-explorer-elements')) {
+        currentContextMenuTarget = e.target.closest('.file-explorer-elements');
+        menuItems.push({ label: 'Go to parent folder', action: 'go-parent', icon: 'fa-arrow-up' });
+        menuItems.push({ label: 'Refresh', action: 'reload', icon: 'fa-rotate-right', checked: true });
+        menuItems.push({ label: 'Upload files here', action: 'upload-files', icon: 'fa-upload' });
+        menuItems.push({ label: 'New folder', action: 'new-folder', icon: 'fa-folder-plus' });
+        menuItems.push({ label: 'New file', action: 'new-file', icon: 'fa-file-medical', subItems: [
+          { label: 'Text file', action: 'new-text-file', icon: 'fa-file-alt' },
+          { label: 'Spreadsheet', action: 'new-spreadsheet', icon: 'fa-file-excel' },
+          { label: 'Presentation', action: 'new-presentation', icon: 'fa-file-powerpoint' }
+        ]});
+        menuItems.push({ label: 'Empty the folder', action: 'empty-folder', icon: 'fa-trash-alt' });
+        menuItems.push({ type: 'separator' });
+        menuItems.push({ label: 'View', action: 'list-view', icon: 'fa-eye', subItems: [
+          { label: 'Icons', action: 'view-icons', icon: 'fa-th-large' },
+          { label: 'List', action: 'view-list', icon: 'fa-list' }
+        ]});
+        menuItems.push({ label: 'Sort', action: 'sort', icon: 'fa-sort', subItems: [
+          { label: 'Name', action: 'sort-name', icon: 'fa-sort-alpha-down' },
+          { label: 'Date', action: 'sort-date', icon: 'fa-calendar-alt' },
+          { label: 'Type', action: 'sort-type', icon: 'fa-file' },
+          { label: 'Size', action: 'sort-size', icon: 'fa-file' },
+          { type: 'separator' },
+          { label: 'Permissions', action: 'sort-permissions', icon: 'fa-file' },
+          { type: 'separator' },
+          { label: 'Folder first', action: 'folder-first', icon: 'fa-file' },
+        ]});
+        menuItems.push({ type: 'separator' });
+        menuItems.push({ label: 'Select all', action: 'select-all', icon: 'fa-check-square' });
+        menuItems.push({ label: 'Add folder to Favorites', action: 'add-folder-to-favorites', icon: 'fa-share-square' });
+        menuItems.push({ label: 'Get info', action: 'get-info', icon: 'fa-info-circle' });
+        menuItems.push({ label: 'Preferences', action: 'preferences', icon: 'fa-cog' });
+       } else if (e.target.closest('.taskbar-icon #notifications-btn')) {
+            currentContextMenuTarget = e.target.closest('#notifications-btn');
+            menuItems.push({ label: 'Open', action: 'open-file', icon: 'fa-folder-open'});
+            menuItems.push({ label: 'Clear all notifications', action: 'clear-all-notifications', icon: 'fa-copy'});
+            menuItems.push({ label: 'Paste', action: 'paste-file', icon: 'fa-paste', disabled: true }); 
+            menuItems.push({ type: 'separator' });
+            menuItems.push({ label: 'Mute Notifications', action: 'mute-notifications', icon: 'fa-trash'});
+          } else if (e.target.closest('.taskbar-icon #wallet-btn')) {
+            currentContextMenuTarget = e.target.closest('#wallet-btn');
+            menuItems.push({ label: 'Open Wallet Widget', action: 'open-file', icon: 'fa-folder-open'});
+            menuItems.push({ label: 'Open Wallet App', action: 'copy-file', icon: 'fa-copy'});
+            menuItems.push({ label: 'Paste', action: 'paste-file', icon: 'fa-paste', disabled: true }); 
+            menuItems.push({ type: 'separator' });
+            menuItems.push({ label: 'Delete', action: 'delete-file', icon: 'fa-trash'});
+          } else if (e.target.closest('.taskbar-right .taskbar-time')) {
+            currentContextMenuTarget = e.target.closest('.taskbar-time');
+            menuItems.push({ label: 'Adjust date and time', action: 'adjust-date-time', icon: 'fa-folder-open'});
+            menuItems.push({ label: 'Open Date and Time Settings', action: 'open-date-time-settings', icon: 'fa-copy'});
+            menuItems.push({ type: 'separator' });
+            menuItems.push({ label: 'Open Calendar', action: 'open-calendar', icon: 'fa-trash'});
+            menuItems.push({ label: 'Open Clock', action: 'open-clock', icon: 'fa-trash'});
+          } else if (e.target.closest('.taskbar-right .taskbar-user')) {
+            currentContextMenuTarget = e.target.closest('.taskbar-user');
+            menuItems.push({ label: 'My Profile', action: 'my-profile', icon: 'fa-folder-open'});
+            menuItems.push({ label: 'Copy', action: 'copy-file', icon: 'fa-copy'});
+            menuItems.push({ label: 'Paste', action: 'paste-file', icon: 'fa-paste', disabled: true }); 
+            menuItems.push({ type: 'separator' });
+            menuItems.push({ label: 'Delete', action: 'delete-file', icon: 'fa-trash'});
+          } else if (e.target.closest('.taskbar .taskbar-app-icons')) {
+            currentContextMenuTarget = e.target.closest('.taskbar-app-icons');
+            menuItems.push({ label: 'Open Window / Minimize', action: 'my-profile', icon: 'fa-folder-open'});
+            menuItems.push({ label: 'Pin/Unpin Task Bar', action: 'paste-file', icon: 'fa-paste', disabled: true }); 
+            menuItems.push({ type: 'separator' });
+            menuItems.push({ label: 'Close Window', action: 'delete-file', icon: 'fa-trash'});
+          } else if (
+            e.target === desktopArea ||
+            (e.target.classList && e.target.classList.contains('desktop-icons'))
+          ) {
+                menuItems.push({ label: 'View', icon: 'fa-eye', subItems: [
               { label: 'Large icons', action: 'view-large' },
               { label: 'Medium icons', action: 'view-medium' },
-              { label: 'Small icons', action: 'view-small' }
+              { label: 'Small icons', action: 'view-small' },
+              { type: 'separator' },
+              { label: 'Auto arrange icons', action: 'auto-arrange-icons' },
+              { label: 'Align icons to grid', action: 'align-icons-grid' },
+              { type: 'separator' },
+              { label: 'Hide desktop icons', action: 'show-desktop-icons' }
           ]});
           menuItems.push({ label: 'Sort by', icon: 'fa-sort', subItems: [
             { label: 'Name', action: 'sort-name' },
             { label: 'Date', action: 'sort-date' },
             { label: 'Type', action: 'sort-type' }
-        ]});
+                    ]});
+                    menuItems.push({ label: 'Refresh', action: 'refresh', icon: 'fa-arrows-rotate' });
           menuItems.push({ type: 'separator' });
           menuItems.push({ label: 'New Folder', action: 'new-folder', icon: 'fa-folder-plus' });
           menuItems.push({ type: 'separator' });
@@ -2243,6 +2581,12 @@ function openAppFromLauncher(appItem) {
             submenuEl.classList.remove('hidden');
             submenuEl.innerHTML = '';
             item.subItems.forEach(subItem => {
+              if (subItem.type === 'separator') {
+                const subSep = document.createElement('div');
+                subSep.className = 'context-menu-separator';
+                submenuEl.appendChild(subSep);
+                return;
+              }
               const subItemEl = document.createElement('div');
               subItemEl.className = 'context-menu-item';
               subItemEl.innerHTML = `<span>${subItem.label}</span>`;
@@ -2456,7 +2800,6 @@ function openAppFromLauncher(appItem) {
   else console.error('populateStartMenuApps is not defined or not a function');
   
   initializeDesktopIconPositions(); 
-  console.log('SCRIPT EXECUTION: DOMContentLoaded END');
 
   // Add snap overlay for snap hints if not present
   if (!document.getElementById('snap-overlay')) {
@@ -2870,6 +3213,38 @@ function openAppFromLauncher(appItem) {
   }
 
   // ... existing code ...
+
+  // --- Bulletproof: Attach ResizeObserver to all .window elements ---
+  function attachSidebarResizeObserver(win) {
+    if (!win || win._sidebarResizeObserver) return;
+    const ro = new ResizeObserver(() => {
+      updateSidebarForWindow(win);
+    });
+    ro.observe(win);
+    win._sidebarResizeObserver = ro;
+    // Initial call
+    updateSidebarForWindow(win);
+  }
+  // Attach to all current windows
+  document.querySelectorAll('.window').forEach(attachSidebarResizeObserver);
+
+  // Patch window creation functions
+  if (typeof createWindowFromTemplate === 'function') {
+    const _originalCreateWindowFromTemplate = createWindowFromTemplate;
+    createWindowFromTemplate = function() {
+      const win = _originalCreateWindowFromTemplate.apply(this, arguments);
+      attachSidebarResizeObserver(win);
+      return win;
+    };
+  }
+  if (typeof createGenericWindow === 'function') {
+    const _originalCreateGenericWindow = createGenericWindow;
+    createGenericWindow = function() {
+      const win = _originalCreateGenericWindow.apply(this, arguments);
+      attachSidebarResizeObserver(win);
+      return win;
+    };
+  }
 });
 // ... existing code ...
 
@@ -3451,139 +3826,10 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 // ... existing code ...
 
-document.addEventListener('DOMContentLoaded', function() {
-  // ... existing code ...
-  const mainContentArea = document.querySelector('.main-content-area');
-  const desktopArea = document.querySelector('.desktop-area');
-  const taskbar = document.querySelector('.taskbar');
-  let mobileScreenIndex = 0; // 0 = icons, 1 = widgets
-  let touchStartX = 0;
-  let touchCurrentX = 0;
-  let isSwiping = false;
-  let swipeThreshold = 60; // px
-  let swipeEnabled = false;
-
-  // --- Move taskbar inside desktop-area on mobile, outside on desktop ---
-  function updateTaskbarPlacement() {
-    const mainContentArea = document.querySelector('.main-content-area');
-    const desktopArea = document.querySelector('.desktop-area');
-    const taskbar = document.querySelector('.taskbar');
-    if (!taskbar || !desktopArea || !mainContentArea) return;
-    if (window.innerWidth <= 1023) {
-      // On mobile, always move taskbar as last child of desktop-area
-      if (desktopArea.lastElementChild !== taskbar) {
-        desktopArea.appendChild(taskbar);
-      }
-    } else {
-      // On desktop, always move taskbar after main-content-area
-      if (mainContentArea.nextElementSibling !== taskbar) {
-        mainContentArea.parentElement.insertBefore(taskbar, mainContentArea.nextElementSibling);
-      }
-    }
-  }
-  window.addEventListener('resize', updateTaskbarPlacement);
-  document.addEventListener('DOMContentLoaded', updateTaskbarPlacement);
-  // ... existing code ...
-});
-// ... existing code ...
 
 // ... existing code ...
-// --- MOBILE SWIPE LOGIC FOR MAIN CONTENT AREA ---
-(function() {
-  const MOBILE_BREAKPOINT = 1023;
-  let mobileScreenIndex = 0; // 0 = icons, 1 = widgets
-  let touchStartX = 0;
-  let touchStartY = 0;
-  let touchCurrentX = 0;
-  let touchCurrentY = 0;
-  let isSwiping = false;
-  let swipeStartedInWidgets = false;
-  const swipeThreshold = 60; // px
-  let mainContentArea = null;
-  let mainContentParent = null;
 
-  function setMobileScreen(index) {
-    mainContentArea = document.querySelector('.main-content-area');
-    mainContentParent = mainContentArea ? mainContentArea.parentElement : null;
-    mobileScreenIndex = Math.max(0, Math.min(1, index));
-    if (!mainContentArea) return;
-    if (mobileScreenIndex === 0) {
-      mainContentArea.classList.add('mobile-icons-active');
-      mainContentArea.classList.remove('mobile-widgets-active');
-    } else {
-      mainContentArea.classList.remove('mobile-icons-active');
-      mainContentArea.classList.add('mobile-widgets-active');
-    }
-  }
 
-  function onTouchStart(e) {
-    if (window.innerWidth > MOBILE_BREAKPOINT) return;
-    if (e.touches.length !== 1) return;
-    isSwiping = true;
-    touchStartX = e.touches[0].clientX;
-    touchStartY = e.touches[0].clientY;
-    touchCurrentX = touchStartX;
-    touchCurrentY = touchStartY;
-    const widgetsScreen = document.getElementById('widgets-screen');
-    swipeStartedInWidgets = widgetsScreen && widgetsScreen.contains(e.target);
-  }
-  function onTouchMove(e) {
-    if (!isSwiping || window.innerWidth > MOBILE_BREAKPOINT) return;
-    touchCurrentX = e.touches[0].clientX;
-    touchCurrentY = e.touches[0].clientY;
-    const dx = touchCurrentX - touchStartX;
-    const dy = touchCurrentY - touchStartY;
-    if (swipeStartedInWidgets && Math.abs(dy) > Math.abs(dx)) {
-      return;
-    }
-    if (Math.abs(dx) > Math.abs(dy)) {
-      e.preventDefault();
-    }
-  }
-  function onTouchEnd(e) {
-    if (!isSwiping || window.innerWidth > MOBILE_BREAKPOINT) return;
-    isSwiping = false;
-    const dx = touchCurrentX - touchStartX;
-    const dy = touchCurrentY - touchStartY;
-    if (swipeStartedInWidgets && Math.abs(dy) > Math.abs(dx)) {
-      return;
-    }
-    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > swipeThreshold) {
-      if (dx < 0 && mobileScreenIndex === 0) {
-        setMobileScreen(1);
-      } else if (dx > 0 && mobileScreenIndex === 1) {
-        setMobileScreen(0);
-      }
-    }
-  }
-  function enableMobileSwipe() {
-    mainContentArea = document.querySelector('.main-content-area');
-    if (!mainContentArea || window.innerWidth > MOBILE_BREAKPOINT) return;
-    mainContentArea.addEventListener('touchstart', onTouchStart, { passive: true });
-    mainContentArea.addEventListener('touchmove', onTouchMove, { passive: false });
-    mainContentArea.addEventListener('touchend', onTouchEnd, { passive: true });
-    setMobileScreen(mobileScreenIndex);
-  }
-  function disableMobileSwipe() {
-    mainContentArea = document.querySelector('.main-content-area');
-    if (!mainContentArea) return;
-    mainContentArea.removeEventListener('touchstart', onTouchStart);
-    mainContentArea.removeEventListener('touchmove', onTouchMove);
-    mainContentArea.removeEventListener('touchend', onTouchEnd);
-  }
-  function handleResize() {
-    if (window.innerWidth <= MOBILE_BREAKPOINT) {
-      enableMobileSwipe();
-      setMobileScreen(mobileScreenIndex);
-    } else {
-      disableMobileSwipe();
-      mobileScreenIndex = 0;
-    }
-  }
-  window.addEventListener('resize', handleResize);
-  document.addEventListener('DOMContentLoaded', handleResize);
-})();
-// ... existing code ...
 
 // --- Desktop Icon Arrangement Persistence ---
 function saveDesktopIconPositions() {
@@ -3689,25 +3935,26 @@ window.addEventListener('resize', function() {
         // --- Cross-browser: Write HTML immediately after open ---
         const doc = popoutWin.document;
         doc.open();
-        doc.write('<!DOCTYPE html><html><head><title>App Popout</title>');
+        doc.write(`<!DOCTYPE html><html><head><title>${windowElement.querySelector('.window-title span')?.textContent || 'App Popout'}</title>`);
         // Copy stylesheets
         Array.from(document.styleSheets).forEach(sheet => {
           if (sheet.href) doc.write(`<link rel="stylesheet" href="${sheet.href}">`);
         });
+        // Inject main JS file for popout functionality
+        doc.write('<script src="js/app.js"></script>');
         doc.write('</head><body style="background: var(--primary-bg); margin:0;">');
-        // Only window-content (NO window-header)
-        const content = windowElement.querySelector('.window-content') || windowElement.querySelector('.calculator-body') || windowElement.querySelector('.photoshop-content');
-        if (content) {
-          // Clone and adjust style for full size
-          const tempDiv = document.createElement('div');
-          tempDiv.innerHTML = content.outerHTML;
-          const mainContent = tempDiv.firstElementChild;
-          if (mainContent) {
-            mainContent.style.width = '100vw';
-            mainContent.style.height = '100vh';
-            mainContent.style.boxSizing = 'border-box';
-            doc.write(mainContent.outerHTML);
-          }
+        // Write the entire window element, not just .window-content
+        if (windowElement) {
+          // Remove any existing inline styles that would conflict
+          windowElement.style.position = '';
+          windowElement.style.left = '';
+          windowElement.style.top = '';
+          windowElement.style.width = '';
+          windowElement.style.height = '';
+          // Write the .window element
+          doc.write(windowElement.outerHTML);
+          // Add style to make .window fill the viewport in the popout and hide the window header
+          doc.write('<style>.window{position:fixed!important;top:0!important;left:0!important;width:100vw!important;height:100vh!important;max-width:none!important;max-height:none!important;min-width:0!important;min-height:0!important;z-index:1!important;} .window-header{display:none!important;}</style>');
         }
         doc.write('</body></html>');
         doc.close();
@@ -3752,7 +3999,7 @@ window.addEventListener('resize', function() {
           const restoreApp = () => {
             // Use appName and appTitle to reopen
             const info = popoutWin._poppedOutAppInfo;
-            if (info && info.appName) {
+            if (!window._loggingOut && info && info.appName) {
               openApp(info.appName, info.appTitle, info.iconClass, info.iconBgClass);
             }
           };
@@ -3764,6 +4011,35 @@ window.addEventListener('resize', function() {
             }
           }, 500);
         }
+        // ... existing code ...
+        // At the top of the file, after other globals:
+        window._allPopoutWindows = window._allPopoutWindows || [];
+        // ... existing code ...
+        // In the popoutButton click handler, after 'if (!popoutWin) return;':
+        window._allPopoutWindows.push(popoutWin);
+        // ... existing code ...
+        // In the logout button event handler:
+        const logOutButton = document.querySelector('.start-menu-logout-button') || document.querySelector('.logout-button');
+        if (logOutButton) {
+          logOutButton.addEventListener('click', () => {
+            if(startMenu) startMenu.style.display = 'none';
+            // Set a global flag to indicate logout in progress
+            window._loggingOut = true;
+            // Close all popout windows
+            if (window._allPopoutWindows && Array.isArray(window._allPopoutWindows)) {
+              window._allPopoutWindows = window._allPopoutWindows.filter(win => {
+                if (win && !win.closed) {
+                  try { win.close(); } catch (e) {}
+                  return false;
+                }
+                return false;
+              });
+            }
+            // Optionally, clear the flag after a short delay
+            setTimeout(() => { window._loggingOut = false; }, 2000);
+          });
+        }
+        // ... existing code ...
       });
     }
 // ... existing code ...
@@ -3830,7 +4106,6 @@ document.addEventListener('keydown', function(e) {
   const active = document.activeElement;
   if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable)) return;
   if (e.key === 'n' || e.key === 'N') {
-    console.log('N key pressed for notification'); // Debug log
     const notificationsPanel = document.getElementById('notifications-panel');
     if (!notificationsPanel) return;
     if (notificationsPanel.style.display !== 'flex') {
@@ -3974,3 +4249,503 @@ document.addEventListener('keydown', function(e) {
   }
 });
 // ... existing code ...
+
+// --- In-app Window-aware Sidebar Adaptation ---
+function updateSidebarForWindow(windowEl) {
+  if (!windowEl) return;
+  if (windowEl._isClosing) return;
+  const sidebars = windowEl.querySelectorAll('.file-explorer-sidebar, .settings-sidebar, .app-store-sidebar, .start-menu-right-sidebar');
+  const width = windowEl.offsetWidth;
+  const isMobile = window.innerWidth <= 767;
+  sidebars.forEach(sb => {
+    if (isMobile) return;
+    // Remove previous listeners
+    if (sb._hoverEnter) sb.removeEventListener('mouseenter', sb._hoverEnter);
+    if (sb._hoverLeave) sb.removeEventListener('mouseleave', sb._hoverLeave);
+    delete sb._hoverEnter;
+    delete sb._hoverLeave;
+    sb.classList.remove('sidebar-hovered', 'sidebar-mobile');
+    sb.style.position = '';
+    sb.style.left = '';
+    sb.style.top = '';
+    sb.style.height = '';
+    sb.style.zIndex = '';
+    sb.style.width = '';
+    const content = sb.parentElement && sb.parentElement.querySelector('.file-explorer-content, .settings-content, .app-store-main-content');
+    if (content) {
+      content.style.transform = '';
+      content.style.width = '';
+    }
+    // Only allow hover-to-expand if sidebar is collapsed and user wants it (toggle ON)
+    const userCollapsed = sb.getAttribute('data-user-collapsed') === 'true';
+    if (width >= 200 && width < 500) {
+      sb.classList.add('sidebar-collapsed');
+      if (userCollapsed) {
+        sb._hoverEnter = function() {
+          const originalWidth = content ? content.offsetWidth : null;
+          sb.classList.add('sidebar-hovered');
+          sb.style.position = 'absolute';
+          sb.style.left = '0';
+          sb.style.top = '0';
+          sb.style.height = '100%';
+          sb.style.zIndex = '20';
+          sb.style.width = '220px';
+          sb.style.overflowY = 'hidden';
+          if (content && originalWidth) {
+            content.style.width = originalWidth + 'px';
+            content.style.transition = 'transform 0.25s cubic-bezier(0.4,0,0.2,1)';
+            content.style.transform = 'translateX(220px)';
+          }
+        };
+        sb._hoverLeave = function() {
+          sb.classList.remove('sidebar-hovered');
+          sb.style.position = '';
+          sb.style.left = '';
+          sb.style.top = '';
+          sb.style.height = '';
+          sb.style.zIndex = '';
+          sb.style.width = '';
+          if (content) {
+            content.style.transition = 'transform 0.25s cubic-bezier(0.4,0,0.2,1)';
+            content.style.transform = '';
+            content.addEventListener('transitionend', function handler(e) {
+              if (e.propertyName === 'transform') {
+                content.style.transition = '';
+                content.style.width = '';
+                content.removeEventListener('transitionend', handler);
+              }
+            });
+          }
+        };
+        sb.addEventListener('mouseenter', sb._hoverEnter);
+        sb.addEventListener('mouseleave', sb._hoverLeave);
+      }
+    } else {
+      // For width >= 500, only collapse if user wants it
+      if (userCollapsed) {
+        sb.classList.add('sidebar-collapsed');
+        sb._hoverEnter = function() {
+          const originalWidth = content ? content.offsetWidth : null;
+          sb.classList.add('sidebar-hovered');
+          sb.style.position = 'absolute';
+          sb.style.left = '0';
+          sb.style.top = '0';
+          sb.style.height = '100%';
+          sb.style.zIndex = '20';
+          sb.style.width = '220px';
+sb.style.overflowY = 'auto';
+          if (content && originalWidth) {
+            content.style.width = originalWidth + 'px';
+            content.style.transition = 'transform 0.25s cubic-bezier(0.4,0,0.2,1)';
+            content.style.transform = 'translateX(220px)';
+          }
+        };
+        sb._hoverLeave = function() {
+          sb.classList.remove('sidebar-hovered');
+          sb.style.position = '';
+          sb.style.left = '';
+          sb.style.top = '';
+          sb.style.height = '';
+          sb.style.zIndex = '';
+          sb.style.width = '';
+          if (content) {
+            content.style.transition = 'transform 0.25s cubic-bezier(0.4,0,0.2,1)';
+            content.style.transform = '';
+            content.addEventListener('transitionend', function handler(e) {
+              if (e.propertyName === 'transform') {
+                content.style.transition = '';
+                content.style.width = '';
+                content.removeEventListener('transitionend', handler);
+              }
+            });
+          }
+        };
+        sb.addEventListener('mouseenter', sb._hoverEnter);
+        sb.addEventListener('mouseleave', sb._hoverLeave);
+      } else {
+        sb.classList.remove('sidebar-collapsed', 'sidebar-hovered', 'sidebar-mobile');
+      }
+    }
+  });
+}
+// Remove all other sidebar hover/push logic and listeners below this point
+
+// --- Bulletproof: Attach ResizeObserver to all .window elements (guaranteed) ---
+(function() {
+  function attachSidebarResizeObserver(win) {
+    if (!win || win._sidebarResizeObserver) return;
+    const ro = new ResizeObserver(() => {
+      updateSidebarForWindow(win);
+    });
+    ro.observe(win);
+    win._sidebarResizeObserver = ro;
+    // Initial call
+    updateSidebarForWindow(win);
+  }
+  if (typeof document !== 'undefined') {
+    document.querySelectorAll('.window').forEach(attachSidebarResizeObserver);
+  }
+  if (typeof createWindowFromTemplate === 'function') {
+    const _originalCreateWindowFromTemplate = createWindowFromTemplate;
+    createWindowFromTemplate = function() {
+      const win = _originalCreateWindowFromTemplate.apply(this, arguments);
+      attachSidebarResizeObserver(win);
+      return win;
+    };
+  }
+  if (typeof createGenericWindow === 'function') {
+    const _originalCreateGenericWindow = createGenericWindow;
+    createGenericWindow = function() {
+      const win = _originalCreateGenericWindow.apply(this, arguments);
+      attachSidebarResizeObserver(win);
+      return win;
+    };
+  }
+})();
+
+// ... existing code ...
+// --- Shared Mobile Sidebar Logic for All Windows with Sidebar ---
+function setupMobileSidebarForWindow(windowElement) {
+  // Try all possible sidebar and content class combos for robustness
+  let sidebar = windowElement.querySelector('.file-explorer-sidebar, .settings-sidebar, .app-store-sidebar');
+  let overlay = windowElement.querySelector('.sidebar-overlay');
+  const windowContent = windowElement.querySelector('.window-content');
+  if (windowContent && overlay && windowContent.firstElementChild !== overlay) {
+    windowContent.insertBefore(overlay, windowContent.firstElementChild);
+  }
+  if (!overlay && windowContent) overlay = windowContent.querySelector('.sidebar-overlay');
+  const menuToggle = windowElement.querySelector('.menu-toggle');
+  // Try all possible content area classes
+  let contentArea = windowElement.querySelector('.file-explorer-content, .settings-content, .app-store-main-content');
+  // If not found, try direct child of window-content
+  if (!contentArea && windowContent) {
+    contentArea = windowContent.querySelector('.file-explorer-content, .settings-content, .app-store-main-content');
+  }
+  // If still not found, fallback to windowContent itself
+  if (!contentArea && windowContent) contentArea = windowContent;
+  // Debug log for diagnosis
+  
+
+  if (!sidebar || !overlay || !menuToggle || !contentArea) return;
+
+  // Remove previous listeners to avoid duplicates
+  menuToggle.onclick = null;
+  overlay.onclick = null;
+  sidebar.querySelectorAll('.sidebar-item').forEach(item => { item.onclick = null; });
+
+  function setBlockInteraction(active) {
+    if (active) {
+      windowElement.classList.add('sidebar-block-interaction');
+    } else {
+      windowElement.classList.remove('sidebar-block-interaction');
+    }
+  }
+
+  menuToggle.addEventListener('click', () => {
+    const isShowing = !sidebar.classList.contains('show');
+    sidebar.classList.toggle('show');
+    overlay.classList.toggle('show');
+    if (window.innerWidth <= 767) {
+      setBlockInteraction(isShowing);
+      if (isShowing) {
+        contentArea.classList.add('sidebar-push-active');
+      } else {
+        contentArea.classList.remove('sidebar-push-active');
+      }
+    }
+  });
+
+  overlay.addEventListener('click', () => {
+    sidebar.classList.remove('show');
+    overlay.classList.remove('show');
+    setBlockInteraction(false);
+    if (window.innerWidth <= 767) {
+      contentArea.classList.remove('sidebar-push-active');
+    }
+  });
+
+  // Close sidebar on item click for mobile
+  const sidebarItems = sidebar.querySelectorAll('.sidebar-item');
+  sidebarItems.forEach(item => {
+    item.addEventListener('click', () => {
+      if (window.innerWidth <= 767) {
+        sidebar.classList.remove('show');
+        overlay.classList.remove('show');
+        setBlockInteraction(false);
+        contentArea.classList.remove('sidebar-push-active');
+      }
+    });
+  });
+
+  // Handle window resize
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 767) {
+      sidebar.classList.remove('show');
+      overlay.classList.remove('show');
+      setBlockInteraction(false);
+      contentArea.classList.remove('sidebar-push-active');
+    }
+  });
+}
+// ... existing code ...
+
+// Patch updateSidebarForWindow to respect data-user-collapsed
+const _originalUpdateSidebarForWindow = updateSidebarForWindow;
+window.updateSidebarForWindow = function(windowEl) {
+  if (!windowEl) return;
+  if (windowEl._isClosing) return;
+  const sidebars = windowEl.querySelectorAll('.file-explorer-sidebar, .settings-sidebar, .app-store-sidebar, .start-menu-right-sidebar');
+  const width = windowEl.offsetWidth;
+  const isMobile = window.innerWidth <= 767;
+  sidebars.forEach(sb => {
+    // On mobile, do NOT touch sidebar classes/styles; let CSS and .show handle everything
+    if (isMobile) {
+      sb.removeAttribute('data-user-collapsed');
+      return;
+    }
+    // User override
+    if (sb.hasAttribute('data-user-collapsed')) {
+      if (sb.getAttribute('data-user-collapsed') === 'true') {
+        sb.classList.add('sidebar-collapsed');
+      } else {
+        sb.classList.remove('sidebar-collapsed');
+      }
+      // If window is very small or very large, remove user override
+      if (width < 200 || width > 700) {
+        sb.removeAttribute('data-user-collapsed');
+      }
+      return;
+    }
+    // Otherwise, original logic
+    const content = sb.parentElement && sb.parentElement.querySelector('.file-explorer-content, .settings-content, .app-store-main-content');
+    if (content) {
+      content.style.transform = '';
+      content.style.width = '';
+    }
+    if (width >= 200 && width < 500) {
+      sb.classList.add('sidebar-collapsed');
+      sb._hoverEnter = function() {
+        const originalWidth = content ? content.offsetWidth : null;
+        sb.classList.add('sidebar-hovered');
+        sb.style.position = 'absolute';
+        sb.style.left = '0';
+        sb.style.top = '0';
+        sb.style.height = '100vh'; // PATCH: always full viewport height
+        sb.style.zIndex = '20';
+        sb.style.width = '220px';
+        sb.style.overflowY = 'hidden';
+        if (content && originalWidth) {
+          content.style.width = originalWidth + 'px';
+          content.style.transition = 'transform 0.25s cubic-bezier(0.4,0,0.2,1)';
+          content.style.transform = 'translateX(220px)';
+        }
+      };
+      sb._hoverLeave = function() {
+        sb.classList.remove('sidebar-hovered');
+        sb.style.position = '';
+        sb.style.left = '';
+        sb.style.top = '';
+        sb.style.height = '';
+        sb.style.overflowY = '';
+        sb.style.zIndex = '';
+        sb.style.width = '';
+        if (content) {
+          content.style.transition = 'transform 0.25s cubic-bezier(0.4,0,0.2,1)';
+          content.style.transform = '';
+          content.addEventListener('transitionend', function handler(e) {
+            if (e.propertyName === 'transform') {
+              content.style.transition = '';
+              content.style.width = '';
+              content.removeEventListener('transitionend', handler);
+            }
+          });
+        }
+      };
+      sb.addEventListener('mouseenter', sb._hoverEnter);
+      sb.addEventListener('mouseleave', sb._hoverLeave);
+    } else {
+      sb.classList.remove('sidebar-collapsed', 'sidebar-hovered', 'sidebar-mobile');
+    }
+  });
+}
+// ... existing code ...
+
+(function() {
+  console.log('[Swipe] Swipe logic running');
+  // --- SWIPE CONTAINER LOGIC (universal: desktop + mobile) ---
+  if (!document.getElementById('swipe-container')) {
+    const swipeContainer = document.createElement('div');
+    swipeContainer.id = 'swipe-container';
+    swipeContainer.style.position = 'fixed';
+    swipeContainer.style.left = '0';
+    swipeContainer.style.top = '0';
+    swipeContainer.style.width = '100vw';
+    swipeContainer.style.height = '100vh';
+    swipeContainer.style.overflow = 'hidden';
+    swipeContainer.style.zIndex = '2147483647';
+    swipeContainer.style.display = 'flex';
+    swipeContainer.style.flexDirection = 'row';
+    swipeContainer.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)';
+    swipeContainer.style.background = '#111';
+
+    // --- DO NOT HIDE ALL BODY CHILDREN ---
+    // Instead, move the real app content into the swipe screens
+
+    // Left screen (Notifications)
+    const leftScreen = document.createElement('div');
+    leftScreen.className = 'swipe-screen-left';
+    leftScreen.style.width = '100vw';
+    leftScreen.style.height = '100vh';
+    leftScreen.style.flexShrink = '0';
+    leftScreen.style.display = 'flex';
+    leftScreen.style.flexDirection = 'column';
+    leftScreen.style.overflow = 'auto';
+    // Move notifications panel if it exists
+    const notificationsPanel = document.getElementById('notifications-panel');
+    if (notificationsPanel) {
+      leftScreen.appendChild(notificationsPanel);
+      notificationsPanel.style.display = 'flex';
+      notificationsPanel.style.position = 'static';
+      notificationsPanel.style.height = '100%';
+      notificationsPanel.style.width = '100%';
+      console.log('[Swipe] Forced notifications panel visible:', notificationsPanel, getComputedStyle(notificationsPanel).display);
+    } else {
+      leftScreen.innerHTML = '<div style="color:#fff;font-size:2rem;">Notifications</div>';
+    }
+
+    // Home screen (middle, Desktop only - CLONE)
+    const homeScreen = document.createElement('div');
+    homeScreen.className = 'swipe-screen-home';
+    homeScreen.style.width = '100vw';
+    homeScreen.style.height = '100vh';
+    homeScreen.style.flexShrink = '0';
+    homeScreen.style.display = 'flex';
+    homeScreen.style.flexDirection = 'column';
+    homeScreen.style.overflow = 'auto';
+    // Clone the desktop area
+    const desktopArea = document.querySelector('.desktop-area');
+    if (desktopArea) {
+      const desktopClone = desktopArea.cloneNode(true);
+      desktopClone.classList.add('in-swipe');
+      desktopClone.removeAttribute('id'); // Remove duplicate ID
+      homeScreen.appendChild(desktopClone);
+      desktopClone.style.display = 'flex';
+      desktopClone.style.height = '100%';
+      desktopClone.style.width = '100%';
+    } else {
+      homeScreen.innerHTML = '<div style="color:#fff;font-size:2rem;margin-bottom:80px;">Home Screen</div>';
+    }
+
+    // Right screen (Widgets only - CLONE)
+    const rightScreen = document.createElement('div');
+    rightScreen.className = 'swipe-screen-right';
+    rightScreen.style.width = '100vw';
+    rightScreen.style.height = '100vh';
+    rightScreen.style.flexShrink = '0';
+    rightScreen.style.display = 'flex';
+    rightScreen.style.flexDirection = 'column';
+    rightScreen.style.overflow = 'auto';
+    // Clone the widgets screen
+    const widgetsScreen = document.getElementById('widgets-screen');
+    if (widgetsScreen) {
+      const widgetsClone = widgetsScreen.cloneNode(true);
+      widgetsClone.classList.add('in-swipe');
+      widgetsClone.removeAttribute('id'); // Remove duplicate ID
+      rightScreen.appendChild(widgetsClone);
+      widgetsClone.style.display = 'flex';
+      widgetsClone.style.position = 'static';
+      widgetsClone.style.height = '100%';
+      widgetsClone.style.width = '100%';
+    } else {
+      rightScreen.innerHTML = '<div style="color:#fff;font-size:2rem;">Widgets</div>';
+    }
+
+    swipeContainer.appendChild(leftScreen);
+    swipeContainer.appendChild(homeScreen);
+    swipeContainer.appendChild(rightScreen);
+    document.body.appendChild(swipeContainer);
+    console.log('[Swipe] Swipe container appended to body');
+  }
+
+  // --- 2. SWIPE/DRAG LOGIC ---
+  const swipeContainer = document.getElementById('swipe-container');
+  let currentScreen = 1; // 0 = left, 1 = home, 2 = right
+  let isDragging = false;
+  let dragStartX = 0;
+  let dragCurrentX = 0;
+  let dragStartTransform = 0;
+
+  function setScreen(index, animate = true) {
+    currentScreen = Math.max(0, Math.min(2, index));
+    if (!animate) swipeContainer.style.transition = 'none';
+    swipeContainer.style.transform = `translateX(${-100 * currentScreen}vw)`;
+    if (!animate) setTimeout(() => { swipeContainer.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)'; }, 30);
+  }
+
+  // Touch events (mobile)
+  swipeContainer.addEventListener('touchstart', function(e) {
+    if (e.touches.length !== 1) return;
+    isDragging = true;
+    dragStartX = e.touches[0].clientX;
+    dragCurrentX = dragStartX;
+    dragStartTransform = -100 * currentScreen;
+    swipeContainer.style.transition = 'none';
+  }, { passive: true });
+  swipeContainer.addEventListener('touchmove', function(e) {
+    if (!isDragging) return;
+    dragCurrentX = e.touches[0].clientX;
+    const dx = dragCurrentX - dragStartX;
+    swipeContainer.style.transform = `translateX(${dragStartTransform + (dx / window.innerWidth) * 100}vw)`;
+    e.preventDefault();
+  }, { passive: false });
+  swipeContainer.addEventListener('touchend', function(e) {
+    if (!isDragging) return;
+    isDragging = false;
+    const dx = dragCurrentX - dragStartX;
+    if (Math.abs(dx) > 60) {
+      if (dx < 0 && currentScreen < 2) setScreen(currentScreen + 1);
+      else if (dx > 0 && currentScreen > 0) setScreen(currentScreen - 1);
+      else setScreen(currentScreen);
+    } else {
+      setScreen(currentScreen);
+    }
+  }, { passive: true });
+
+  // Mouse events (desktop)
+  swipeContainer.addEventListener('mousedown', function(e) {
+    if (e.button !== 0) return;
+    isDragging = true;
+    dragStartX = e.clientX;
+    dragCurrentX = dragStartX;
+    dragStartTransform = -100 * currentScreen;
+    swipeContainer.style.transition = 'none';
+    document.body.style.userSelect = 'none';
+  });
+  window.addEventListener('mousemove', function(e) {
+    if (!isDragging) return;
+    dragCurrentX = e.clientX;
+    const dx = dragCurrentX - dragStartX;
+    swipeContainer.style.transform = `translateX(${dragStartTransform + (dx / window.innerWidth) * 100}vw)`;
+  });
+  window.addEventListener('mouseup', function(e) {
+    if (!isDragging) return;
+    isDragging = false;
+    document.body.style.userSelect = '';
+    const dx = dragCurrentX - dragStartX;
+    if (Math.abs(dx) > 60) {
+      if (dx < 0 && currentScreen < 2) setScreen(currentScreen + 1);
+      else if (dx > 0 && currentScreen > 0) setScreen(currentScreen - 1);
+      else setScreen(currentScreen);
+    } else {
+      setScreen(currentScreen);
+    }
+  });
+  // --- 3. Initial state ---
+  setScreen(1, false); // Home by default
+
+})();
+// ... existing code ...
+
+
+
+

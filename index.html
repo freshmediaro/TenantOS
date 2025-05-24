@@ -530,7 +530,13 @@
               
             </div>
             <div class="window-statusbar">
-              <div class="status-left">21 items</div>
+              <div class="status-left">
+                <label class="toggle-switch" id="file-explorer-sidebar-toggle-label" style="margin-right: 14px;">
+                  <input type="checkbox" id="file-explorer-sidebar-toggle">
+                  <span class="slider"></span>
+                </label>
+                21 items
+              </div>
               <div class="status-right">5 items selected</div>
             </div>
           </div>
@@ -543,10 +549,12 @@
     <template id="settings-app-template">
       <div class="window file-explorer-window" id="settings-app-window">
         <div class="window-header">
-          <button class="menu-toggle"><i class="fas fa-bars"></i></button>
+          <button class="back-btn" style="display:none;"><i class="fas fa-chevron-left"></i></button>
           <div class="window-title">
             <div class="window-icon green-icon"><i class="fas fa-cog"></i></div>
             <span>Settings</span>
+            <span class="chevron" style="display:none; margin: 0 8px; color: #8e8e93; font-size: 12px;"><i class="fas fa-chevron-right"></i></span>
+            <span class="panel-title" style="display:none;"></span>
           </div>
           <div class="window-controls">
             <button class="window-minimize"><i class="fas fa-minus"></i></button>
@@ -571,17 +579,17 @@
             </div>
             <nav class="settings-nav">
               <ul>
-                <li><a href="#" data-section="family"><i class="fas fa-users"></i> Family</a></li>
-                <li><a href="#" data-section="suggestions" class="has-badge"><i class="fas fa-lightbulb"></i> Suggestions <span class="badge">2</span></a></li>
-                <li><a href="#" data-section="wifi"><i class="fas fa-wifi"></i> Wi-Fi</a></li>
-                <li><a href="#" data-section="bluetooth"><i class="fab fa-bluetooth-b"></i> Bluetooth</a></li>
-                <li><a href="#" data-section="network"><i class="fas fa-globe"></i> Network</a></li>
-                <li><a href="#" data-section="notifications"><i class="fas fa-bell"></i> Notifications</a></li>
-                <li><a href="#" data-section="sound"><i class="fas fa-volume-up"></i> Sound</a></li>
-                <li><a href="#" data-section="focus"><i class="fas fa-moon"></i> Focus</a></li>
-                <li><a href="#" data-section="screentime"><i class="fas fa-hourglass-half"></i> Screen Time</a></li>
-                <li><a href="#" data-section="general"><i class="fas fa-cog"></i> General</a></li>
-                <li><a href="#" data-section="appearance" class="active"><i class="fas fa-palette"></i> Appearance</a></li>
+                <li><a href="#" data-section="family"><i class="fas fa-users"></i><span> Family</span></a></li>
+                <li><a href="#" data-section="suggestions" class="has-badge"><i class="fas fa-lightbulb"></i> <span>Suggestions </span><span class="badge">2</span></a></li>
+                <li><a href="#" data-section="wifi"><i class="fas fa-wifi"></i> <span>Wi-Fi</span></a></li>
+                <li><a href="#" data-section="bluetooth"><i class="fab fa-bluetooth-b"></i> <span>Bluetooth</span></a></li>
+                <li><a href="#" data-section="network"><i class="fas fa-globe"></i> <span>Network</span></a></li>
+                <li><a href="#" data-section="notifications"><i class="fas fa-bell"></i> <span>Notifications</span></a></li>
+                <li><a href="#" data-section="sound"><i class="fas fa-volume-up"></i> <span>Sound</span></a></li>
+                <li><a href="#" data-section="focus"><i class="fas fa-moon"></i> <span>Focus</span></a></li>
+                <li><a href="#" data-section="screentime"><i class="fas fa-hourglass-half"></i> <span>Screen Time</span></a></li>
+                <li><a href="#" data-section="general"><i class="fas fa-cog"></i> <span>General</span></a></li>
+                <li><a href="#" data-section="appearance" class="active"><i class="fas fa-palette"></i> <span>Appearance</span></a></li>
               </ul>
             </nav>
           </div>
@@ -703,6 +711,43 @@
             </div>
             <!-- Other sections (General, Wi-Fi, etc.) would go here, hidden by default -->
           </div>
+
+          <!-- MOBILE-ONLY: iOS-style sliding panels -->
+          <div class="settings-mobile-container" style="display:none">
+            <div class="settings-mobile-sidebar">
+              <div class="settings-mobile-search">
+                <input type="text" placeholder="Search">
+              </div>
+              <div class="settings-mobile-header-section" ">
+                <div class="settings-user-profile">
+                  <img src="img/avatar.png" alt="User" class="profile-avatar">
+                  <div class="profile-info">
+                    <span class="profile-name">Michael Muchmore</span>
+                    <span class="profile-id">Apple ID</span>
+                  </div>
+                </div>
+              </div>
+              <ul class="settings-mobile-list">
+                <li><button data-section="family"><i class="fas fa-users"></i><span>Family</span><span class="chevron"><i class="fas fa-chevron-right"></i></span></button></li>
+                <li><button data-section="suggestions"><i class="fas fa-lightbulb"></i><span>Suggestions</span><span class="badge">2</span><span class="chevron"><i class="fas fa-chevron-right"></i></span></button></li>
+                <li><button data-section="wifi"><i class="fas fa-wifi"></i><span>Wi-Fi</span><span class="chevron"><i class="fas fa-chevron-right"></i></span></button></li>
+                <li><button data-section="bluetooth"><i class="fab fa-bluetooth-b"></i><span>Bluetooth</span><span class="chevron"><i class="fas fa-chevron-right"></i></span></button></li>
+                <li><button data-section="network"><i class="fas fa-globe"></i><span>Network</span><span class="chevron"><i class="fas fa-chevron-right"></i></span></button></li>
+                <li><button data-section="notifications"><i class="fas fa-bell"></i><span>Notifications</span><span class="chevron"><i class="fas fa-chevron-right"></i></span></button></li>
+                <li><button data-section="sound"><i class="fas fa-volume-up"></i><span>Sound</span><span class="chevron"><i class="fas fa-chevron-right"></i></span></button></li>
+                <li><button data-section="focus"><i class="fas fa-moon"></i><span>Focus</span><span class="chevron"><i class="fas fa-chevron-right"></i></span></button></li>
+                <li><button data-section="screentime"><i class="fas fa-hourglass-half"></i><span>Screen Time</span><span class="chevron"><i class="fas fa-chevron-right"></i></span></button></li>
+                <li><button data-section="general"><i class="fas fa-cog"></i><span>General</span><span class="chevron"><i class="fas fa-chevron-right"></i></span></button></li>
+                <li><button data-section="appearance"><i class="fas fa-palette"></i><span>Appearance</span><span class="chevron"><i class="fas fa-chevron-right"></i></span></button></li>
+              </ul>
+            </div>
+            <div class="settings-mobile-panel">
+              <ul class="settings-mobile-options">
+                <!-- Section options go here -->
+              </ul>
+            </div>
+          </div>
+          <!-- END MOBILE-ONLY -->
         </div>
       </div>
     </template>
@@ -727,6 +772,7 @@
           </div>
         </div>
         <div class="window-content">
+          <div class="sidebar-overlay"></div>
           <div class="app-store-body">
             <aside class="app-store-sidebar">
               <div class="app-store-search-container">
