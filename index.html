@@ -90,27 +90,32 @@
             <div class="taskbar-app-icons" id="taskbar-app-icons"></div>
             <div class="taskbar-right">
               <div class="taskbar-icon">
-                <button id="notifications-btn" class="taskbar-user-btn" style="background: none; border: none; padding: 0; margin: 0; cursor: pointer; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
+                <button id="notifications-btn" class="taskbar-user-btn" >
                   <i class="fas fa-bell"></i>
                 </button>
               </div>
               <div class="taskbar-icon">
-                <button id="wallet-btn" class="taskbar-user-btn" style="background: none; border: none; padding: 0; margin: 0; cursor: pointer; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
+                <button id="wallet-btn" class="taskbar-user-btn">
                   <i class="fas fa-wallet"></i>
                 </button>
               </div>
               <div class="taskbar-icon">
-                <button id="fullscreen-btn" class="taskbar-user-btn" style="background: none; border: none; padding: 0; margin: 0; cursor: pointer; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
+                <button id="fullscreen-btn" class="taskbar-user-btn">
                   <i class="fas fa-expand"></i>
                 </button>
               </div>
               <div class="taskbar-icon">
-                <button id="global-search-btn" class="taskbar-search-btn" style="background: none; border: none; padding: 0; margin: 0; cursor: pointer; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
+                <button id="volume-btn" class="taskbar-user-btn" title="Volume">
+                  <i class="fas fa-volume-up"></i>
+                </button>
+              </div>
+              <div class="taskbar-icon">
+                <button id="global-search-btn" class="taskbar-search-btn">
                   <i class="fas fa-search"></i>
                 </button>
               </div>
               <div class="taskbar-icon">
-                <button id="app-launcher-btn" class="taskbar-user-btn" style="background: none; border: none; padding: 0; margin: 0; cursor: pointer; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
+                <button id="app-launcher-btn" class="taskbar-user-btn">
                   <i class="fas fa-th"></i>
                 </button>
               </div>
@@ -118,12 +123,12 @@
                 <span id="current-time">22:30</span>
                 <span class="date">Mie. 25 Aprilie</span>
               </div>
-              <div class="taskbar-user">
-                <button id="ai-chat-btn" class="taskbar-user-btn" style="background: none; border: none; padding: 0; margin: 0; cursor: pointer;">
+              <div class="taskbar-ai">
+                <button id="ai-chat-btn" class="taskbar-user-btn" ">
                   <img src="img/alien.png" alt="User" class="user-avatar">
                 </button>
               </div>
-              <button id="widgets-toggle-btn" class="taskbar-icon" style="width: 20px; height: 36px; margin-left: 8px; display: flex; align-items: center; justify-content: center; background: none; border: none; cursor: pointer; font-size: 18px;">
+              <button id="widgets-toggle-btn" class="taskbar-icon" >
                 <span id="widgets-toggle-arrow"><i class="fas fa-chevron-right"></i></span>
               </button>
             </div>
@@ -455,15 +460,19 @@
           
           <div class="file-explorer-content">
             <div class="window-toolbar">
+              <div class="toolbar-left">
               <button class="toolbar-button"><i class="fas fa-arrow-left"></i></button>
               <button class="toolbar-button"><i class="fas fa-arrow-right"></i></button>
               <button class="toolbar-button"><i class="fas fa-arrow-up"></i></button>
-              <button class="toolbar-button"><i class="fas fa-home"></i></button>
-              <div class="path-breadcrumb">
-                <span class="breadcrumb-separator">></span>
+              </div>         <div class="path-breadcrumb">
+                <i class="fas fa-home"> </i>
+                <i class="fas fa-chevron-right breadcrumb-chevron"></i>
                 <span class="breadcrumb-item">My files</span>
+                <i class="fas fa-chevron-right breadcrumb-chevron"></i>
+                <span class="breadcrumb-item">Subfolder</span>
               </div>
               <div class="toolbar-right">
+                <button class="toolbar-button"><i class="fas fa-gear"></i></button>
                 <button class="toolbar-button"><i class="fas fa-th-large"></i></button>
                 <button class="toolbar-button"><i class="fas fa-search"></i></button>
               </div>
@@ -477,7 +486,90 @@
                 <div class="file-name">Desktop</div>
                 <div class="file-info">3 GB</div>
               </div>
-              
+              <div class="file-item folder">
+                <div class="file-icon">
+                  <i class="fas fa-folder"></i>
+                </div>
+                <div class="file-name">Desktop</div>
+                <div class="file-info">3 GB</div>
+              </div>
+              <div class="file-item folder">
+                <div class="file-icon">
+                  <i class="fas fa-folder"></i>
+                </div>
+                <div class="file-name">Desktop</div>
+                <div class="file-info">3 GB</div>
+              </div>
+              <div class="file-item folder">
+                <div class="file-icon">
+                  <i class="fas fa-folder"></i>
+                </div>
+                <div class="file-name">Desktop</div>
+                <div class="file-info">3 GB</div>
+              </div>
+              <div class="file-item folder">
+                <div class="file-icon">
+                  <i class="fas fa-folder"></i>
+                </div>
+                <div class="file-name">Desktop</div>
+                <div class="file-info">3 GB</div>
+              </div>
+              <div class="file-item folder">
+                <div class="file-icon">
+                  <i class="fas fa-folder"></i>
+                </div>
+                <div class="file-name">Desktop</div>
+                <div class="file-info">3 GB</div>
+              </div>
+              <div class="file-item folder">
+                <div class="file-icon">
+                  <i class="fas fa-folder"></i>
+                </div>
+                <div class="file-name">Desktop</div>
+                <div class="file-info">3 GB</div>
+              </div>
+              <div class="file-item folder">
+                <div class="file-icon">
+                  <i class="fas fa-folder"></i>
+                </div>
+                <div class="file-name">Desktop</div>
+                <div class="file-info">3 GB</div>
+              </div>
+              <div class="file-item folder">
+                <div class="file-icon">
+                  <i class="fas fa-folder"></i>
+                </div>
+                <div class="file-name">Desktop</div>
+                <div class="file-info">3 GB</div>
+              </div>
+              <div class="file-item folder">
+                <div class="file-icon">
+                  <i class="fas fa-folder"></i>
+                </div>
+                <div class="file-name">Desktop</div>
+                <div class="file-info">3 GB</div>
+              </div>
+              <div class="file-item folder">
+                <div class="file-icon">
+                  <i class="fas fa-folder"></i>
+                </div>
+                <div class="file-name">Desktop</div>
+                <div class="file-info">3 GB</div>
+              </div>
+              <div class="file-item folder">
+                <div class="file-icon">
+                  <i class="fas fa-folder"></i>
+                </div>
+                <div class="file-name">Desktop</div>
+                <div class="file-info">3 GB</div>
+              </div>
+              <div class="file-item folder">
+                <div class="file-icon">
+                  <i class="fas fa-folder"></i>
+                </div>
+                <div class="file-name">Desktop</div>
+                <div class="file-info">3 GB</div>
+              </div>
               <div class="file-item folder">
                 <div class="file-icon">
                   <i class="fas fa-folder"></i>
@@ -574,22 +666,36 @@
               <img src="img/avatar.png" alt="User" class="profile-avatar">
               <div class="profile-info">
                 <span class="profile-name">Michael Muchmore</span>
-                <span class="profile-id">Apple ID</span>
+                <span class="profile-id">My Profile</span>
               </div>
             </div>
             <nav class="settings-nav">
               <ul>
-                <li><a href="#" data-section="family"><i class="fas fa-users"></i><span> Family</span></a></li>
-                <li><a href="#" data-section="suggestions" class="has-badge"><i class="fas fa-lightbulb"></i> <span>Suggestions </span><span class="badge">2</span></a></li>
-                <li><a href="#" data-section="wifi"><i class="fas fa-wifi"></i> <span>Wi-Fi</span></a></li>
-                <li><a href="#" data-section="bluetooth"><i class="fab fa-bluetooth-b"></i> <span>Bluetooth</span></a></li>
-                <li><a href="#" data-section="network"><i class="fas fa-globe"></i> <span>Network</span></a></li>
-                <li><a href="#" data-section="notifications"><i class="fas fa-bell"></i> <span>Notifications</span></a></li>
-                <li><a href="#" data-section="sound"><i class="fas fa-volume-up"></i> <span>Sound</span></a></li>
-                <li><a href="#" data-section="focus"><i class="fas fa-moon"></i> <span>Focus</span></a></li>
-                <li><a href="#" data-section="screentime"><i class="fas fa-hourglass-half"></i> <span>Screen Time</span></a></li>
-                <li><a href="#" data-section="general"><i class="fas fa-cog"></i> <span>General</span></a></li>
                 <li><a href="#" data-section="appearance" class="active"><i class="fas fa-palette"></i> <span>Appearance</span></a></li>
+                <li><a href="#" data-section="admin-access"><i class="fas fa-users"></i><span> Admin access</span></a></li>
+                <li><a href="#" data-section="integrations" class="has-badge"><i class="fas fa-lightbulb"></i> <span>Integrations </span><span class="badge">2</span></a></li>
+                <li><a href="#" data-section="privacy-security"><i class="fas fa-globe"></i> <span>Privacy & Security</span></a></li>
+                <li><a href="#" data-section="notifications"><i class="fas fa-bell"></i> <span>Notifications</span></a></li>
+                <li><a href="#" data-section="active-services"><i class="fas fa-cog"></i> <span>Active Services</span></a></li>
+
+              </ul>
+            </nav>
+            <div class="settings-website-profile">
+              <img src="img/avatar.png" alt="User" class="website-avatar">
+              <div class="profile-info">
+                <span class="profile-name">Argenti.ro</span>
+                <span class="profile-id">Website settings</span>
+              </div>
+            </div>
+            <nav class="settings-nav">
+              <ul>
+                <li><a href="#" data-section="products-settings"><i class="fas fa-users"></i><span> Products</span></a></li>
+                <li><a href="#" data-section="payments-settings" class="has-badge"><i class="fas fa-lightbulb"></i> <span>Payments</span><span class="badge">2</span></a></li>
+                <li><a href="#" data-section="shipping-settings"><i class="fas fa-globe"></i> <span>Shipping</span></a></li>
+                <li><a href="#" data-section="customers-privacy-settings"><i class="fas fa-bell"></i> <span>Customers & Privacy</span></a></li>
+                <li><a href="#" data-section="emails-settings"><i class="fas fa-cog"></i> <span>Emails</span></a></li>
+                <li><a href="#" data-section="billing-settings"><i class="fas fa-cog"></i> <span>Billing</span></a></li>
+
               </ul>
             </nav>
           </div>
@@ -723,22 +829,35 @@
                   <img src="img/avatar.png" alt="User" class="profile-avatar">
                   <div class="profile-info">
                     <span class="profile-name">Michael Muchmore</span>
-                    <span class="profile-id">Apple ID</span>
+                    <span class="profile-id">My Profile</span>
                   </div>
                 </div>
               </div>
               <ul class="settings-mobile-list">
-                <li><button data-section="family"><i class="fas fa-users"></i><span>Family</span><span class="chevron"><i class="fas fa-chevron-right"></i></span></button></li>
-                <li><button data-section="suggestions"><i class="fas fa-lightbulb"></i><span>Suggestions</span><span class="badge">2</span><span class="chevron"><i class="fas fa-chevron-right"></i></span></button></li>
-                <li><button data-section="wifi"><i class="fas fa-wifi"></i><span>Wi-Fi</span><span class="chevron"><i class="fas fa-chevron-right"></i></span></button></li>
-                <li><button data-section="bluetooth"><i class="fab fa-bluetooth-b"></i><span>Bluetooth</span><span class="chevron"><i class="fas fa-chevron-right"></i></span></button></li>
-                <li><button data-section="network"><i class="fas fa-globe"></i><span>Network</span><span class="chevron"><i class="fas fa-chevron-right"></i></span></button></li>
-                <li><button data-section="notifications"><i class="fas fa-bell"></i><span>Notifications</span><span class="chevron"><i class="fas fa-chevron-right"></i></span></button></li>
-                <li><button data-section="sound"><i class="fas fa-volume-up"></i><span>Sound</span><span class="chevron"><i class="fas fa-chevron-right"></i></span></button></li>
-                <li><button data-section="focus"><i class="fas fa-moon"></i><span>Focus</span><span class="chevron"><i class="fas fa-chevron-right"></i></span></button></li>
-                <li><button data-section="screentime"><i class="fas fa-hourglass-half"></i><span>Screen Time</span><span class="chevron"><i class="fas fa-chevron-right"></i></span></button></li>
-                <li><button data-section="general"><i class="fas fa-cog"></i><span>General</span><span class="chevron"><i class="fas fa-chevron-right"></i></span></button></li>
                 <li><button data-section="appearance"><i class="fas fa-palette"></i><span>Appearance</span><span class="chevron"><i class="fas fa-chevron-right"></i></span></button></li>
+                <li><button data-section="admin-access"><i class="fas fa-users"></i><span>Admin access</span><span class="chevron"><i class="fas fa-chevron-right"></i></span></button></li>
+                <li><button data-section="integrations"><i class="fas fa-lightbulb"></i><span>Integrations</span><span class="badge">2</span><span class="chevron"><i class="fas fa-chevron-right"></i></span></button></li>
+                 <li><button data-section="privacy-security"><i class="fas fa-globe"></i><span>Privacy & Security</span><span class="chevron"><i class="fas fa-chevron-right"></i></span></button></li>
+                <li><button data-section="notifications"><i class="fas fa-bell"></i><span>Notifications</span><span class="chevron"><i class="fas fa-chevron-right"></i></span></button></li>
+                <li><button data-section="active-services"><i class="fas fa-cog"></i><span>Active Services</span><span class="chevron"><i class="fas fa-chevron-right"></i></span></button></li>
+
+              </ul>
+              <div class="settings-mobile-header-section" ">
+                <div class="settings-user-profile">
+                  <img src="img/avatar.png" alt="User" class="profile-avatar">
+                  <div class="profile-info">
+                    <span class="profile-name">Argenti.ro</span>
+                    <span class="profile-id">Website settings</span>
+                  </div>
+                </div>
+              </div>
+              <ul class="settings-mobile-list">
+                <li><button data-section="products-settings"><i class="fas fa-users"></i><span>Products</span><span class="chevron"><i class="fas fa-chevron-right"></i></span></button></li>
+                <li><button data-section="payments-settings"><i class="fas fa-lightbulb"></i><span>Payments</span><span class="badge">2</span><span class="chevron"><i class="fas fa-chevron-right"></i></span></button></li>
+                <li><button data-section="shipping-settings"><i class="fas fa-globe"></i><span>Shipping</span><span class="chevron"><i class="fas fa-chevron-right"></i></span></button></li>
+                <li><button data-section="customers-privacy-settings"><i class="fas fa-bell"></i><span>Customers & Privacy</span><span class="chevron"><i class="fas fa-chevron-right"></i></span></button></li>
+                <li><button data-section="emails-settings"><i class="fas fa-cog"></i><span>Emails</span><span class="chevron"><i class="fas fa-chevron-right"></i></span></button></li>
+                <li><button data-section="billing-settings"><i class="fas fa-cog"></i><span>Billing</span><span class="chevron"><i class="fas fa-chevron-right"></i></span></button></li>
               </ul>
             </div>
             <div class="settings-mobile-panel">
@@ -1070,6 +1189,25 @@
     </div>
     <div class="wallet-sidebar-content">
       <!-- Wallet content goes here -->
+    </div>
+  </div>
+  
+  <!-- Volume Panel -->
+  <div id="volume-panel" class="volume-panel">
+    <div class="volume-panel-inner">
+      <div class="volume-panel-header">
+        <span>Volume Controls</span>
+        <button id="close-volume-panel" class="close-volume-panel-btn" title="Close">&times;</button>
+      </div>
+      <div class="volume-control-group">
+        <label for="browser-volume-slider">Browser Volume</label>
+        <input type="range" id="browser-volume-slider" min="0" max="100" value="100">
+      </div>
+      <div class="volume-control-group">
+        <label for="system-volume-slider">System Volume</label>
+        <input type="range" id="system-volume-slider" min="0" max="100" value="100" disabled title="System volume can only be changed from your device's settings.">
+        <div class="system-volume-tooltip">System volume can only be changed from your device's settings.</div>
+      </div>
     </div>
   </div>
   

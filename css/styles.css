@@ -343,13 +343,11 @@ body {
 }
 
 .taskbar-icon {
-  width: 28px;
-  height: 28px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-left: 10px;
+  margin-left: 6px;
   cursor: pointer;
 }
 
@@ -374,6 +372,13 @@ body {
   width: 25px;
   height: 30px;
   overflow: hidden;
+  cursor: pointer;
+}
+
+.taskbar-ai {
+  width: 23px;
+  height: 27px;
+  overflow: visible;
   cursor: pointer;
 }
 
@@ -478,12 +483,12 @@ body {
 }
 
 .category-link {
-  /* font-size: 12px; */
+  font-size: 12px;
   color: #A0A0B0;
-  /* text-decoration: none; */
+  text-decoration: none;
 }
 .category-link i {
-  /* margin-right: 5px; */
+   margin-right: 5px; 
   font-size: 13px; /* Slightly larger icon */
 }
 
@@ -889,7 +894,7 @@ body {
 .window-toolbar {
   display: flex;
   align-items: center;
-  padding: 8px 12px;
+  padding: 6px 12px;
   background-color: rgba(255, 255, 255, 0.05);
   border-bottom: 1px solid var(--border-color);
   position: static;
@@ -898,10 +903,12 @@ body {
   width: 100%;
 }
 
+
+
 .toolbar-button {
   background: none;
   border: none;
-  color: white;
+  color: rgba(255, 255, 255, 0.753);
   cursor: pointer;
   width: 30px;
   height: 30px;
@@ -910,10 +917,27 @@ body {
   align-items: center;
   justify-content: center;
   margin-right: 5px;
+  font-size: 15px;
 }
+
+.window-toolbar button.toolbar-button {
+  color: rgb(255 255 255 / 70%);
+  }
 
 .toolbar-button:hover {
   background-color: rgba(255, 255, 255, 0.1);
+  color: #fff !important;
+}
+
+.breadcrumb-item {
+  padding: 4px 7px;
+  border-radius: 5px;
+  font-size: 13px;
+  margin-right: 5px;
+}
+
+.breadcrumb-item:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
 }
 
 .path-breadcrumb {
@@ -922,14 +946,41 @@ body {
   margin-left: 10px;
   flex: 1;
   white-space: nowrap;
+  background: #100f21;
+  padding: 5px 10px;
+  border-radius: 6px;
+  margin-right: 10px;
+  min-width: 45px;
+  overflow: hidden;
 }
+
+.path-breadcrumb i {
+  font-size: 12px;
+  margin-right: 5px;
+}
+
+.path-breadcrumb i.fa-home {
+  padding: 8px;
+  border-radius: 5px;
+}
+
+.path-breadcrumb i.fa-home:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.path-breadcrumb i.breadcrumb-chevron {
+  font-size: 8px;
+  margin-right: 4px;
+  color: #999;
+}
+
 
 .breadcrumb-separator {
   margin: 0 8px;
   color: rgba(255, 255, 255, 0.4);
 }
 
-.toolbar-right {
+.toolbar-right, .toolbar-left {
   margin-left: auto;
   display: flex;
 }
@@ -962,10 +1013,10 @@ body {
 .sidebar-item, .settings-nav li a {
   display: flex;
   align-items: center;
-  padding: 8px 15px;
+  padding: 6px 15px;
   cursor: pointer;
   font-weight: 500;
-  margin: 2px 0px;
+  margin: 3px 0px;
 }
 
 .sidebar-item:hover {
@@ -1025,7 +1076,7 @@ body {
    margin-bottom: 40px;
    padding: 10px 10px 20px 10px;
    max-height: 100%;
-   height: 100%;
+   height: 80%;
 }
 
 .files-grid {
@@ -1714,7 +1765,7 @@ body.light-windows .file-info {
   width: 100%;
 }
 
-.settings-user-profile {
+.settings-user-profile, .settings-website-profile {
   display: flex;
   align-items: center;
   padding: 0 0 20px 0;
@@ -1722,7 +1773,11 @@ body.light-windows .file-info {
   border-bottom: 1px solid rgba(255,255,255,0.05);
 }
 
-.profile-avatar {
+.settings-website-profile {
+  margin-top: 20px;
+}
+
+.profile-avatar, .website-avatar {
   width: 48px;
   height: 48px;
   border-radius: 50%;
@@ -1785,6 +1840,10 @@ body.light-windows .file-info {
   position: relative;
 }
 
+.settings-nav {
+  margin-bottom: 20px;
+}
+
 
 .badge {
   background-color: #ff3b30;
@@ -1811,8 +1870,9 @@ body.light-windows .file-info {
   align-items: center;
   padding: 10px 20px;
   border-bottom: 1px solid #1c1c1c;
-  background-color: #333;
-  height: 44px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid var(--border-color);
+  height: 50px;
 }
 
 .settings-nav-arrows button {
@@ -1898,6 +1958,7 @@ body.light-windows .file-info {
   display: flex;
   gap: 10px;
   align-items: center;
+  min-width: 300px;
 }
 
 .color-swatch {
@@ -1968,6 +2029,16 @@ body.light-windows .file-info {
   display: inline-block;
   width: 40px;
   height: 22px;
+ }
+
+.window-statusbar .status-left .toggle-switch {
+  zoom: 0.5;
+  margin-right: 30px !important;
+}
+
+.window-statusbar .status-left {
+  display: flex;
+     align-items: center;
 }
 
 .toggle-switch input {
@@ -2100,7 +2171,7 @@ input:checked + .slider:before {
 .context-menu-submenu-item {
   display: flex;
   align-items: center;
-  padding: 8px 15px;
+  padding: 6px 15px;
   cursor: default; /* Changed from pointer to default, action on click */
   white-space: nowrap;
   transition: background-color 0.1s ease;
@@ -3169,15 +3240,16 @@ body.light-windows .settings-content .badge {
     align-items: center; 
     justify-content: center;
   cursor: pointer;
-  font-size: 18px;
+  font-size: 14px;
   color: #fff;
-  transition: background 0.2s;
+  opacity: 0.4;
+  margin-right: 5px;
 }
 .taskbar-icon#widgets-toggle-btn:hover {
-  background: rgba(255,255,255,0.08);
+  opacity: 1;
 }
 #widgets-toggle-arrow {
-  font-size: 16px;
+  font-size: 14px;
   line-height: 1;
   pointer-events: none;
 }
@@ -3289,6 +3361,11 @@ body.light-windows .settings-content .badge {
 
 .taskbar-search-btn {
   color: #fff;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  width: 28px;
+  height: 28px;
 }
 .global-search-mic {
   background: none;
@@ -3372,9 +3449,9 @@ body.light-windows .settings-content .badge {
   right: 10px;
   bottom: 60px;
   height: calc(100vh - 70px);
-  width: 420px;
+  width: 380px;
   z-index: 4000;
-  background: #050217c5;
+  background: #05021791;
   border-radius: 20px;
   box-shadow: -4px 0 24px rgba(0,0,0,0.25);
   transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
@@ -3391,7 +3468,7 @@ body.light-windows .settings-content .badge {
 .notifications-panel-content {
   flex: 1;
   overflow-y: auto;
-  padding: 24px 24px 16px 24px;
+  padding: 24px 14px 16px 14px;
   display: flex;
   flex-direction: column;
   /* Remove height: 100%; */
@@ -3414,8 +3491,22 @@ body.light-windows .settings-content .badge {
 
 .taskbar .taskbar-user-btn {
   color: #fff;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  width: 28px;
+  height: 28px;
 }
 
+#ai-chat-btn {
+  width: 22px;
+  height: 25px;
+  transition: transform 0.18s cubic-bezier(0.4,0,0.2,1);
+}
+
+#ai-chat-btn:hover {
+  transform: scale(1.15);
+}
 
 
 .window-controls button.window-popout {
@@ -3525,7 +3616,7 @@ body.light-windows .settings-content .badge {
 
 /* --- Notification Panel Design Styles --- */
 .notifications-panel-content {
-  padding: 24px 24px 16px 24px;
+  padding: 24px 14px 16px 14px;
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -3538,14 +3629,14 @@ body.light-windows .settings-content .badge {
   justify-content: space-between;
   margin-bottom: 10px;
   position: fixed;
-    width: 390px;
+    width: 360px;
     padding: 15px 10px 15px 0;
     backdrop-filter: blur(50px);
 }
 
 .notif-title {
-  font-size: 1.13rem;
-  font-weight: 700;
+  font-size: 16px;
+  font-weight: 500;
   color: #fff;
 }
 
@@ -3608,18 +3699,25 @@ body.light-windows .settings-content .badge {
   align-items: flex-start;
   gap: 14px;
   background: none;
-  
+  border-radius: 14px;
   padding: 14px 14px 14px 14px;
   position: relative;
   box-shadow: none;
   transition: background 0.18s;
-  border-bottom: 1px solid #23243a99;
 }
 .notif-card.unread {
   background: #23243a69;
     border-radius: 14px;
     border-bottom: none;
 }
+
+.notif-card:hover {
+  background: #ffffff15;
+}
+.notif-card.unread:hover {
+  background: #ffffff15;
+}
+
 
 .unread.os-toast-notification {
   background: #23243a69;
@@ -5385,7 +5483,7 @@ body.light-windows .settings-content .badge {
     margin-bottom: 0;
     box-sizing: border-box;
   }
-  .settings-user-profile {
+  .settings-user-profile, .settings-website-profile {
     display: flex;
     align-items: center;
     padding: 8px 20px;
@@ -5393,7 +5491,7 @@ body.light-windows .settings-content .badge {
     box-sizing: border-box;
     border: none;
   }
-  .settings-user-profile .profile-avatar {
+  .settings-user-profile .profile-avatar, .settings-website-profile .website-avatar {
     width: 60px;
     height: 60px;
     border-radius: 50%;
@@ -5401,18 +5499,18 @@ body.light-windows .settings-content .badge {
     background: #555;
     flex-shrink: 0;
   }
-  .settings-user-profile .profile-info {
+  .settings-user-profile .profile-info, .settings-website-profile .profile-info {
     display: flex;
     flex-direction: column;
     gap: 2px;
   }
-  .settings-user-profile .profile-name {
+  .settings-user-profile .profile-name, .settings-website-profile .profile-name {
     font-size: 22px;
     font-weight: 500;
     color: #e0e0e0;
     display: block;
   }
-  .settings-user-profile .profile-id {
+  .settings-user-profile .profile-id, .settings-website-profile .profile-id {
     font-size: 12px;
     color: #999;
   }
@@ -5444,3 +5542,95 @@ body.light-windows .settings-content .badge {
   transition: opacity 0.25s cubic-bezier(0.4,0,0.2,1), width 0.25s cubic-bezier(0.4,0,0.2,1), margin 0.25s cubic-bezier(0.4,0,0.2,1);
   display: inline;
 }
+
+/* Volume Panel Styles */
+#volume-panel {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: -320px;
+  z-index: 4001;
+  background: rgba(18, 20, 40, 0.97);
+  box-shadow: 0 -8px 32px rgba(0,0,0,0.18);
+  border-radius: 18px 18px 0 0;
+  width: 100vw;
+  max-width: 420px;
+  margin: 0 auto;
+  transition: bottom 0.35s cubic-bezier(0.4,0,0.2,1);
+  display: flex;
+  flex-direction: column;
+  min-height: 180px;
+  /* pointer-events: none; */
+}
+#volume-panel.visible {
+  bottom: 0 !important;
+  pointer-events: auto !important;
+  opacity: 1 !important;
+  z-index: 9999 !important;
+  min-height: 180px;
+}
+.volume-panel-inner {
+  padding: 28px 28px 22px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.volume-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 18px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 10px;
+}
+.close-volume-panel-btn {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 26px;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.18s;
+}
+.close-volume-panel-btn:hover {
+  opacity: 1;
+}
+.volume-control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.volume-control-group label {
+  color: #fff;
+  font-size: 15px;
+  margin-bottom: 2px;
+}
+#browser-volume-slider, #system-volume-slider {
+  width: 100%;
+  accent-color: var(--accent-color, #1a73ce);
+  height: 4px;
+  border-radius: 6px;
+  background: #23243a;
+}
+#system-volume-slider:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.system-volume-tooltip {
+  color: #bbb;
+  font-size: 12px;
+  margin-top: 2px;
+  display: block;
+}
+@media (max-width: 600px) {
+  .volume-panel {
+    max-width: 100vw;
+    border-radius: 12px 12px 0 0;
+  }
+  .volume-panel-inner {
+    padding: 18px 10px 14px 10px;
+  }
+}
+
+

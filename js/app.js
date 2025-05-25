@@ -2430,18 +2430,47 @@ document.addEventListener('DOMContentLoaded', function() {
       hideContextMenu(); // Hide any previous before showing new
       currentContextMenuTarget = e.target;
       const menuItems = [];
-      if (e.target.closest('.desktop-icon')) {
+      if (e.target.closest('.taskbar .taskbar-app-icon.minimized')) {
+        currentContextMenuTarget = e.target.closest('.taskbar-app-icon.minimized');
+        menuItems.push({ label: 'Open Window', action: 'my-profile', icon: 'fa-folder-open'});
+        menuItems.push({ label: 'Pin/Unpin Task Bar', action: 'paste-file', icon: 'fa-paste', disabled: true }); 
+        menuItems.push({ type: 'separator' });
+        menuItems.push({ label: 'Close Window', action: 'delete-file', icon: 'fa-trash'});
+      } else if (e.target.closest('.taskbar .taskbar-app-icon')) {
+        currentContextMenuTarget = e.target.closest('.taskbar-app-icon');
+        menuItems.push({ label: 'Minimize Window', action: 'my-profile', icon: 'fa-folder-open'});
+        menuItems.push({ label: 'Pin/Unpin Task Bar', action: 'paste-file', icon: 'fa-paste', disabled: true }); 
+        menuItems.push({ type: 'separator' });
+        menuItems.push({ label: 'Close Window', action: 'delete-file', icon: 'fa-trash'});
+        } else if (e.target.closest('.taskbar .taskbar-app-icons')) {
+          currentContextMenuTarget = e.target.closest('.taskbar-app-icons');
+          menuItems.push({ label: 'Search', action: 'search-taskbar', icon: 'fa-file-archive', subItems: [
+            { label: 'Show search icon', action: 'show-search-icon', icon: 'fa-file-archive' },
+            { label: 'Show search bar', action: 'show-search-bar', icon: 'fa-file-archive' } 
+          ]});
+          menuItems.push({ label: 'Always show widgets', action: 'always-show-widgets', icon: 'fa-folder-open' });
+          menuItems.push({ label: 'Show desktop', action: 'show-desktop', icon: 'fa-thumbtack' });
+          menuItems.push({ type: 'separator' });
+          menuItems.push({ label: 'Preferences', action: 'preferences', icon: 'fa-cog' });
+        } else if (e.target.closest('.desktop-icon')) {
           currentContextMenuTarget = e.target.closest('.desktop-icon');
           menuItems.push({ label: 'Open', action: 'open-app', icon: 'fa-folder-open' });
           menuItems.push({ label: 'Pin to Start', action: 'pin-to-start', icon: 'fa-thumbtack' });
           menuItems.push({ type: 'separator' });
           menuItems.push({ label: 'Delete', action: 'delete-icon', icon: 'fa-trash' });
-       
-       } else if (e.target.closest('.file-explorer-content .file-item')) {
-        currentContextMenuTarget = e.target.closest('.file-item');
-        menuItems.push({ label: 'Open', action: 'open-file', icon: 'fa-folder-open'});
-        menuItems.push({ label: 'Open in new window', action: 'open-in-new-window', icon: 'fa-window-restore'});
-        menuItems.push({ label: 'Download', action: 'download', icon: 'fa-download'});
+
+        } else if (e.target.closest('.start-button')) {
+          currentContextMenuTarget = e.target.closest('.start-button');
+          menuItems.push({ label: 'Settings 1', action: 'open-app', icon: 'fa-folder-open' });
+          menuItems.push({ label: 'Settings 2', action: 'pin-to-start', icon: 'fa-thumbtack' });
+          menuItems.push({ type: 'separator' });
+          menuItems.push({ label: 'Settings 3', action: 'delete-icon', icon: 'fa-trash' });
+
+        } else if (e.target.closest('.file-explorer-content .file-item')) {
+          currentContextMenuTarget = e.target.closest('.file-item');
+          menuItems.push({ label: 'Open', action: 'open-file', icon: 'fa-folder-open'});
+          menuItems.push({ label: 'Open in new window', action: 'open-in-new-window', icon: 'fa-window-restore'});
+          menuItems.push({ label: 'Download', action: 'download', icon: 'fa-download'});
         menuItems.push({ label: 'Preview', action: 'preview', icon: 'fa-eye'});
         menuItems.push({ label: 'Upload files in this folder', action: 'upload-files', icon: 'fa-upload'});
         menuItems.push({ type: 'separator' });
@@ -2457,9 +2486,16 @@ document.addEventListener('DOMContentLoaded', function() {
           { label: 'TAR', action: 'archive-tar', icon: 'fa-file-archive' }
         ]});
         menuItems.push({ type: 'separator' });
+        menuItems.push({ label: 'Share with others', action: 'invert-selection', icon: 'fa-random'});
+        menuItems.push({ type: 'separator' });
         menuItems.push({ label: 'Select all', action: 'select-all', icon: 'fa-check-square'});
-        menuItems.push({ label: 'Invert selection', action: 'invert-selection', icon: 'fa-random'});
         menuItems.push({ label: 'Add to Favorites', action: 'add-folder-to-favorites', icon: 'fa-share-square'});
+        menuItems.push({ label: 'Get info', action: 'get-info', icon: 'fa-info-circle'});
+      } else if (e.target.closest('.file-explorer-sidebar .sidebar-item ')) {
+        currentContextMenuTarget = e.target.closest('.sidebar-item');
+        menuItems.push({ label: 'Open', action: 'open-file', icon: 'fa-folder-open'});
+        menuItems.push({ label: 'Open in new window', action: 'open-in-new-window', icon: 'fa-window-restore'});
+        menuItems.push({ type: 'separator' });
         menuItems.push({ label: 'Get info', action: 'get-info', icon: 'fa-info-circle'});
       } else if (e.target.closest('.file-explorer-content .file-explorer-elements')) {
         currentContextMenuTarget = e.target.closest('.file-explorer-elements');
@@ -2488,6 +2524,8 @@ document.addEventListener('DOMContentLoaded', function() {
         ]});
         menuItems.push({ label: 'Empty the folder', action: 'empty-folder', icon: 'fa-trash-alt' });
         
+        menuItems.push({ type: 'separator' });
+        menuItems.push({ label: 'Share with others', action: 'invert-selection', icon: 'fa-random'});
         menuItems.push({ type: 'separator' });
         menuItems.push({ label: 'Select all', action: 'select-all', icon: 'fa-check-square' });
         menuItems.push({ label: 'Add folder to Favorites', action: 'add-folder-to-favorites', icon: 'fa-share-square' });
@@ -2521,12 +2559,7 @@ document.addEventListener('DOMContentLoaded', function() {
             menuItems.push({ label: 'Paste', action: 'paste-file', icon: 'fa-paste', disabled: true }); 
             menuItems.push({ type: 'separator' });
             menuItems.push({ label: 'Delete', action: 'delete-file', icon: 'fa-trash'});
-          } else if (e.target.closest('.taskbar .taskbar-app-icons')) {
-            currentContextMenuTarget = e.target.closest('.taskbar-app-icons');
-            menuItems.push({ label: 'Open Window / Minimize', action: 'my-profile', icon: 'fa-folder-open'});
-            menuItems.push({ label: 'Pin/Unpin Task Bar', action: 'paste-file', icon: 'fa-paste', disabled: true }); 
-            menuItems.push({ type: 'separator' });
-            menuItems.push({ label: 'Close Window', action: 'delete-file', icon: 'fa-trash'});
+
           } else if (
             e.target === desktopArea ||
             (e.target.classList && e.target.classList.contains('desktop-icons'))
@@ -3509,7 +3542,7 @@ document.addEventListener('DOMContentLoaded', function() {
               <div class="notif-content">
                 <div class="notif-main-row">
                   <span class="notif-main-title">New sale</span>
-                  <span class="notif-dot"></span>
+                
                 </div>
                 <div class="notif-desc">New sale from Andrei Caramitru</div>
                 <div class="notif-meta">1m</div>
@@ -3522,7 +3555,7 @@ document.addEventListener('DOMContentLoaded', function() {
               <div class="notif-content">
                 <div class="notif-main-row">
                   <span class="notif-main-title">Andrei Caramitru made a new <b>sale</b></span>
-                  <span class="notif-dot"></span>
+                 
                 </div>
                 <div class="notif-desc">in total of <b>4500 lei</b></div>
                 <div class="notif-meta">20m</div>
@@ -3562,7 +3595,7 @@ document.addEventListener('DOMContentLoaded', function() {
               <div class="notif-content">
                 <div class="notif-main-row">
                   <span class="notif-main-title">New sale</span>
-                  <span class="notif-dot"></span>
+                 
                 </div>
                 <div class="notif-desc">New sale from Andrei Caramitru</div>
                 <div class="notif-meta">1m</div>
@@ -4294,7 +4327,7 @@ function updateSidebarForWindow(windowEl) {
     }
     // Only allow hover-to-expand if sidebar is collapsed and user wants it (toggle ON)
     const userCollapsed = sb.getAttribute('data-user-collapsed') === 'true';
-    if (width >= 200 && width < 500) {
+    if (width >= 200 && width < 510) {
       sb.classList.add('sidebar-collapsed');
       if (userCollapsed) {
         sb._hoverEnter = function() {
