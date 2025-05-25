@@ -2308,16 +2308,32 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!isDraggingFileSelector) return;
         if (!fileExplorerContentArea || dragSelector.parentElement !== fileExplorerContentArea) return;
         const contentRect = fileExplorerContentArea.getBoundingClientRect();
+        // Get toolbar and statusbar bounds
+        const fileExplorerWindow = fileExplorerContentArea.closest('.window');
+        let toolbarBottom = 0;
+        let statusbarTop = fileExplorerContentArea.clientHeight;
+        if (fileExplorerWindow) {
+          const toolbar = fileExplorerWindow.querySelector('.window-toolbar');
+          const statusbar = fileExplorerWindow.querySelector('.window-statusbar');
+          if (toolbar) {
+            const toolbarRect = toolbar.getBoundingClientRect();
+            toolbarBottom = toolbarRect.bottom - contentRect.top;
+            if (toolbarBottom < 0) toolbarBottom = 0;
+          }
+          if (statusbar) {
+            const statusbarRect = statusbar.getBoundingClientRect();
+            statusbarTop = statusbarRect.top - contentRect.top;
+            if (statusbarTop > fileExplorerContentArea.clientHeight) statusbarTop = fileExplorerContentArea.clientHeight;
+          }
+        }
         let currentX = e.clientX - contentRect.left + fileExplorerContentArea.scrollLeft;
         let currentY = e.clientY - contentRect.top + fileExplorerContentArea.scrollTop;
-        // Clamp Y so drag selector does not go over the statusbar
-        const statusbar = fileExplorerWindow.querySelector('.window-statusbar');
-        if (statusbar) {
-          const statusbarHeight = statusbar.offsetHeight;
-          const maxY = fileExplorerContentArea.offsetHeight - statusbarHeight;
-          if (currentY > maxY) currentY = maxY;
-          if (fileSelectorStartY > maxY) fileSelectorStartY = maxY;
-        }
+        // Clamp X and Y so drag selector does not go outside fileExplorerContentArea
+        currentX = Math.max(0, Math.min(currentX, fileExplorerContentArea.clientWidth));
+        currentY = Math.max(toolbarBottom, Math.min(currentY, statusbarTop));
+        // Clamp startX/startY as well
+        fileSelectorStartX = Math.max(0, Math.min(fileSelectorStartX, fileExplorerContentArea.clientWidth));
+        fileSelectorStartY = Math.max(toolbarBottom, Math.min(fileSelectorStartY, statusbarTop));
         const newLeft = Math.min(currentX, fileSelectorStartX);
         const newTop = Math.min(currentY, fileSelectorStartY);
         const newWidth = Math.abs(currentX - fileSelectorStartX);
@@ -2428,11 +2444,11 @@ document.addEventListener('DOMContentLoaded', function() {
         menuItems.push({ label: 'Download', action: 'download', icon: 'fa-download'});
         menuItems.push({ label: 'Preview', action: 'preview', icon: 'fa-eye'});
         menuItems.push({ label: 'Upload files in this folder', action: 'upload-files', icon: 'fa-upload'});
-        menuItems.push({ label: 'Move Into New Folder', action: 'into-new-folder', icon: 'fa-folder-plus'});
         menuItems.push({ type: 'separator' });
         menuItems.push({ label: 'Copy', action: 'copy-file', icon: 'fa-copy'});
         menuItems.push({ label: 'Cut', action: 'cut-file', icon: 'fa-scissors'});
         menuItems.push({ label: 'Duplicate', action: 'duplicate-file', icon: 'fa-clone'});
+        menuItems.push({ label: 'Move Into New Folder', action: 'into-new-folder', icon: 'fa-folder-plus'});
         menuItems.push({ type: 'separator' });
         menuItems.push({ label: 'Delete file', action: 'into-trash', icon: 'fa-trash'});
         menuItems.push({ label: 'Rename', action: 'rename', icon: 'fa-i-cursor'});
@@ -2447,17 +2463,6 @@ document.addEventListener('DOMContentLoaded', function() {
         menuItems.push({ label: 'Get info', action: 'get-info', icon: 'fa-info-circle'});
       } else if (e.target.closest('.file-explorer-content .file-explorer-elements')) {
         currentContextMenuTarget = e.target.closest('.file-explorer-elements');
-        menuItems.push({ label: 'Go to parent folder', action: 'go-parent', icon: 'fa-arrow-up' });
-        menuItems.push({ label: 'Refresh', action: 'reload', icon: 'fa-rotate-right', checked: true });
-        menuItems.push({ label: 'Upload files here', action: 'upload-files', icon: 'fa-upload' });
-        menuItems.push({ label: 'New folder', action: 'new-folder', icon: 'fa-folder-plus' });
-        menuItems.push({ label: 'New file', action: 'new-file', icon: 'fa-file-medical', subItems: [
-          { label: 'Text file', action: 'new-text-file', icon: 'fa-file-alt' },
-          { label: 'Spreadsheet', action: 'new-spreadsheet', icon: 'fa-file-excel' },
-          { label: 'Presentation', action: 'new-presentation', icon: 'fa-file-powerpoint' }
-        ]});
-        menuItems.push({ label: 'Empty the folder', action: 'empty-folder', icon: 'fa-trash-alt' });
-        menuItems.push({ type: 'separator' });
         menuItems.push({ label: 'View', action: 'list-view', icon: 'fa-eye', subItems: [
           { label: 'Icons', action: 'view-icons', icon: 'fa-th-large' },
           { label: 'List', action: 'view-list', icon: 'fa-list' }
@@ -2472,11 +2477,22 @@ document.addEventListener('DOMContentLoaded', function() {
           { type: 'separator' },
           { label: 'Folder first', action: 'folder-first', icon: 'fa-file' },
         ]});
+        menuItems.push({ label: 'Refresh', action: 'reload', icon: 'fa-rotate-right', checked: true });
+        menuItems.push({ type: 'separator' });
+        menuItems.push({ label: 'Upload files', action: 'upload-files', icon: 'fa-upload' });
+        menuItems.push({ label: 'New folder', action: 'new-folder', icon: 'fa-folder-plus' });
+        menuItems.push({ label: 'New file', action: 'new-file', icon: 'fa-file-medical', subItems: [
+          { label: 'Text file', action: 'new-text-file', icon: 'fa-file-alt' },
+          { label: 'Spreadsheet', action: 'new-spreadsheet', icon: 'fa-file-excel' },
+          { label: 'Presentation', action: 'new-presentation', icon: 'fa-file-powerpoint' }
+        ]});
+        menuItems.push({ label: 'Empty the folder', action: 'empty-folder', icon: 'fa-trash-alt' });
+        
         menuItems.push({ type: 'separator' });
         menuItems.push({ label: 'Select all', action: 'select-all', icon: 'fa-check-square' });
         menuItems.push({ label: 'Add folder to Favorites', action: 'add-folder-to-favorites', icon: 'fa-share-square' });
-        menuItems.push({ label: 'Get info', action: 'get-info', icon: 'fa-info-circle' });
         menuItems.push({ label: 'Preferences', action: 'preferences', icon: 'fa-cog' });
+        menuItems.push({ label: 'Get info', action: 'get-info', icon: 'fa-info-circle' });
        } else if (e.target.closest('.taskbar-icon #notifications-btn')) {
             currentContextMenuTarget = e.target.closest('#notifications-btn');
             menuItems.push({ label: 'Open', action: 'open-file', icon: 'fa-folder-open'});
