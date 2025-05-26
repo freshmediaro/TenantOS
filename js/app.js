@@ -3,7 +3,23 @@
 // [ ... other globally defined functions or variables if any ... ]
 
 
-
+// --- Fade out helper for notif-section-label ---
+function fadeOutSectionLabel(sectionLabel) {
+  if (!sectionLabel) return;
+  if (sectionLabel.classList.contains('fading-out')) return;
+  sectionLabel.classList.add('fading-out');
+  sectionLabel.style.transition = 'all 0.3s ease-out';
+  sectionLabel.style.opacity = '0';
+  sectionLabel.style.height = '0';
+  sectionLabel.style.marginTop = '0';
+  sectionLabel.style.marginBottom = '0';
+  sectionLabel.style.overflow = 'hidden';
+  
+  setTimeout(() => {
+    sectionLabel.style.display = 'none';
+    sectionLabel.remove();
+  }, 300);
+}
 
 
  // In setupFileExplorerInteraction or after creating the File Explorer window:
@@ -52,17 +68,55 @@ document.addEventListener('keydown', function(e) {
   const active = document.activeElement;
   if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable)) return;
   if (e.key === 'n' || e.key === 'N') {
-    console.log('N key pressed for notification');
     const notificationsPanel = document.getElementById('notifications-panel');
-    if (!notificationsPanel) { console.log('No notificationsPanel'); return; }
-    const notifList = notificationsPanel.querySelector('.notif-list');
-    if (!notifList) { console.log('No notifList'); return; }
-    console.log('notifList found, inserting notification');
-    // Add to list (always)
+    if (!notificationsPanel) return;
+    
+    // Get or create the Today section
+    let todaySection = notificationsPanel.querySelector('.notifications-panel-content');
+    if (!todaySection) {
+      todaySection = document.createElement('div');
+      todaySection.className = 'notifications-panel-content';
+      notificationsPanel.appendChild(todaySection);
+    }
+    
+    // Check if we need to create the header
+    if (!todaySection.querySelector('.notif-header-row')) {
+      const headerRow = document.createElement('div');
+      headerRow.className = 'notif-header-row';
+      headerRow.innerHTML = `
+        <span class="notif-title">Notifications</span>
+        <div class="notif-tabs">
+          <button class="notif-tab notif-tab-active">All</button>
+          <button class="notif-tab">Unread</button>
+        </div>
+      `;
+      todaySection.insertBefore(headerRow, todaySection.firstChild);
+    }
+    
+    // Check if we need to create the Today section label and list
+    let todayList = todaySection.querySelector('.notif-list');
+    if (!todayList) {
+      // Remove any "no notifications" message if it exists
+      const emptyMsg = todaySection.querySelector('.no-notifications-msg');
+      if (emptyMsg) emptyMsg.remove();
+      
+      // Add the Today section label
+      const sectionLabel = document.createElement('div');
+      sectionLabel.className = 'notif-section-label';
+      sectionLabel.innerHTML = 'Today <span class="notif-clear">Clear all</span>';
+      todaySection.appendChild(sectionLabel);
+      
+      // Add the notification list
+      todayList = document.createElement('div');
+      todayList.className = 'notif-list';
+      todaySection.appendChild(todayList);
+    }
+    
+    // Create and add the new notification
     const card = document.createElement('div');
     card.className = 'notif-card unread';
     card.style.transform = 'translateX(120%)';
-    card.style.opacity = '0.7';
+    card.style.opacity = '0';
     card.innerHTML = `
       <button class="notif-delete-btn" title="Delete notification">&times;</button>
       <div class="notif-icon-bg notif-bg-blue"><i class="fas fa-shopping-cart"></i></div>
@@ -76,16 +130,22 @@ document.addEventListener('keydown', function(e) {
       </div>
       <img class="notif-avatar" src="img/avatar.png" />
     `;
-    notifList.insertBefore(card, notifList.firstChild);
-    setTimeout(() => {
-      card.style.transition = 'transform 0.45s cubic-bezier(0.4,0,0.2,1), opacity 0.45s cubic-bezier(0.4,0,0.2,1)';
+    
+    todayList.insertBefore(card, todayList.firstChild);
+    
+    // Animate the card in
+    requestAnimationFrame(() => {
+      card.style.transition = 'all 0.3s ease-out';
       card.style.transform = 'translateX(0)';
       card.style.opacity = '1';
-    }, 10);
+    });
+    
+    // Enable swipe-to-delete for the new card
     if (typeof enableNotificationSwipeToDelete === 'function') {
       enableNotificationSwipeToDelete();
     }
-    // If panel is closed, show toast
+    
+    // Show toast if panel is closed
     if (notificationsPanel.style.display !== 'flex') {
       showToastNotification();
     }
@@ -2422,7 +2482,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if(contextMenu) contextMenu.classList.add('hidden');
   }
 
-  //Right Click menu for desktop, file explorer, and taskbar and icons
+  //Arg Right Click menu for desktop, file explorer, and taskbar and icons
 
   if (desktopArea) {
     desktopArea.addEventListener('contextmenu', function(e) {
@@ -2432,16 +2492,24 @@ document.addEventListener('DOMContentLoaded', function() {
       const menuItems = [];
       if (e.target.closest('.taskbar .taskbar-app-icon.minimized')) {
         currentContextMenuTarget = e.target.closest('.taskbar-app-icon.minimized');
-        menuItems.push({ label: 'Open Window', action: 'my-profile', icon: 'fa-folder-open'});
-        menuItems.push({ label: 'Pin/Unpin Task Bar', action: 'paste-file', icon: 'fa-paste', disabled: true }); 
+        menuItems.push({ label: 'Open', action: 'open-taskbar-icon', icon: 'fa-folder-open'});
+        menuItems.push({ label: 'Pin/Unpin Task Bar', action: 'taskbar-pin', icon: 'fa-thumbtack', disabled: true }); 
         menuItems.push({ type: 'separator' });
-        menuItems.push({ label: 'Close Window', action: 'delete-file', icon: 'fa-trash'});
+        menuItems.push({ label: 'Close Window', action: 'close-app', icon: 'fa-xmark'});
+      } else if (e.target.closest('.trash-item ')) {
+        currentContextMenuTarget = e.target.closest('.trash-item');
+        menuItems.push({ label: 'Open', action: 'open-file', icon: 'fa-folder-open'});
+        menuItems.push({ label: 'Open in new window', action: 'open-in-new-window', icon: 'fa-window-restore'});
+        menuItems.push({ type: 'separator' });
+        menuItems.push({ label: 'Empty Trash', action: 'empty-trash', icon: 'fa-trash-alt'});
+        menuItems.push({ type: 'separator' });
+        menuItems.push({ label: 'Get info', action: 'get-info', icon: 'fa-info-circle'});
       } else if (e.target.closest('.taskbar .taskbar-app-icon')) {
         currentContextMenuTarget = e.target.closest('.taskbar-app-icon');
-        menuItems.push({ label: 'Minimize Window', action: 'my-profile', icon: 'fa-folder-open'});
-        menuItems.push({ label: 'Pin/Unpin Task Bar', action: 'paste-file', icon: 'fa-paste', disabled: true }); 
+        menuItems.push({ label: 'Minimize Window', action: 'minimize-app', icon: 'fa-window-minimize'});
+        menuItems.push({ label: 'Pin/Unpin Task Bar', action: 'pin-taskbar', icon: 'fa-thumbtack' }); 
         menuItems.push({ type: 'separator' });
-        menuItems.push({ label: 'Close Window', action: 'delete-file', icon: 'fa-trash'});
+        menuItems.push({ label: 'Close Window', action: 'close-app', icon: 'fa-xmark'});
         } else if (e.target.closest('.taskbar .taskbar-app-icons')) {
           currentContextMenuTarget = e.target.closest('.taskbar-app-icons');
           menuItems.push({ label: 'Search', action: 'search-taskbar', icon: 'fa-file-archive', subItems: [
@@ -2449,23 +2517,34 @@ document.addEventListener('DOMContentLoaded', function() {
             { label: 'Show search bar', action: 'show-search-bar', icon: 'fa-file-archive' } 
           ]});
           menuItems.push({ label: 'Always show widgets', action: 'always-show-widgets', icon: 'fa-folder-open' });
-          menuItems.push({ label: 'Show desktop', action: 'show-desktop', icon: 'fa-thumbtack' });
+          menuItems.push({ label: 'Show desktop', action: 'show-desktop', icon: 'fa-display' });
           menuItems.push({ type: 'separator' });
-          menuItems.push({ label: 'Preferences', action: 'preferences', icon: 'fa-cog' });
+          menuItems.push({ label: 'Customize Taskbar', action: 'customize-taskbar', icon: 'fa-cog' });
         } else if (e.target.closest('.desktop-icon')) {
           currentContextMenuTarget = e.target.closest('.desktop-icon');
           menuItems.push({ label: 'Open', action: 'open-app', icon: 'fa-folder-open' });
           menuItems.push({ label: 'Pin to Start', action: 'pin-to-start', icon: 'fa-thumbtack' });
           menuItems.push({ type: 'separator' });
           menuItems.push({ label: 'Delete', action: 'delete-icon', icon: 'fa-trash' });
-
         } else if (e.target.closest('.start-button')) {
           currentContextMenuTarget = e.target.closest('.start-button');
-          menuItems.push({ label: 'Settings 1', action: 'open-app', icon: 'fa-folder-open' });
-          menuItems.push({ label: 'Settings 2', action: 'pin-to-start', icon: 'fa-thumbtack' });
+          menuItems.push({ label: 'My Profile', action: 'my-profile-settings', icon: 'fa-folder-open' });
+          menuItems.push({ label: 'Appearance', action: 'appearance-settings', icon: 'fa-thumbtack' });
+          menuItems.push({ label: 'Notifications', action: 'notifications-settings', icon: 'fa-bell' });
+          menuItems.push({ label: 'Privacy', action: 'privacy-settings', icon: 'fa-user-secret' });
+          menuItems.push({ label: 'Security', action: 'security-settings', icon: 'fa-shield-alt' });
+          menuItems.push({ label: 'Integrations', action: 'integrations-settings', icon: 'fa-hdd' });
+          menuItems.push({ label: 'Active Services', action: 'active-services', icon: 'fa-info-circle' });
           menuItems.push({ type: 'separator' });
-          menuItems.push({ label: 'Settings 3', action: 'delete-icon', icon: 'fa-trash' });
-
+          menuItems.push({ label: 'My Website', action: 'my-website', icon: 'fa-globe' });
+          menuItems.push({ label: 'Products', action: 'products-settings', icon: 'fa-folder-open' });
+          menuItems.push({ label: 'Payments', action: 'payments-settings', icon: 'fa-folder-open' });
+          menuItems.push({ label: 'Shipping', action: 'shipping-settings', icon: 'fa-folder-open' });
+          menuItems.push({ label: 'Customers & Privacy', action: 'customers-privacy-settings', icon: 'fa-folder-open' });
+          menuItems.push({ label: 'Emails', action: 'emails-settings', icon: 'fa-folder-open' });
+          menuItems.push({ label: 'Billing', action: 'billing-settings', icon: 'fa-folder-open' });
+          menuItems.push({ type: 'separator' });
+          menuItems.push({ label: 'Open Settings', action: 'open-settings', icon: 'fa-cog' });
         } else if (e.target.closest('.file-explorer-content .file-item')) {
           currentContextMenuTarget = e.target.closest('.file-item');
           menuItems.push({ label: 'Open', action: 'open-file', icon: 'fa-folder-open'});
@@ -2486,17 +2565,30 @@ document.addEventListener('DOMContentLoaded', function() {
           { label: 'TAR', action: 'archive-tar', icon: 'fa-file-archive' }
         ]});
         menuItems.push({ type: 'separator' });
-        menuItems.push({ label: 'Share with others', action: 'invert-selection', icon: 'fa-random'});
+        menuItems.push({ label: 'Share with others', action: 'share-with-others', icon: 'fa-random'});
         menuItems.push({ type: 'separator' });
         menuItems.push({ label: 'Select all', action: 'select-all', icon: 'fa-check-square'});
         menuItems.push({ label: 'Add to Favorites', action: 'add-folder-to-favorites', icon: 'fa-share-square'});
         menuItems.push({ label: 'Get info', action: 'get-info', icon: 'fa-info-circle'});
-      } else if (e.target.closest('.file-explorer-sidebar .sidebar-item ')) {
+      } else if (e.target.closest('.file-explorer-sidebar .sidebar-section.drives-section .sidebar-item ')) {
+        currentContextMenuTarget = e.target.closest('.sidebar-item');
+        menuItems.push({ label: 'Open', action: 'open-file', icon: 'fa-folder-open'});
+        menuItems.push({ label: 'Open in new window', action: 'open-in-new-window', icon: 'fa-window-restore'});
+        menuItems.push({ type: 'separator' });
+        menuItems.push({ label: 'Connect / Disconnect', action: 'connect-disconnect', icon: 'fa-info-circle'});
+      } else if (e.target.closest('.file-explorer-sidebar .sidebar-section.shared-section .sidebar-item ')) {
         currentContextMenuTarget = e.target.closest('.sidebar-item');
         menuItems.push({ label: 'Open', action: 'open-file', icon: 'fa-folder-open'});
         menuItems.push({ label: 'Open in new window', action: 'open-in-new-window', icon: 'fa-window-restore'});
         menuItems.push({ type: 'separator' });
         menuItems.push({ label: 'Get info', action: 'get-info', icon: 'fa-info-circle'});
+      } else if (e.target.closest('.file-explorer-sidebar .sidebar-section .sidebar-item ')) {
+        currentContextMenuTarget = e.target.closest('.sidebar-item');
+        menuItems.push({ label: 'Open', action: 'open-file', icon: 'fa-folder-open'});
+        menuItems.push({ label: 'Open in new window', action: 'open-in-new-window', icon: 'fa-window-restore'});
+        menuItems.push({ type: 'separator' });
+        menuItems.push({ label: 'Get info', action: 'get-info', icon: 'fa-info-circle'});
+
       } else if (e.target.closest('.file-explorer-content .file-explorer-elements')) {
         currentContextMenuTarget = e.target.closest('.file-explorer-elements');
         menuItems.push({ label: 'View', action: 'list-view', icon: 'fa-eye', subItems: [
@@ -2525,40 +2617,62 @@ document.addEventListener('DOMContentLoaded', function() {
         menuItems.push({ label: 'Empty the folder', action: 'empty-folder', icon: 'fa-trash-alt' });
         
         menuItems.push({ type: 'separator' });
-        menuItems.push({ label: 'Share with others', action: 'invert-selection', icon: 'fa-random'});
+        menuItems.push({ label: 'Share with others', action: 'share-with-others', icon: 'fa-random'});
         menuItems.push({ type: 'separator' });
         menuItems.push({ label: 'Select all', action: 'select-all', icon: 'fa-check-square' });
         menuItems.push({ label: 'Add folder to Favorites', action: 'add-folder-to-favorites', icon: 'fa-share-square' });
         menuItems.push({ label: 'Preferences', action: 'preferences', icon: 'fa-cog' });
         menuItems.push({ label: 'Get info', action: 'get-info', icon: 'fa-info-circle' });
-       } else if (e.target.closest('.taskbar-icon #notifications-btn')) {
-            currentContextMenuTarget = e.target.closest('#notifications-btn');
-            menuItems.push({ label: 'Open', action: 'open-file', icon: 'fa-folder-open'});
-            menuItems.push({ label: 'Clear all notifications', action: 'clear-all-notifications', icon: 'fa-copy'});
-            menuItems.push({ label: 'Paste', action: 'paste-file', icon: 'fa-paste', disabled: true }); 
-            menuItems.push({ type: 'separator' });
-            menuItems.push({ label: 'Mute Notifications', action: 'mute-notifications', icon: 'fa-trash'});
+      } else if (e.target.closest('.taskbar-icon #notifications-btn')) {
+        currentContextMenuTarget = e.target.closest('#notifications-btn');
+        menuItems.push({ label: 'Open Notifications', action: 'open-notifications', icon: 'fa-bell'});
+        menuItems.push({ label: 'Clear all notifications', action: 'clear-all-notifications', icon: 'fa-broom'});
+        menuItems.push({ type: 'separator' });
+        menuItems.push({ label: 'Customize notifications', action: 'customize-notifications', icon: 'fa-gear'});
+        menuItems.push({ label: 'Desktop notifications', action: 'new-file', icon: 'fa-comments', subItems: [
+          { label: 'Only 1 notification', action: 'show-only-1-notification', icon: 'fa-file-alt' },
+          { label: 'Only 3 Notifications', action: 'show-only-3-notifications', icon: 'fa-file-excel' },
+          { label: 'All notifications', action: 'show-all-notifications', icon: 'fa-file-powerpoint' }
+        ]});
+        menuItems.push({ type: 'separator' });
+        menuItems.push({ label: 'Mute Notifications', action: 'mute-notifications', icon: 'fa-bell-slash'});
           } else if (e.target.closest('.taskbar-icon #wallet-btn')) {
             currentContextMenuTarget = e.target.closest('#wallet-btn');
-            menuItems.push({ label: 'Open Wallet Widget', action: 'open-file', icon: 'fa-folder-open'});
-            menuItems.push({ label: 'Open Wallet App', action: 'copy-file', icon: 'fa-copy'});
-            menuItems.push({ label: 'Paste', action: 'paste-file', icon: 'fa-paste', disabled: true }); 
+            menuItems.push({ label: 'Open Wallet Panel', action: 'taskbar-open-wallet', icon: 'fa-wallet'});
+            menuItems.push({ label: 'Open Wallet App', action: 'taskbar-open-wallet-app', icon: 'fa-money-check-dollar'});
             menuItems.push({ type: 'separator' });
-            menuItems.push({ label: 'Delete', action: 'delete-file', icon: 'fa-trash'});
+            menuItems.push({ label: 'Display Settings', action: 'new-file', icon: 'fa-comments', subItems: [
+              { label: 'Show icons only', action: 'new-text-file', icon: 'fa-file-alt' },
+              { label: 'Show account balance', action: 'new-spreadsheet', icon: 'fa-file-excel' },
+            ]});
+          } else if (e.target.closest('.taskbar-right #volume-btn')) {
+            currentContextMenuTarget = e.target.closest('#volume-btn');
+            menuItems.push({ label: 'Open Volume', action: 'taskbar-open-volume', icon: 'fa-volume-high'});
+            menuItems.push({ label: 'Open sound settings', action: 'open-sound-settings', icon: 'fa-gear'});
+            menuItems.push({ type: 'separator' });
+            menuItems.push({ label: 'Microphone', action: 'taskbar-open-calendar', icon: 'fa-microphone'});
+            menuItems.push({ label: 'Mute', action: 'taskbar-mute', icon: 'fa-volume-mute'});
           } else if (e.target.closest('.taskbar-right .taskbar-time')) {
             currentContextMenuTarget = e.target.closest('.taskbar-time');
-            menuItems.push({ label: 'Adjust date and time', action: 'adjust-date-time', icon: 'fa-folder-open'});
-            menuItems.push({ label: 'Open Date and Time Settings', action: 'open-date-time-settings', icon: 'fa-copy'});
+            menuItems.push({ label: 'Date and Time Settings', action: 'taskbar-date-time-settings', icon: 'fa-gear'});
             menuItems.push({ type: 'separator' });
-            menuItems.push({ label: 'Open Calendar', action: 'open-calendar', icon: 'fa-trash'});
-            menuItems.push({ label: 'Open Clock', action: 'open-clock', icon: 'fa-trash'});
-          } else if (e.target.closest('.taskbar-right .taskbar-user')) {
-            currentContextMenuTarget = e.target.closest('.taskbar-user');
-            menuItems.push({ label: 'My Profile', action: 'my-profile', icon: 'fa-folder-open'});
-            menuItems.push({ label: 'Copy', action: 'copy-file', icon: 'fa-copy'});
-            menuItems.push({ label: 'Paste', action: 'paste-file', icon: 'fa-paste', disabled: true }); 
+            menuItems.push({ label: 'Open Calendar', action: 'taskbar-open-calendar', icon: 'fa-calendar-days'});
+            menuItems.push({ label: 'Open Clock', action: 'taskbar-open-clock', icon: 'fa-clock'});
+          } else if (e.target.closest('.taskbar-right #ai-chat-btn')) {
+            currentContextMenuTarget = e.target.closest('#ai-chat-btn');
+            menuItems.push({ label: 'Open AI Chat', action: 'taskbar-open-ai-chat', icon: 'fa-comment-dots'});
+            menuItems.push({ label: 'Open New Chat', action: 'taskbar-new-chat', icon: 'fa-plus'});
             menuItems.push({ type: 'separator' });
-            menuItems.push({ label: 'Delete', action: 'delete-file', icon: 'fa-trash'});
+            menuItems.push({ label: 'Chat Settings', action: 'taskbar-ai-chat-settings', icon: 'fa-gear'});
+            menuItems.push({ label: 'Chat history', action: 'taskbar-chat-history', icon: 'fa-history'});
+            menuItems.push({ label: 'Clear chat', action: 'taskbar-clear-chat', icon: 'fa-broom'});
+
+          } else if (e.target.closest('.taskbar-right #widgets-toggle-btn')) {
+            currentContextMenuTarget = e.target.closest('#widgets-toggle-btn');
+            menuItems.push({ label: 'Always show widgets', action: 'always-show-widgets', icon: 'fa-folder-open'});
+            menuItems.push({ label: 'Disable widgets', action: 'disable-widgets', icon: 'fa-copy'});
+            menuItems.push({ type: 'separator' });
+            menuItems.push({ label: 'Customize widgets', action: 'customize-widgets', icon: 'fa-gear'});
 
           } else if (
             e.target === desktopArea ||
@@ -3651,33 +3765,102 @@ document.addEventListener('DOMContentLoaded', function() {
         const notifCard = e.target.closest('.notif-card');
         if (notifCard) {
           const notifList = notifCard.parentElement;
+          
+          // First slide out
           notifCard.classList.add('notif-card-removing');
-          notifCard.addEventListener('animationend', function handler() {
-            notifCard.removeEventListener('animationend', handler);
-            notifCard.classList.remove('notif-card-removing');
-            // Hide the card immediately after slide-out
-            notifCard.style.display = 'none';
-            // Set height inline for smooth collapse (but it's hidden)
+          notifCard.style.transition = 'transform 0.3s ease-out, opacity 0.3s ease-out';
+          notifCard.style.transform = 'translateX(120%)';
+          notifCard.style.opacity = '0';
+          
+          setTimeout(() => {
+            // Prepare for height animation
+            notifCard.style.overflow = 'hidden';
             notifCard.style.height = notifCard.offsetHeight + 'px';
-            void notifCard.offsetHeight;
-            notifCard.classList.add('notif-card-collapsing');
-            notifCard.style.height = '0px';
-            notifCard.addEventListener('transitionend', function collapseHandler(e) {
-              if (e.propertyName === 'height') {
-                notifCard.removeEventListener('transitionend', collapseHandler);
-                notifCard.remove();
-                // If this was the last notification in the list, hide the section label
-                if (notifList && notifList.classList.contains('notif-list') && notifList.querySelectorAll('.notif-card').length === 0) {
-                  const sectionLabel = notifList.previousElementSibling;
-                  if (sectionLabel && sectionLabel.classList.contains('notif-section-label')) {
-                    sectionLabel.style.display = 'none';
-                  }
+            notifCard.style.transition = 'all 0.3s ease-out';
+            
+            // Trigger height collapse
+            requestAnimationFrame(() => {
+              notifCard.style.height = '0';
+              notifCard.style.marginTop = '0';
+              notifCard.style.marginBottom = '0';
+              notifCard.style.padding = '0';
+            });
+            
+            // Remove after animations
+            setTimeout(() => {
+              notifCard.remove();
+              
+              // If this was the last notification in the list, animate out section label and list
+              if (notifList && notifList.classList.contains('notif-list') && notifList.querySelectorAll('.notif-card').length === 0) {
+                const sectionLabel = notifList.previousElementSibling;
+                if (sectionLabel && sectionLabel.classList.contains('notif-section-label')) {
+                  fadeOutSectionLabel(sectionLabel);
+                  
+                  // Animate list collapse
+                  notifList.style.height = notifList.offsetHeight + 'px';
+                  notifList.style.overflow = 'hidden';
+                  notifList.style.transition = 'all 0.3s ease-out';
+                  
+                  requestAnimationFrame(() => {
+                    notifList.style.height = '0';
+                    notifList.style.marginTop = '0';
+                    notifList.style.marginBottom = '0';
+                    
+                    setTimeout(() => {
+                      notifList.remove();
+                      
+                      // Check if we need to show empty state
+                      const notifPanelContent = notificationsPanel.querySelector('.notifications-panel-content');
+                      if (notifPanelContent && !notifPanelContent.querySelector('.notif-card')) {
+                        const headerRow = notifPanelContent.querySelector('.notif-header-row');
+                        const tempHeader = headerRow ? headerRow.cloneNode(true) : null;
+                        notifPanelContent.innerHTML = '';
+                        if (tempHeader) notifPanelContent.appendChild(tempHeader);
+                        
+                        const emptyMsg = document.createElement('div');
+                        emptyMsg.className = 'no-notifications-msg';
+                        emptyMsg.textContent = 'No new notifications';
+                        emptyMsg.style.cssText = 'display: flex; align-items: center; justify-content: center; height: 100%; color: #888; font-size: 1.15rem; font-weight: 500; text-align: center; margin-top: 60px; opacity: 0;';
+                        notifPanelContent.appendChild(emptyMsg);
+                        
+                        requestAnimationFrame(() => {
+                          emptyMsg.style.transition = 'opacity 0.3s ease-out';
+                          emptyMsg.style.opacity = '1';
+                        });
+                      }
+                    }, 300);
+                  });
                 }
               }
+            }, 300);
+          }, 300);
+          
+          // Check if all notifications are gone and show empty message
+          const notifPanelContent = notificationsPanel.querySelector('.notifications-panel-content');
+          if (notifPanelContent && !notifPanelContent.querySelector('.notif-card')) {
+            // Remove any remaining section labels and lists
+            const remainingLabels = notifPanelContent.querySelectorAll('.notif-section-label');
+            remainingLabels.forEach(label => {
+              fadeOutSectionLabel(label);
+              const nextList = label.nextElementSibling;
+              if (nextList && nextList.classList.contains('notif-list')) {
+                nextList.remove();
+              }
             });
-          });
+            
+            // Clear content and show empty message
+            const headerRow = notifPanelContent.querySelector('.notif-header-row');
+            const tempHeader = headerRow ? headerRow.cloneNode(true) : null;
+            notifPanelContent.innerHTML = '';
+            if (tempHeader) notifPanelContent.appendChild(tempHeader);
+            
+            const emptyMsg = document.createElement('div');
+            emptyMsg.className = 'no-notifications-msg';
+            emptyMsg.textContent = 'No new notifications';
+            emptyMsg.style.cssText = 'display: flex; align-items: center; justify-content: center; height: 100%; color: #888; font-size: 1.15rem; font-weight: 500; text-align: center; margin-top: 60px;';
+            notifPanelContent.appendChild(emptyMsg);
+          }
         }
-        setTimeout(checkNoNotifications, 400);
       }
       // Handle Clear all
       if (e.target.classList.contains('notif-clear')) {
@@ -3686,40 +3869,101 @@ document.addEventListener('DOMContentLoaded', function() {
         if (sectionLabel) {
           let notifList = sectionLabel.nextElementSibling;
           if (notifList && notifList.classList.contains('notif-list')) {
-            // Animate and remove all notif-card children with a staggered delay
+            // Animate out all notifications with stagger
             const notifCards = Array.from(notifList.querySelectorAll('.notif-card'));
-            let remaining = notifCards.length;
-            if (remaining === 0) {
-              sectionLabel.style.display = 'none';
-              // Check if all notifications are gone
-              setTimeout(checkNoNotifications, 400);
-              return;
-            }
-            notifCards.forEach((card, idx) => {
+            notifCards.forEach((card, index) => {
               setTimeout(() => {
-                card.classList.add('notif-card-removing');
-                card.addEventListener('animationend', function handler() {
-                  card.removeEventListener('animationend', handler);
-                  card.classList.remove('notif-card-removing');
-                  card.style.display = 'none';
+                // Slide out animation
+                card.style.transition = 'transform 0.3s ease-out, opacity 0.3s ease-out';
+                card.style.transform = 'translateX(120%)';
+                card.style.opacity = '0';
+                
+                // Height collapse animation
+                setTimeout(() => {
+                  card.style.overflow = 'hidden';
                   card.style.height = card.offsetHeight + 'px';
-                  void card.offsetHeight;
-                  card.classList.add('notif-card-collapsing');
-                  card.style.height = '0px';
-                  card.addEventListener('transitionend', function collapseHandler(e) {
-                    if (e.propertyName === 'height') {
-                      card.removeEventListener('transitionend', collapseHandler);
-                      card.remove();
-                      remaining--;
-                      if (remaining === 0) {
-                        sectionLabel.style.display = 'none';
-                        setTimeout(checkNoNotifications, 100);
-                      }
-                    }
+                  card.style.transition = 'all 0.3s ease-out';
+                  
+                  requestAnimationFrame(() => {
+                    card.style.height = '0';
+                    card.style.marginTop = '0';
+                    card.style.marginBottom = '0';
+                    card.style.padding = '0';
                   });
-                });
-              }, idx * 60); // 60ms stagger between each
+                  
+                  // Remove after animations
+                  setTimeout(() => {
+                    card.remove();
+                    
+                    // If this was the last card, animate out the section
+                    if (index === notifCards.length - 1) {
+                      fadeOutSectionLabel(sectionLabel);
+                      
+                      // Animate list collapse
+                      notifList.style.height = notifList.offsetHeight + 'px';
+                      notifList.style.overflow = 'hidden';
+                      notifList.style.transition = 'all 0.3s ease-out';
+                      
+                      requestAnimationFrame(() => {
+                        notifList.style.height = '0';
+                        notifList.style.marginTop = '0';
+                        notifList.style.marginBottom = '0';
+                        
+                        setTimeout(() => {
+                          notifList.remove();
+                          
+                          // Check if we need to show empty state
+                          const notifPanelContent = notificationsPanel.querySelector('.notifications-panel-content');
+                          if (notifPanelContent && !notifPanelContent.querySelector('.notif-card')) {
+                            const headerRow = notifPanelContent.querySelector('.notif-header-row');
+                            const tempHeader = headerRow ? headerRow.cloneNode(true) : null;
+                            notifPanelContent.innerHTML = '';
+                            if (tempHeader) notifPanelContent.appendChild(tempHeader);
+                            
+                            const emptyMsg = document.createElement('div');
+                            emptyMsg.className = 'no-notifications-msg';
+                            emptyMsg.textContent = 'No new notifications';
+                            emptyMsg.style.cssText = 'display: flex; align-items: center; justify-content: center; height: 100%; color: #888; font-size: 1.15rem; font-weight: 500; text-align: center; margin-top: 60px; opacity: 0;';
+                            notifPanelContent.appendChild(emptyMsg);
+                            
+                            requestAnimationFrame(() => {
+                              emptyMsg.style.transition = 'opacity 0.3s ease-out';
+                              emptyMsg.style.opacity = '1';
+                            });
+                          }
+                        }, 300);
+                      });
+                    }
+                  }, 300);
+                }, 300);
+              }, index * 50); // Stagger each card's animation
             });
+            
+            // Check if all notifications are gone
+            const notifPanelContent = notificationsPanel.querySelector('.notifications-panel-content');
+            if (notifPanelContent && !notifPanelContent.querySelector('.notif-card')) {
+              // Remove any remaining section labels and lists
+              const remainingLabels = notifPanelContent.querySelectorAll('.notif-section-label');
+              remainingLabels.forEach(label => {
+                fadeOutSectionLabel(label);
+                const nextList = label.nextElementSibling;
+                if (nextList && nextList.classList.contains('notif-list')) {
+                  nextList.remove();
+                }
+              });
+              
+              // Clear content and show empty message
+              const headerRow = notifPanelContent.querySelector('.notif-header-row');
+              const tempHeader = headerRow ? headerRow.cloneNode(true) : null;
+              notifPanelContent.innerHTML = '';
+              if (tempHeader) notifPanelContent.appendChild(tempHeader);
+              
+              const emptyMsg = document.createElement('div');
+              emptyMsg.className = 'no-notifications-msg';
+              emptyMsg.textContent = 'No new notifications';
+              emptyMsg.style.cssText = 'display: flex; align-items: center; justify-content: center; height: 100%; color: #888; font-size: 1.15rem; font-weight: 500; text-align: center; margin-top: 60px;';
+              notifPanelContent.appendChild(emptyMsg);
+            }
           }
         }
       }
@@ -3730,16 +3974,48 @@ document.addEventListener('DOMContentLoaded', function() {
       function checkNoNotifications() {
         const notifPanelContent = notificationsPanel.querySelector('.notifications-panel-content');
         if (!notifPanelContent) return;
+        
+        // Check each notification section
+        const notifLists = notifPanelContent.querySelectorAll('.notif-list');
+        notifLists.forEach(list => {
+          if (!list.querySelector('.notif-card')) {
+            const sectionLabel = list.previousElementSibling;
+            if (sectionLabel && sectionLabel.classList.contains('notif-section-label')) {
+              fadeOutSectionLabel(sectionLabel);
+              // Remove the empty list after animation
+              setTimeout(() => list.remove(), 400);
+            }
+          }
+        });
+
+        // Check if there are any notifications at all
         const anyNotif = notifPanelContent.querySelector('.notif-card');
         let emptyMsg = notifPanelContent.querySelector('.no-notifications-msg');
+        
         if (!anyNotif) {
-          if (!emptyMsg) {
-            emptyMsg = document.createElement('div');
-            emptyMsg.className = 'no-notifications-msg';
-            emptyMsg.textContent = 'No new notifications';
-            emptyMsg.style.cssText = 'display: flex; align-items: center; justify-content: center; height: 220px; color: #888; font-size: 1.15rem; font-weight: 500; text-align: center;';
-            notifPanelContent.appendChild(emptyMsg);
-          }
+          // Remove any remaining section labels first
+          const remainingLabels = notifPanelContent.querySelectorAll('.notif-section-label');
+          remainingLabels.forEach(label => {
+            if (!label.classList.contains('fading-out')) {
+              fadeOutSectionLabel(label);
+            }
+          });
+
+          // Clear everything except header row and add empty message
+          setTimeout(() => {
+            if (!notifPanelContent.querySelector('.notif-card')) {  // Double check no new notifications appeared
+              const headerRow = notifPanelContent.querySelector('.notif-header-row');
+              const tempHeader = headerRow ? headerRow.cloneNode(true) : null;
+              notifPanelContent.innerHTML = '';
+              if (tempHeader) notifPanelContent.appendChild(tempHeader);
+
+              emptyMsg = document.createElement('div');
+              emptyMsg.className = 'no-notifications-msg';
+              emptyMsg.textContent = 'No new notifications';
+              emptyMsg.style.cssText = 'display: flex; align-items: center; justify-content: center; height: 100%; color: #888; font-size: 1.15rem; font-weight: 500; text-align: center; margin-top: 60px;';
+              notifPanelContent.appendChild(emptyMsg);
+            }
+          }, 400);  // Wait for fade out animations to complete
         } else {
           if (emptyMsg) emptyMsg.remove();
         }
@@ -4134,10 +4410,25 @@ function enableNotificationSwipeToDelete() {
       card.style.transition = 'transform 0.2s';
       if (translateX > threshold) { // Only if swiped right enough
         card.style.transform = `translateX(120%)`;
-        setTimeout(() => {
+        card.classList.add('notif-card-removing');
+        card.addEventListener('transitionend', function handler() {
+          card.removeEventListener('transitionend', handler);
+          const notifList = card.parentElement;
           card.remove();
-          // Optionally: call checkNoNotifications() if you want to show "No notifications" message
-        }, 200);
+          
+          // Check if this was the last notification in the section
+          if (notifList && notifList.classList.contains('notif-list') && notifList.querySelectorAll('.notif-card').length === 0) {
+            const sectionLabel = notifList.previousElementSibling;
+            if (sectionLabel && sectionLabel.classList.contains('notif-section-label')) {
+              fadeOutSectionLabel(sectionLabel);
+              // Remove the empty list after animation
+              setTimeout(() => notifList.remove(), 400);
+            }
+          }
+          
+          // Check if all notifications are gone
+          setTimeout(checkNoNotifications, 400);
+        });
       } else {
         // Snap back
         card.style.transform = '';
