@@ -176,6 +176,7 @@ window.addEventListener(
 
 
 document.addEventListener('contextmenu', function (event) {
+  console.log('contextmenu event:', event.target, event.target.className, event.target.tagName);
   // Allow custom right-click on notification bell
   const bell = document.getElementById('notifications-btn');
   if (bell && (event.target === bell || bell.contains(event.target))) {
@@ -2484,8 +2485,246 @@ document.addEventListener('DOMContentLoaded', function() {
 
   //Arg Right Click menu for desktop, file explorer, and taskbar and icons
 
+  // --- Global Context Menu for Text Selection (works everywhere except desktop, file explorer, taskbar) ---
+(function() {
+  // Save original executeContextMenuAction
+  const _originalExecuteContextMenuAction = executeContextMenuAction;
+  // Patch global contextmenu
+  document.addEventListener('contextmenu', function(e) {
+    const target = e.target;
+    if (
+      (target.tagName === 'INPUT' && !target.readOnly && !target.disabled) ||
+      (target.tagName === 'TEXTAREA' && !target.readOnly && !target.disabled) ||
+      (target.isContentEditable && !target.readOnly && !target.disabled)
+    ) {
+      // If inside .desktop-area, .file-explorer-content, .taskbar, let those handlers run
+      if (target.closest && (
+        target.closest('.desktop-area') ||
+        target.closest('.file-explorer-content') ||
+        target.closest('.widget-content') ||
+        target.closest('.notification-widget') ||
+        (target.closest('.taskbar') && !target.closest('.search-input'))
+      )) return;
+      e.preventDefault();
+      hideContextMenu && hideContextMenu();
+      currentContextMenuTarget = target;
+      let hasSelection = false;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+        hasSelection = target.selectionStart !== target.selectionEnd;
+      } else if (target.isContentEditable) {
+        const sel = window.getSelection();
+        hasSelection = sel && sel.rangeCount > 0 && !sel.getRangeAt(0).collapsed && target.contains(sel.anchorNode);
+      }
+      const menuItems = [];
+      menuItems.push({ label: 'Cut', action: 'text-cut', icon: 'fa-scissors', disabled: !hasSelection });
+      menuItems.push({ label: 'Copy', action: 'text-copy', icon: 'fa-copy', disabled: !hasSelection });
+      menuItems.push({ label: 'Paste', action: 'text-paste', icon: 'fa-clipboard' });
+      menuItems.push({ label: 'Delete', action: 'text-delete', icon: 'fa-trash', disabled: !hasSelection });
+      menuItems.push({ type: 'separator' });
+      menuItems.push({ label: 'Select All', action: 'text-select-all', icon: 'fa-i-cursor' });
+      populateContextMenu(menuItems, e.clientX, e.clientY);
+    }
+  }, true);
+  // Patch executeContextMenuAction
+  async function tryClipboardWrite(text, target, actionType) {
+    console.log('tryClipboardWrite called', text, target, actionType);
+    try {
+      if (typeof window.focus === 'function') window.focus();
+      if (target && typeof target.focus === 'function') target.focus();
+      await new Promise(resolve => setTimeout(resolve, 0));
+      await navigator.clipboard.writeText(text);
+      console.log('Clipboard API writeText succeeded');
+      return true;
+    } catch (err) {
+      console.warn('Clipboard API writeText failed', err);
+      // Fallback to execCommand
+      try {
+        if (target && typeof target.focus === 'function') target.focus();
+        if (actionType === 'cut' || actionType === 'copy') {
+          if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+            const start = target.selectionStart;
+            const end = target.selectionEnd;
+            if (start !== end) {
+              target.setSelectionRange(start, end);
+            }
+          } else if (target.isContentEditable) {
+            const sel = window.getSelection();
+            if (sel && sel.rangeCount === 0) {
+              const range = document.createRange();
+              range.selectNodeContents(target);
+              sel.removeAllRanges();
+              sel.addRange(range);
+            }
+          }
+          const success = document.execCommand(actionType);
+          console.log('execCommand', actionType, 'result:', success);
+          if (!success) throw new Error('execCommand failed');
+          return true;
+        }
+      } catch (fallbackErr) {
+        console.warn('execCommand fallback failed', fallbackErr);
+        return false;
+      }
+      return false;
+    }
+  }
+  async function tryClipboardRead(target) {
+    try {
+      if (typeof window.focus === 'function') window.focus();
+      if (target && typeof target.focus === 'function') target.focus();
+      await new Promise(resolve => setTimeout(resolve, 0));
+      return await navigator.clipboard.readText();
+    } catch (err) {
+      // Fallback to execCommand (paste)
+      try {
+        if (target && typeof target.focus === 'function') target.focus();
+        const success = document.execCommand('paste');
+        if (!success) throw new Error('execCommand paste failed');
+        // For security, browsers may not return pasted text
+        // User may need to use Ctrl+V
+        return '';
+      } catch (fallbackErr) {
+        alert('Clipboard access is not available. Please use Ctrl+V.');
+        return '';
+      }
+    }
+  }
+  window.executeContextMenuAction = async function(action) {
+    console.log('[Patched] executeContextMenuAction called with:', action);
+    try {
+      console.log('Action:', action, 'Target:', currentContextMenuTarget);
+      if (!currentContextMenuTarget) {
+        console.warn('No currentContextMenuTarget!');
+        return _originalExecuteContextMenuAction.call(this, action);
+      }
+      const target = currentContextMenuTarget;
+      if (typeof target.focus === 'function') target.focus();
+      if (document.activeElement !== target) target.focus();
+      window.focus && window.focus();
+      switch(action) {
+        case 'text-cut': {
+          console.log('[ContextMenu] text-cut triggered');
+          if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+            const start = target.selectionStart;
+            const end = target.selectionEnd;
+            console.log('start:', start, 'end:', end, 'typeof start:', typeof start, 'typeof end:', typeof end);
+            if (start !== end) {
+              const selectedText = target.value.slice(start, end);
+              console.log('About to call tryClipboardWrite with:', selectedText, target, 'cut');
+              const ok = await tryClipboardWrite(selectedText, target, 'cut');
+              if (ok) {
+                target.value = target.value.slice(0, start) + target.value.slice(end);
+                target.setSelectionRange(start, start);
+              } else {
+                alert('Cut failed: Clipboard could not be updated.');
+              }
+            }
+          } else if (target.isContentEditable) {
+            const sel = window.getSelection();
+            if (sel && !sel.isCollapsed) {
+              const selectedText = sel.toString();
+              console.log('About to call tryClipboardWrite with:', selectedText, target, 'cut');
+              const ok = await tryClipboardWrite(selectedText, target, 'cut');
+              if (ok) sel.deleteFromDocument();
+              else alert('Cut failed: Clipboard could not be updated.');
+            }
+          }
+          break;
+        }
+        case 'text-copy': {
+          console.log('[ContextMenu] text-copy triggered');
+          if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+            const start = target.selectionStart;
+            const end = target.selectionEnd;
+            console.log('start:', start, 'end:', end, 'typeof start:', typeof start, 'typeof end:', typeof end);
+            if (start !== end) {
+              const selectedText = target.value.slice(start, end);
+              console.log('About to call tryClipboardWrite with:', selectedText, target, 'copy');
+              const ok = await tryClipboardWrite(selectedText, target, 'copy');
+              if (!ok) alert('Copy failed: Clipboard could not be updated.');
+            }
+          } else if (target.isContentEditable) {
+            const sel = window.getSelection();
+            if (sel && !sel.isCollapsed) {
+              const selectedText = sel.toString();
+              console.log('About to call tryClipboardWrite with:', selectedText, target, 'copy');
+              const ok = await tryClipboardWrite(selectedText, target, 'copy');
+              if (!ok) alert('Copy failed: Clipboard could not be updated.');
+            }
+          }
+          break;
+        }
+        case 'text-paste': {
+          console.log('[ContextMenu] text-paste triggered');
+          if (navigator.clipboard && navigator.clipboard.readText) {
+            try {
+              const text = await navigator.clipboard.readText();
+              console.log('Clipboard readText:', text);
+              if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+                const start = target.selectionStart;
+                const end = target.selectionEnd;
+                const val = target.value;
+                target.value = val.slice(0, start) + text + val.slice(end);
+                target.setSelectionRange(start + text.length, start + text.length);
+              } else if (target.isContentEditable) {
+                document.execCommand('insertText', false, text);
+              }
+            } catch (err) {
+              console.error('Paste failed:', err);
+              alert('Paste failed: Clipboard could not be read.');
+            }
+          } else {
+            alert('Paste failed: Clipboard could not be read.');
+          }
+          break;
+        }
+        case 'text-delete': {
+          console.log('[ContextMenu] text-delete triggered');
+          if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+            const start = target.selectionStart;
+            const end = target.selectionEnd;
+            console.log('start:', start, 'end:', end, 'typeof start:', typeof start, 'typeof end:', typeof end);
+            if (start !== end) {
+              const val = target.value;
+              target.value = val.slice(0, start) + val.slice(end);
+              target.setSelectionRange(start, start);
+            }
+          } else if (target.isContentEditable) {
+            const sel = window.getSelection();
+            if (sel && !sel.isCollapsed) sel.deleteFromDocument();
+          }
+          break;
+        }
+        case 'text-select-all': {
+          console.log('[ContextMenu] text-select-all triggered');
+          if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+            target.focus();
+            target.select();
+            console.log('After select():', target.selectionStart, target.selectionEnd, target.value.length);
+          } else if (target.isContentEditable) {
+            const range = document.createRange();
+            range.selectNodeContents(target);
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(range);
+            console.log('After selectNodeContents:', sel.toString());
+          }
+          break;
+        }
+        default:
+          _originalExecuteContextMenuAction.call(this, action);
+      }
+    } catch (err) {
+      console.error('Context menu action error:', err);
+    }
+  };
+  console.log('Patched executeContextMenuAction installed');
+})();
+
   if (desktopArea) {
     desktopArea.addEventListener('contextmenu', function(e) {
+      // Skip if right-clicking the search input
+      if (e.target.classList && e.target.classList.contains('search-input')) return;
       e.preventDefault();
       hideContextMenu(); // Hide any previous before showing new
       currentContextMenuTarget = e.target;
@@ -2565,9 +2804,8 @@ document.addEventListener('DOMContentLoaded', function() {
           { label: 'TAR', action: 'archive-tar', icon: 'fa-file-archive' }
         ]});
         menuItems.push({ type: 'separator' });
-        menuItems.push({ label: 'Share with others', action: 'share-with-others', icon: 'fa-random'});
+        menuItems.push({ label: 'Share with...', action: 'share-with-others', icon: 'fa-random'});
         menuItems.push({ type: 'separator' });
-        menuItems.push({ label: 'Select all', action: 'select-all', icon: 'fa-check-square'});
         menuItems.push({ label: 'Add to Favorites', action: 'add-folder-to-favorites', icon: 'fa-share-square'});
         menuItems.push({ label: 'Get info', action: 'get-info', icon: 'fa-info-circle'});
       } else if (e.target.closest('.file-explorer-sidebar .sidebar-section.drives-section .sidebar-item ')) {
@@ -2607,6 +2845,7 @@ document.addEventListener('DOMContentLoaded', function() {
         ]});
         menuItems.push({ label: 'Refresh', action: 'reload', icon: 'fa-rotate-right', checked: true });
         menuItems.push({ type: 'separator' });
+        menuItems.push({ label: 'Paste', action: 'paste', icon: 'fa-paste', disabled: true});
         menuItems.push({ label: 'Upload files', action: 'upload-files', icon: 'fa-upload' });
         menuItems.push({ label: 'New folder', action: 'new-folder', icon: 'fa-folder-plus' });
         menuItems.push({ label: 'New file', action: 'new-file', icon: 'fa-file-medical', subItems: [
@@ -2614,10 +2853,9 @@ document.addEventListener('DOMContentLoaded', function() {
           { label: 'Spreadsheet', action: 'new-spreadsheet', icon: 'fa-file-excel' },
           { label: 'Presentation', action: 'new-presentation', icon: 'fa-file-powerpoint' }
         ]});
-        menuItems.push({ label: 'Empty the folder', action: 'empty-folder', icon: 'fa-trash-alt' });
-        
+       
         menuItems.push({ type: 'separator' });
-        menuItems.push({ label: 'Share with others', action: 'share-with-others', icon: 'fa-random'});
+        menuItems.push({ label: 'Share with...', action: 'share-with-others', icon: 'fa-random'});
         menuItems.push({ type: 'separator' });
         menuItems.push({ label: 'Select all', action: 'select-all', icon: 'fa-check-square' });
         menuItems.push({ label: 'Add folder to Favorites', action: 'add-folder-to-favorites', icon: 'fa-share-square' });
@@ -2724,9 +2962,24 @@ document.addEventListener('DOMContentLoaded', function() {
           chevron.className = 'fas fa-chevron-right context-menu-chevron';
           menuItemEl.appendChild(chevron); // Always last for flex
         }
-        menuItemEl.addEventListener('click', (e) => {
+        menuItemEl.addEventListener('click', async (e) => {
           if (!item.disabled) {
-            executeContextMenuAction(item.action);
+            console.log('Clicked menu item:', item.label, item.action);
+            // Detailed logging for clipboard actions
+            if (item.action && item.action.startsWith('text-')) {
+              console.log('Active element:', document.activeElement);
+              console.log('CurrentContextMenuTarget:', currentContextMenuTarget);
+              if (currentContextMenuTarget) {
+                console.log('Selection:', currentContextMenuTarget.selectionStart, currentContextMenuTarget.selectionEnd);
+                console.log('Is contenteditable:', currentContextMenuTarget.isContentEditable);
+              }
+            }
+            try {
+              console.log('About to call window.executeContextMenuAction:', item.action, typeof window.executeContextMenuAction, window.executeContextMenuAction);
+              await window.executeContextMenuAction(item.action);
+            } catch (err) {
+              console.error('Context menu action error:', err);
+            }
             hideContextMenu();
           }
           e.stopPropagation(); 
@@ -2757,7 +3010,7 @@ document.addEventListener('DOMContentLoaded', function() {
               // Never add chevron or .has-submenu to submenu items
               subItemEl.addEventListener('click', (ev) => {
                 if (!subItem.disabled) {
-                  executeContextMenuAction(subItem.action);
+                  window.executeContextMenuAction(subItem.action);
                   hideContextMenu();
                   // Remove submenu if present
                   if (submenuEl && submenuEl.parentNode) {
@@ -3036,7 +3289,7 @@ document.addEventListener('DOMContentLoaded', function() {
     overlay.style.width = '100vw';
     overlay.style.height = '100vh';
     //overlay.style.background = '#050217d0';
-    overlay.style.zIndex = '999999';
+    overlay.style.zIndex = '5000';
     overlay.style.display = 'flex';
     overlay.style.alignItems = 'center';
     overlay.style.justifyContent = 'center';
