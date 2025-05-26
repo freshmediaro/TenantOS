@@ -2,6 +2,249 @@
 // This app is now tested and compatible with all major browsers. If you find a browser-specific bug, please report it.
 // [ ... other globally defined functions or variables if any ... ]
 
+// --- Global mute state ---
+let isMuted = false;
+let previousVolume = 75; // Default volume
+
+// --- Notifications mute state ---
+let isNotificationsMuted = false;
+
+// --- Desktop notification stacking mode ---
+// Modes: 'one', 'three', 'all'
+let desktopNotificationMode = 'three'; // Default to 3 notifications stacked
+
+// Initialize volume button
+const volumeBtn = document.querySelector('#volume-btn');
+const volumePanel = document.querySelector('#volume-panel');
+
+if (volumeBtn && volumePanel) {
+  // Set initial state
+  volumePanel.style.display = 'none';
+  
+  volumeBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (volumePanel.classList.contains('visible')) {
+      volumePanel.classList.remove('visible');
+      setTimeout(() => {
+        volumePanel.style.display = 'none';
+      }, 350);
+    } else {
+      volumePanel.style.display = 'flex';
+      requestAnimationFrame(() => {
+        volumePanel.classList.add('visible');
+      });
+    }
+  });
+  
+  // Setup close button
+  const closeBtn = volumePanel.querySelector('#close-volume-panel');
+  if (closeBtn) {
+    closeBtn.addEventListener('click', () => {
+      volumePanel.classList.remove('visible');
+      setTimeout(() => {
+        volumePanel.style.display = 'none';
+      }, 350);
+    });
+  }
+  
+  // Setup volume slider
+  const browserVolumeSlider = volumePanel.querySelector('#browser-volume-slider');
+  if (browserVolumeSlider) {
+    browserVolumeSlider.addEventListener('input', (e) => {
+      const value = parseInt(e.target.value, 10);
+      const icon = volumeBtn.querySelector('i');
+      if (value === 0) {
+        isMuted = true;
+        if (icon) {
+          icon.classList.remove('fa-volume-up');
+          icon.classList.add('fa-volume-mute');
+        }
+      } else {
+        if (isMuted) {
+          // Only update previousVolume if coming from muted state
+          previousVolume = value;
+        }
+        isMuted = false;
+        if (icon) {
+          icon.classList.remove('fa-volume-mute');
+          icon.classList.add('fa-volume-up');
+        }
+      }
+    });
+
+    // Playlist panel logic
+    const musicPanel = volumePanel.querySelector('.music-panel-box');
+    const playlistBtn = musicPanel ? musicPanel.querySelector('.music-btn[title="Playlist"]') : null;
+    let playlistPanel = null;
+    if (playlistBtn && musicPanel) {
+      playlistBtn.addEventListener('click', () => {
+        if (!playlistPanel) {
+          // Create the playlist panel
+          playlistPanel = document.createElement('div');
+          playlistPanel.className = 'music-panel-box playlist-panel-slide';
+          playlistPanel.style.position = 'absolute';
+          playlistPanel.style.left = '0';
+          playlistPanel.style.right = '0';
+          playlistPanel.style.bottom = '100%';
+          playlistPanel.style.margin = '0 auto 28px auto';
+          playlistPanel.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)';
+          playlistPanel.style.transform = 'translateY(100%)';
+          playlistPanel.innerHTML = '<div style="padding: 18px 18px 10px 18px; color: #fff; font-size: 1.1rem; font-weight: 600;">Playlist (placeholder)</div>';
+          musicPanel.style.position = 'relative';
+          musicPanel.parentNode.insertBefore(playlistPanel, musicPanel);
+          // Animate in
+          setTimeout(() => {
+            playlistPanel.style.transform = 'translateY(0)';
+          }, 10);
+        } else {
+          // Animate out and remove
+          playlistPanel.style.transform = 'translateY(100%)';
+          setTimeout(() => {
+            if (playlistPanel && playlistPanel.parentNode) {
+              playlistPanel.parentNode.removeChild(playlistPanel);
+              playlistPanel = null;
+            }
+          }, 350);
+        }
+      });
+    }
+  }
+  
+  // Close panel when clicking outside
+  document.addEventListener('click', (e) => {
+    if (volumePanel.classList.contains('visible') && 
+        !volumePanel.contains(e.target) && 
+        !volumeBtn.contains(e.target)) {
+      volumePanel.classList.remove('visible');
+      setTimeout(() => {
+        volumePanel.style.display = 'none';
+      }, 350);
+    }
+  });
+}
+
+
+
+// Volume Panel: Live percentage and volume control
+function setupVolumePanel() {
+  const volumeSlider = document.getElementById('browser-volume-slider');
+  const volumePercent = document.getElementById('volume-percentage');
+  // Try to find a global <audio> element (if you have one)
+  const audio = document.querySelector('audio');
+
+  if (volumeSlider && volumePercent) {
+    const updateVolume = () => {
+      const value = parseInt(volumeSlider.value, 10);
+      volumePercent.textContent = value + '%';
+      if (audio) {
+        audio.volume = value / 100;
+      }
+    };
+    volumeSlider.addEventListener('input', updateVolume);
+    // Set initial value
+    updateVolume();
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  // ... existing code ...
+  setupVolumePanel();
+  setNotificationsBtnOpacity();
+});
+// ... existing code ...
+
+
+
+
+// --- Wallet Sidebar Toggle Logic ---
+(function() {
+  const walletBtn = document.getElementById('wallet-btn');
+  const walletSidebar = document.getElementById('wallet-sidebar');
+  const walletCloseBtn = walletSidebar ? walletSidebar.querySelector('.wallet-close-btn') : null;
+  let walletVisible = false;
+
+  // --- Wallet display mode state ---
+  window.walletDisplayMode = window.walletDisplayMode || 'icon';
+  window.walletAccountBalance = '$ 254.00';
+
+  function updateWalletBtnDisplay() {
+    if (!walletBtn) return;
+    if (window.walletDisplayMode === 'icon') {
+      walletBtn.innerHTML = '<i class="fas fa-wallet"></i>';
+    } else if (window.walletDisplayMode === 'balance') {
+      walletBtn.innerHTML = `<span style="font-weight:600;font-size:15px;">${window.walletAccountBalance}</span>`;
+    }
+  }
+
+  function showWalletSidebar() {
+    if (!walletSidebar) return;
+    walletSidebar.style.display = 'flex';
+    setTimeout(() => walletSidebar.classList.add('wallet-sidebar-visible'), 10);
+    walletVisible = true;
+  }
+  function hideWalletSidebar() {
+    if (!walletSidebar) return;
+    walletSidebar.classList.remove('wallet-sidebar-visible');
+    // Remove any previous transitionend handlers to avoid duplicates
+    walletSidebar.removeEventListener('transitionend', walletSidebar._onTransitionEnd);
+    walletSidebar._onTransitionEnd = function(e) {
+      if (e.propertyName === 'transform' && !walletSidebar.classList.contains('wallet-sidebar-visible')) {
+        walletSidebar.style.display = 'none';
+        walletSidebar.removeEventListener('transitionend', walletSidebar._onTransitionEnd);
+      }
+    };
+    walletSidebar.addEventListener('transitionend', walletSidebar._onTransitionEnd);
+    walletVisible = false;
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    updateWalletBtnDisplay();
+    if (walletBtn && walletSidebar) {
+      walletBtn.addEventListener('click', function() {
+        if (window.innerWidth <= 1023) return;
+        const aiChatWindow = document.getElementById('ai-chat-window');
+        if (aiChatWindow && aiChatWindow.classList.contains('ai-chat-visible')) {
+          aiChatWindow.classList.remove('ai-chat-visible');
+          aiChatWindow.addEventListener('transitionend', function handler(e) {
+            if (e.propertyName === 'transform') {
+              aiChatWindow.style.display = 'none';
+              aiChatWindow.removeEventListener('transitionend', handler);
+            }
+          });
+        }
+        if (!walletVisible) {
+          showWalletSidebar();
+        } else {
+          hideWalletSidebar();
+        }
+      });
+    }
+    if (walletCloseBtn) {
+      walletCloseBtn.addEventListener('click', function() {
+        if (!walletVisible) return;
+        hideWalletSidebar();
+      });
+    }
+    document.addEventListener('mousedown', function(e) {
+      if (
+        walletVisible &&
+        walletSidebar &&
+        !walletSidebar.contains(e.target) &&
+        walletBtn &&
+        !walletBtn.contains(e.target) &&
+        window.innerWidth > 1023
+      ) {
+        hideWalletSidebar();
+      }
+    });
+  });
+  window.updateWalletBtnDisplay = updateWalletBtnDisplay;
+})();
+// ... existing code ...
+
+
 
 // --- Fade out helper for notif-section-label ---
 function fadeOutSectionLabel(sectionLabel) {
@@ -99,6 +342,8 @@ document.addEventListener('keydown', function(e) {
       // Remove any "no notifications" message if it exists
       const emptyMsg = todaySection.querySelector('.no-notifications-msg');
       if (emptyMsg) emptyMsg.remove();
+      setNotificationsBtnOpacity();
+
       
       // Add the Today section label
       const sectionLabel = document.createElement('div');
@@ -138,6 +383,7 @@ document.addEventListener('keydown', function(e) {
       card.style.transition = 'all 0.3s ease-out';
       card.style.transform = 'translateX(0)';
       card.style.opacity = '1';
+      updateNotificationsBadge();
     });
     
     // Enable swipe-to-delete for the new card
@@ -2615,6 +2861,7 @@ document.addEventListener('DOMContentLoaded', function() {
               if (ok) {
                 target.value = target.value.slice(0, start) + target.value.slice(end);
                 target.setSelectionRange(start, start);
+                showShortTopNotification('Cutted');
               } else {
                 alert('Cut failed: Clipboard could not be updated.');
               }
@@ -2625,8 +2872,10 @@ document.addEventListener('DOMContentLoaded', function() {
               const selectedText = sel.toString();
               console.log('About to call tryClipboardWrite with:', selectedText, target, 'cut');
               const ok = await tryClipboardWrite(selectedText, target, 'cut');
-              if (ok) sel.deleteFromDocument();
-              else alert('Cut failed: Clipboard could not be updated.');
+              if (ok) {
+                sel.deleteFromDocument();
+                showShortTopNotification('Cutted');
+              } else alert('Cut failed: Clipboard could not be updated.');
             }
           }
           break;
@@ -2641,7 +2890,8 @@ document.addEventListener('DOMContentLoaded', function() {
               const selectedText = target.value.slice(start, end);
               console.log('About to call tryClipboardWrite with:', selectedText, target, 'copy');
               const ok = await tryClipboardWrite(selectedText, target, 'copy');
-              if (!ok) alert('Copy failed: Clipboard could not be updated.');
+              if (ok) showShortTopNotification('Copiated');
+              else alert('Copy failed: Clipboard could not be updated.');
             }
           } else if (target.isContentEditable) {
             const sel = window.getSelection();
@@ -2649,7 +2899,8 @@ document.addEventListener('DOMContentLoaded', function() {
               const selectedText = sel.toString();
               console.log('About to call tryClipboardWrite with:', selectedText, target, 'copy');
               const ok = await tryClipboardWrite(selectedText, target, 'copy');
-              if (!ok) alert('Copy failed: Clipboard could not be updated.');
+              if (ok) showShortTopNotification('Copiated');
+              else alert('Copy failed: Clipboard could not be updated.');
             }
           }
           break;
@@ -2711,6 +2962,125 @@ document.addEventListener('DOMContentLoaded', function() {
           }
           break;
         }
+        case 'open-music-player': {
+          // Show/hide the music player inside the volume panel
+          const volumePanel = document.getElementById('volume-panel');
+          if (volumePanel) {
+            const musicPanel = volumePanel.querySelector('.music-panel-box');
+            if (musicPanel) {
+              if (musicPanel.style.display === 'none') {
+                musicPanel.style.display = '';
+              } else {
+                musicPanel.style.display = 'none';
+              }
+            }
+          }
+          break;
+        }
+        case 'taskbar-mute': {
+          // Toggle mute state
+          const volumeBtn = document.getElementById('volume-btn');
+          if (volumeBtn) {
+            const icon = volumeBtn.querySelector('i');
+            const volumeSlider = document.getElementById('browser-volume-slider');
+            if (!isMuted) {
+              // Muting
+              if (volumeSlider) {
+                previousVolume = volumeSlider.value;
+                volumeSlider.value = 0;
+                // Trigger input event to update UI/volume
+                volumeSlider.dispatchEvent(new Event('input', { bubbles: true }));
+              }
+              if (icon) {
+                icon.classList.remove('fa-volume-up');
+                icon.classList.add('fa-volume-mute');
+              }
+              isMuted = true;
+            } else {
+              // Unmuting
+              if (volumeSlider) {
+                volumeSlider.value = previousVolume;
+                volumeSlider.dispatchEvent(new Event('input', { bubbles: true }));
+              }
+              if (icon) {
+                icon.classList.remove('fa-volume-mute');
+                icon.classList.add('fa-volume-up');
+              }
+              isMuted = false;
+            }
+          }
+          break;
+        }
+        case 'mute-notifications': {
+          // Toggle notifications mute state
+          isNotificationsMuted = !isNotificationsMuted;
+          // Update notifications button icon
+          const notificationsBtn = document.getElementById('notifications-btn');
+          if (notificationsBtn) {
+            const icon = notificationsBtn.querySelector('i');
+            if (icon) {
+              if (isNotificationsMuted) {
+                icon.classList.remove('fa-bell');
+                icon.classList.add('fa-bell-slash');
+              } else {
+                icon.classList.remove('fa-bell-slash');
+                icon.classList.add('fa-bell');
+              }
+            }
+          }
+          // Optionally, you can show a toast or feedback here
+          break;
+        }
+        case 'show-only-1-notification':
+          desktopNotificationMode = 'one';
+          showShortTopNotification('Desktop notifications: Only 1');
+          break;
+        case 'show-only-3-notifications':
+          desktopNotificationMode = 'three';
+          showShortTopNotification('Desktop notifications: Only 3');
+          break;
+        case 'show-all-notifications':
+          desktopNotificationMode = 'all';
+          showShortTopNotification('Desktop notifications: All');
+          break;
+        case 'clear-all-notifications': {
+          // Remove all notification cards from the panel
+          const notificationsPanel = document.getElementById('notifications-panel');
+          if (notificationsPanel) {
+            const notifPanelContent = notificationsPanel.querySelector('.notifications-panel-content');
+            if (notifPanelContent) {
+              notifPanelContent.querySelectorAll('.notif-card').forEach(card => card.remove());
+              notifPanelContent.querySelectorAll('.notif-section-label').forEach(label => label.remove());
+              notifPanelContent.querySelectorAll('.notif-list').forEach(list => list.remove());
+              // Show empty state
+              const headerRow = notifPanelContent.querySelector('.notif-header-row');
+              const tempHeader = headerRow ? headerRow.cloneNode(true) : null;
+              notifPanelContent.innerHTML = '';
+              if (tempHeader) notifPanelContent.appendChild(tempHeader);
+              const emptyMsg = document.createElement('div');
+              emptyMsg.className = 'no-notifications-msg';
+              emptyMsg.textContent = 'No new notifications';
+              emptyMsg.style.cssText = 'display: flex; align-items: center; justify-content: center; height: 100%; color: #888; font-size: 1.15rem; font-weight: 500; text-align: center; margin-top: 60px;';
+              notifPanelContent.appendChild(emptyMsg);
+              setNotificationsBtnOpacity();
+              updateNotificationsBadge();
+            }
+          }
+          // Remove all desktop toast notifications
+          const toastContainer = document.getElementById('os-toast-container');
+          if (toastContainer) {
+            Array.from(toastContainer.children).forEach(child => child.remove());
+          }
+          break;
+        }
+        case 'show-wallet-icon':
+          window.walletDisplayMode = 'icon';
+          window.updateWalletBtnDisplay && window.updateWalletBtnDisplay();
+          break;
+        case 'show-account-balance':
+          window.walletDisplayMode = 'balance';
+          window.updateWalletBtnDisplay && window.updateWalletBtnDisplay();
+          break;
         default:
           _originalExecuteContextMenuAction.call(this, action);
       }
@@ -2732,7 +3102,7 @@ document.addEventListener('DOMContentLoaded', function() {
       if (e.target.closest('.taskbar .taskbar-app-icon.minimized')) {
         currentContextMenuTarget = e.target.closest('.taskbar-app-icon.minimized');
         menuItems.push({ label: 'Open', action: 'open-taskbar-icon', icon: 'fa-folder-open'});
-        menuItems.push({ label: 'Pin/Unpin Task Bar', action: 'taskbar-pin', icon: 'fa-thumbtack', disabled: true }); 
+        menuItems.push({ label: 'Pin To Taskbar', action: 'pin-to-taskbar', icon: 'fa-thumbtack' }); 
         menuItems.push({ type: 'separator' });
         menuItems.push({ label: 'Close Window', action: 'close-app', icon: 'fa-xmark'});
       } else if (e.target.closest('.trash-item ')) {
@@ -2746,23 +3116,20 @@ document.addEventListener('DOMContentLoaded', function() {
       } else if (e.target.closest('.taskbar .taskbar-app-icon')) {
         currentContextMenuTarget = e.target.closest('.taskbar-app-icon');
         menuItems.push({ label: 'Minimize Window', action: 'minimize-app', icon: 'fa-window-minimize'});
-        menuItems.push({ label: 'Pin/Unpin Task Bar', action: 'pin-taskbar', icon: 'fa-thumbtack' }); 
+        menuItems.push({ label: 'Pin To Taskbar', action: 'pin-to-taskbar', icon: 'fa-thumbtack' }); 
         menuItems.push({ type: 'separator' });
         menuItems.push({ label: 'Close Window', action: 'close-app', icon: 'fa-xmark'});
         } else if (e.target.closest('.taskbar .taskbar-app-icons')) {
           currentContextMenuTarget = e.target.closest('.taskbar-app-icons');
-          menuItems.push({ label: 'Search', action: 'search-taskbar', icon: 'fa-file-archive', subItems: [
-            { label: 'Show search icon', action: 'show-search-icon', icon: 'fa-file-archive' },
-            { label: 'Show search bar', action: 'show-search-bar', icon: 'fa-file-archive' } 
-          ]});
-          menuItems.push({ label: 'Always show widgets', action: 'always-show-widgets', icon: 'fa-folder-open' });
+          menuItems.push({ label: 'Show search bar', action: 'show-search-taskbar', icon: 'fa-search'});
+          menuItems.push({ label: 'Customize Widgets', action: 'customize-widgets', icon: 'fa-server' });
           menuItems.push({ label: 'Show desktop', action: 'show-desktop', icon: 'fa-display' });
           menuItems.push({ type: 'separator' });
           menuItems.push({ label: 'Customize Taskbar', action: 'customize-taskbar', icon: 'fa-cog' });
         } else if (e.target.closest('.desktop-icon')) {
           currentContextMenuTarget = e.target.closest('.desktop-icon');
           menuItems.push({ label: 'Open', action: 'open-app', icon: 'fa-folder-open' });
-          menuItems.push({ label: 'Pin to Start', action: 'pin-to-start', icon: 'fa-thumbtack' });
+          menuItems.push({ label: 'Pin To Taskbar', action: 'pin-to-taskbar', icon: 'fa-thumbtack' }); 
           menuItems.push({ type: 'separator' });
           menuItems.push({ label: 'Delete', action: 'delete-icon', icon: 'fa-trash' });
         } else if (e.target.closest('.start-button')) {
@@ -2863,7 +3230,6 @@ document.addEventListener('DOMContentLoaded', function() {
         menuItems.push({ label: 'Get info', action: 'get-info', icon: 'fa-info-circle' });
       } else if (e.target.closest('.taskbar-icon #notifications-btn')) {
         currentContextMenuTarget = e.target.closest('#notifications-btn');
-        menuItems.push({ label: 'Open Notifications', action: 'open-notifications', icon: 'fa-bell'});
         menuItems.push({ label: 'Clear all notifications', action: 'clear-all-notifications', icon: 'fa-broom'});
         menuItems.push({ type: 'separator' });
         menuItems.push({ label: 'Customize notifications', action: 'customize-notifications', icon: 'fa-gear'});
@@ -2873,23 +3239,33 @@ document.addEventListener('DOMContentLoaded', function() {
           { label: 'All notifications', action: 'show-all-notifications', icon: 'fa-file-powerpoint' }
         ]});
         menuItems.push({ type: 'separator' });
-        menuItems.push({ label: 'Mute Notifications', action: 'mute-notifications', icon: 'fa-bell-slash'});
+        menuItems.push({ label: isNotificationsMuted ? 'Unmute Notifications' : 'Mute Notifications', action: 'mute-notifications', icon: isNotificationsMuted ? 'fa-bell' : 'fa-bell-slash'});
           } else if (e.target.closest('.taskbar-icon #wallet-btn')) {
             currentContextMenuTarget = e.target.closest('#wallet-btn');
             menuItems.push({ label: 'Open Wallet Panel', action: 'taskbar-open-wallet', icon: 'fa-wallet'});
             menuItems.push({ label: 'Open Wallet App', action: 'taskbar-open-wallet-app', icon: 'fa-money-check-dollar'});
             menuItems.push({ type: 'separator' });
             menuItems.push({ label: 'Display Settings', action: 'new-file', icon: 'fa-comments', subItems: [
-              { label: 'Show icons only', action: 'new-text-file', icon: 'fa-file-alt' },
-              { label: 'Show account balance', action: 'new-spreadsheet', icon: 'fa-file-excel' },
+              { label: 'Show icon', action: 'show-wallet-icon', icon: 'fa-file-alt', checked: window.walletDisplayMode === 'icon' },
+              { label: 'Show account balance', action: 'show-account-balance', icon: 'fa-file-excel', checked: window.walletDisplayMode === 'balance' },
             ]});
           } else if (e.target.closest('.taskbar-right #volume-btn')) {
             currentContextMenuTarget = e.target.closest('#volume-btn');
             menuItems.push({ label: 'Open Volume', action: 'taskbar-open-volume', icon: 'fa-volume-high'});
-            menuItems.push({ label: 'Open sound settings', action: 'open-sound-settings', icon: 'fa-gear'});
-            menuItems.push({ type: 'separator' });
             menuItems.push({ label: 'Microphone', action: 'taskbar-open-calendar', icon: 'fa-microphone'});
-            menuItems.push({ label: 'Mute', action: 'taskbar-mute', icon: 'fa-volume-mute'});
+            // Dynamically set Show/Hide music player label
+            const volumePanel = document.getElementById('volume-panel');
+            let musicPanelVisible = true;
+            if (volumePanel) {
+              const musicPanel = volumePanel.querySelector('.music-panel-box');
+              if (musicPanel && (musicPanel.style.display === 'none' || getComputedStyle(musicPanel).display === 'none')) {
+                musicPanelVisible = false;
+              }
+            }
+            menuItems.push({ label: musicPanelVisible ? 'Hide music player' : 'Show music player', action: 'open-music-player', icon: 'fa-music'});
+            menuItems.push({ type: 'separator' });
+            menuItems.push({ label: 'Open sound settings', action: 'open-sound-settings', icon: 'fa-gear'});
+            menuItems.push({ label: isMuted ? 'Unmute' : 'Mute', action: 'taskbar-mute', icon: isMuted ? 'fa-volume-up' : 'fa-volume-mute'});
           } else if (e.target.closest('.taskbar-right .taskbar-time')) {
             currentContextMenuTarget = e.target.closest('.taskbar-time');
             menuItems.push({ label: 'Date and Time Settings', action: 'taskbar-date-time-settings', icon: 'fa-gear'});
@@ -2977,9 +3353,9 @@ document.addEventListener('DOMContentLoaded', function() {
             try {
               console.log('About to call window.executeContextMenuAction:', item.action, typeof window.executeContextMenuAction, window.executeContextMenuAction);
               await window.executeContextMenuAction(item.action);
-            } catch (err) {
-              console.error('Context menu action error:', err);
-            }
+    } catch (err) {
+      console.error('Context menu action error:', err);
+    }
             hideContextMenu();
           }
           e.stopPropagation(); 
@@ -3005,7 +3381,18 @@ document.addEventListener('DOMContentLoaded', function() {
               }
               const subItemEl = document.createElement('div');
               subItemEl.className = 'context-menu-item';
-              subItemEl.innerHTML = `<span>${subItem.label}</span>`;
+              // Add check mark if this is the selected notification mode or wallet display mode
+              let showCheck = false;
+              if (
+                (subItem.action === 'show-only-1-notification' && desktopNotificationMode === 'one') ||
+                (subItem.action === 'show-only-3-notifications' && desktopNotificationMode === 'three') ||
+                (subItem.action === 'show-all-notifications' && desktopNotificationMode === 'all') ||
+                (subItem.action === 'show-wallet-icon' && window.walletDisplayMode === 'icon') ||
+                (subItem.action === 'show-account-balance' && window.walletDisplayMode === 'balance')
+              ) {
+                showCheck = true;
+              }
+              subItemEl.innerHTML = `<span>${subItem.label}</span>` + (showCheck ? '<i class="fas fa-check context-menu-checkmark"></i>' : '');
               if (subItem.disabled) subItemEl.classList.add('disabled');
               // Never add chevron or .has-submenu to submenu items
               subItemEl.addEventListener('click', (ev) => {
@@ -4011,6 +4398,7 @@ document.addEventListener('DOMContentLoaded', function() {
       `;
       // Enable swipe-to-delete after notifications are rendered
       enableNotificationSwipeToDelete();
+      updateNotificationsBadge();
     }
     // Add event delegation for delete buttons
     notificationsPanel.addEventListener('click', function(e) {
@@ -4042,7 +4430,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Remove after animations
             setTimeout(() => {
               notifCard.remove();
-              
+              updateNotificationsBadge();
               // If this was the last notification in the list, animate out section label and list
               if (notifList && notifList.classList.contains('notif-list') && notifList.querySelectorAll('.notif-card').length === 0) {
                 const sectionLabel = notifList.previousElementSibling;
@@ -4061,7 +4449,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     setTimeout(() => {
                       notifList.remove();
-                      
+                      updateNotificationsBadge();
                       // Check if we need to show empty state
                       const notifPanelContent = notificationsPanel.querySelector('.notifications-panel-content');
                       if (notifPanelContent && !notifPanelContent.querySelector('.notif-card')) {
@@ -4073,8 +4461,9 @@ document.addEventListener('DOMContentLoaded', function() {
                         const emptyMsg = document.createElement('div');
                         emptyMsg.className = 'no-notifications-msg';
                         emptyMsg.textContent = 'No new notifications';
-                        emptyMsg.style.cssText = 'display: flex; align-items: center; justify-content: center; height: 100%; color: #888; font-size: 1.15rem; font-weight: 500; text-align: center; margin-top: 60px; opacity: 0;';
+                        emptyMsg.style.cssText = 'display: flex; align-items: center; justify-content: center; height: 100%; color: #888; font-size: 15px; font-weight: 400; text-align: center; margin-top: 60px; opacity: 0;';
                         notifPanelContent.appendChild(emptyMsg);
+                        setNotificationsBtnOpacity();
                         
                         requestAnimationFrame(() => {
                           emptyMsg.style.transition = 'opacity 0.3s ease-out';
@@ -4088,31 +4477,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 300);
           }, 300);
           
-          // Check if all notifications are gone and show empty message
-          const notifPanelContent = notificationsPanel.querySelector('.notifications-panel-content');
-          if (notifPanelContent && !notifPanelContent.querySelector('.notif-card')) {
-            // Remove any remaining section labels and lists
-            const remainingLabels = notifPanelContent.querySelectorAll('.notif-section-label');
-            remainingLabels.forEach(label => {
-              fadeOutSectionLabel(label);
-              const nextList = label.nextElementSibling;
-              if (nextList && nextList.classList.contains('notif-list')) {
-                nextList.remove();
-              }
-            });
-            
-            // Clear content and show empty message
-            const headerRow = notifPanelContent.querySelector('.notif-header-row');
-            const tempHeader = headerRow ? headerRow.cloneNode(true) : null;
-            notifPanelContent.innerHTML = '';
-            if (tempHeader) notifPanelContent.appendChild(tempHeader);
-            
-            const emptyMsg = document.createElement('div');
-            emptyMsg.className = 'no-notifications-msg';
-            emptyMsg.textContent = 'No new notifications';
-            emptyMsg.style.cssText = 'display: flex; align-items: center; justify-content: center; height: 100%; color: #888; font-size: 1.15rem; font-weight: 500; text-align: center; margin-top: 60px;';
-            notifPanelContent.appendChild(emptyMsg);
-          }
+          
         }
       }
       // Handle Clear all
@@ -4147,7 +4512,7 @@ document.addEventListener('DOMContentLoaded', function() {
                   // Remove after animations
                   setTimeout(() => {
                     card.remove();
-                    
+                    updateNotificationsBadge();
                     // If this was the last card, animate out the section
                     if (index === notifCards.length - 1) {
                       fadeOutSectionLabel(sectionLabel);
@@ -4164,7 +4529,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         
                         setTimeout(() => {
                           notifList.remove();
-                          
+                          updateNotificationsBadge();
                           // Check if we need to show empty state
                           const notifPanelContent = notificationsPanel.querySelector('.notifications-panel-content');
                           if (notifPanelContent && !notifPanelContent.querySelector('.notif-card')) {
@@ -4178,6 +4543,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             emptyMsg.textContent = 'No new notifications';
                             emptyMsg.style.cssText = 'display: flex; align-items: center; justify-content: center; height: 100%; color: #888; font-size: 1.15rem; font-weight: 500; text-align: center; margin-top: 60px; opacity: 0;';
                             notifPanelContent.appendChild(emptyMsg);
+                            setNotificationsBtnOpacity();
                             
                             requestAnimationFrame(() => {
                               emptyMsg.style.transition = 'opacity 0.3s ease-out';
@@ -4216,6 +4582,8 @@ document.addEventListener('DOMContentLoaded', function() {
               emptyMsg.textContent = 'No new notifications';
               emptyMsg.style.cssText = 'display: flex; align-items: center; justify-content: center; height: 100%; color: #888; font-size: 1.15rem; font-weight: 500; text-align: center; margin-top: 60px;';
               notifPanelContent.appendChild(emptyMsg);
+              setNotificationsBtnOpacity();
+              updateNotificationsBadge();
             }
           }
         }
@@ -4267,10 +4635,14 @@ document.addEventListener('DOMContentLoaded', function() {
               emptyMsg.textContent = 'No new notifications';
               emptyMsg.style.cssText = 'display: flex; align-items: center; justify-content: center; height: 100%; color: #888; font-size: 1.15rem; font-weight: 500; text-align: center; margin-top: 60px;';
               notifPanelContent.appendChild(emptyMsg);
+              setNotificationsBtnOpacity();
+              updateNotificationsBadge();
             }
           }, 400);  // Wait for fade out animations to complete
         } else {
           if (emptyMsg) emptyMsg.remove();
+          setNotificationsBtnOpacity();
+          updateNotificationsBadge();
         }
       }
     });
@@ -4742,24 +5114,10 @@ document.addEventListener('keydown', function(e) {
 
 // ... existing code ...
 // --- WINDOWS 11 STYLE TOAST NOTIFICATION ---
-function showToastNotification() {
-  // Remove any existing toast
-  let existing = document.getElementById('os-toast-notification');
-  if (existing) existing.remove();
-  // Create toast element
-  const toast = document.createElement('div');
-  toast.id = 'os-toast-notification';
-  toast.className = 'notif-card unread os-toast-notification';
-  toast.style.position = 'fixed';
-  toast.style.right = '-400px';
-  toast.style.top = '32px';
-  toast.style.zIndex = '999999';
-  toast.style.width = '340px';
-  toast.style.maxWidth = '90vw';
-  toast.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.14)';
-  toast.style.transition = 'right 0.5s cubic-bezier(0.4,0,0.2,1), opacity 0.4s';
-  toast.style.opacity = '1';
-  toast.innerHTML = `
+function showToastNotification(opts = {}) {
+  if (isNotificationsMuted) return;
+  // Toast content (allow override for test/dev)
+  const notifContent = opts.content || `
     <button class="notif-delete-btn" title="Dismiss notification">&times;</button>
     <div class="notif-icon-bg notif-bg-blue"><i class="fas fa-shopping-cart"></i></div>
     <div class="notif-content">
@@ -4772,17 +5130,57 @@ function showToastNotification() {
     </div>
     <img class="notif-avatar" src="img/avatar.png" />
   `;
-  document.body.appendChild(toast);
-  setTimeout(() => { toast.style.right = '32px'; }, 10);
-
+  // Toast stacking container
+  let container = document.getElementById('os-toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'os-toast-container';
+    container.style.position = 'fixed';
+    container.style.top = '32px';
+    container.style.right = '32px';
+    container.style.width = '340px';
+    container.style.zIndex = '999999';
+    container.style.pointerEvents = 'none';
+    container.style.height = 'auto';
+    document.body.appendChild(container);
+  }
+  // Remove all if mode is 'one'
+  if (desktopNotificationMode === 'one') {
+    Array.from(container.children).forEach(child => child.remove());
+  }
+  // Create toast
+  const toast = document.createElement('div');
+  toast.className = 'notif-card unread os-toast-notification';
+  toast.style.position = 'absolute';
+  toast.style.right = '0';
+  toast.style.left = 'auto';
+  toast.style.margin = '0';
+  toast.style.width = '340px';
+  toast.style.maxWidth = '90vw';
+  toast.style.pointerEvents = 'auto';
+  toast.innerHTML = notifContent;
+  // Insert at top (index 0)
+  container.insertBefore(toast, container.firstChild);
+  // Animate in
+  toast.style.transform = 'translateX(120%)';
+  toast.style.opacity = '0.7';
+  setTimeout(() => {
+    toast.style.transition = 'top 0.35s cubic-bezier(0.4,0,0.2,1), transform 0.45s cubic-bezier(0.4,0,0.2,1), opacity 0.45s cubic-bezier(0.4,0,0.2,1)';
+    toast.style.transform = 'translateX(0)';
+    toast.style.opacity = '1';
+  }, 10);
+  // Dismiss logic
   let dismissTimer;
   let dismissed = false;
   function dismissToast() {
     if (dismissed) return;
     dismissed = true;
-    toast.style.right = '-400px';
     toast.style.opacity = '0.7';
-    setTimeout(() => toast.remove(), 500);
+    toast.style.transform = 'translateX(120%)';
+    setTimeout(() => {
+      toast.remove();
+      updateToastStackPositions();
+    }, 500);
   }
   function startTimer() {
     dismissTimer = setTimeout(dismissToast, 4000);
@@ -4792,209 +5190,46 @@ function showToastNotification() {
   }
   toast.addEventListener('mouseenter', clearTimer);
   toast.addEventListener('mouseleave', startTimer);
-  toast.querySelector('.notif-delete-btn').onclick = dismissToast;
+  const delBtn = toast.querySelector('.notif-delete-btn');
+  if (delBtn) delBtn.onclick = dismissToast;
   startTimer();
+  // Stacking limit logic
+  let maxToasts = 1;
+  if (desktopNotificationMode === 'three') maxToasts = 3;
+  if (desktopNotificationMode === 'all') {
+    // Calculate how many fit in viewport
+    const taskbarHeight = 60; // px (adjust if needed)
+    const margin = 20; // px
+    const toastHeight = 80; // px (approximate, adjust if needed)
+    const available = window.innerHeight - taskbarHeight - margin - 32; // 32px top
+    maxToasts = Math.floor(available / (toastHeight + 14));
+  }
+  // Remove excess toasts (from bottom)
+  while (container.children.length > maxToasts) {
+    container.lastChild.remove();
+  }
+  // Update positions for all toasts
+  updateToastStackPositions();
 }
 
-// --- GLOBAL SHORTCUT: Press 'N' to show a notification (OS-style) ---
-document.addEventListener('keydown', function(e) {
-  // Ignore if focus is in an input, textarea, or contenteditable
-  const active = document.activeElement;
-  if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable)) return;
-  if (e.key === 'n' || e.key === 'N') {
-    console.log('N key pressed for notification');
-    const notificationsPanel = document.getElementById('notifications-panel');
-    if (!notificationsPanel) { console.log('No notificationsPanel'); return; }
-    const notifList = notificationsPanel.querySelector('.notif-list');
-    if (!notifList) { console.log('No notifList'); return; }
-    console.log('notifList found, inserting notification');
-    // Add to list (always)
-    const card = document.createElement('div');
-    card.className = 'notif-card unread';
-    card.style.transform = 'translateX(120%)';
-    card.style.opacity = '0.7';
-    card.innerHTML = `
-      <button class="notif-delete-btn" title="Delete notification">&times;</button>
-      <div class="notif-icon-bg notif-bg-blue"><i class="fas fa-shopping-cart"></i></div>
-      <div class="notif-content">
-        <div class="notif-main-row">
-          <span class="notif-main-title">New incoming notification</span>
-          <span class="notif-dot"></span>
-        </div>
-        <div class="notif-desc">This is a test notification</div>
-        <div class="notif-meta">now</div>
-      </div>
-      <img class="notif-avatar" src="img/avatar.png" />
-    `;
-    notifList.insertBefore(card, notifList.firstChild);
-    setTimeout(() => {
-      card.style.transition = 'transform 0.45s cubic-bezier(0.4,0,0.2,1), opacity 0.45s cubic-bezier(0.4,0,0.2,1)';
-      card.style.transform = 'translateX(0)';
-      card.style.opacity = '1';
-    }, 10);
-    if (typeof enableNotificationSwipeToDelete === 'function') {
-      enableNotificationSwipeToDelete();
-    }
-    // If panel is closed, show toast
-    if (notificationsPanel.style.display !== 'flex') {
-      showToastNotification();
-    }
-  }
-});
-// ... existing code ...
-
-// --- In-app Window-aware Sidebar Adaptation ---
-function updateSidebarForWindow(windowEl) {
-  if (!windowEl) return;
-  if (windowEl._isClosing) return;
-  const sidebars = windowEl.querySelectorAll('.file-explorer-sidebar, .settings-sidebar, .app-store-sidebar, .start-menu-right-sidebar');
-  const width = windowEl.offsetWidth;
-  const isMobile = window.innerWidth <= 767;
-  sidebars.forEach(sb => {
-    if (isMobile) return;
-    // Remove previous listeners
-    if (sb._hoverEnter) sb.removeEventListener('mouseenter', sb._hoverEnter);
-    if (sb._hoverLeave) sb.removeEventListener('mouseleave', sb._hoverLeave);
-    delete sb._hoverEnter;
-    delete sb._hoverLeave;
-    sb.classList.remove('sidebar-hovered', 'sidebar-mobile');
-    sb.style.position = '';
-    sb.style.left = '';
-    sb.style.top = '';
-    sb.style.height = '';
-    sb.style.zIndex = '';
-    sb.style.width = '';
-    const content = sb.parentElement && sb.parentElement.querySelector('.file-explorer-content, .settings-content, .app-store-main-content');
-    if (content) {
-      content.style.transform = '';
-      content.style.width = '';
-    }
-    // Only allow hover-to-expand if sidebar is collapsed and user wants it (toggle ON)
-    const userCollapsed = sb.getAttribute('data-user-collapsed') === 'true';
-    if (width >= 200 && width < 510) {
-      sb.classList.add('sidebar-collapsed');
-      if (userCollapsed) {
-        sb._hoverEnter = function() {
-          const originalWidth = content ? content.offsetWidth : null;
-          sb.classList.add('sidebar-hovered');
-          sb.style.position = 'absolute';
-          sb.style.left = '0';
-          sb.style.top = '0';
-          sb.style.height = '100%';
-          sb.style.zIndex = '20';
-          sb.style.width = '220px';
-          sb.style.overflowY = 'hidden';
-          if (content && originalWidth) {
-            content.style.width = originalWidth + 'px';
-            content.style.transition = 'transform 0.25s cubic-bezier(0.4,0,0.2,1)';
-            content.style.transform = 'translateX(220px)';
-          }
-        };
-        sb._hoverLeave = function() {
-          sb.classList.remove('sidebar-hovered');
-          sb.style.position = '';
-          sb.style.left = '';
-          sb.style.top = '';
-          sb.style.height = '';
-          sb.style.zIndex = '';
-          sb.style.width = '';
-          if (content) {
-            content.style.transition = 'transform 0.25s cubic-bezier(0.4,0,0.2,1)';
-            content.style.transform = '';
-            content.addEventListener('transitionend', function handler(e) {
-              if (e.propertyName === 'transform') {
-                content.style.transition = '';
-                content.style.width = '';
-                content.removeEventListener('transitionend', handler);
-              }
-            });
-          }
-        };
-        sb.addEventListener('mouseenter', sb._hoverEnter);
-        sb.addEventListener('mouseleave', sb._hoverLeave);
-      }
-    } else {
-      // For width >= 500, only collapse if user wants it
-      if (userCollapsed) {
-        sb.classList.add('sidebar-collapsed');
-        sb._hoverEnter = function() {
-          const originalWidth = content ? content.offsetWidth : null;
-          sb.classList.add('sidebar-hovered');
-          sb.style.position = 'absolute';
-          sb.style.left = '0';
-          sb.style.top = '0';
-          sb.style.height = '100%';
-          sb.style.zIndex = '20';
-          sb.style.width = '220px';
-sb.style.overflowY = 'auto';
-          if (content && originalWidth) {
-            content.style.width = originalWidth + 'px';
-            content.style.transition = 'transform 0.25s cubic-bezier(0.4,0,0.2,1)';
-            content.style.transform = 'translateX(220px)';
-          }
-        };
-        sb._hoverLeave = function() {
-          sb.classList.remove('sidebar-hovered');
-          sb.style.position = '';
-          sb.style.left = '';
-          sb.style.top = '';
-          sb.style.height = '';
-          sb.style.zIndex = '';
-          sb.style.width = '';
-          if (content) {
-            content.style.transition = 'transform 0.25s cubic-bezier(0.4,0,0.2,1)';
-            content.style.transform = '';
-            content.addEventListener('transitionend', function handler(e) {
-              if (e.propertyName === 'transform') {
-                content.style.transition = '';
-                content.style.width = '';
-                content.removeEventListener('transitionend', handler);
-              }
-            });
-          }
-        };
-        sb.addEventListener('mouseenter', sb._hoverEnter);
-        sb.addEventListener('mouseleave', sb._hoverLeave);
-      } else {
-        sb.classList.remove('sidebar-collapsed', 'sidebar-hovered', 'sidebar-mobile');
-      }
-    }
+function updateToastStackPositions() {
+  const container = document.getElementById('os-toast-container');
+  if (!container) return;
+  const margin = 14; // px
+  const toastHeight = 80; // px (should match above)
+  Array.from(container.children).forEach((toast, idx) => {
+    toast.style.position = 'absolute';
+    toast.style.right = '0';
+    toast.style.left = 'auto';
+    toast.style.margin = '20px';
+    toast.style.transition = 'top 0.35s cubic-bezier(0.4,0,0.2,1), transform 0.45s cubic-bezier(0.4,0,0.2,1), opacity 0.45s cubic-bezier(0.4,0,0.2,1)'; // Smooth move
+    toast.style.top = (idx * (toastHeight + margin)) + 'px';
+    toast.style.zIndex = 999999 - idx;
   });
+  // Adjust container height
+  container.style.height = (container.children.length * (toastHeight + margin) - margin) + 'px';
 }
-// Remove all other sidebar hover/push logic and listeners below this point
-
-// --- Bulletproof: Attach ResizeObserver to all .window elements (guaranteed) ---
-(function() {
-  function attachSidebarResizeObserver(win) {
-    if (!win || win._sidebarResizeObserver) return;
-    const ro = new ResizeObserver(() => {
-      updateSidebarForWindow(win);
-    });
-    ro.observe(win);
-    win._sidebarResizeObserver = ro;
-    // Initial call
-    updateSidebarForWindow(win);
-  }
-  if (typeof document !== 'undefined') {
-    document.querySelectorAll('.window').forEach(attachSidebarResizeObserver);
-  }
-  if (typeof createWindowFromTemplate === 'function') {
-    const _originalCreateWindowFromTemplate = createWindowFromTemplate;
-    createWindowFromTemplate = function() {
-      const win = _originalCreateWindowFromTemplate.apply(this, arguments);
-      attachSidebarResizeObserver(win);
-      return win;
-    };
-  }
-  if (typeof createGenericWindow === 'function') {
-    const _originalCreateGenericWindow = createGenericWindow;
-    createGenericWindow = function() {
-      const win = _originalCreateGenericWindow.apply(this, arguments);
-      attachSidebarResizeObserver(win);
-      return win;
-    };
-  }
-})();
+// ... existing code ...
 
 // ... existing code ...
 // --- Shared Mobile Sidebar Logic for All Windows with Sidebar ---
@@ -5338,6 +5573,253 @@ window.updateSidebarForWindow = function(windowEl) {
 
 })();
 // ... existing code ...
+
+// Show a short notification in the top middle of the screen
+function showShortTopNotification(message) {
+  let existing = document.getElementById('os-short-top-notification');
+  if (existing) existing.remove();
+  const notif = document.createElement('div');
+  notif.id = 'os-short-top-notification';
+  notif.textContent = message;
+  notif.style.position = 'fixed';
+  notif.style.top = '32px';
+  notif.style.left = '50%';
+  notif.style.transform = 'translateX(-50%)';
+  notif.style.background = 'rgba(50,50,70,0.97)';
+  notif.style.color = '#fff';
+  notif.style.fontSize = '16px';
+  notif.style.fontWeight = '400';
+  notif.style.padding = '10px 26px';
+  notif.style.borderRadius = '16px';
+  notif.style.zIndex = '999999';
+  notif.style.boxShadow = '0 4px 24px rgba(0,0,0,0.18)';
+  notif.style.opacity = '0';
+  notif.style.transition = 'opacity 0.25s';
+  document.body.appendChild(notif);
+  setTimeout(() => { notif.style.opacity = '1'; }, 10);
+  setTimeout(() => {
+    notif.style.opacity = '0';
+    setTimeout(() => notif.remove(), 400);
+  }, 1200);
+}
+
+// Set notifications button opacity based on whether there are notifications
+function setNotificationsBtnOpacity() {
+  const notificationsBtn = document.getElementById('notifications-btn');
+  const notificationsPanel = document.getElementById('notifications-panel');
+  if (!notificationsBtn || !notificationsPanel) return;
+  const notifPanelContent = notificationsPanel.querySelector('.notifications-panel-content');
+  if (notifPanelContent && notifPanelContent.querySelector('.no-notifications-msg')) {
+    notificationsBtn.style.opacity = '0.5';
+  } else {
+    notificationsBtn.style.opacity = '1';
+  }
+}
+
+// Also call setNotificationsBtnOpacity on DOMContentLoaded to initialize.
+document.addEventListener('DOMContentLoaded', function() {
+  // ... existing code ...
+  setNotificationsBtnOpacity();
+});
+// ... existing code ...
+
+function updateNotificationsBadge() {
+  const notificationsBtn = document.getElementById('notifications-btn');
+  if (!notificationsBtn) return;
+  let notifCount = 0;
+  const notificationsPanel = document.getElementById('notifications-panel');
+  if (notificationsPanel) {
+    const notifPanelContent = notificationsPanel.querySelector('.notifications-panel-content');
+    if (notifPanelContent) {
+      notifCount = notifPanelContent.querySelectorAll('.notif-card').length;
+    }
+  }
+  let badge = notificationsBtn.querySelector('.notif-badge');
+  if (!badge) {
+    badge = document.createElement('span');
+    badge.className = 'notif-badge';
+    notificationsBtn.appendChild(badge);
+  }
+  if (notifCount > 0) {
+    badge.textContent = notifCount > 99 ? '99+' : notifCount;
+    badge.style.display = '';
+  } else {
+    badge.style.display = 'none';
+  }
+}
+// ... existing code ...
+// After every setNotificationsBtnOpacity(); add:
+setNotificationsBtnOpacity();
+updateNotificationsBadge();
+// ...
+// On DOMContentLoaded, call updateNotificationsBadge to initialize
+// ...
+document.addEventListener('DOMContentLoaded', function() {
+  setNotificationsBtnOpacity();
+  updateNotificationsBadge();
+});
+// ...
+// After adding a notification card:
+todayList.appendChild(card);
+updateNotificationsBadge();
+// ...
+// After removing a notification card or clearing notifications, also call updateNotificationsBadge() after setNotificationsBtnOpacity().
+
+
+// --- In-app Window-aware Sidebar Adaptation ---
+function updateSidebarForWindow(windowEl) {
+  if (!windowEl) return;
+  if (windowEl._isClosing) return;
+  const sidebars = windowEl.querySelectorAll('.file-explorer-sidebar, .settings-sidebar, .app-store-sidebar, .start-menu-right-sidebar');
+  const width = windowEl.offsetWidth;
+  const isMobile = window.innerWidth <= 767;
+  sidebars.forEach(sb => {
+    if (isMobile) return;
+    // Remove previous listeners
+    if (sb._hoverEnter) sb.removeEventListener('mouseenter', sb._hoverEnter);
+    if (sb._hoverLeave) sb.removeEventListener('mouseleave', sb._hoverLeave);
+    delete sb._hoverEnter;
+    delete sb._hoverLeave;
+    sb.classList.remove('sidebar-hovered', 'sidebar-mobile');
+    sb.style.position = '';
+    sb.style.left = '';
+    sb.style.top = '';
+    sb.style.height = '';
+    sb.style.zIndex = '';
+    sb.style.width = '';
+    const content = sb.parentElement && sb.parentElement.querySelector('.file-explorer-content, .settings-content, .app-store-main-content');
+    if (content) {
+      content.style.transform = '';
+      content.style.width = '';
+    }
+    // Only allow hover-to-expand if sidebar is collapsed and user wants it (toggle ON)
+    const userCollapsed = sb.getAttribute('data-user-collapsed') === 'true';
+    if (width >= 200 && width < 510) {
+      sb.classList.add('sidebar-collapsed');
+      if (userCollapsed) {
+        sb._hoverEnter = function() {
+          const originalWidth = content ? content.offsetWidth : null;
+          sb.classList.add('sidebar-hovered');
+          sb.style.position = 'absolute';
+          sb.style.left = '0';
+          sb.style.top = '0';
+          sb.style.height = '100%';
+          sb.style.zIndex = '20';
+          sb.style.width = '220px';
+          sb.style.overflowY = 'hidden';
+          if (content && originalWidth) {
+            content.style.width = originalWidth + 'px';
+            content.style.transition = 'transform 0.25s cubic-bezier(0.4,0,0.2,1)';
+            content.style.transform = 'translateX(220px)';
+          }
+        };
+        sb._hoverLeave = function() {
+          sb.classList.remove('sidebar-hovered');
+          sb.style.position = '';
+          sb.style.left = '';
+          sb.style.top = '';
+          sb.style.height = '';
+          sb.style.zIndex = '';
+          sb.style.width = '';
+          if (content) {
+            content.style.transition = 'transform 0.25s cubic-bezier(0.4,0,0.2,1)';
+            content.style.transform = '';
+            content.addEventListener('transitionend', function handler(e) {
+              if (e.propertyName === 'transform') {
+                content.style.transition = '';
+                content.style.width = '';
+                content.removeEventListener('transitionend', handler);
+              }
+            });
+          }
+        };
+        sb.addEventListener('mouseenter', sb._hoverEnter);
+        sb.addEventListener('mouseleave', sb._hoverLeave);
+      }
+    } else {
+      // For width >= 500, only collapse if user wants it
+      if (userCollapsed) {
+        sb.classList.add('sidebar-collapsed');
+        sb._hoverEnter = function() {
+          const originalWidth = content ? content.offsetWidth : null;
+          sb.classList.add('sidebar-hovered');
+          sb.style.position = 'absolute';
+          sb.style.left = '0';
+          sb.style.top = '0';
+          sb.style.height = '100%';
+          sb.style.zIndex = '20';
+          sb.style.width = '220px';
+sb.style.overflowY = 'auto';
+          if (content && originalWidth) {
+            content.style.width = originalWidth + 'px';
+            content.style.transition = 'transform 0.25s cubic-bezier(0.4,0,0.2,1)';
+            content.style.transform = 'translateX(220px)';
+          }
+        };
+        sb._hoverLeave = function() {
+          sb.classList.remove('sidebar-hovered');
+          sb.style.position = '';
+          sb.style.left = '';
+          sb.style.top = '';
+          sb.style.height = '';
+          sb.style.zIndex = '';
+          sb.style.width = '';
+          if (content) {
+            content.style.transition = 'transform 0.25s cubic-bezier(0.4,0,0.2,1)';
+            content.style.transform = '';
+            content.addEventListener('transitionend', function handler(e) {
+              if (e.propertyName === 'transform') {
+                content.style.transition = '';
+                content.style.width = '';
+                content.removeEventListener('transitionend', handler);
+              }
+            });
+          }
+        };
+        sb.addEventListener('mouseenter', sb._hoverEnter);
+        sb.addEventListener('mouseleave', sb._hoverLeave);
+      } else {
+        sb.classList.remove('sidebar-collapsed', 'sidebar-hovered', 'sidebar-mobile');
+      }
+    }
+  });
+}
+// Remove all other sidebar hover/push logic and listeners below this point
+
+// --- Bulletproof: Attach ResizeObserver to all .window elements (guaranteed) ---
+(function() {
+  function attachSidebarResizeObserver(win) {
+    if (!win || win._sidebarResizeObserver) return;
+    const ro = new ResizeObserver(() => {
+      updateSidebarForWindow(win);
+    });
+    ro.observe(win);
+    win._sidebarResizeObserver = ro;
+    // Initial call
+    updateSidebarForWindow(win);
+  }
+  if (typeof document !== 'undefined') {
+    document.querySelectorAll('.window').forEach(attachSidebarResizeObserver);
+  }
+  if (typeof createWindowFromTemplate === 'function') {
+    const _originalCreateWindowFromTemplate = createWindowFromTemplate;
+    createWindowFromTemplate = function() {
+      const win = _originalCreateWindowFromTemplate.apply(this, arguments);
+      attachSidebarResizeObserver(win);
+      return win;
+    };
+  }
+  if (typeof createGenericWindow === 'function') {
+    const _originalCreateGenericWindow = createGenericWindow;
+    createGenericWindow = function() {
+      const win = _originalCreateGenericWindow.apply(this, arguments);
+      attachSidebarResizeObserver(win);
+      return win;
+    };
+  }
+})();
+
+
 
 
 

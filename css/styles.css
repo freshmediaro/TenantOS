@@ -89,6 +89,8 @@ body {
   overflow: hidden;
   height: 100vh;
   font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+-moz-osx-font-smoothing: grayscale;
 }
 
 #app {
@@ -150,14 +152,15 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center; /* Horizontal centering of icon-container and span */
-  justify-content: flex-start; /* Align icon-container and span to the top of the .desktop-icon box */
+  justify-content: center; /* Align icon-container and span to the top of the .desktop-icon box */
   text-align: center;
   cursor: pointer;
   width: var(--grid-cell-width, 84px); /* Use variable for consistency */
-  height: var(--grid-cell-height, 84px); /* Give icon a defined height matching cell min-height */
+  height: var(--grid-cell-height, 100px); /* Give icon a defined height matching cell min-height */
   transition: all 0.3s;
   /* background-color: rgba(0, 255, 0, 0.2); */ /* REMOVE TEST BACKGROUND */
   /* border: 1px solid yellow; */ /* REMOVE TEST BORDER */
+  border-radius: 10px;
 }
 
 .desktop-icon:hover {
@@ -221,7 +224,7 @@ body {
   display: flex;
   align-items: center;
   padding: 0 0 0 20px;
-  z-index: 3000; /* Above most elements but below start menu */
+  z-index: 30000 !important; /* Above most elements but below start menu */
   position: fixed !important; /* Change from relative to fixed */
   bottom: 0 !important;
   left: 0 !important;
@@ -229,16 +232,7 @@ body {
   width: 100% !important;
 }
 
-/* Update taskbar positioning for all screen sizes */
-.taskbar {
-  position: fixed !important; /* Change from relative to fixed */
-  bottom: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  width: 100% !important;
-  z-index: 3000 !important;
-  /* Keep existing styles for height, background, etc */
-}
+
 
 .start-button {
   width: 50px;
@@ -343,12 +337,13 @@ body {
 }
 
 .taskbar-icon {
-  border-radius: 50%;
+  border-radius: 5px;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-left: 6px;
   cursor: pointer;
+  min-width: 30px;
 }
 
 .taskbar-icon:hover {
@@ -947,10 +942,10 @@ body {
   flex: 1;
   white-space: nowrap;
   background: #100f21;
-  padding: 5px 10px;
+  padding: 5px 6px;
   border-radius: 6px;
   margin-right: 10px;
-  min-width: 45px;
+  min-width: 41px;
   overflow: hidden;
 }
 
@@ -1031,7 +1026,6 @@ body {
 
 .sidebar-item i {
   width: 20px;
-  margin-right: 8px;
   color: rgba(255, 255, 255, 0.8);
 }
 
@@ -1097,7 +1091,7 @@ body {
 }
 
 .file-item:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.03);
 }
 
 body.light-windows .file-item:hover {
@@ -1111,14 +1105,18 @@ body.light-windows .file-item.selected {
 /* Style for selected file items in File Explorer */
 .file-item.selected  {
 /* outline: 2px dashed rgba(0, 120, 212, 0.7); */ /* Blue dash, more visible in window context */
-  background-color: rgba(0, 120, 212, 0.15);
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.file-item.selected:hover {
+  background-color: rgba(255, 255, 255, 0.03);
 }
 
 body.light-windows .file-info {
   color: #929292 !important;
 }
 
-.file-item.selected .file-name {
+.file-item.selected .file-name1arg {
   background-color: var(--accent-color); /* Windows selection blue */
   color: white;
   border-radius: 3px; /* Slight rounding for the text background */
@@ -2171,12 +2169,26 @@ input:checked + .slider:before {
 .context-menu-submenu-item {
   display: flex;
   align-items: center;
-  padding: 6px 15px;
+  padding: 6px 10px;
   cursor: default; /* Changed from pointer to default, action on click */
   white-space: nowrap;
   transition: background-color 0.1s ease;
+  font-size: 12px;
 }
 
+.ai-chat-header { 
+  display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      justify-content: space-between;
+      align-items: center;
+      align-content: center;
+      padding: 15px 20px 15px 20px;
+  }
+
+.context-menu.submenu .context-menu-item {
+  padding: 6px 25px;
+}
 
 
 .context-menu-item:hover,
@@ -2246,11 +2258,15 @@ input:checked + .slider:before {
     outline: 2px dashed rgba(0, 0, 0, 0.5); /* Example: dashed outline */
     background-color: rgba(0, 120, 212, 0.2); /* Light blueish background for the icon itself */
 }
-.desktop-icon.selected span {
-    background-color: #0078D4; /* Selected text background like Windows */
+/*.desktop-icon.selected span {
+    background-color: #0078D4; /* Selected text background like Windows 
     color: white;
     padding: 2px 6px;
     border-radius: 5px;
+}*/
+
+.desktop-icon.selected {
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 /* Ensure context menu is above drag selector if they somehow overlap (though unlikely) */
@@ -3287,18 +3303,37 @@ body.light-windows .settings-content .badge {
   flex-direction: column;
 }
 .ai-chat-close-btn {
-  position: absolute;
-  top: 22px;
-  right: 16px;
   background: none;
     border: none;
   color: #fff;
-  font-size: 22px;
+  font-size: 24px;
     cursor: pointer;
   z-index: 10;
   opacity: 0.7;
   transition: opacity 0.2s;
 }
+
+.ai-chat-title i {
+  font-size: 12px;
+  margin-right: 7px;
+  }
+  
+  .ai-chat-title span {
+  font-size: 14px;
+  }
+  
+
+.ai-menu-toggle {
+  background: none;
+    border: none;
+  color: #fff;
+  font-size: 18px;
+    cursor: pointer;
+  z-index: 10;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
 .ai-chat-close-btn:hover {
     opacity: 1;
 }
@@ -3601,11 +3636,11 @@ body.light-windows .settings-content .badge {
   display: none;
 }
 
-/* Accent color for selected desktop icon title */
+/* Accent color for selected desktop icon title 
 .desktop-icon.selected span {
   color: #FFFFFF !important;
   background: var(--accent-color) !important;
-}
+}*/
 
 /* Accent color for active sidebar tab in settings (text and icon, no solid background) */
 .settings-nav li a.active, .sidebar-item.active {
@@ -4737,18 +4772,10 @@ body.light-windows .settings-content .badge {
   max-width: 90vw;
   pointer-events: auto;
   opacity: 1;
-  transition: right 0.5s cubic-bezier(0.4,0,0.2,1), opacity 0.4s;
+  transition: transform 0.45s cubic-bezier(0.4,0,0.2,1), opacity 0.4s;
   animation: toastSlideIn 0.5s cubic-bezier(0.4,0,0.2,1);
 }
-.os-toast-notification.slide-out {
-  right: -400px !important;
-  opacity: 0.7;
-  transition: right 0.5s cubic-bezier(0.4,0,0.2,1), opacity 0.4s;
-}
-@keyframes toastSlideIn {
-  from { right: -400px; opacity: 0.7; }
-  to { right: 32px; opacity: 1; }
-}
+/* Remove .os-toast-notification.slide-out and right transition logic */
 .os-toast-notification .notif-delete-btn {
   opacity: 0.7;
   right: 10px;
@@ -5543,86 +5570,6 @@ body.light-windows .settings-content .badge {
   display: inline;
 }
 
-/* Volume Panel Styles */
-#volume-panel {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: -320px;
-  z-index: 4001;
-  background: rgba(18, 20, 40, 0.97);
-  box-shadow: 0 -8px 32px rgba(0,0,0,0.18);
-  border-radius: 18px 18px 0 0;
-  width: 100vw;
-  max-width: 420px;
-  margin: 0 auto;
-  transition: bottom 0.35s cubic-bezier(0.4,0,0.2,1);
-  display: flex;
-  flex-direction: column;
-  min-height: 180px;
-  /* pointer-events: none; */
-}
-#volume-panel.visible {
-  bottom: 0 !important;
-  pointer-events: auto !important;
-  opacity: 1 !important;
-  z-index: 9999 !important;
-  min-height: 180px;
-}
-.volume-panel-inner {
-  padding: 28px 28px 22px 28px;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-.volume-panel-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 18px;
-  font-weight: 600;
-  color: #fff;
-  margin-bottom: 10px;
-}
-.close-volume-panel-btn {
-  background: none;
-  border: none;
-  color: #fff;
-  font-size: 26px;
-  cursor: pointer;
-  opacity: 0.7;
-  transition: opacity 0.18s;
-}
-.close-volume-panel-btn:hover {
-  opacity: 1;
-}
-.volume-control-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.volume-control-group label {
-  color: #fff;
-  font-size: 15px;
-  margin-bottom: 2px;
-}
-#browser-volume-slider, #system-volume-slider {
-  width: 100%;
-  accent-color: var(--accent-color, #1a73ce);
-  height: 4px;
-  border-radius: 6px;
-  background: #23243a;
-}
-#system-volume-slider:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-.system-volume-tooltip {
-  color: #bbb;
-  font-size: 12px;
-  margin-top: 2px;
-  display: block;
-}
 @media (max-width: 600px) {
   .volume-panel {
     max-width: 100vw;
@@ -5633,4 +5580,542 @@ body.light-windows .settings-content .badge {
   }
 }
 
+/* --- Volume Panel Redesign --- */
+#volume-panel {
+  position: fixed;
+  right: 15px;
+  bottom: -320px;
+  background: rgba(18, 20, 40, 0.97);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  border-radius: 18px;
+  width: 370px;
+  max-width: 95vw;
+  margin: 0 auto;
+  transition: bottom 0.35s cubic-bezier(0.4,0,0.2,1);
+  display: flex;
+  flex-direction: column;
+  min-height: 320px;
+  margin-bottom: 60px;
+  z-index: 6000;
+}
 
+#volume-panel.visible {
+  bottom: 60px !important;
+  pointer-events: auto !important;
+  opacity: 1 !important;
+  z-index: 6000;
+}
+.volume-panel-inner {
+  padding: 24px 24px 18px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.music-player-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.music-header-row {
+  font-size: 1.08rem;
+  color: #fff;
+  font-weight: 600;
+  margin-bottom: 8px;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.music-main-row {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 18px;
+}
+.music-album-art {
+  width: 110px;
+  height: 110px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #232335;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.music-album-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 12px;
+}
+.music-right-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 8px;
+}
+.music-progress-slider {
+  width: 100%;
+  accent-color: #3576f6;
+  height: 5px;
+  border-radius: 6px;
+  background: #23243a;
+  margin-bottom: 6px;
+}
+.music-time-controls-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 2px;
+}
+.music-current-time, .music-total-time {
+  color: #ffffffab;
+  font-size: 12px;
+  min-width: 38px;
+
+}
+
+.music-current-time {
+  text-align: left;
+}
+
+.music-total-time {
+  text-align: end;
+}
+
+.music-btn:active, .music-btn:focus {
+  background: #232335;
+  color: #3576f6;
+}
+.close-volume-panel-btn {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.5rem;
+  margin-left: 6px;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.18s;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.close-volume-panel-btn:hover {
+  opacity: 1;
+}
+.volume-slider-panel {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: none;
+  padding: 0 0 0 0;
+}
+
+#browser-volume-slider {
+  flex: 1;
+  accent-color: #3576f6;
+  height: 5px;
+  border-radius: 6px;
+  background: #23243a;
+}
+
+@media (max-width: 500px) {
+  #volume-panel {
+    width: 98vw;
+    min-width: 0;
+    max-width: 100vw;
+    border-radius: 12px 12px 0 0;
+    left: 0;
+    right: 0;
+  }
+  .volume-panel-inner {
+    padding: 12px 6px 10px 6px;
+  }
+  .music-album-art {
+    width: 70px;
+    height: 70px;
+  }
+}
+
+
+.music-panel-box {
+  margin-bottom: 22px;
+}
+.volume-panel-box {
+  margin-bottom: 0;
+}
+
+.volume-panel-inner {
+  background: none;
+  box-shadow: none;
+  border-radius: 0;
+  padding: 24px 24px 18px 24px;
+  gap: 0;
+}
+@media (max-width: 500px) {
+  #volume-panel {
+    width: 98vw;
+    min-width: 0;
+    max-width: 100vw;
+    left: 0;
+    right: 0;
+  }
+  .music-panel-box, .volume-panel-box {
+    border-radius: 12px;
+  }
+  .volume-panel-inner {
+    padding: 12px 6px 10px 6px;
+  }
+}
+
+.music-panel-box {
+  box-shadow: rgba(0, 0, 0, 0.25) -4px 0px 24px;
+  backdrop-filter: blur(30px);
+  background: rgba(5, 2, 23, 0.57);
+  border-radius: 20px;
+  padding: 22px 22px 14px 22px;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto 28px auto;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+.music-panel-content {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+.music-info-block {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  min-width: 0;
+}
+.music-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.music-meta {
+  font-size: 12px;
+  color: #bfc2d1;
+  font-weight: 400;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.music-album-art-block {
+  width: 50px;
+  height: 50px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #232335;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.music-album-art-block img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 14px;
+}
+.music-progress-row {
+  margin-top: 18px;
+  margin-bottom: 0;
+  width: 100%;
+  position: relative;
+}
+.music-progress-slider {
+  width: 100%;
+  accent-color: #3576f6;
+  height: 5px;
+  border-radius: 6px;
+  background: #23243a;
+  margin-bottom: 0;
+}
+.music-time-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 2px;
+  font-size: 1rem;
+  color: #bfc2d1;
+  font-weight: 500;
+}
+.music-current-time, .music-total-time {
+  min-width: 38px;
+}
+.music-controls-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 0 10px 0;
+}
+.music-btn {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  transition: color 0.18s, background 0.18s;
+  border-radius: 8px;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.music-btn:active, .music-btn:focus {
+  background: #232335;
+  color: #3576f6;
+}
+.play-btn {
+  background: #fff;
+  color: #18192b;
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  font-size: 20px;
+  margin: 0 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.18s, color 0.18s;
+}
+.play-btn:active, .play-btn:focus {
+  background: #3576f6;
+  color: #fff;
+}
+.close-volume-panel-btn {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.7rem;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.18s;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.close-volume-panel-btn:hover {
+  opacity: 1;
+}
+.volume-panel-box {
+  box-shadow: rgba(0, 0, 0, 0.25) -4px 0px 24px;
+  backdrop-filter: blur(30px);
+  background: rgba(5, 2, 23, 0.57);
+  border-radius: 20px;
+  padding: 20px 24px;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+.volume-slider-panel {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+}
+.volume-slider-panel i {
+  color: #bfc2d1;
+  font-size: 14px;
+  margin-right: 8px;
+}
+#browser-volume-slider {
+  flex: 1;
+  accent-color: #3576f6;
+  height: 5px;
+  border-radius: 6px;
+  background: #23243a;
+  margin: 0 8px;
+}
+#volume-percentage {
+  color: #fff;
+  font-size: 14px;
+  text-align: right;
+  margin-left: 8px;
+}
+#volume-panel {
+  background: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  min-height: unset;
+  width: 360px;
+  max-width: 98vw;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  pointer-events: auto;
+}
+@media (max-width: 600px) {
+  #volume-panel {
+    width: 98vw;
+    min-width: 0;
+    max-width: 100vw;
+    left: 0;
+    right: 0;
+  }
+  .music-panel-box, .volume-panel-box {
+    border-radius: 14px;
+    padding: 12px 6px 10px 6px;
+  }
+  .music-album-art-block {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+  }
+  .play-btn {
+    width: 38px;
+    height: 38px;
+    font-size: 1.3rem;
+  }
+}
+
+
+.taskbar {
+  position: fixed !important;
+  z-index: 30000 !important;
+}
+
+
+/* --- Wallet Sidebar Slide-in (Match AI Chat Style) --- */
+#wallet-sidebar {
+  position: fixed;
+  right: 10px;
+  bottom: 60px;
+  top: auto;
+  height: calc(100vh - 70px);
+  width: 420px;
+  z-index: 4000;
+  background: #050217c5;
+  box-shadow: -4px 0 24px rgba(0,0,0,0.25);
+  border-radius: 20px;
+  transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+  transform: translateX(100%);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  backdrop-filter: blur(30px);
+}
+#wallet-sidebar.wallet-sidebar-visible {
+  transform: translateX(0);
+}
+@media (max-width: 1023px) {
+  #wallet-sidebar {
+    width: 100vw;
+    left: 0;
+    right: 0;
+    border-radius: 0;
+  }
+}
+
+.wallet-sidebar-header {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  align-items: center;
+  align-content: center;
+  padding: 15px 20px 15px 20px;
+}
+
+.wallet-menu-toggle {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 18px;
+  cursor: pointer;
+  z-index: 10;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+.wallet-menu-toggle:hover {
+  opacity: 1;
+}
+
+.wallet-header-center {
+  display: flex;
+  align-items: center;
+}
+.wallet-header-center i {
+  font-size: 12px;
+  margin-right: 7px;
+}
+.wallet-header-center span {
+  font-size: 14px;
+}
+
+.wallet-close-btn {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 24px;
+  cursor: pointer;
+  z-index: 10;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+.wallet-close-btn:hover {
+  opacity: 1;
+}
+
+/* Notification badge for taskbar notifications button */
+.notif-badge {
+  position: absolute;
+  top: 0;
+  right: -3px;
+  width: 15px;
+  height: 15px;
+  padding: 0 4px;
+  background: #ff1900;
+  color: #fff;
+  font-size: 10px;
+  font-weight: bold;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.18);
+  pointer-events: none;
+}
+
+.context-menu-checkmark {
+  margin-left: auto;
+  margin-right: 0 !important;
+  font-size: 13px !important;
+  color: #ffffff !important;
+  width: 18px;
+  text-align: right;
+  display: inline-block;
+}
+
+#wallet-btn {
+  width: max-content;
+  padding: 0px 8px;
+}
