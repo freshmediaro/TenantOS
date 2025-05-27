@@ -55,6 +55,17 @@ if (volumeBtn && volumePanel) {
     browserVolumeSlider.addEventListener('input', (e) => {
       const value = parseInt(e.target.value, 10);
       const icon = volumeBtn.querySelector('i');
+      const panelIcon = volumePanel.querySelector('.volume-slider-panel i');
+      // Update panel icon as well
+      if (panelIcon) {
+        if (value === 0) {
+          panelIcon.classList.remove('fa-volume-up');
+          panelIcon.classList.add('fa-volume-mute');
+        } else {
+          panelIcon.classList.remove('fa-volume-mute');
+          panelIcon.classList.add('fa-volume-up');
+        }
+      }
       if (value === 0) {
         isMuted = true;
         if (icon) {
@@ -73,6 +84,43 @@ if (volumeBtn && volumePanel) {
         }
       }
     });
+
+    // Mute/unmute logic for panel icon
+    const panelIcon = volumePanel.querySelector('.volume-slider-panel i');
+    if (panelIcon) {
+      panelIcon.style.cursor = 'pointer';
+      panelIcon.addEventListener('click', function() {
+        const icon = volumeBtn.querySelector('i');
+        if (!isMuted) {
+          // Muting
+          if (browserVolumeSlider) {
+            previousVolume = browserVolumeSlider.value;
+            browserVolumeSlider.value = 0;
+            browserVolumeSlider.dispatchEvent(new Event('input', { bubbles: true }));
+          }
+          if (icon) {
+            icon.classList.remove('fa-volume-up');
+            icon.classList.add('fa-volume-mute');
+          }
+          panelIcon.classList.remove('fa-volume-up');
+          panelIcon.classList.add('fa-volume-mute');
+          isMuted = true;
+        } else {
+          // Unmuting
+          if (browserVolumeSlider) {
+            browserVolumeSlider.value = previousVolume;
+            browserVolumeSlider.dispatchEvent(new Event('input', { bubbles: true }));
+          }
+          if (icon) {
+            icon.classList.remove('fa-volume-mute');
+            icon.classList.add('fa-volume-up');
+          }
+          panelIcon.classList.remove('fa-volume-mute');
+          panelIcon.classList.add('fa-volume-up');
+          isMuted = false;
+        }
+      });
+    }
 
     // Playlist panel logic
     const musicPanel = volumePanel.querySelector('.music-panel-box');
@@ -152,6 +200,9 @@ document.addEventListener('DOMContentLoaded', function() {
   // ... existing code ...
   setupVolumePanel();
   setNotificationsBtnOpacity();
+
+
+  
 });
 // ... existing code ...
 
@@ -329,7 +380,7 @@ document.addEventListener('keydown', function(e) {
       headerRow.innerHTML = `
         <span class="notif-title">Notifications</span>
         <div class="notif-tabs">
-          <button class="notif-tab notif-tab-active">All</button>
+          <button class="notif-tab notif-tab-active">All1</button>
           <button class="notif-tab">Unread</button>
         </div>
       `;
@@ -575,26 +626,186 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
-  const startMenuApps = [
-    { id: 'this-pc', name: 'This PC', iconClass: 'fa-desktop', iconBgClass: 'pink-icon', iconBgMenuClass: 'pink-bg', category: 'SYSTEM APPS' },
-    { id: 'web-files', name: 'Web Files', iconClass: 'fa-folder-open', iconBgClass: 'green-icon', iconBgMenuClass: 'green-bg', category: 'SYSTEM APPS' },
-    { id: 'trash-sm', name: 'Trash', iconClass: 'fa-trash', iconBgClass: 'purple-icon', iconBgMenuClass: 'purple-bg', category: 'SYSTEM APPS' },
-    { id: 'settings-sm', name: 'Settings', iconClass: 'fa-cog', iconBgClass: 'pink-icon', iconBgMenuClass: 'pink-bg', category: 'SYSTEM APPS' }, 
-    { id: 'site-builder-sm', name: 'Site Builder', iconClass: 'fa-globe', iconBgClass: 'pink-icon', iconBgMenuClass: 'pink-bg', category: 'CUSTOMISE' },
-    { id: 'app-store-sm', name: 'AppStore', iconClass: 'fa-store', iconBgClass: 'green-icon', iconBgMenuClass: 'green-bg', category: 'CUSTOMISE' },
-    { id: 'social-master', name: 'Social Master', iconClass: 'fa-users', iconBgClass: 'purple-icon', iconBgMenuClass: 'purple-bg', category: 'CUSTOMISE' },
-    { id: 'personalize', name: 'Personalize', iconClass: 'fa-cog', iconBgClass: 'pink-icon', iconBgMenuClass: 'pink-bg', category: 'CUSTOMISE' },
-    { id: 'word-doc', name: 'Word doc', iconClass: 'fa-file-word', iconBgClass: 'pink-icon', iconBgMenuClass: 'pink-bg', category: 'DOCS' },
-    { id: 'excel-numbers', name: 'Excel Numbers', iconClass: 'fa-file-excel', iconBgClass: 'green-icon', iconBgMenuClass: 'green-bg', category: 'DOCS' },
-    { id: 'notepad', name: 'Notepad', iconClass: 'fa-sticky-note', iconBgClass: 'purple-icon', iconBgMenuClass: 'purple-bg', category: 'DOCS' },
-    { id: 'wordpad', name: 'Wordpad', iconClass: 'fa-file-alt', iconBgClass: 'pink-icon', iconBgMenuClass: 'pink-bg', category: 'DOCS' },
-    { id: 'calculator-sm', name: 'Calculator', iconClass: 'fa-calculator', iconBgClass: 'gray-icon', iconBgMenuClass: 'gray-bg', category: 'PRODUCTIVITY' },
-    { id: 'photoshop-sm', name: 'Photoshop', iconClass: 'fa-palette', iconBgClass: 'blue-icon', iconBgMenuClass: 'blue-bg', category: 'PRODUCTIVITY' },
-    { id: 'calendar-sm', name: 'Calendar', iconClass: 'fa-calendar-alt', iconBgClass: 'purple-icon', iconBgMenuClass: 'purple-bg', category: 'PRODUCTIVITY' },
-    { id: 'notes', name: 'Notes', iconClass: 'far fa-clipboard', iconBgClass: 'pink-icon', iconBgMenuClass: 'pink-bg', category: 'PRODUCTIVITY' },
-    { id: 'app-launcher', name: 'App launcher', iconClass: 'fa-th', iconBgClass: 'blue-icon', iconBgMenuClass: 'blue-bg', category: 'SYSTEM APPS' }
-  ];
-  
+  // Move this to the top-level scope, before any function that uses it
+// ... existing code ...
+
+// --- START MENU LOGIC (moved to bottom for robustness) ---
+
+// Define the app list before any function that uses it
+const startMenuApps = [
+  { id: 'this-pc', name: 'This PC', iconClass: 'fa-desktop', iconBgClass: 'pink-icon', iconBgMenuClass: 'pink-bg', category: 'SYSTEM APPS' },
+  { id: 'web-files', name: 'Web Files', iconClass: 'fa-folder-open', iconBgClass: 'green-icon', iconBgMenuClass: 'green-bg', category: 'SYSTEM APPS' },
+  { id: 'trash-sm', name: 'Trash', iconClass: 'fa-trash', iconBgClass: 'purple-icon', iconBgMenuClass: 'purple-bg', category: 'SYSTEM APPS' },
+  { id: 'settings-sm', name: 'Settings', iconClass: 'fa-cog', iconBgClass: 'pink-icon', iconBgMenuClass: 'pink-bg', category: 'SYSTEM APPS' }, 
+  { id: 'site-builder-sm', name: 'Site Builder', iconClass: 'fa-globe', iconBgClass: 'pink-icon', iconBgMenuClass: 'pink-bg', category: 'CUSTOMISE' },
+  { id: 'app-store-sm', name: 'AppStore', iconClass: 'fa-store', iconBgClass: 'green-icon', iconBgMenuClass: 'green-bg', category: 'CUSTOMISE' },
+  { id: 'social-master', name: 'Social Master', iconClass: 'fa-users', iconBgClass: 'purple-icon', iconBgMenuClass: 'purple-bg', category: 'CUSTOMISE' },
+  { id: 'personalize', name: 'Personalize', iconClass: 'fa-cog', iconBgClass: 'pink-icon', iconBgMenuClass: 'pink-bg', category: 'CUSTOMISE' },
+  { id: 'word-doc', name: 'Word doc', iconClass: 'fa-file-word', iconBgClass: 'pink-icon', iconBgMenuClass: 'pink-bg', category: 'DOCS' },
+  { id: 'excel-numbers', name: 'Excel Numbers', iconClass: 'fa-file-excel', iconBgClass: 'green-icon', iconBgMenuClass: 'green-bg', category: 'DOCS' },
+  { id: 'notepad', name: 'Notepad', iconClass: 'fa-sticky-note', iconBgClass: 'purple-icon', iconBgMenuClass: 'purple-bg', category: 'DOCS' },
+  { id: 'wordpad', name: 'Wordpad', iconClass: 'fa-file-alt', iconBgClass: 'pink-icon', iconBgMenuClass: 'pink-bg', category: 'DOCS' },
+  { id: 'calculator-sm', name: 'Calculator', iconClass: 'fa-calculator', iconBgClass: 'gray-icon', iconBgMenuClass: 'gray-bg', category: 'PRODUCTIVITY' },
+  { id: 'photoshop-sm', name: 'Photoshop', iconClass: 'fa-palette', iconBgClass: 'blue-icon', iconBgMenuClass: 'blue-bg', category: 'PRODUCTIVITY' },
+  { id: 'calendar-sm', name: 'Calendar', iconClass: 'fa-calendar-alt', iconBgClass: 'purple-icon', iconBgMenuClass: 'purple-bg', category: 'PRODUCTIVITY' },
+  { id: 'notes', name: 'Notes', iconClass: 'far fa-clipboard', iconBgClass: 'pink-icon', iconBgMenuClass: 'pink-bg', category: 'PRODUCTIVITY' },
+  { id: 'app-launcher', name: 'App launcher', iconClass: 'fa-th', iconBgClass: 'blue-icon', iconBgMenuClass: 'blue-bg', category: 'SYSTEM APPS' }
+];
+
+let startMenuAppSortMode = 'category'; // 'category' or 'alphabet'
+
+function categoryLinkClickHandler(e) {
+  e.preventDefault();
+  console.log('Category link clicked!'); // DEBUG
+  startMenuAppSortMode = (startMenuAppSortMode === 'category') ? 'alphabet' : 'category';
+  populateStartMenuApps();
+  // Update button text/icon
+  const categoryLink = e.currentTarget;
+  if (startMenuAppSortMode === 'category') {
+    categoryLink.innerHTML = '<i class="fas fa-arrow-down-a-z"></i> Alphabet';
+  } else {
+    categoryLink.innerHTML = '<i class="fas fa-sliders-h"></i> Category';
+  }
+}
+
+function attachCategoryLinkHandler() {
+  const categoryLink = document.querySelector('.start-menu-category-link');
+  if (categoryLink) {
+    categoryLink.removeEventListener('click', categoryLinkClickHandler);
+    categoryLink.addEventListener('click', categoryLinkClickHandler);
+  }
+}
+
+function populateStartMenuApps() {
+  console.log('populateStartMenuApps called, mode:', startMenuAppSortMode); // DEBUG
+  const startMenuLeftPanel = document.querySelector('.start-menu-left-panel');
+  if (!startMenuLeftPanel) return;
+  const existingSections = startMenuLeftPanel.querySelectorAll('.app-grid-section');
+  existingSections.forEach(section => section.remove());
+
+  if (startMenuAppSortMode === 'alphabet') {
+    // Alphabet mode: single grid, all apps sorted by name
+    const allApps = [...startMenuApps].sort((a, b) => a.name.localeCompare(b.name));
+    const appGridSection = document.createElement('div');
+    appGridSection.className = 'app-grid-section';
+    const appGrid = document.createElement('div');
+    appGrid.className = 'app-grid';
+    allApps.forEach(app => {
+      const appItem = document.createElement('div');
+      appItem.className = 'app-grid-item';
+      appItem.setAttribute('data-app-id', app.id);
+      appItem.setAttribute('data-app-name', app.name.toLowerCase());
+      appItem.innerHTML = `
+        <div class=\"app-icon-bg ${app.iconBgMenuClass}\">\n          <i class=\"fas ${app.iconClass}\"></i>\n        </div>\n        <span>${app.name}</span>\n      `;
+      const openStartMenuApp = (e) => {
+        openApp(app.id, app.name, app.iconClass, app.iconBgClass, appItem);
+        if(window.startMenu) window.startMenu.style.display = 'none';
+      };
+      appItem.addEventListener('click', openStartMenuApp);
+      appGrid.appendChild(appItem);
+    });
+    appGridSection.appendChild(appGrid);
+    startMenuLeftPanel.appendChild(appGridSection);
+  } else {
+    // Category mode (default)
+    const categories = {};
+    startMenuApps.forEach(app => {
+      if (!categories[app.category]) categories[app.category] = [];
+      categories[app.category].push(app);
+    });
+    for (const categoryName in categories) {
+      if (categories[categoryName].length > 0) {
+        const appGridSection = document.createElement('div');
+        appGridSection.className = 'app-grid-section';
+        appGridSection.setAttribute('data-category-name', categoryName);
+        const categoryHeader = document.createElement('h4');
+        categoryHeader.textContent = categoryName;
+        appGridSection.appendChild(categoryHeader);
+        const appGrid = document.createElement('div');
+        appGrid.className = 'app-grid';
+        categories[categoryName].forEach(app => {
+          const appItem = document.createElement('div');
+          appItem.className = 'app-grid-item';
+          appItem.setAttribute('data-app-id', app.id);
+          appItem.setAttribute('data-app-name', app.name.toLowerCase());
+          appItem.innerHTML = `
+            <div class=\"app-icon-bg ${app.iconBgMenuClass}\">\n              <i class=\"fas ${app.iconClass}\"></i>\n            </div>\n            <span>${app.name}</span>\n          `;
+          const openStartMenuApp = (e) => {
+            openApp(app.id, app.name, app.iconClass, app.iconBgClass, appItem);
+            if(window.startMenu) window.startMenu.style.display = 'none';
+          };
+          appItem.addEventListener('click', openStartMenuApp);
+          appGrid.appendChild(appItem);
+        });
+        appGridSection.appendChild(appGrid);
+        startMenuLeftPanel.appendChild(appGridSection);
+      }
+    }
+  }
+  attachCategoryLinkHandler(); // Ensure handler is always attached
+}
+
+function filterStartMenuApps(searchTerm) {
+  const startMenuLeftPanel = document.querySelector('.start-menu-left-panel');
+  if (!startMenuLeftPanel) return;
+  const term = searchTerm.toLowerCase();
+  const appSections = startMenuLeftPanel.querySelectorAll('.app-grid-section');
+  appSections.forEach(section => {
+    const appItems = [];
+    startMenuApps.forEach(app => {
+      // ... create appItem, add listeners, etc ...
+      grid.appendChild(appItem);
+      appItems.push(appItem);
+    }); // <-- End of forEach
+
+    // Now define the function here:
+    function openAppFromLauncher(appItem) {
+      appItems.forEach(item => item.classList.remove('selected'));
+      appItem.classList.add('selected');
+      openApp(
+        appItem.getAttribute('data-app-id') || appItem.getAttribute('data-app-name'),
+        appItem.querySelector('span').textContent,
+        appItem.querySelector('i').className.split(' ').find(cls => cls.startsWith('fa-')),
+        appItem.className.split(' ').find(cls => cls.endsWith('-icon'))
+      );
+      closeLauncher();
+    }
+    let sectionHasVisibleItems = false;
+    appItems.forEach(item => {
+      const appName = item.getAttribute('data-app-name');
+      const isVisible = appName.includes(term);
+      item.style.display = isVisible ? '' : 'none';
+      if (isVisible) sectionHasVisibleItems = true;
+    });
+    section.style.display = sectionHasVisibleItems ? '' : 'none';
+  });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  const startMenuLeftPanel = document.querySelector('.start-menu-left-panel');
+  if (startMenuLeftPanel) {
+    startMenuLeftPanel.addEventListener('click', function(e) {
+      const categoryLink = e.target.closest('.start-menu-category-link');
+      if (categoryLink) {
+        e.preventDefault();
+        console.log('Category link clicked!'); // DEBUG
+        startMenuAppSortMode = (startMenuAppSortMode === 'category') ? 'alphabet' : 'category';
+        populateStartMenuApps();
+        // Update button text/icon
+        if (startMenuAppSortMode === 'category') {
+          categoryLink.innerHTML = '<i class="fas fa-arrow-down-a-z"></i> Alphabet';
+        } else {
+          categoryLink.innerHTML = '<i class="fas fa-sliders-h"></i> Category';
+        }
+      }
+    });
+  }
+  populateStartMenuApps();
+  attachCategoryLinkHandler();
+});
+// ... existing code ...
+
+
   function updateCurrentTime() {
     const now = new Date();
     const hours = String(now.getHours()).padStart(2, '0');
@@ -604,6 +815,10 @@ document.addEventListener('DOMContentLoaded', function() {
   
   if(startButton && startMenu) {
     startButton.addEventListener('click', function() {
+      if (startMenu.classList.contains('start-menu-style-app-launcher')) {
+        openAppLauncherWindow(startButton);
+        return;
+      }
       if (startMenu.style.display === 'block') {
         // Animate close
         startMenu.classList.remove('start-menu-anim-open');
@@ -1226,22 +1441,30 @@ document.addEventListener('DOMContentLoaded', function() {
         // In the logout button event handler:
         const logOutButton = document.querySelector('.start-menu-logout-button') || document.querySelector('.logout-button');
         if (logOutButton) {
-          logOutButton.addEventListener('click', () => {
-            if(startMenu) startMenu.style.display = 'none';
-            // Set a global flag to indicate logout in progress
-            window._loggingOut = true;
-            // Close all popout windows
-            if (window._allPopoutWindows && Array.isArray(window._allPopoutWindows)) {
-              window._allPopoutWindows = window._allPopoutWindows.filter(win => {
-                if (win && !win.closed) {
-                  try { win.close(); } catch (e) {}
-                  return false;
+          logOutButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            showConfirmDialog({
+              title: "Log out?",
+              message: "Are you sure you want to log out?",
+              iconClass: "fa-sign-out-alt",
+              okText: "Log out",
+              cancelText: "Cancel"
+            }).then(confirmed => {
+              if (confirmed) {
+                if (typeof startMenu !== 'undefined' && startMenu) startMenu.style.display = 'none';
+                window._loggingOut = true;
+                if (window._allPopoutWindows && Array.isArray(window._allPopoutWindows)) {
+                  window._allPopoutWindows = window._allPopoutWindows.filter(win => {
+                    if (win && !win.closed) {
+                      try { win.close(); } catch (e) {}
+                      return false;
+                    }
+                    return false;
+                  });
                 }
-                return false;
-              });
-            }
-            // Optionally, clear the flag after a short delay
-            setTimeout(() => { window._loggingOut = false; }, 2000);
+                setTimeout(() => { window._loggingOut = false; }, 2000);
+              }
+            });
           });
         }
         // ... existing code ...
@@ -1666,52 +1889,7 @@ document.addEventListener('DOMContentLoaded', function() {
     return iconEl;
   }
 
-  function populateStartMenuApps() {
-    if (!startMenuLeftPanel) return;
-    const existingSections = startMenuLeftPanel.querySelectorAll('.app-grid-section');
-    existingSections.forEach(section => section.remove());
-    const categories = {};
-    startMenuApps.forEach(app => {
-      if (!categories[app.category]) categories[app.category] = [];
-      categories[app.category].push(app);
-    });
-    for (const categoryName in categories) {
-      if (categories[categoryName].length > 0) {
-        const appGridSection = document.createElement('div');
-        appGridSection.className = 'app-grid-section';
-        appGridSection.setAttribute('data-category-name', categoryName);
-        const categoryHeader = document.createElement('h4');
-        categoryHeader.textContent = categoryName;
-        appGridSection.appendChild(categoryHeader);
-        const appGrid = document.createElement('div');
-        appGrid.className = 'app-grid';
-        categories[categoryName].forEach(app => {
-          const appItem = document.createElement('div');
-          appItem.className = 'app-grid-item'; 
-          appItem.setAttribute('data-app-id', app.id);
-          appItem.setAttribute('data-app-name', app.name.toLowerCase()); 
-          appItem.innerHTML = `
-            <div class="app-icon-bg ${app.iconBgMenuClass}">
-              <i class="fas ${app.iconClass}"></i>
-            </div>
-            <span>${app.name}</span>
-          `;
-          // Function to handle app opening
-          const openStartMenuApp = (e) => {
-            openApp(app.id, app.name, app.iconClass, app.iconBgClass, appItem);
-            if(startMenu) startMenu.style.display = 'none';
-          };
-
-          // Use click event for both mobile and desktop
-          appItem.addEventListener('click', openStartMenuApp);
-
-          appGrid.appendChild(appItem);
-        });
-        appGridSection.appendChild(appGrid);
-        startMenuLeftPanel.appendChild(appGridSection);
-      }
-    }
-  }
+  
 
   function filterStartMenuApps(searchTerm) {
     if (!startMenuLeftPanel) return;
@@ -1762,25 +1940,33 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   const logOutButton = document.querySelector('.start-menu-logout-button') || document.querySelector('.logout-button');
-  if (logOutButton) {
-    logOutButton.addEventListener('click', () => {
-      if(startMenu) startMenu.style.display = 'none';
-      // Set a global flag to indicate logout in progress
-      window._loggingOut = true;
-      // Close all popout windows
-      if (window._allPopoutWindows && Array.isArray(window._allPopoutWindows)) {
-        window._allPopoutWindows = window._allPopoutWindows.filter(win => {
-          if (win && !win.closed) {
-            try { win.close(); } catch (e) {}
+if (logOutButton) {
+  logOutButton.addEventListener('click', (e) => {
+    e.preventDefault();
+    showConfirmDialog({
+      title: "Log out?",
+      message: "Are you sure you want to log out?",
+      iconClass: "fa-sign-out-alt",
+      okText: "Log out",
+      cancelText: "Cancel"
+    }).then(confirmed => {
+      if (confirmed) {
+        if (typeof startMenu !== 'undefined' && startMenu) startMenu.style.display = 'none';
+        window._loggingOut = true;
+        if (window._allPopoutWindows && Array.isArray(window._allPopoutWindows)) {
+          window._allPopoutWindows = window._allPopoutWindows.filter(win => {
+            if (win && !win.closed) {
+              try { win.close(); } catch (e) {}
+              return false;
+            }
             return false;
-          }
-          return false;
-        });
+          });
+        }
+        setTimeout(() => { window._loggingOut = false; }, 2000);
       }
-      // Optionally, clear the flag after a short delay
-      setTimeout(() => { window._loggingOut = false; }, 2000);
     });
-  }
+  });
+}
   
   function setupSettingsApp(settingsWindowElement) {
     const sidebarNavLinks = settingsWindowElement.querySelectorAll('.settings-nav li a');
@@ -1804,7 +1990,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     sidebarNavLinks.forEach(link => {
       link.addEventListener('click', function(e) {
-        e.preventDefault();
+      e.preventDefault();
         setActiveSection(this.getAttribute('data-section'));
       });
     });
@@ -2847,6 +3033,17 @@ document.addEventListener('DOMContentLoaded', function() {
       if (typeof target.focus === 'function') target.focus();
       if (document.activeElement !== target) target.focus();
       window.focus && window.focus();
+  
+      // --- ADD THIS ARRAY AT THE TOP OF THE FUNCTION ---
+      const allStartMenuStyles = [
+        'start-menu-style-default',
+        'start-menu-style-default-apps-only',
+        'start-menu-style-windows11',
+        'start-menu-list-style',
+        'start-menu-apps-only',
+        'start-menu-style-apps-list-only',
+        'start-menu-style-app-launcher'
+      ];
       switch(action) {
         case 'text-cut': {
           console.log('[ContextMenu] text-cut triggered');
@@ -3081,6 +3278,68 @@ document.addEventListener('DOMContentLoaded', function() {
           window.walletDisplayMode = 'balance';
           window.updateWalletBtnDisplay && window.updateWalletBtnDisplay();
           break;
+ // --- START MENU STYLE CASES: REPLACE ANY OLD/NESTED ONES WITH THESE ---
+ case 'start-menu-style-default':
+  if (startMenu) {
+    startMenu.classList.remove(...allStartMenuStyles);
+    startMenu.classList.add('start-menu-style-default');
+    startMenuAppSortMode = 'category';
+    populateStartMenuApps();
+    startMenu.style.display = 'block';
+  }
+  break;
+case 'start-menu-style-default-apps-only':
+  if (startMenu) {
+    startMenu.classList.remove(...allStartMenuStyles);
+    startMenu.classList.add('start-menu-style-default-apps-only');
+    startMenuAppSortMode = 'category';
+    populateStartMenuApps();
+    startMenu.style.display = 'block';
+  }
+  break;
+case 'start-menu-style-windows11':
+  if (startMenu) {
+    startMenu.classList.remove(...allStartMenuStyles);
+    startMenu.classList.add('start-menu-style-windows11');
+    startMenuAppSortMode = 'alphabet';
+    populateStartMenuApps();
+    startMenu.style.display = 'block';
+  }
+  break;
+case 'start-menu-style-apps-list-with-sidebar':
+  if (startMenu) {
+    startMenu.classList.remove(...allStartMenuStyles);
+    startMenu.classList.add('start-menu-list-style');
+    startMenuAppSortMode = 'category';
+    populateStartMenuApps();
+    startMenu.style.display = 'block';
+  }
+  break;
+case 'start-menu-style-apps-list-only':
+  if (startMenu) {
+    startMenu.classList.remove(...allStartMenuStyles);
+    startMenu.classList.add('start-menu-style-apps-list-only');
+    startMenuAppSortMode = 'category';
+    populateStartMenuApps();
+    startMenu.style.display = 'block';
+  }
+  break;
+case 'start-menu-style-app-launcher':
+  if (startMenu) {
+    startMenu.classList.remove(...allStartMenuStyles);
+    startMenu.classList.add('start-menu-style-app-launcher');
+    startMenu.style.display = 'none';
+  }
+  
+            if (startMenu) {
+              startMenu.className = startMenu.className
+              .split(' ')
+              .filter(cls => !cls.startsWith('start-menu-style-') && cls !== 'start-menu-apps-only' && cls !== 'start-menu-list-style')
+              .join(' ');
+            startMenu.classList.add('start-menu-style-app-launcher');
+            startMenu.style.display = 'none';
+            }
+            break;
         default:
           _originalExecuteContextMenuAction.call(this, action);
       }
@@ -3121,11 +3380,25 @@ document.addEventListener('DOMContentLoaded', function() {
         menuItems.push({ label: 'Close Window', action: 'close-app', icon: 'fa-xmark'});
         } else if (e.target.closest('.taskbar .taskbar-app-icons')) {
           currentContextMenuTarget = e.target.closest('.taskbar-app-icons');
-          menuItems.push({ label: 'Show search bar', action: 'show-search-taskbar', icon: 'fa-search'});
+          menuItems.push({ label: 'Hide search bar', action: 'hide-search-taskbar', icon: 'fa-search'});
+          menuItems.push({ label: 'Show / Hide Icons', action: 'show-hide-icons-taskbar-right', icon: 'fa-cog', subItems: [
+            { label: 'Hide Search icon', action: 'hide-search-icon-taskbar-right', icon: 'fa-search' },
+            { label: 'Hide App Launcher', action: 'hide-app-launcher-taskbar-right', icon: 'fa-search' },
+            { label: 'Hide Volume', action: 'hide-volume-taskbar-right', icon: 'fa-search' },
+            { type: 'separator' },
+            { label: 'Hide Desktop icons', action: 'hide-app-launcher-taskbar-right', icon: 'fa-search' },
+          ]});
+          menuItems.push({ type: 'separator' });
           menuItems.push({ label: 'Customize Widgets', action: 'customize-widgets', icon: 'fa-server' });
           menuItems.push({ label: 'Show desktop', action: 'show-desktop', icon: 'fa-display' });
           menuItems.push({ type: 'separator' });
-          menuItems.push({ label: 'Customize Taskbar', action: 'customize-taskbar', icon: 'fa-cog' });
+          menuItems.push({ label: 'Customize Taskbar', action: 'customize-all-taskbar', icon: 'fa-cog', subItems: [
+            { label: 'Default', action: 'taskbar-icons-middle-alignment', icon: 'fa-search' },
+            { label: 'All Icons (including taskt menu) - Middle alignment', action: 'taskbar-icons-middle-alignment', icon: 'fa-search' },
+            { label: 'Icons - Left alignment', action: 'taskbar-icons-left-alignment', icon: 'fa-server' },
+            { label: 'Icons and Text', action: 'taskbar-icons-and-text-apps', icon: 'fa-server' },
+
+          ]});
         } else if (e.target.closest('.desktop-icon')) {
           currentContextMenuTarget = e.target.closest('.desktop-icon');
           menuItems.push({ label: 'Open', action: 'open-app', icon: 'fa-folder-open' });
@@ -3134,23 +3407,68 @@ document.addEventListener('DOMContentLoaded', function() {
           menuItems.push({ label: 'Delete', action: 'delete-icon', icon: 'fa-trash' });
         } else if (e.target.closest('.start-button')) {
           currentContextMenuTarget = e.target.closest('.start-button');
-          menuItems.push({ label: 'My Profile', action: 'my-profile-settings', icon: 'fa-folder-open' });
-          menuItems.push({ label: 'Appearance', action: 'appearance-settings', icon: 'fa-thumbtack' });
+          menuItems.push({ label: 'My Profile', action: 'my-profile-settings', icon: 'fa-user' });
+          menuItems.push({ label: 'Appearance', action: 'appearance-settings', icon: 'fa-paint-brush' });
           menuItems.push({ label: 'Notifications', action: 'notifications-settings', icon: 'fa-bell' });
-          menuItems.push({ label: 'Privacy', action: 'privacy-settings', icon: 'fa-user-secret' });
-          menuItems.push({ label: 'Security', action: 'security-settings', icon: 'fa-shield-alt' });
-          menuItems.push({ label: 'Integrations', action: 'integrations-settings', icon: 'fa-hdd' });
-          menuItems.push({ label: 'Active Services', action: 'active-services', icon: 'fa-info-circle' });
+          menuItems.push({ label: 'Privacy', action: 'privacy-settings', icon: 'fa-user-shield' });
+          menuItems.push({ label: 'Security', action: 'security-settings', icon: 'fa-lock' });
+          menuItems.push({ label: 'Integrations', action: 'integrations-settings', icon: 'fa-plug' });
+          menuItems.push({ label: 'Active Services', action: 'active-services', icon: 'fa-cogs' });
           menuItems.push({ type: 'separator' });
           menuItems.push({ label: 'My Website', action: 'my-website', icon: 'fa-globe' });
-          menuItems.push({ label: 'Products', action: 'products-settings', icon: 'fa-folder-open' });
-          menuItems.push({ label: 'Payments', action: 'payments-settings', icon: 'fa-folder-open' });
-          menuItems.push({ label: 'Shipping', action: 'shipping-settings', icon: 'fa-folder-open' });
-          menuItems.push({ label: 'Customers & Privacy', action: 'customers-privacy-settings', icon: 'fa-folder-open' });
-          menuItems.push({ label: 'Emails', action: 'emails-settings', icon: 'fa-folder-open' });
-          menuItems.push({ label: 'Billing', action: 'billing-settings', icon: 'fa-folder-open' });
+          menuItems.push({ label: 'Products', action: 'products-settings', icon: 'fa-box-open' });
+          menuItems.push({ label: 'Payments', action: 'payments-settings', icon: 'fa-credit-card' });
+          menuItems.push({ label: 'Shipping', action: 'shipping-settings', icon: 'fa-shipping-fast' });
+          menuItems.push({ label: 'Customers & Privacy', action: 'customers-privacy-settings', icon: 'fa-users' });
+          menuItems.push({ label: 'Emails', action: 'emails-settings', icon: 'fa-envelope' });
+          menuItems.push({ label: 'Billing', action: 'billing-settings', icon: 'fa-file-invoice-dollar' });
           menuItems.push({ type: 'separator' });
           menuItems.push({ label: 'Open Settings', action: 'open-settings', icon: 'fa-cog' });
+          menuItems.push({ type: 'separator' });
+menuItems.push({
+  label: 'Start menu style',
+  action: 'start-menu-style',
+  icon: 'fa-table-cells',
+  subItems: [
+    {
+      label: 'Default',
+      action: 'start-menu-style-default',
+      icon: 'fa-braille',
+      checked: startMenu && startMenu.classList.contains('start-menu-style-default')
+    },
+    {
+      label: 'Default Apps only',
+      action: 'start-menu-style-default-apps-only',
+      icon: 'fa-braille',
+      checked: startMenu && startMenu.classList.contains('start-menu-style-default-apps-only')
+    },
+    {
+      label: 'Windows 11 Style',
+      action: 'start-menu-style-windows11',
+      icon: 'fa-windows',
+      checked: startMenu && startMenu.classList.contains('start-menu-style-windows11')
+    },
+    {
+      label: 'List with sidebar',
+      action: 'start-menu-style-apps-list-with-sidebar',
+      icon: 'fa-list-ul',
+      checked: startMenu && startMenu.classList.contains('start-menu-list-style') && !startMenu.classList.contains('start-menu-style-apps-list-only')
+    },
+    {
+      label: 'List Apps only',
+      action: 'start-menu-style-apps-list-only',
+      icon: 'fa-list-ul',
+      checked: startMenu && startMenu.classList.contains('start-menu-style-apps-list-only')
+    },
+    { type: 'separator' },
+    {
+      label: 'App Launcher',
+      action: 'start-menu-style-app-launcher',
+      icon: 'fa-rocket',
+      checked: startMenu && startMenu.classList.contains('start-menu-style-app-launcher')
+    }
+  ]
+});
         } else if (e.target.closest('.file-explorer-content .file-item')) {
           currentContextMenuTarget = e.target.closest('.file-item');
           menuItems.push({ label: 'Open', action: 'open-file', icon: 'fa-folder-open'});
@@ -3384,6 +3702,7 @@ document.addEventListener('DOMContentLoaded', function() {
               // Add check mark if this is the selected notification mode or wallet display mode
               let showCheck = false;
               if (
+                subItem.checked || // NEW: Check the item's checked property
                 (subItem.action === 'show-only-1-notification' && desktopNotificationMode === 'one') ||
                 (subItem.action === 'show-only-3-notifications' && desktopNotificationMode === 'three') ||
                 (subItem.action === 'show-all-notifications' && desktopNotificationMode === 'all') ||
@@ -3646,7 +3965,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Add App launcher desktop icon if not present
   document.addEventListener('DOMContentLoaded', function() {
-    // ... existing code ...
+      // ... existing code ...
     // Add App launcher icon to desktop
     if (desktopIconsContainer && !document.querySelector('.desktop-icon[data-app="app-launcher"]')) {
       const appLauncherIcon = document.createElement('div');
@@ -3689,7 +4008,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // --- macOS-style search bar ---
     const searchBarContainer = document.createElement('div');
     searchBarContainer.className = 'search-bar-container';
-    searchBarContainer.style.width = 'min(90vw, 900px)';
+
     searchBarContainer.style.maxWidth = '100vw;';
     searchBarContainer.style.margin = '40px auto 0 auto';
     searchBarContainer.style.display = 'flex';
@@ -3704,13 +4023,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const searchInput = document.createElement('input');
     searchInput.type = 'text';
-    searchInput.placeholder = 'Search';
+    searchInput.placeholder = 'Start typing...';
     searchInput.style.width = '100%';
     searchInput.style.height = '44px';
     searchInput.style.borderRadius = '0px';
     searchInput.style.border = 'none';
     searchInput.style.background = 'transparent';
-    searchInput.style.borderBottom = '1px solid rgba(255,255,255,0.1)';
     searchInput.style.color = '#fff';
     searchInput.style.fontSize = '20px';
     searchInput.style.padding = '0 48px 0 20px';
@@ -3722,12 +4040,12 @@ document.addEventListener('DOMContentLoaded', function() {
     searchInput.autofocus = true;
     searchInput.style.display = 'block';
     searchInput.style.position = 'relative';
-
+    searchInput.style.textAlign = 'center';
     // Add a search icon (macOS style)
     const searchIcon = document.createElement('i');
     searchIcon.className = 'fas fa-search';
     searchIcon.style.position = 'absolute';
-    searchIcon.style.right = '18px';
+    searchIcon.style.left = '18px';
     searchIcon.style.top = '0';
     searchIcon.style.height = '44px';
     searchIcon.style.display = 'flex';
@@ -3735,6 +4053,7 @@ document.addEventListener('DOMContentLoaded', function() {
     searchIcon.style.color = 'rgba(255,255,255,0.6)';
     searchIcon.style.fontSize = '20px';
     searchIcon.style.pointerEvents = 'none';
+    searchIcon.style.display = 'none';
 
     searchBarContainer.appendChild(searchInput);
     searchBarContainer.appendChild(searchIcon);
@@ -4864,8 +5183,8 @@ window.addEventListener('resize', function() {
       }
     }
   }
-});
-// ... existing code ...
+      });
+      // ... existing code ...
     const popoutButton = windowElement.querySelector('.window-popout');
     if (popoutButton) {
       popoutButton.addEventListener('click', function(e) {
@@ -4974,25 +5293,25 @@ window.addEventListener('resize', function() {
           logOutButton.addEventListener('click', () => {
             if(startMenu) startMenu.style.display = 'none';
             // Set a global flag to indicate logout in progress
-            window._loggingOut = true;
+        window._loggingOut = true;
             // Close all popout windows
-            if (window._allPopoutWindows && Array.isArray(window._allPopoutWindows)) {
-              window._allPopoutWindows = window._allPopoutWindows.filter(win => {
-                if (win && !win.closed) {
-                  try { win.close(); } catch (e) {}
-                  return false;
-                }
-                return false;
-              });
+        if (window._allPopoutWindows && Array.isArray(window._allPopoutWindows)) {
+          window._allPopoutWindows = window._allPopoutWindows.filter(win => {
+            if (win && !win.closed) {
+              try { win.close(); } catch (e) {}
+              return false;
             }
+            return false;
+          });
+        }
             // Optionally, clear the flag after a short delay
-            setTimeout(() => { window._loggingOut = false; }, 2000);
+        setTimeout(() => { window._loggingOut = false; }, 2000);
           });
         }
         // ... existing code ...
       });
-    }
-// ... existing code ...
+  }
+  // ... existing code ...
 
 // ... existing code ...
 // --- SWIPE TO DELETE FOR NOTIFICATIONS ---
@@ -5122,7 +5441,7 @@ function showToastNotification(opts = {}) {
     <div class="notif-icon-bg notif-bg-blue"><i class="fas fa-shopping-cart"></i></div>
     <div class="notif-content">
       <div class="notif-main-row">
-        <span class="notif-main-title">New incoming notification</span>
+        <span class="notif-main-title">New incoming notification1</span>
         <span class="notif-dot"></span>
       </div>
       <div class="notif-desc">This is a test notification</div>
@@ -5474,7 +5793,7 @@ window.updateSidebarForWindow = function(windowEl) {
     rightScreen.style.flexDirection = 'column';
     rightScreen.style.overflow = 'auto';
     // Clone the widgets screen
-    const widgetsScreen = document.getElementById('widgets-screen');
+  const widgetsScreen = document.getElementById('widgets-screen');
     if (widgetsScreen) {
       const widgetsClone = widgetsScreen.cloneNode(true);
       widgetsClone.classList.add('in-swipe');
@@ -5820,7 +6139,39 @@ sb.style.overflowY = 'auto';
 })();
 
 
-
+// --- Alert Confirmation Dialog ---
+function showConfirmDialog({ title, message, iconClass, okText = "OK", cancelText = "Cancel" }) {
+  return new Promise((resolve) => {
+    let existing = document.getElementById('os-alert-overlay');
+    if (existing) existing.remove();
+    const overlay = document.createElement('div');
+    overlay.id = 'os-alert-overlay';
+    overlay.className = 'alert-overlay';
+    overlay.innerHTML = `
+      <div class="alert-dialog">
+        <div class="alert-icon"><i class="fas ${iconClass || 'fa-question-circle'}"></i></div>
+        <div class="alert-title">${title || ''}</div>
+        <div class="alert-message">${message || ''}</div>
+        <div class="alert-actions">
+          <button class="alert-btn alert-cancel">${cancelText}</button>
+          <button class="alert-btn alert-ok">${okText}</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+    setTimeout(() => overlay.classList.add('alert-overlay-bg-visible'), 10);
+    setTimeout(() => overlay.querySelector('.alert-ok').focus(), 10);
+    function fadeOutAndRemove(result) {
+      overlay.classList.add('alert-overlay-fadeout');
+      setTimeout(() => { overlay.remove(); resolve(result); }, 400);
+    }
+    overlay.querySelector('.alert-cancel').onclick = () => fadeOutAndRemove(false);
+    overlay.querySelector('.alert-ok').onclick = () => { overlay.remove(); resolve(true); };
+    overlay.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') { fadeOutAndRemove(false); }
+    });
+  });
+}
 
 
 

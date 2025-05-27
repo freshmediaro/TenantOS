@@ -258,7 +258,7 @@ body {
 }
 
 .search-container {
-  height: 35px;
+  height: 30px;
   background-color: rgba(255, 255, 255, 0.1);
   border-radius: 8px;
   display: flex;
@@ -405,6 +405,7 @@ body {
   display: none; /* Hidden by default, JS will toggle */
   flex-direction: column; /* Main container is a column */
   padding: 0; /* Remove global padding, sections will manage their own */
+  transition: all 0.3s;
 }
 
 /* NEW: Profile Header Area */
@@ -449,6 +450,7 @@ body {
   /* gap: 25px;  Gap between left panel and right sidebar */
   padding-top: 30px;
   padding-bottom: 30px;
+  max-height: calc(100vh - 280px);
 }
 
 /* Adjustments for Left Panel (App Grid) */
@@ -458,7 +460,6 @@ body {
   padding: 0; /* Remove old padding */
   border-right: none; /* Remove old border, gap handles separation */
   overflow-y: auto; /* Allow scrolling for apps */
-  max-height: calc(100vh - 280px); /* Estimate based on header/footer heights */
   max-width: 420px;
   padding: 10px 30px;
 }
@@ -477,12 +478,15 @@ body {
   color: #E0E0E0;
 }
 
-.category-link {
+.start-menu-category-link {
   font-size: 12px;
   color: #A0A0B0;
   text-decoration: none;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
 }
-.category-link i {
+.start-menu-category-link i {
    margin-right: 5px; 
   font-size: 13px; /* Slightly larger icon */
 }
@@ -548,8 +552,7 @@ body {
   font-size: 12px;
   color: rgba(255, 255, 255, 0.85);
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow: visible;
   max-width: 100%;
 }
 
@@ -559,7 +562,6 @@ body {
   flex-shrink: 0; /* Prevent shrinking */
   padding: 10px 20px; /* Space from the left panel (if gap isn't enough or for border) */
   overflow-y: auto;
-  max-height: calc(100vh - 280px); /* Match left panel */
 }
 
 .start-menu-right-sidebar .menu-section {
@@ -653,6 +655,9 @@ body {
   background-color: rgba(255, 255, 255, 0.04); /* Darker search input bg */
   border-radius: 8px;
   padding: 10px 15px; /* More padding */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .start-menu-footer .search-icon-bottom {
@@ -668,10 +673,16 @@ body {
   outline: none;
   color: var(--text-color);
   font-size: 14px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .start-menu-footer .start-menu-search-input-bottom::placeholder {
   color: #808090;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 /* NEW: Logout Button */
@@ -1031,9 +1042,7 @@ body {
 
 
 
-.app-launcher-app {
-  display: flex !important;
-}
+
 
 
 .add-drive-button {
@@ -3940,6 +3949,10 @@ body.light-windows .settings-content .badge {
 @media (max-width: 1023px) {
   /* All rules from every scattered @media (max-width: 1023px) go here */
 
+  #app-launcher-overlay .search-bar-container {
+    display: none !important
+    }
+
     .desktop-icons {
       display: grid !important;
       grid-template-columns: repeat(4, 1fr) !important;
@@ -5656,14 +5669,7 @@ body.light-windows .settings-content .badge {
   justify-content: flex-start;
   gap: 8px;
 }
-.music-progress-slider {
-  width: 100%;
-  accent-color: #3576f6;
-  height: 5px;
-  border-radius: 6px;
-  background: #23243a;
-  margin-bottom: 6px;
-}
+
 .music-time-controls-row {
   display: flex;
   align-items: center;
@@ -5685,10 +5691,7 @@ body.light-windows .settings-content .badge {
   text-align: end;
 }
 
-.music-btn:active, .music-btn:focus {
-  background: #232335;
-  color: #3576f6;
-}
+
 .close-volume-panel-btn {
   background: none;
   border: none;
@@ -5841,7 +5844,7 @@ body.light-windows .settings-content .badge {
 }
 .music-progress-slider {
   width: 100%;
-  accent-color: #3576f6;
+  accent-color: var(--accent-color);
   height: 5px;
   border-radius: 6px;
   background: #23243a;
@@ -5873,20 +5876,27 @@ body.light-windows .settings-content .badge {
   font-size: 16px;
   cursor: pointer;
   transition: color 0.18s, background 0.18s;
-  border-radius: 8px;
+  border-radius: 50%;
   width: 38px;
   height: 38px;
   display: flex;
   align-items: center;
   justify-content: center;
+  opacity: 0.8;
 }
+.music-btn:hover {
+  opacity: 1;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
 .music-btn:active, .music-btn:focus {
-  background: #232335;
-  color: #3576f6;
+  background: var(--accent-color);
+  color: #fff;
+  opacity: 1;
 }
 .play-btn {
   background: #fff;
-  color: #18192b;
+  color: var(--accent-color);
   width: 45px;
   height: 45px;
   border-radius: 50%;
@@ -5897,9 +5907,12 @@ body.light-windows .settings-content .badge {
   align-items: center;
   justify-content: center;
   transition: background 0.18s, color 0.18s;
+  opacity: 1;
 }
-.play-btn:active, .play-btn:focus {
-  background: #3576f6;
+
+
+.play-btn:active, .play-btn:focus, .play-btn:hover {
+  background: var(--accent-color);
   color: #fff;
 }
 .close-volume-panel-btn {
@@ -6110,7 +6123,7 @@ body.light-windows .settings-content .badge {
   margin-right: 0 !important;
   font-size: 13px !important;
   color: #ffffff !important;
-  width: 18px;
+  width: 16px;
   text-align: right;
   display: inline-block;
 }
@@ -6118,4 +6131,347 @@ body.light-windows .settings-content .badge {
 #wallet-btn {
   width: max-content;
   padding: 0px 8px;
+}
+
+/* Hide right sidebar in apps only mode */
+
+.start-menu.start-menu-style-default-apps-only {
+  width: 420px;
+  transition: all 0.3s;
+}
+
+.start-menu.start-menu-style-default-apps-only .start-menu-right-sidebar {
+  display: none !important;
+  transition: all 0.3s;
+}
+.start-menu.start-menu-style-default-apps-only .start-menu-left-panel {
+  max-width: none;
+  flex-grow: 1;
+  width: 100%;
+  transition: all 0.3s;
+}
+
+/* List style for start menu */
+
+.start-menu.start-menu-list-style .start-menu-right-sidebar {
+  width: 240px;
+  transition: all 0.3s;
+  padding: 10px;
+}
+
+.start-menu.start-menu-list-style .app-grid-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 0;
+  transition: all 0.3s;
+  margin: 0;
+}
+.start-menu.start-menu-list-style .app-grid-item {
+  display: flex;
+  align-items: center;
+  padding: 4px 0;
+  border-radius: 0;
+  margin: 0;
+  width: 100%;
+  transition: all 0.3s;
+  flex-direction: row;
+}
+
+.start-menu.start-menu-list-style .app-grid-section h4 {
+  margin: 16px 0 15px 0;
+  font-size: 10px;
+  color: #565977;
+  font-weight: 500;
+}
+.start-menu.start-menu-list-style .app-icon-bg {
+  margin-right: 12px;
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  margin-bottom: 0;
+}
+.start-menu.start-menu-list-style .app-grid-item span {
+  font-size: 14px;
+  font-weight: 400;
+}
+.start-menu.start-menu-list-style .app-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  transition: all 0.3s;
+}
+
+.start-menu.start-menu-list-style .app-icon-bg i {
+  font-size: 18px; }
+
+.start-menu.start-menu-list-style {
+  width: 500px;
+  transition: all 0.3s;
+}
+
+/* List style for start menu APPS ONLY */
+
+.start-menu.start-menu-style-apps-list-only .start-menu-right-sidebar {
+  width: 240px;
+  transition: all 0.3s;
+  padding: 10px;
+}
+
+.start-menu.start-menu-style-apps-list-only .app-grid-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 0;
+  transition: all 0.3s;
+  margin: 0;
+}
+.start-menu.start-menu-style-apps-list-only .app-grid-item {
+  display: flex;
+  align-items: center;
+  padding: 4px 0;
+  border-radius: 0;
+  margin: 0;
+  width: 100%;
+  transition: all 0.3s;
+  flex-direction: row;
+}
+
+.start-menu.start-menu-style-apps-list-only .app-grid-section h4 {
+  margin: 16px 0 15px 0;
+  font-size: 10px;
+  color: #565977;
+  font-weight: 500;
+}
+.start-menu.start-menu-style-apps-list-only .app-icon-bg {
+  margin-right: 12px;
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  margin-bottom: 0;
+}
+.start-menu.start-menu-style-apps-list-only .app-grid-item span {
+  font-size: 14px;
+  font-weight: 400;
+}
+.start-menu.start-menu-style-apps-list-only .app-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  transition: all 0.3s;
+}
+
+.start-menu.start-menu-style-apps-list-only .app-icon-bg i {
+  font-size: 18px; }
+
+.start-menu.start-menu-style-apps-list-only {
+  width: 500px;
+  transition: all 0.3s;
+}
+
+
+
+.start-menu.start-menu-style-apps-list-only {
+ width: 280px;
+ transition: all 0.3s;
+}
+
+
+.start-menu.start-menu-style-apps-list-only .start-menu-body {
+  padding-top: 10px; 
+  padding-bottom: 10px;
+  transition: all 0.3s;
+}
+  
+.start-menu.start-menu-style-apps-list-only .start-menu-search-bar-bottom {
+  display: none !important;
+}
+
+.start-menu.start-menu-style-apps-list-only .start-menu-footer {
+  padding-top: 0;
+}
+
+.start-menu.start-menu-style-apps-list-only .start-menu-right-sidebar {
+  display: none;
+}
+
+
+/* windows 11 style */
+
+.start-menu.start-menu-style-windows11 {
+  height: 600px;
+  width: 600px;
+}
+
+.start-menu.start-menu-style-windows11 .app-icon-bg {
+  width: 40px;
+    height: 40px;
+    border-radius: 10px;
+}
+
+.start-menu.start-menu-style-windows11 .start-menu-body {
+  display: block;
+  padding-top: 24px;
+  padding-bottom: 0;
+}
+
+.start-menu.start-menu-style-windows11 .start-menu-left-panel {
+  max-width: none;
+  width: 100%;
+  padding: 0 32px 10px 32px;
+  margin-bottom: 18px;
+  box-sizing: border-box;
+  transition: all 0.3s;
+  height: 340px;
+}
+
+.start-menu.start-menu-style-windows11 .start-menu-right-sidebar {
+  width: 100%;
+  max-width: none;
+  padding: 0 32px 0 32px;
+  box-sizing: border-box;
+  display: flex  ;
+  justify-content: space-between;
+  overflow-y: auto;
+  max-height: 150px; /* 70px footer, 60px header (adjust if needed) */
+  position: relative;
+  z-index: 1;
+}
+
+.start-menu.start-menu-style-windows11 .start-menu-right-sidebar .menu-section {
+  margin-bottom: 18px;
+  width: 200px;
+}
+
+.start-menu.start-menu-style-windows11 .start-menu-right-sidebar .menu-section:last-child {
+  margin-bottom: 0;
+}
+
+.start-menu.start-menu-style-windows11 .start-menu-right-sidebar .menu-section h3 {
+  padding-left: 0;
+  margin-bottom: 10px;
+}
+
+.start-menu.start-menu-style-windows11 .menu-links-list {
+  display: flex;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 5px;
+  flex-direction: column;
+    flex-wrap: nowrap;
+}
+
+.start-menu.start-menu-style-windows11 .menu-links-list li {
+  margin: 0;
+}
+
+.start-menu.start-menu-style-windows11 .menu-links-list li a.menu-item {
+  padding: 6px 10px;
+  justify-content: flex-start;
+}
+
+/* Responsive: stack sidebar under left panel on small screens */
+@media (max-width: 600px) {
+  .start-menu.start-menu-style-windows11 .start-menu-left-panel,
+  .start-menu.start-menu-style-windows11 .start-menu-right-sidebar {
+    padding: 0 10px;
+  }
+  .start-menu.start-menu-style-windows11 .menu-links-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+.start-menu.start-menu-style-windows11 .start-menu-footer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  border-radius: 0 0 16px 16px;
+  background: rgba(0,0,0,0.15);
+  border-top: 1px solid rgba(255,255,255,0.08);
+  z-index: 2;
+  padding: 10px 25px;
+}
+
+.start-menu.start-menu-style-windows11 {
+  padding-bottom: 70px; /* Reserve space for the fixed footer */
+}
+
+/* --- Modal Confirmation Dialog Styles --- */
+.alert-overlay {
+  position: fixed; top: 0; 
+  left: 0; 
+  width: 100vw; 
+  height: 100vh;
+
+  background: rgba(0,0,0,0.32); 
+  z-index: 999999;
+  display: flex; 
+  align-items: center; 
+  justify-content: center;
+  transition: background 5s cubic-bezier(0.4,0,0.2,1);
+}
+
+.alert-overlay.alert-overlay-bg-visible {
+  background-color: var(--primary-bg);
+  background:radial-gradient(circle at center, rgba(128, 0, 128, 0.548), transparent 70%), var(--primary-bg);
+}
+
+.alert-dialog {
+  background: #23243a69;
+  backdrop-filter: blur(40px);
+  border: 1px solid var(--border-color);
+  color: #fff; 
+  border-radius: 16px; 
+  box-shadow: 0 8px 32px #0008;
+  padding: 32px 28px; 
+  min-width: 320px; 
+  max-width: 90vw; 
+  text-align: center;
+  z-index: 9999999;
+}
+.alert-icon { 
+  font-size: 38px; 
+  margin-bottom: 16px; 
+}
+
+.alert-title { 
+  font-size: 1.25rem; 
+  font-weight: 600; 
+  margin-bottom: 8px; 
+}
+.alert-message { 
+  font-size: 1rem; 
+  margin-bottom: 24px; 
+}
+
+.alert-actions { 
+  display: flex; 
+  gap: 16px; 
+  justify-content: center; 
+}
+
+.alert-btn { 
+  padding: 9px 28px; 
+  border-radius: 8px; 
+  border: none; 
+  font-size: 15px; 
+  font-weight: 500;
+  cursor: pointer; 
+}
+.alert-btn.alert-ok { 
+  background: #0078d4; 
+  color: #fff; }
+.alert-btn.alert-cancel { 
+  background: #a4a6bd57;
+  color: #fff; }
+
+.alert-overlay.alert-overlay-fadeout {
+  background: rgba(0,0,0,0.32) !important;
+  transition: background-color 0.8s cubic-bezier(0.4,0,0.2,1);
+}
+.alert-overlay.alert-overlay-fadeout .alert-dialog {
+  opacity: 0;
+  transform: translateY(40px) scale(0.98);
+  transition: opacity 0.4s, transform 0.4s;
 }
