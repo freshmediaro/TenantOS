@@ -17,14 +17,166 @@ let desktopNotificationMode = 'three'; // Default to 3 notifications stacked
 const volumeBtn = document.querySelector('#volume-btn');
 const volumePanel = document.querySelector('#volume-panel');
 
+
+
+
+
+document.addEventListener('DOMContentLoaded', function () {
+  // ... existing code ...
+  // GLOBAL SEARCH OVERLAY LOGIC
+  const globalSearchBtn = document.getElementById('global-search-btn');
+  const globalSearchOverlay = document.getElementById('global-search-overlay');
+  const globalSearchInput = document.getElementById('global-search-input');
+  const globalSearchDropdownBtn = document.getElementById('global-search-dropdown-btn');
+  const globalSearchDropdownList = document.getElementById('global-search-dropdown-list');
+  const globalSearchSelected = document.getElementById('global-search-selected');
+  let globalSearchDropdownOpen = false;
+  function showGlobalSearch() {
+    if (window.innerWidth <= 1023) return;
+    globalSearchOverlay.style.display = 'flex';
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        globalSearchOverlay.style.opacity = '1';
+        globalSearchOverlay.style.visibility = 'visible';
+        if (globalSearchInput) {
+          // Force input to be focusable and reset focus state
+          globalSearchInput.tabIndex = -1;
+          globalSearchInput.blur();
+          globalSearchInput.tabIndex = 0;
+          globalSearchInput.focus();
+          globalSearchInput.select();
+        }
+        document.body.style.overflow = 'hidden';
+      });
+    });
+  }
+  function hideGlobalSearch() {
+    globalSearchOverlay.style.opacity = '0';
+    globalSearchOverlay.style.visibility = 'hidden';
+    setTimeout(() => {
+      globalSearchOverlay.style.display = 'none';
+      document.body.style.overflow = '';
+    }, 300);
+    closeDropdown();
+  }
+  function openDropdown() {
+    globalSearchDropdownList.style.display = 'flex';
+    globalSearchDropdownOpen = true;
+  }
+  function closeDropdown() {
+    globalSearchDropdownList.style.display = 'none';
+    globalSearchDropdownOpen = false;
+  }
+  if (globalSearchBtn && globalSearchOverlay) {
+    globalSearchBtn.addEventListener('click', function () {
+      if (window.innerWidth <= 1023) return;
+      if (globalSearchOverlay.style.display !== 'flex') {
+        globalSearchOverlay.style.display = 'flex';
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            globalSearchOverlay.style.opacity = '1';
+            globalSearchOverlay.style.visibility = 'visible';
+            if (globalSearchInput) {
+              // Remove and re-append input for bulletproof focus
+              const parent = globalSearchInput.parentNode;
+              const next = globalSearchInput.nextSibling;
+              parent.removeChild(globalSearchInput);
+              if (next) parent.insertBefore(globalSearchInput, next);
+              else parent.appendChild(globalSearchInput);
+              setTimeout(() => {
+                globalSearchInput.focus();
+                globalSearchInput.setSelectionRange(0, globalSearchInput.value.length);
+              }, 30);
+            }
+            document.body.style.overflow = 'hidden';
+          });
+        });
+      } else {
+        if (globalSearchInput) {
+          // Remove and re-append input for bulletproof focus
+          const parent = globalSearchInput.parentNode;
+          const next = globalSearchInput.nextSibling;
+          parent.removeChild(globalSearchInput);
+          if (next) parent.insertBefore(globalSearchInput, next);
+          else parent.appendChild(globalSearchInput);
+          setTimeout(() => {
+            globalSearchInput.focus();
+            globalSearchInput.setSelectionRange(0, globalSearchInput.value.length);
+          }, 30);
+        }
+      }
+    });
+    globalSearchInput && globalSearchInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') hideGlobalSearch();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (globalSearchOverlay.style.display !== 'none' && e.key === 'Escape') hideGlobalSearch();
+    });
+    globalSearchOverlay.addEventListener('mousedown', function (e) {
+      if (e.target === globalSearchOverlay) hideGlobalSearch();
+    });
+    // Dropdown logic
+    if (globalSearchDropdownBtn && globalSearchDropdownList) {
+      globalSearchDropdownBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (globalSearchDropdownOpen) closeDropdown();
+        else openDropdown();
+      });
+      globalSearchDropdownList.addEventListener('mousedown', function (e) {
+        e.stopPropagation();
+      });
+      document.addEventListener('mousedown', function (e) {
+        if (globalSearchDropdownOpen && !globalSearchDropdownList.contains(e.target) && e.target !== globalSearchDropdownBtn) {
+          closeDropdown();
+        }
+      });
+      Array.from(globalSearchDropdownList.querySelectorAll('.dropdown-item')).forEach(item => {
+        item.addEventListener('click', function () {
+          globalSearchDropdownList.querySelectorAll('.dropdown-item').forEach(i => i.classList.remove('selected'));
+          item.classList.add('selected');
+          // Set icon and text in the selected button
+          globalSearchSelected.innerHTML = item.innerHTML;
+          closeDropdown();
+        });
+      });
+      // On page load, set the default selected icon+text
+      const initiallySelected = globalSearchDropdownList.querySelector('.dropdown-item.selected');
+      if (initiallySelected) {
+        globalSearchSelected.innerHTML = initiallySelected.innerHTML;
+      }
+    }
+  }
+});
+// ... existing code ...
+
+
+
+
+// --- Robust volume UI update function ---
+function updateVolumeUI(value) {
+  const volumeBtn = document.getElementById('volume-btn');
+  const volumePanel = document.getElementById('volume-panel');
+  const icon = volumeBtn ? volumeBtn.querySelector('i') : null;
+  const panelIcon = volumePanel ? volumePanel.querySelector('.volume-slider-panel i') : null;
+  isMuted = (value === 0);
+  if (icon) {
+    icon.classList.remove('fa-volume-up', 'fa-volume-mute');
+    icon.classList.add(isMuted ? 'fa-volume-mute' : 'fa-volume-up');
+  }
+  if (panelIcon) {
+    panelIcon.classList.remove('fa-volume-up', 'fa-volume-mute');
+    panelIcon.classList.add(isMuted ? 'fa-volume-mute' : 'fa-volume-up');
+  }
+}
+
 if (volumeBtn && volumePanel) {
   // Set initial state
   volumePanel.style.display = 'none';
-  
+
   volumeBtn.addEventListener('click', (e) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (volumePanel.classList.contains('visible')) {
       volumePanel.classList.remove('visible');
       setTimeout(() => {
@@ -37,7 +189,7 @@ if (volumeBtn && volumePanel) {
       });
     }
   });
-  
+
   // Setup close button
   const closeBtn = volumePanel.querySelector('#close-volume-panel');
   if (closeBtn) {
@@ -48,40 +200,15 @@ if (volumeBtn && volumePanel) {
       }, 350);
     });
   }
-  
+
   // Setup volume slider
   const browserVolumeSlider = volumePanel.querySelector('#browser-volume-slider');
   if (browserVolumeSlider) {
     browserVolumeSlider.addEventListener('input', (e) => {
       const value = parseInt(e.target.value, 10);
-      const icon = volumeBtn.querySelector('i');
-      const panelIcon = volumePanel.querySelector('.volume-slider-panel i');
-      // Update panel icon as well
-      if (panelIcon) {
-        if (value === 0) {
-          panelIcon.classList.remove('fa-volume-up');
-          panelIcon.classList.add('fa-volume-mute');
-        } else {
-          panelIcon.classList.remove('fa-volume-mute');
-          panelIcon.classList.add('fa-volume-up');
-        }
-      }
-      if (value === 0) {
-        isMuted = true;
-        if (icon) {
-          icon.classList.remove('fa-volume-up');
-          icon.classList.add('fa-volume-mute');
-        }
-      } else {
-        if (isMuted) {
-          // Only update previousVolume if coming from muted state
-          previousVolume = value;
-        }
-        isMuted = false;
-        if (icon) {
-          icon.classList.remove('fa-volume-mute');
-          icon.classList.add('fa-volume-up');
-        }
+      updateVolumeUI(value);
+      if (!isMuted) {
+        previousVolume = value;
       }
     });
 
@@ -89,8 +216,7 @@ if (volumeBtn && volumePanel) {
     const panelIcon = volumePanel.querySelector('.volume-slider-panel i');
     if (panelIcon) {
       panelIcon.style.cursor = 'pointer';
-      panelIcon.addEventListener('click', function() {
-        const icon = volumeBtn.querySelector('i');
+      panelIcon.addEventListener('click', function () {
         if (!isMuted) {
           // Muting
           if (browserVolumeSlider) {
@@ -98,26 +224,12 @@ if (volumeBtn && volumePanel) {
             browserVolumeSlider.value = 0;
             browserVolumeSlider.dispatchEvent(new Event('input', { bubbles: true }));
           }
-          if (icon) {
-            icon.classList.remove('fa-volume-up');
-            icon.classList.add('fa-volume-mute');
-          }
-          panelIcon.classList.remove('fa-volume-up');
-          panelIcon.classList.add('fa-volume-mute');
-          isMuted = true;
         } else {
           // Unmuting
           if (browserVolumeSlider) {
             browserVolumeSlider.value = previousVolume;
             browserVolumeSlider.dispatchEvent(new Event('input', { bubbles: true }));
           }
-          if (icon) {
-            icon.classList.remove('fa-volume-mute');
-            icon.classList.add('fa-volume-up');
-          }
-          panelIcon.classList.remove('fa-volume-mute');
-          panelIcon.classList.add('fa-volume-up');
-          isMuted = false;
         }
       });
     }
@@ -125,46 +237,48 @@ if (volumeBtn && volumePanel) {
     // Playlist panel logic
     const musicPanel = volumePanel.querySelector('.music-panel-box');
     const playlistBtn = musicPanel ? musicPanel.querySelector('.music-btn[title="Playlist"]') : null;
-    let playlistPanel = null;
     if (playlistBtn && musicPanel) {
       playlistBtn.addEventListener('click', () => {
-        if (!playlistPanel) {
-          // Create the playlist panel
-          playlistPanel = document.createElement('div');
-          playlistPanel.className = 'music-panel-box playlist-panel-slide';
-          playlistPanel.style.position = 'absolute';
-          playlistPanel.style.left = '0';
-          playlistPanel.style.right = '0';
-          playlistPanel.style.bottom = '100%';
-          playlistPanel.style.margin = '0 auto 28px auto';
-          playlistPanel.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)';
-          playlistPanel.style.transform = 'translateY(100%)';
-          playlistPanel.innerHTML = '<div style="padding: 18px 18px 10px 18px; color: #fff; font-size: 1.1rem; font-weight: 600;">Playlist (placeholder)</div>';
+        if (musicPanel.style.display === 'none') return;
+        let domPlaylistPanel = musicPanel.parentNode.querySelector('.playlist-panel-slide');
+        if (!domPlaylistPanel) {
+          domPlaylistPanel = document.createElement('div');
+          domPlaylistPanel.className = 'music-panel-box playlist-panel-slide';
+          domPlaylistPanel.style.position = 'absolute';
+          domPlaylistPanel.style.left = '0';
+          domPlaylistPanel.style.right = '0';
+          domPlaylistPanel.style.bottom = '100%';
+          domPlaylistPanel.style.margin = '0 auto 28px auto';
+          domPlaylistPanel.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)';
+          domPlaylistPanel.style.transform = 'translateY(100%)';
+          domPlaylistPanel.innerHTML = '<div style="padding: 18px 18px 10px 18px; color: #fff; font-size: 1.1rem; font-weight: 600;">Playlist (placeholder)</div>';
           musicPanel.style.position = 'relative';
-          musicPanel.parentNode.insertBefore(playlistPanel, musicPanel);
-          // Animate in
+          musicPanel.parentNode.insertBefore(domPlaylistPanel, musicPanel);
           setTimeout(() => {
-            playlistPanel.style.transform = 'translateY(0)';
+            domPlaylistPanel.style.transform = 'translateY(0)';
           }, 10);
         } else {
-          // Animate out and remove
-          playlistPanel.style.transform = 'translateY(100%)';
-          setTimeout(() => {
-            if (playlistPanel && playlistPanel.parentNode) {
-              playlistPanel.parentNode.removeChild(playlistPanel);
-              playlistPanel = null;
+          domPlaylistPanel.style.transform = 'translateY(100%)';
+          if (window._playlistPanelRemoveTimeout) {
+            clearTimeout(window._playlistPanelRemoveTimeout);
+            window._playlistPanelRemoveTimeout = null;
+          }
+          window._playlistPanelRemoveTimeout = setTimeout(() => {
+            if (domPlaylistPanel && domPlaylistPanel.parentNode) {
+              domPlaylistPanel.parentNode.removeChild(domPlaylistPanel);
             }
+            window._playlistPanelRemoveTimeout = null;
           }, 350);
         }
       });
     }
   }
-  
+
   // Close panel when clicking outside
   document.addEventListener('click', (e) => {
-    if (volumePanel.classList.contains('visible') && 
-        !volumePanel.contains(e.target) && 
-        !volumeBtn.contains(e.target)) {
+    if (volumePanel.classList.contains('visible') &&
+      !volumePanel.contains(e.target) &&
+      !volumeBtn.contains(e.target)) {
       volumePanel.classList.remove('visible');
       setTimeout(() => {
         volumePanel.style.display = 'none';
@@ -196,21 +310,522 @@ function setupVolumePanel() {
   }
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
+  // ... existing code ...
+
+  // Define the populateContextMenu function globally
+  window.populateContextMenu = function (menuItems, x, y) {
+    const contextMenu = document.getElementById('context-menu');
+    if (!contextMenu) {
+      console.error('Context menu element not found.');
+      return;
+    }
+
+    // Clear existing menu items
+    contextMenu.innerHTML = '';
+
+    // Populate menu items
+    menuItems.forEach(item => {
+      if (item.type === 'separator') {
+        const separator = document.createElement('div');
+        separator.className = 'context-menu-separator';
+        contextMenu.appendChild(separator);
+      } else {
+        const menuItem = document.createElement('div');
+        menuItem.className = 'context-menu-item';
+        menuItem.innerHTML = `<i class="fas ${item.icon}"></i><span>${item.label}</span>`;
+        menuItem.addEventListener('click', () => {
+          if (typeof window.executeContextMenuAction === 'function') {
+            window.executeContextMenuAction(item.action);
+          }
+        });
+        contextMenu.appendChild(menuItem);
+      }
+    });
+
+    // Position and display the context menu
+    contextMenu.style.left = `${x}px`;
+    contextMenu.style.top = `${y}px`;
+    contextMenu.classList.remove('hidden');
+  };
+
+  // Ensure the context menu is hidden when clicking outside
+  document.addEventListener('click', (e) => {
+    const contextMenu = document.getElementById('context-menu');
+    if (contextMenu && !contextMenu.contains(e.target)) {
+      contextMenu.classList.add('hidden');
+    }
+  });
+
   // ... existing code ...
   setupVolumePanel();
   setNotificationsBtnOpacity();
-
-
-  
 });
 // ... existing code ...
 
 
+//logout function
+const handleLogout = () => {
+  showConfirmDialog({
+    title: "Log out?",
+    message: "Are you sure you want to log out?",
+    iconClass: "fa-sign-out-alt",
+    okText: "Log out",
+    cancelText: "Cancel"
+  }).then(confirmed => {
+    if (confirmed) {
+      if (typeof startMenu !== 'undefined' && startMenu) startMenu.style.display = 'none';
+      window._loggingOut = true;
+      if (window._allPopoutWindows && Array.isArray(window._allPopoutWindows)) {
+        window._allPopoutWindows = window._allPopoutWindows.filter(win => {
+          if (win && !win.closed) {
+            try { win.close(); } catch (e) { }
+            return false;
+          }
+          return false;
+        });
+      }
+      setTimeout(() => { window._loggingOut = false; }, 2000);
+    }
+  });
+};
+
+const logOutButton = document.querySelector('.start-menu-logout-button') || document.querySelector('.logout-button');
+if (logOutButton) {
+  logOutButton.addEventListener('click', (e) => {
+    e.preventDefault();
+    handleLogout();
+  });
+}
+
+
+
+function getAppIconDetails(appName) {
+  let iconClass = 'fa-window-maximize';
+  let iconBgClass = 'gray-icon';
+  const desktopIcon = document.querySelector(`.desktop-icon[data-app="${appName}"]`);
+  if (desktopIcon) {
+    const iElem = desktopIcon.querySelector('i');
+    const cElem = desktopIcon.querySelector('.icon-container');
+    if (iElem) iconClass = iElem.className.split(' ').find(cls => cls.startsWith('fa-')) || iconClass;
+    if (cElem) iconBgClass = cElem.className.split(' ').find(cls => cls.endsWith('-icon')) || iconBgClass;
+  }
+  return { iconClass, iconBgClass };
+}
+
+
+//Top bar with icons and profile
+function createAppLauncherTopBar() {
+  const topBar = document.createElement('div');
+  topBar.className = 'app-launcher-top-bar';
+  topBar.style.display = 'flex';
+  topBar.style.justifyContent = 'space-between';
+  topBar.style.alignItems = 'center';
+  topBar.style.height = '35px';
+  topBar.style.padding = '0 15px 0 3px';
+  topBar.style.background = '#050217c5';
+  topBar.style.backdropFilter = 'blur(30px)';
+
+  // Profile (left)
+  const profileBtn = document.createElement('button');
+  profileBtn.className = 'app-launcher-profile-btn';
+  profileBtn.innerHTML = '<img src="img/avatar.png" alt="User" class="profile-avatar" style="width:24px;height:24px;border-radius:50%;">Michael Muchmore';
+  profileBtn.style.background = 'transparent';
+  profileBtn.style.color = '#fff';
+  profileBtn.style.border = 'none';
+  profileBtn.style.borderRadius = '5px';
+  profileBtn.style.padding = '5px 15px';
+  profileBtn.style.fontSize = '14px';
+  profileBtn.style.fontWeight = '500';
+  profileBtn.style.cursor = 'pointer';
+  profileBtn.style.display = 'flex';
+  profileBtn.style.alignItems = 'center';
+  profileBtn.style.transition = 'background 0.18s';
+  profileBtn.addEventListener('mouseover', () => { profileBtn.style.background = 'var(--accent-color)' });
+  profileBtn.addEventListener('mouseout', () => { profileBtn.style.background = 'transparent' });
+  profileBtn.addEventListener('click', function (e) {
+    e.stopPropagation();
+    if (window._profileDropdown && window._profileDropdown.parentNode) window._profileDropdown.parentNode.removeChild(window._profileDropdown);
+    const profileDropdown = document.createElement('div');
+    window._profileDropdown = profileDropdown;
+    profileDropdown.className = 'context-menu app-launcher-profile-dropdown';
+    profileDropdown.style.position = 'absolute';
+    profileDropdown.style.zIndex = '10000';
+    const rect = profileBtn.getBoundingClientRect();
+    profileDropdown.style.left = rect.left + 'px';
+    profileDropdown.style.top = (rect.bottom + 4) + 'px';
+    const userProfile = document.createElement('div');
+    userProfile.className = 'settings-user-profile';
+    userProfile.style.display = 'flex';
+    userProfile.style.flexDirection = 'column';
+    userProfile.style.alignItems = 'center';
+    userProfile.style.justifyContent = 'center';
+    userProfile.style.padding = '25px 10px';
+    userProfile.style.borderBottom = '1px solid rgba(255,255,255,0.08)';
+    userProfile.style.marginBottom = '6px';
+    userProfile.innerHTML = `
+      <img src="img/avatar.png" alt="User" class="profile-avatar" style="width:54px;height:54px;border-radius:50%;margin-bottom:8px;">
+      <div class="profile-info" style="text-align:center;">
+        <span class="profile-name" style="display:block;font-size:15px;font-weight:600;margin-top:5px;">Michael Muchmore</span>
+        <span class="profile-id" style="display:block;font-size:13px;color:#aaa;margin-top:5px;">argenti.ro</span>
+      </div>
+    `;
+    profileDropdown.appendChild(userProfile);
+    const backToDesktop = document.createElement('div');
+    backToDesktop.className = 'context-menu-item';
+    backToDesktop.innerHTML = '<i class="fas fa-desktop"></i><span>Back to desktop mode</span>';
+    backToDesktop.addEventListener('click', function (ev) {
+      window.executeContextMenuAction && window.executeContextMenuAction('desktop-mode');
+      if (profileDropdown && profileDropdown.parentNode) profileDropdown.parentNode.removeChild(profileDropdown);
+      ev.stopPropagation();
+    });
+    profileDropdown.appendChild(backToDesktop);
+    const sep1 = document.createElement('div');
+    sep1.className = 'context-menu-separator';
+    profileDropdown.appendChild(sep1);
+    const profileAction = document.createElement('div');
+    profileAction.className = 'context-menu-item';
+    profileAction.innerHTML = '<i class="fas fa-user-cog"></i><span>Open Profile Settings</span>';
+    profileAction.style.justifyContent = 'center';
+    profileAction.addEventListener('click', function (ev) {
+      openApp('settings', 'Settings', 'fa-cog', 'green');
+      if (profileDropdown && profileDropdown.parentNode) profileDropdown.parentNode.removeChild(profileDropdown);
+      ev.stopPropagation();
+    });
+    profileDropdown.appendChild(profileAction);
+    const viewItem = document.createElement('div');
+    viewItem.className = 'context-menu-item has-submenu';
+    viewItem.innerHTML = '<i class="fas fa-eye"></i><span>View</span><i class="fas fa-chevron-right context-menu-chevron"></i>';
+    const viewSubmenu = document.createElement('div');
+    viewSubmenu.className = 'context-menu submenu';
+    viewSubmenu.style.position = 'fixed';
+    viewSubmenu.style.zIndex = '10001';
+    viewSubmenu.style.visibility = 'hidden';
+    viewSubmenu.innerHTML = '';
+    const multitask = document.createElement('div');
+    multitask.className = 'context-menu-item context-menu-submenu-item';
+    multitask.innerHTML = '<i class="fas fa-object-ungroup"></i><span>Multitask</span>';
+    multitask.addEventListener('click', function (ev) {
+      window.executeContextMenuAction && window.executeContextMenuAction('multi-task-mode');
+      if (profileDropdown && profileDropdown.parentNode) profileDropdown.parentNode.removeChild(profileDropdown);
+      ev.stopPropagation();
+    });
+    viewSubmenu.appendChild(multitask);
+    const easyMode = document.createElement('div');
+    easyMode.className = 'context-menu-item context-menu-submenu-item';
+    easyMode.innerHTML = '<i class="fas fa-table-columns"></i><span>Easy Mode</span>';
+    easyMode.addEventListener('click', function (ev) {
+      window.executeContextMenuAction && window.executeContextMenuAction('single-task-mode');
+      if (profileDropdown && profileDropdown.parentNode) profileDropdown.parentNode.removeChild(profileDropdown);
+      ev.stopPropagation();
+    });
+    viewSubmenu.appendChild(easyMode);
+    let submenuHover = false;
+    let submenuCloseTimer = null;
+    function openSubmenu() {
+      const rect = viewItem.getBoundingClientRect();
+      viewSubmenu.style.left = (rect.right) + 'px';
+      viewSubmenu.style.top = (rect.top) + 'px';
+      viewSubmenu.style.visibility = '';
+      document.body.appendChild(viewSubmenu);
+    }
+    function closeSubmenu() {
+      if (viewSubmenu && viewSubmenu.parentNode) viewSubmenu.parentNode.removeChild(viewSubmenu);
+    }
+    viewItem.addEventListener('mouseenter', function () {
+      if (submenuCloseTimer) { clearTimeout(submenuCloseTimer); submenuCloseTimer = null; }
+      openSubmenu();
+    });
+    viewItem.addEventListener('mouseleave', function () {
+      submenuCloseTimer = setTimeout(() => {
+        if (!submenuHover) closeSubmenu();
+      }, 120);
+    });
+    viewSubmenu.addEventListener('mouseenter', function () {
+      submenuHover = true;
+      if (submenuCloseTimer) { clearTimeout(submenuCloseTimer); submenuCloseTimer = null; }
+    });
+    viewSubmenu.addEventListener('mouseleave', function () {
+      submenuHover = false;
+      submenuCloseTimer = setTimeout(() => {
+        closeSubmenu();
+      }, 120);
+    });
+    profileDropdown.appendChild(viewItem);
+    const settingsItem = document.createElement('div');
+    settingsItem.className = 'context-menu-item';
+    settingsItem.innerHTML = '<i class="fas fa-cog"></i><span>Settings</span>';
+    settingsItem.addEventListener('click', function (ev) {
+      openApp('settings', 'Settings', 'fa-cog', 'green');
+      if (profileDropdown && profileDropdown.parentNode) profileDropdown.parentNode.removeChild(profileDropdown);
+      ev.stopPropagation();
+    });
+    profileDropdown.appendChild(settingsItem);
+    const sep2 = document.createElement('div');
+    sep2.className = 'context-menu-separator';
+    profileDropdown.appendChild(sep2);
+    const helpItem = document.createElement('div');
+    helpItem.className = 'context-menu-item';
+    helpItem.innerHTML = '<i class="fas fa-question-circle"></i><span>Help and Support</span>';
+    helpItem.addEventListener('click', function (ev) {
+      window.executeContextMenuAction && window.executeContextMenuAction('help-and-support');
+      if (profileDropdown && profileDropdown.parentNode) profileDropdown.parentNode.removeChild(profileDropdown);
+      ev.stopPropagation();
+    });
+    profileDropdown.appendChild(helpItem);
+    const logoutItem = document.createElement('div');
+    logoutItem.className = 'context-menu-item';
+    logoutItem.innerHTML = '<i class="fas fa-sign-out-alt"></i><span>Logout</span>';
+    logoutItem.addEventListener('click', function (ev) {
+      handleLogout();
+      if (profileDropdown && profileDropdown.parentNode) profileDropdown.parentNode.removeChild(profileDropdown);
+      ev.stopPropagation();
+    });
+    profileDropdown.appendChild(logoutItem);
+    setTimeout(() => {
+      function closeDropdown(ev) {
+        if (profileDropdown && !profileDropdown.contains(ev.target) && ev.target !== profileBtn) {
+          profileDropdown.classList.remove('anim-slide-down');
+          profileDropdown.classList.add('anim-slide-up');
+          profileDropdown.addEventListener('animationend', function handler(e) {
+            if (e.animationName === 'appLauncherProfileDropdownSlideUp') {
+              if (profileDropdown.parentNode) profileDropdown.parentNode.removeChild(profileDropdown);
+              profileDropdown.removeEventListener('animationend', handler);
+            }
+          });
+          document.removeEventListener('mousedown', closeDropdown);
+          document.removeEventListener('scroll', closeDropdown, true);
+        }
+      }
+      document.addEventListener('mousedown', closeDropdown);
+      document.addEventListener('scroll', closeDropdown, true);
+    }, 0);
+    document.body.appendChild(profileDropdown);
+    profileDropdown.classList.remove('anim-slide-up');
+    void profileDropdown.offsetWidth;
+    profileDropdown.classList.add('anim-slide-down');
+    profileDropdown.addEventListener('animationend', function handler(e) {
+      if (e.animationName === 'appLauncherProfileDropdownSlideDown') {
+        profileDropdown.classList.remove('anim-slide-down');
+      }
+    });
+  });
+  topBar.appendChild(profileBtn);
+
+  // Taskbar-right icons (right) - CLONE, NOT MOVE
+  const rightIcons = createAppLauncherTaskbarRightIcons();
+  topBar.appendChild(rightIcons);
+  // Re-attach listeners to cloned icons
+  rightIcons.querySelectorAll('.taskbar-icon').forEach(attachTaskbarIconListeners);
+  // --- After moving/replacing, update window.walletBtn to the new element ---
+  window.walletBtn = document.getElementById('wallet-btn');
+
+  return topBar;
+}
+
+
+// Helper: Attach event listeners to a taskbar icon clone (robust, no event forwarding)
+function attachTaskbarIconListeners(cloneBtn) {
+  // Remove ID to avoid duplicate IDs in DOM
+  if (cloneBtn.id) cloneBtn.removeAttribute('id');
+  // Only attach to buttons or clickable divs
+  if (
+    !(cloneBtn.tagName === 'BUTTON' ||
+      cloneBtn.classList.contains('taskbar-icon') ||
+      cloneBtn.classList.contains('taskbar-time') ||
+      cloneBtn.classList.contains('taskbar-ai'))
+  ) {
+    return;
+  }
+  // Mark as a clone for context menu logic
+  cloneBtn.setAttribute('data-app-launcher-clone', 'true');
+
+  // Helper to attach the correct click logic to a button or div
+  function attachLogicToEl(el) {
+    el.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      // Always use the .taskbar-icon as the context for icon checks
+      let iconContainer = el;
+      if (el.tagName === 'BUTTON' && el.parentElement && el.parentElement.classList.contains('taskbar-icon')) {
+        iconContainer = el.parentElement;
+      }
+      // Wallet
+      if (iconContainer.classList.contains('taskbar-icon') && iconContainer.querySelector('.fa-wallet')) {
+        if (typeof showWalletSidebar === 'function') showWalletSidebar();
+      }
+      // AI Chat
+      else if (iconContainer.classList.contains('taskbar-icon') && iconContainer.querySelector('.fa-comment-dots')) {
+        if (typeof openApp === 'function') openApp('ai-chat', 'AI Chat', 'fa-comment-dots', 'blue-icon');
+      }
+      // App Launcher
+      else if (iconContainer.classList.contains('taskbar-icon') && iconContainer.querySelector('.fa-th-large, .fa-th')) {
+        const widgetsScreen = document.getElementById('widgets-screen');
+        if (widgetsScreen) {
+          widgetsScreen.style.display = widgetsScreen.style.display === 'none' ? '' : 'none';
+        }
+      }
+      // Notifications (use the same function as the original button)
+      else if (iconContainer.classList.contains('taskbar-icon') && iconContainer.querySelector('.fa-bell, .fa-bell-slash')) {
+        if (typeof toggleNotificationsPanel === 'function') toggleNotificationsPanel();
+      }
+      // Fullscreen
+      else if (iconContainer.classList.contains('taskbar-icon') && iconContainer.querySelector('.fa-expand, .fa-compress')) {
+        // Fullscreen button logic
+        const fullscreenIcon = iconContainer.querySelector('i');
+        function isFullscreen() {
+          return document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
+        }
+        function requestFullscreen(elem) {
+          if (elem.requestFullscreen) {
+            elem.requestFullscreen();
+          } else if (elem.webkitRequestFullscreen) {
+            elem.webkitRequestFullscreen();
+          } else if (elem.mozRequestFullScreen) {
+            elem.mozRequestFullScreen();
+          } else if (elem.msRequestFullscreen) {
+            elem.msRequestFullscreen();
+          }
+        }
+        function exitFullscreen() {
+          if (document.exitFullscreen) {
+            document.exitFullscreen();
+          } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+          } else if (document.mozCancelFullScreen) {
+            document.mozCancelFullScreen();
+          } else if (document.msExitFullscreen) {
+            document.msExitFullscreen();
+          }
+        }
+        function updateFullscreenIcon() {
+          if (fullscreenIcon) {
+            if (isFullscreen()) {
+              fullscreenIcon.classList.remove('fa-expand');
+              fullscreenIcon.classList.add('fa-compress');
+            } else {
+              fullscreenIcon.classList.remove('fa-compress');
+              fullscreenIcon.classList.add('fa-expand');
+            }
+          }
+        }
+        if (isFullscreen()) {
+          exitFullscreen();
+        } else {
+          requestFullscreen(document.documentElement);
+        }
+        setTimeout(updateFullscreenIcon, 100); // update icon after state change
+      }
+      // Volume
+      else if (iconContainer.classList.contains('taskbar-icon') && iconContainer.querySelector('.fa-volume-up, .fa-volume-mute')) {
+        const volumePanel = document.getElementById('volume-panel');
+        if (volumePanel) {
+          if (volumePanel.classList.contains('visible')) {
+            volumePanel.classList.remove('visible');
+            setTimeout(() => {
+              volumePanel.style.display = 'none';
+            }, 350);
+          } else {
+            volumePanel.style.display = 'flex';
+            requestAnimationFrame(() => {
+              volumePanel.classList.add('visible');
+            });
+          }
+        }
+      }
+      // Global search (exclude volume)
+      else if (iconContainer.classList.contains('taskbar-icon') && iconContainer.querySelector('.fa-search') && !iconContainer.querySelector('.fa-volume-up, .fa-volume-mute')) {
+        const globalSearchOverlay = document.getElementById('global-search-overlay');
+        const globalSearchInput = document.getElementById('global-search-input');
+        if (globalSearchOverlay && globalSearchInput) {
+          if (window.innerWidth <= 1023) return;
+          if (globalSearchOverlay.style.display !== 'flex') {
+            globalSearchOverlay.style.display = 'flex';
+            requestAnimationFrame(() => {
+              requestAnimationFrame(() => {
+                globalSearchOverlay.style.opacity = '1';
+                globalSearchOverlay.style.visibility = 'visible';
+                globalSearchInput.tabIndex = -1;
+                globalSearchInput.blur();
+                globalSearchInput.tabIndex = 0;
+                globalSearchInput.focus();
+                globalSearchInput.select();
+                document.body.style.overflow = 'hidden';
+              });
+            });
+          } else {
+            globalSearchInput.tabIndex = -1;
+            globalSearchInput.blur();
+            globalSearchInput.tabIndex = 0;
+            globalSearchInput.focus();
+            globalSearchInput.select();
+          }
+        }
+      }
+      // Generic app
+      else if (iconContainer.classList.contains('taskbar-icon') && iconContainer.hasAttribute('data-app')) {
+        const app = iconContainer.getAttribute('data-app');
+        if (typeof openApp === 'function') openApp(app, app.charAt(0).toUpperCase() + app.slice(1), '', '');
+      }
+    });
+  }
+
+  // Attach to the element itself
+  attachLogicToEl(cloneBtn);
+
+  // If this is a .taskbar-icon, also attach to its child button (if present)
+  if (cloneBtn.classList.contains('taskbar-icon')) {
+    const btn = cloneBtn.querySelector('button');
+    if (btn) {
+      attachLogicToEl(btn);
+    }
+  }
+
+
+} // <-- Properly close the function
+
+(function () {
+  const origExecuteContextMenuAction = window.executeContextMenuAction;
+  window.executeContextMenuAction = async function (action) {
+    if (
+      window.currentContextMenuTarget &&
+      window.currentContextMenuTarget.classList &&
+      window.currentContextMenuTarget.classList.contains('taskbar-icon') &&
+      window.currentContextMenuTarget.closest('.app-launcher-taskbar-right')
+    ) {
+      window.currentContextMenuTarget.click();
+      if (typeof hideContextMenu === 'function') hideContextMenu();
+      return;
+    }
+    return origExecuteContextMenuAction.call(this, action);
+  };
+})();
+
+// --- App Launcher Top Bar Right Icons (robust, unified) ---
+function createAppLauncherTaskbarRightIcons() {
+  const taskbarRight = document.querySelector('.taskbar-right');
+  let rightIcons = document.createElement('div');
+  rightIcons.className = 'app-launcher-taskbar-right';
+  rightIcons.style.display = 'flex';
+  rightIcons.style.alignItems = 'center';
+  let launcherTaskbarRightWrapper = document.createElement('div');
+  launcherTaskbarRightWrapper.className = 'taskbar-right';
+  launcherTaskbarRightWrapper.style.display = 'flex';
+  launcherTaskbarRightWrapper.style.alignItems = 'center';
+  // MOVE, do not clone
+  Array.from(taskbarRight.children).forEach(child => {
+    launcherTaskbarRightWrapper.appendChild(child); // MOVE, do not clone
+  });
+  rightIcons.appendChild(launcherTaskbarRightWrapper);
+  // Hide the main .taskbar-right in App Launcher mode
+  if (taskbarRight) taskbarRight.style.display = 'none';
+  return rightIcons;
+}
+
 
 
 // --- Wallet Sidebar Toggle Logic ---
-(function() {
+(function () {
   const walletBtn = document.getElementById('wallet-btn');
   const walletSidebar = document.getElementById('wallet-sidebar');
   const walletCloseBtn = walletSidebar ? walletSidebar.querySelector('.wallet-close-btn') : null;
@@ -221,6 +836,7 @@ document.addEventListener('DOMContentLoaded', function() {
   window.walletAccountBalance = '$ 254.00';
 
   function updateWalletBtnDisplay() {
+    const walletBtn = window.walletBtn || document.getElementById('wallet-btn');
     if (!walletBtn) return;
     if (window.walletDisplayMode === 'icon') {
       walletBtn.innerHTML = '<i class="fas fa-wallet"></i>';
@@ -240,7 +856,7 @@ document.addEventListener('DOMContentLoaded', function() {
     walletSidebar.classList.remove('wallet-sidebar-visible');
     // Remove any previous transitionend handlers to avoid duplicates
     walletSidebar.removeEventListener('transitionend', walletSidebar._onTransitionEnd);
-    walletSidebar._onTransitionEnd = function(e) {
+    walletSidebar._onTransitionEnd = function (e) {
       if (e.propertyName === 'transform' && !walletSidebar.classList.contains('wallet-sidebar-visible')) {
         walletSidebar.style.display = 'none';
         walletSidebar.removeEventListener('transitionend', walletSidebar._onTransitionEnd);
@@ -250,10 +866,10 @@ document.addEventListener('DOMContentLoaded', function() {
     walletVisible = false;
   }
 
-  document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('DOMContentLoaded', function () {
     updateWalletBtnDisplay();
     if (walletBtn && walletSidebar) {
-      walletBtn.addEventListener('click', function() {
+      walletBtn.addEventListener('click', function () {
         if (window.innerWidth <= 1023) return;
         const aiChatWindow = document.getElementById('ai-chat-window');
         if (aiChatWindow && aiChatWindow.classList.contains('ai-chat-visible')) {
@@ -273,12 +889,12 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     }
     if (walletCloseBtn) {
-      walletCloseBtn.addEventListener('click', function() {
+      walletCloseBtn.addEventListener('click', function () {
         if (!walletVisible) return;
         hideWalletSidebar();
       });
     }
-    document.addEventListener('mousedown', function(e) {
+    document.addEventListener('mousedown', function (e) {
       if (
         walletVisible &&
         walletSidebar &&
@@ -308,7 +924,7 @@ function fadeOutSectionLabel(sectionLabel) {
   sectionLabel.style.marginTop = '0';
   sectionLabel.style.marginBottom = '0';
   sectionLabel.style.overflow = 'hidden';
-  
+
   setTimeout(() => {
     sectionLabel.style.display = 'none';
     sectionLabel.remove();
@@ -316,8 +932,8 @@ function fadeOutSectionLabel(sectionLabel) {
 }
 
 
- // In setupFileExplorerInteraction or after creating the File Explorer window:
- function setupSidebarToggleForFileExplorer(fileExplorerWindow) {
+// In setupFileExplorerInteraction or after creating the File Explorer window:
+function setupSidebarToggleForFileExplorer(fileExplorerWindow) {
   const sidebar = fileExplorerWindow.querySelector('.file-explorer-sidebar');
   const toggleLabel = fileExplorerWindow.querySelector('#file-explorer-sidebar-toggle-label');
   const toggle = fileExplorerWindow.querySelector('#file-explorer-sidebar-toggle');
@@ -343,7 +959,7 @@ function fadeOutSectionLabel(sectionLabel) {
   }
   updateToggleVisibility();
   window.addEventListener('resize', updateToggleVisibility);
-  toggle.addEventListener('change', function() {
+  toggle.addEventListener('change', function () {
     if (window.innerWidth > 500) {
       if (toggle.checked) {
         sidebar.classList.add('sidebar-collapsed');
@@ -358,13 +974,13 @@ function fadeOutSectionLabel(sectionLabel) {
 }
 
 
-document.addEventListener('keydown', function(e) {
+document.addEventListener('keydown', function (e) {
   const active = document.activeElement;
   if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable)) return;
   if (e.key === 'n' || e.key === 'N') {
     const notificationsPanel = document.getElementById('notifications-panel');
     if (!notificationsPanel) return;
-    
+
     // Get or create the Today section
     let todaySection = notificationsPanel.querySelector('.notifications-panel-content');
     if (!todaySection) {
@@ -372,7 +988,7 @@ document.addEventListener('keydown', function(e) {
       todaySection.className = 'notifications-panel-content';
       notificationsPanel.appendChild(todaySection);
     }
-    
+
     // Check if we need to create the header
     if (!todaySection.querySelector('.notif-header-row')) {
       const headerRow = document.createElement('div');
@@ -386,7 +1002,7 @@ document.addEventListener('keydown', function(e) {
       `;
       todaySection.insertBefore(headerRow, todaySection.firstChild);
     }
-    
+
     // Check if we need to create the Today section label and list
     let todayList = todaySection.querySelector('.notif-list');
     if (!todayList) {
@@ -395,19 +1011,19 @@ document.addEventListener('keydown', function(e) {
       if (emptyMsg) emptyMsg.remove();
       setNotificationsBtnOpacity();
 
-      
+
       // Add the Today section label
       const sectionLabel = document.createElement('div');
       sectionLabel.className = 'notif-section-label';
       sectionLabel.innerHTML = 'Today <span class="notif-clear">Clear all</span>';
       todaySection.appendChild(sectionLabel);
-      
+
       // Add the notification list
       todayList = document.createElement('div');
       todayList.className = 'notif-list';
       todaySection.appendChild(todayList);
     }
-    
+
     // Create and add the new notification
     const card = document.createElement('div');
     card.className = 'notif-card unread';
@@ -419,16 +1035,16 @@ document.addEventListener('keydown', function(e) {
       <div class="notif-content">
         <div class="notif-main-row">
           <span class="notif-main-title">New incoming notification</span>
-          <span class="notif-dot"></span>
+   
         </div>
         <div class="notif-desc">This is a test notification</div>
         <div class="notif-meta">now</div>
       </div>
       <img class="notif-avatar" src="img/avatar.png" />
     `;
-    
+
     todayList.insertBefore(card, todayList.firstChild);
-    
+
     // Animate the card in
     requestAnimationFrame(() => {
       card.style.transition = 'all 0.3s ease-out';
@@ -436,12 +1052,12 @@ document.addEventListener('keydown', function(e) {
       card.style.opacity = '1';
       updateNotificationsBadge();
     });
-    
+
     // Enable swipe-to-delete for the new card
     if (typeof enableNotificationSwipeToDelete === 'function') {
       enableNotificationSwipeToDelete();
     }
-    
+
     // Show toast if panel is closed
     if (notificationsPanel.style.display !== 'flex') {
       showToastNotification();
@@ -471,58 +1087,308 @@ window.addEventListener(
   { passive: false }
 );
 
-
 document.addEventListener('contextmenu', function (event) {
-  console.log('contextmenu event:', event.target, event.target.className, event.target.tagName);
-  // Allow custom right-click on notification bell
-  const bell = document.getElementById('notifications-btn');
-  if (bell && (event.target === bell || bell.contains(event.target))) {
-    // Let the bell's own handler run, do NOT preventDefault here
-    return;
-  }
   event.preventDefault(); // This disables the browser's context menu elsewhere
 });
 
-document.addEventListener('DOMContentLoaded', function() {
+
+// Utility: Close start menu with animation
+function closeStartMenuAnimated() {
+  if (!startMenu) return;
+  if (startMenu.style.display === 'block') {
+    startMenu.classList.remove('start-menu-anim-open');
+    startMenu.classList.add('start-menu-anim-close');
+    startMenu.addEventListener('animationend', function handler() {
+      startMenu.style.display = 'none';
+      startMenu.classList.remove('start-menu-anim-close');
+      startMenu.removeEventListener('animationend', handler);
+    });
+  } else {
+    startMenu.style.display = 'none';
+  }
+}
+
+document.addEventListener('mousedown', function (e) {
+  if (startMenu && startMenu.style.display === 'block' && !startMenu.contains(e.target) && e.target !== startButton && !startButton.contains(e.target)) {
+    closeStartMenuAnimated();
+  }
+});
+document.addEventListener('contextmenu', function (e) {
+  // Only block context menu on the taskbar in app launcher mode
+  if (
+    document.body.classList.contains('app-launcher-mode') &&
+    e.target.closest('.taskbar') &&
+    !e.target.closest('.taskbar-app-icon')
+  ) {
+    e.preventDefault();
+    const contextMenu = document.getElementById('context-menu');
+    if (contextMenu) contextMenu.classList.add('hidden');
+    return;
+  }
+  if (startMenu && startMenu.style.display === 'block' && !startMenu.contains(e.target) && e.target !== startButton && !startButton.contains(e.target)) {
+    closeStartMenuAnimated();
+  }
+});
+
+
+
+// --- GLOBAL STATE (move to top of file) ---
+let openWindows = {};
+let activeWindow = null;
+let windowZIndex = 100;
+let windowIdCounter = 0;
+let currentContextMenuTarget = null;
+let selectedDesktopIcons = new Set();
+let isDraggingSelector = false;
+let dragSelectorStartX, dragSelectorStartY;
+let isDraggingFileSelector = false;
+let fileSelectorStartX, fileSelectorStartY;
+let fileExplorerContentArea = null;
+let currentSelectedFileItems = new Set();
+let startMenu = null;
+let startButton = null;
+
+document.addEventListener('DOMContentLoaded', function () {
 
   // DOM Elements
-  const startButton = document.getElementById('start-button');
-  const startMenu = document.getElementById('start-menu');
-  const desktopIcons = document.querySelectorAll('.desktop-icon');
+  startButton = document.getElementById('start-button');
+  startMenu = document.getElementById('start-menu');
   const windowsContainer = document.getElementById('windows-container');
   const currentTimeEl = document.getElementById('current-time');
-  const taskbarAppIconsContainer = document.getElementById('taskbar-app-icons');
+
   const startMenuLeftPanel = document.querySelector('.start-menu-left-panel');
   const startMenuSearchTop = document.getElementById('start-menu-search-top');
   const startMenuSearchBottom = document.getElementById('start-menu-search-bottom');
   const contextMenu = document.getElementById('context-menu');
   const dragSelector = document.getElementById('drag-selector');
-  const desktopArea = document.getElementById('desktop-area'); 
+  const desktopArea = document.getElementById('desktop-area');
   const desktopIconsContainer = document.querySelector('.desktop-icons');
-  
+
+
+
+
+
+  // Custom context menu for app-grid-item (start menu/app launcher)
+  if (startMenuLeftPanel) {
+    startMenuLeftPanel.addEventListener('contextmenu', function (e) {
+      if (e.target.closest('.app-grid-item')) {
+        currentContextMenuTarget = e.target.closest('.app-grid-item');
+        const appName = currentContextMenuTarget.getAttribute('data-app-name') || currentContextMenuTarget.getAttribute('data-app-id');
+        const appTitle = currentContextMenuTarget.getAttribute('data-app-title') || currentContextMenuTarget.querySelector('span')?.textContent || appName;
+        const details = getAppIconDetails(appName);
+
+        // Determine if system app
+        let isSystemApp = false;
+        if (typeof startMenuApps !== 'undefined') {
+          const appObj = startMenuApps.find(a =>
+            a.id === appName ||
+            a.name === appName ||
+            (a.name && a.name.toLowerCase().replace(/\s+/g, '-') === appName)
+          );
+          if (appObj && appObj.category && appObj.category.toUpperCase().includes('SYSTEM')) isSystemApp = true;
+        }
+
+        const menuItems = [
+          { label: 'Open', action: 'open-app', icon: details.iconClass },
+          { label: 'Add to Desktop', action: 'add-to-desktop', icon: 'fa-desktop' },
+          { label: isAppPinned(appName) ? 'Unpin from Taskbar' : 'Pin to Taskbar', action: isAppPinned(appName) ? 'unpin-taskbar' : 'pin-to-taskbar', icon: 'fa-thumbtack' },
+          { type: 'separator' },
+          isSystemApp
+            ? { label: 'Uninstall App', action: 'uninstall-app', icon: 'fa-trash', disabled: true }
+            : { label: 'Uninstall App', action: 'uninstall-app', icon: 'fa-trash' }
+        ];
+        populateContextMenu(menuItems, e.clientX, e.clientY);
+        e.preventDefault();
+        return;
+      }
+    });
+  }
 
   
+  const taskbarAppIconsContainer = document.getElementById('taskbar-app-icons');
+  // ... other variables ...
+
+  // --- PERSISTENT PINNED TASKBAR ICONS SYSTEM ---
+  function getPinnedTaskbarApps() {
+    try {
+      return JSON.parse(localStorage.getItem('pinnedTaskbarApps') || '[]');
+    } catch (e) { return []; }
+  }
+  function setPinnedTaskbarApps(list) {
+    localStorage.setItem('pinnedTaskbarApps', JSON.stringify(list));
+  }
+  function isAppPinned(appName) {
+    return getPinnedTaskbarApps().includes(appName);
+  }
+  function pinAppToTaskbar(appName) {
+    const pins = getPinnedTaskbarApps();
+    if (!pins.includes(appName)) {
+      pins.push(appName);
+      setPinnedTaskbarApps(pins);
+      renderPinnedTaskbarIcons();
+    }
+  }
+  function unpinAppFromTaskbar(appName) {
+    const pins = getPinnedTaskbarApps().filter(a => a !== appName);
+    setPinnedTaskbarApps(pins);
+    renderPinnedTaskbarIcons();
+  }
+  function renderPinnedTaskbarIcons() {
+    // Clear all icons and separators
+    taskbarAppIconsContainer.innerHTML = '';
+    const pins = getPinnedTaskbarApps();
+  
+    // Render all pinned icons (open or not), in pin order
+    pins.forEach(appName => {
+      const details = getAppIconDetails(appName);
+      let appTitle = appName.charAt(0).toUpperCase() + appName.slice(1).replace(/-/g, ' ');
+      const desktopIcon = document.querySelector(`.desktop-icon[data-app="${appName}"] span`);
+      if (desktopIcon) appTitle = desktopIcon.textContent;
+      // Check if app is open
+      const openWin = Object.values(openWindows).find(w => w.name === appName && w.element);
+      const iconEl = document.createElement('div');
+      if (openWin && openWin.element) {
+        iconEl.className = 'taskbar-app-icon pinned-only opened-app';
+        iconEl.setAttribute('data-window-id', openWin.element.id);
+        // Update openWindows to point to this icon
+        if (openWindows[openWin.element.id]) {
+          openWindows[openWin.element.id].taskbarIcon = iconEl;
+        }
+      } else {
+        iconEl.className = 'taskbar-app-icon pinned-only';
+      }
+      iconEl.setAttribute('data-app-name', appName);
+      iconEl.setAttribute('title', appTitle);
+      iconEl.innerHTML = `<div class="icon-container ${details.iconBgClass}"><i class="fas ${details.iconClass}"></i></div>`;
+      iconEl.addEventListener('click', function () {
+        if (openWin && openWin.element) {
+          if (openWin.element.classList.contains('minimized')) {
+            toggleMinimizeWindow(openWin.element, iconEl);
+          } else if (activeWindow === openWin.element) {
+            toggleMinimizeWindow(openWin.element, iconEl);
+          } else {
+            makeWindowActive(openWin.element);
+          }
+        } else {
+          openApp(appName, appTitle, details.iconClass, details.iconBgClass, this);
+        }
+      });
+      taskbarAppIconsContainer.appendChild(iconEl);
+    });
+  
+    // Add separator if there are open (unpinned) apps
+    const openUnpinned = Object.values(openWindows).filter(w => w.element && !isAppPinned(w.name));
+    if (openUnpinned.length > 0) {
+      const separator = document.createElement('div');
+      separator.className = 'taskbar-separator';
+      taskbarAppIconsContainer.appendChild(separator);
+    }
+  
+    // Render open (unpinned) app icons
+    openUnpinned.forEach(winObj => {
+      if (!winObj.element) return;
+      const appName = winObj.name;
+      const details = getAppIconDetails(appName);
+      let iconClass = winObj.iconClass || details.iconClass || 'fa-window-maximize';
+      let iconBgClass = winObj.iconBgClass || details.iconBgClass || 'gray-icon';
+      // Try to get the icon background class from the desktop icon
+      const desktopIcon = document.querySelector(`.desktop-icon[data-app="${appName}"] .icon-container`);
+      if (desktopIcon) {
+        const bgClass = Array.from(desktopIcon.classList).find(cls => cls.endsWith('-icon'));
+        if (bgClass) iconBgClass = bgClass;
+      }
+      const appTitle = winObj.appTitle || appName.charAt(0).toUpperCase() + appName.slice(1).replace(/-/g, ' ');
+      const iconEl = document.createElement('div');
+      iconEl.className = 'taskbar-app-icon opened-app';
+      iconEl.setAttribute('data-window-id', winObj.element.id);
+      iconEl.setAttribute('title', appTitle);
+      iconEl.innerHTML = `<div class="icon-container ${iconBgClass}"><i class="fas ${iconClass}"></i></div>`;
+      iconEl.addEventListener('click', function () {
+        const windowToFocus = winObj.element;
+        if (windowToFocus) {
+          if (windowToFocus.classList.contains('minimized')) {
+            toggleMinimizeWindow(windowToFocus, iconEl);
+          } else if (activeWindow === windowToFocus) {
+            toggleMinimizeWindow(windowToFocus, iconEl);
+          } else {
+            makeWindowActive(windowToFocus);
+          }
+        }
+      });
+      // Update openWindows to point to this icon
+      if (openWindows[winObj.element.id]) {
+        openWindows[winObj.element.id].taskbarIcon = iconEl;
+      }
+      taskbarAppIconsContainer.appendChild(iconEl);
+    });
+  
+    // After rendering, update the active state
+    updateTaskbarActiveState();
+  }
+
+    // Add separator if there are open (unpinned) apps
+    const openUnpinned = Object.values(openWindows).filter(w => w.element && !isAppPinned(w.name));
+    if (openUnpinned.length > 0) {
+      const separator = document.createElement('div');
+      separator.className = 'taskbar-separator';
+      taskbarAppIconsContainer.appendChild(separator);
+    }
+
+    // Render open (unpinned) app icons
+    Object.values(openWindows).forEach(winObj => {
+      if (!winObj.element) return;
+      const appName = winObj.name;
+      if (isAppPinned(appName)) return; // Pinned apps are only shown as pinned-only if not open
+      // Re-create the icon for open app
+      const details = getAppIconDetails(appName);
+      let iconClass = details.iconClass || 'fa-window-maximize';
+      let iconBgClass = details.iconBgClass || 'gray-icon';
+      // Try to get the icon background class from the desktop icon
+      const desktopIcon = document.querySelector(`.desktop-icon[data-app="${appName}"] .icon-container`);
+      if (desktopIcon) {
+        const bgClass = Array.from(desktopIcon.classList).find(cls => cls.endsWith('-icon'));
+        if (bgClass) iconBgClass = bgClass;
+      }
+      const appTitle = winObj.appTitle || appName.charAt(0).toUpperCase() + appName.slice(1).replace(/-/g, ' ');
+      const iconEl = document.createElement('div');
+      iconEl.className = 'taskbar-app-icon opened-app';
+      iconEl.setAttribute('data-window-id', winObj.element.id);
+      iconEl.setAttribute('title', appTitle);
+      iconEl.innerHTML = `<div class="icon-container ${iconBgClass}"><i class="fas ${iconClass}"></i></div>`;
+      iconEl.addEventListener('click', function () {
+        const windowToFocus = winObj.element;
+        if (windowToFocus) {
+          if (windowToFocus.classList.contains('minimized')) {
+            toggleMinimizeWindow(windowToFocus, iconEl);
+          } else if (activeWindow === windowToFocus) {
+            toggleMinimizeWindow(windowToFocus, iconEl);
+          } else {
+            makeWindowActive(windowToFocus);
+          }
+        }
+      });
+      taskbarAppIconsContainer.appendChild(iconEl);
+    
+  });
+  // On load, render pinned icons
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', renderPinnedTaskbarIcons);
+  } else {
+    renderPinnedTaskbarIcons();
+  }
+
+
+
   // Templates
   const fileExplorerTemplate = document.getElementById('file-explorer-template');
-  
+
   // State
-  let activeWindow = null;
-  let windowZIndex = 100;
-  let openWindows = {};
-  let windowIdCounter = 0;
-  let currentContextMenuTarget = null;
-  let selectedDesktopIcons = new Set();
-  let isDraggingSelector = false;
-  let dragSelectorStartX, dragSelectorStartY;
-  let isDraggingFileSelector = false;
-  let fileSelectorStartX, fileSelectorStartY;
-  let fileExplorerContentArea = null;
-  let currentSelectedFileItems = new Set();
-  
-  const GRID_CELL_WIDTH = 80;
-  const GRID_CELL_HEIGHT = 100;
-  const GRID_GAP = 20;
-  
+  const GRID_CELL_WIDTH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--grid-cell-width'));
+  const GRID_CELL_HEIGHT = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--grid-cell-height'));
+  const GRID_GAP = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--grid-gap'));
+  let iconZoomLevel = parseFloat(localStorage.getItem('iconZoomLevel')) || 1.0;
+
+
   let draggedIcon = null;
   let isActuallyDraggingIcon = false;
   let dragStartMouseX, dragStartMouseY;
@@ -531,13 +1397,90 @@ document.addEventListener('DOMContentLoaded', function() {
   let originalIconTransition = ''; // Variable to store original transition
   const MOBILE_BREAKPOINT = 1023; // Max width for tablet/mobile behavior
 
-  function clearIconSelection() {
-    if (selectedDesktopIcons) { 
-        selectedDesktopIcons.forEach(icon => icon.classList.remove('selected'));
-        selectedDesktopIcons.clear();
-    } 
+
+
+  function setupDesktopIcon(icon) {
+    // Function to handle app opening
+    const openAppFromIcon = function (e) {
+      e.stopPropagation();
+      e.preventDefault();
+      const appName = this.getAttribute('data-app');
+      const appTitleElement = this.querySelector('span');
+      const appTitle = appTitleElement ? appTitleElement.textContent : 'Unknown App';
+      const iconElement = this.querySelector('i');
+      const iconContainer = this.querySelector('.icon-container');
+      const iconClass = iconElement ? iconElement.className.split(' ').find(cls => cls.startsWith('fa-')) : 'fa-question-circle';
+      const iconBgClass = iconContainer ? iconContainer.className.split(' ').find(cls => cls.endsWith('-icon')) : 'gray-icon';
+      if (!appName) return;
+      openApp(appName, appTitle, iconClass, iconBgClass, this);
+    };
+
+    // Desktop: Double click to open
+    icon.addEventListener('dblclick', function (e) {
+      if (window.innerWidth > MOBILE_BREAKPOINT) {
+        openAppFromIcon.call(this, e);
+      }
+    });
+
+    // Mobile: Single tap to open
+    icon.addEventListener('click', function (e) {
+      if (window.innerWidth <= MOBILE_BREAKPOINT) {
+        openAppFromIcon.call(this, e);
+      }
+    });
+
+    icon.addEventListener('mousedown', function (e) {
+      if (e.button !== 0) return;
+      if (!this.classList.contains('selected')) {
+        clearIconSelection();
+        this.classList.add('selected');
+        selectedDesktopIcons.add(this);
+      }
+      draggedIcon = this;
+      isActuallyDraggingIcon = false;
+      dragStartMouseX = e.clientX;
+      dragStartMouseY = e.clientY;
+      dragOffsetX = e.clientX - draggedIcon.getBoundingClientRect().left;
+      dragOffsetY = e.clientY - draggedIcon.getBoundingClientRect().top;
+      // Store original position for single drag
+      iconOriginalLeft = draggedIcon.style.left;
+      iconOriginalTop = draggedIcon.style.top;
+      // --- Multi-drag: store initial positions of all selected icons ---
+      if (selectedDesktopIcons.size > 1) {
+        multiDragInitialPositions = Array.from(selectedDesktopIcons).map(icon => {
+          const rect = icon.getBoundingClientRect();
+          const parentRect = icon.parentElement.getBoundingClientRect();
+          return {
+            icon,
+            left: rect.left - parentRect.left + icon.parentElement.scrollLeft,
+            top: rect.top - parentRect.top + icon.parentElement.scrollTop
+          };
+        });
+        multiDragStartMouseX = e.clientX;
+        multiDragStartMouseY = e.clientY;
+        // Store original positions for multi-drag
+        multiDragOriginalPositions = Array.from(selectedDesktopIcons).map(icon => ({
+          icon,
+          left: icon.style.left,
+          top: icon.style.top
+        }));
+      } else {
+        multiDragInitialPositions = null;
+        multiDragOriginalPositions = null;
+      }
+      document.addEventListener('mousemove', globalOnIconMouseMove);
+      document.addEventListener('mouseup', globalOnIconMouseUp);
+    });
   }
-  
+
+
+  function clearIconSelection() {
+    if (selectedDesktopIcons) {
+      selectedDesktopIcons.forEach(icon => icon.classList.remove('selected'));
+      selectedDesktopIcons.clear();
+    }
+  }
+
   function isIntersecting(rect1, rect2) {
     return !(
       rect1.right < rect2.left ||
@@ -550,32 +1493,32 @@ document.addEventListener('DOMContentLoaded', function() {
   function updateSelectedIcons() {
     if (!dragSelector || !desktopArea) return;
     const selectorRect = dragSelector.getBoundingClientRect();
-    desktopIcons.forEach(icon => {
-        const iconRect = icon.getBoundingClientRect();
-        if (isIntersecting(selectorRect, iconRect)) {
-            icon.classList.add('selected');
-            selectedDesktopIcons.add(icon);
-        } else {
-            icon.classList.remove('selected');
-            selectedDesktopIcons.delete(icon);
-        }
+    document.querySelectorAll('.desktop-icon').forEach(icon => {
+      const iconRect = icon.getBoundingClientRect();
+      if (isIntersecting(selectorRect, iconRect)) {
+        icon.classList.add('selected');
+        selectedDesktopIcons.add(icon);
+      } else {
+        icon.classList.remove('selected');
+        selectedDesktopIcons.delete(icon);
+      }
     });
   }
-  
+
   function updateSelectedFileItems(contentArea, selectorEl, itemsToSelect, selectedSet) {
     if (!selectorEl || !contentArea || !itemsToSelect || !selectedSet) {
       return;
     }
     const selectorRect = selectorEl.getBoundingClientRect();
     itemsToSelect.forEach(item => {
-        const itemRect = item.getBoundingClientRect();
-        if (isIntersecting(selectorRect, itemRect)) {
-            item.classList.add('selected');
-            selectedSet.add(item);
-        } else {
-            item.classList.remove('selected');
-            selectedSet.delete(item);
-        }
+      const itemRect = item.getBoundingClientRect();
+      if (isIntersecting(selectorRect, itemRect)) {
+        item.classList.add('selected');
+        selectedSet.add(item);
+      } else {
+        item.classList.remove('selected');
+        selectedSet.delete(item);
+      }
     });
   }
 
@@ -588,233 +1531,737 @@ document.addEventListener('DOMContentLoaded', function() {
       });
       return;
     }
-    if (!desktopIconsContainer) {
-      console.error('[GridInit] .desktop-icons container not found! Return early.');
-      return;
-    }
-    if (!desktopIcons || desktopIcons.length === 0) {
+    const icons = document.querySelectorAll('.desktop-icon');
+    if (!icons || icons.length === 0) {
       console.warn('[GridInit] No desktopIcons found to initialize. Return early.');
       return;
     }
-    console.log('[GridInit] Initializing desktop icon positions...');
+    // Get desktop area and taskbar height
+    const desktopArea = document.getElementById('desktop-area');
+    const taskbar = document.querySelector('.taskbar');
+    const desktopRect = desktopArea.getBoundingClientRect();
+    const taskbarHeight = taskbar ? taskbar.offsetHeight : 0;
+    const availableHeight = window.innerHeight - taskbarHeight - 50; // 30px bottom margin
+    const leftOffset = GRID_GAP; // px from the left
+    const topOffset = GRID_GAP; // px from the top
+    const verticalGap = GRID_GAP; // Use default grid gap
+    const iconHeight = GRID_CELL_HEIGHT;
+    const maxRows = Math.max(1, Math.floor((availableHeight - topOffset) / (iconHeight + verticalGap)));
+    const colWidth = GRID_CELL_WIDTH + GRID_GAP;
+    icons.forEach((icon, index) => {
+      const col = Math.floor(index / maxRows);
+      const row = index % maxRows;
+      const iconLeft = leftOffset + col * colWidth;
+      const iconTop = topOffset + row * (iconHeight + verticalGap);
+      icon.style.position = 'absolute';
+      icon.style.left = iconLeft + 'px';
+      icon.style.top = iconTop + 'px';
+      icon.dataset.homeLeft = String(iconLeft);
+      icon.dataset.homeTop = String(iconTop);
+    });
+  }
+
+  // ... existing code ...
+
+
+  // --- Desktop Icon Order Persistence ---
+  function getDesktopIconOrder() {
     try {
-      const containerWidth = desktopIconsContainer.clientWidth - (GRID_GAP);
-      const maxCols = Math.max(1, Math.floor(containerWidth / (GRID_CELL_WIDTH + GRID_GAP)));
-      const occupied = {};
-      desktopIcons.forEach((icon, index) => {
-        let col = index % maxCols;
-        let row = Math.floor(index / maxCols);
-        // Find next available slot
-        while (occupied[`${col},${row}`]) {
-          col++;
-          if (col >= maxCols) {
-            col = 0;
-            row++;
+      return JSON.parse(localStorage.getItem('desktopIconOrder') || '[]');
+    } catch (e) { return []; }
+  }
+  function setDesktopIconOrder(order) {
+    localStorage.setItem('desktopIconOrder', JSON.stringify(order));
+  }
+
+  function getOrderedDesktopIcons() {
+    const order = getDesktopIconOrder();
+    const icons = Array.from(document.querySelectorAll('.desktop-icon'));
+    if (!order.length) return icons;
+    // Sort icons by order, then by DOM order for new icons
+    return icons.slice().sort((a, b) => {
+      const aApp = a.getAttribute('data-app');
+      const bApp = b.getAttribute('data-app');
+      const aIdx = order.indexOf(aApp);
+      const bIdx = order.indexOf(bApp);
+      if (aIdx === -1 && bIdx === -1) return 0;
+      if (aIdx === -1) return 1;
+      if (bIdx === -1) return -1;
+      return aIdx - bIdx;
+    });
+  }
+
+  function saveCurrentDesktopIconOrder() {
+    const icons = Array.from(document.querySelectorAll('.desktop-icon'));
+    const order = icons.map(icon => icon.getAttribute('data-app'));
+    setDesktopIconOrder(order);
+  }
+
+
+
+  //Switch desktop and app launcher mode functions
+
+  function switchToAppLauncherMode() {
+    if (document.getElementById('app-launcher-desktop')) return;
+    const desktopArea = document.getElementById('desktop-area');
+    const desktopIconsContainer = document.querySelector('.desktop-icons');
+    const taskbar = document.querySelector('.taskbar');
+    const widgetsScreen = document.getElementById('widgets-screen');
+    const widgetsToggleBtn = document.getElementById('widgets-toggle-btn');
+    const appLauncherBtn = document.getElementById('app-launcher-btn');
+    // --- FIX: Do NOT hide buttons before animation ---
+    // let animCount = 0, animDone = 0;
+    let animCount = 0, animDone = 0;
+    function onAnimEnd() { animDone++; if (animDone >= animCount) finishSwitch(); }
+    // Animate desktop icons
+    if (desktopIconsContainer && desktopIconsContainer.style.display !== 'none') {
+      animCount++;
+      desktopIconsContainer.classList.add('anim-slide-left');
+      desktopIconsContainer.addEventListener('animationend', function handler() {
+        desktopIconsContainer.removeEventListener('animationend', handler);
+        desktopIconsContainer.classList.remove('anim-slide-left');
+        desktopIconsContainer.style.display = 'none';
+        desktopIconsContainer.style.pointerEvents = 'none';
+        onAnimEnd();
+      });
+    }
+    // Animate widgets ONLY if not already hidden
+    if (
+      widgetsScreen &&
+      widgetsScreen.style.display !== 'none' &&
+      !widgetsScreen.classList.contains('widgets-hidden')
+    ) {
+      animCount++;
+      widgetsScreen.classList.add('anim-slide-right');
+      widgetsScreen.addEventListener('animationend', function handler() {
+        widgetsScreen.removeEventListener('animationend', handler);
+        widgetsScreen.classList.remove('anim-slide-right');
+        widgetsScreen.style.display = 'none';
+        onAnimEnd();
+      });
+    }
+    // Animate taskbar
+    if (taskbar && taskbar.style.display !== 'none') {
+      animCount++;
+      taskbar.classList.add('anim-slide-down');
+      taskbar.addEventListener('animationend', function handler() {
+        taskbar.removeEventListener('animationend', handler);
+        taskbar.classList.remove('anim-slide-down');
+        taskbar.style.display = 'none';
+        onAnimEnd();
+      });
+    }
+    // --- FIX: Do NOT hide widgetsToggleBtn before animation ---
+    // if (widgetsToggleBtn) widgetsToggleBtn.style.display = 'none';
+    if (animCount === 0) finishSwitch();
+
+    function finishSwitch() {
+      // --- Ensure easy mode is OFF when entering app launcher mode ---
+      window._easyMode = false;
+      document.body.classList.remove('easy-mode');
+      const desktopArea = document.getElementById('desktop-area');
+      if (desktopArea) desktopArea.classList.remove('easy-mode');
+
+      const desktopIconsContainer = document.querySelector('.desktop-icons');
+      const taskbar = document.querySelector('.taskbar');
+      const widgetsScreen = document.getElementById('widgets-screen');
+      const widgetsToggleBtn = document.getElementById('widgets-toggle-btn');
+      // Hide app-launcher-btn in app-launcher-taskbar-right
+      const appLauncherBtn = document.getElementById('app-launcher-btn');
+      if (appLauncherBtn) appLauncherBtn.style.display = 'none';
+      if (widgetsToggleBtn) widgetsToggleBtn.style.display = 'none';
+      // Hide entire desktop icons container and disable pointer events
+      if (desktopIconsContainer) {
+        desktopIconsContainer.style.display = 'none';
+        desktopIconsContainer.style.pointerEvents = 'none';
+      }
+      if (taskbar) taskbar.style.display = 'none';
+      // Hide widgets and toggle
+      if (widgetsScreen) widgetsScreen.style.display = 'none';
+      if (widgetsToggleBtn) widgetsToggleBtn.style.display = 'none';
+      // Remove any previous app-launcher-desktop if present
+      let launcherDesktop = document.getElementById('app-launcher-desktop');
+      if (launcherDesktop) launcherDesktop.remove();
+      // Remove App Launcher overlay if present
+      const appLauncherOverlay = document.getElementById('app-launcher-overlay');
+      if (appLauncherOverlay && appLauncherOverlay.parentNode) appLauncherOverlay.parentNode.removeChild(appLauncherOverlay);
+      // Remove App Launcher desktop icon if present
+      const appLauncherIcon = document.querySelector('.desktop-icon[data-app="app-launcher"]');
+      if (appLauncherIcon && appLauncherIcon.parentNode) {
+        window._appLauncherIconWasPresent = true;
+        appLauncherIcon.parentNode.removeChild(appLauncherIcon);
+      } else {
+        window._appLauncherIconWasPresent = false;
+      }
+      // Create the app launcher desktop container
+      launcherDesktop = document.createElement('div');
+      launcherDesktop.id = 'app-launcher-desktop';
+      launcherDesktop.style.position = 'absolute';
+      launcherDesktop.style.top = '0';
+      launcherDesktop.style.left = '0';
+      launcherDesktop.style.width = '100%';
+      launcherDesktop.style.height = '100%';
+      launcherDesktop.style.display = 'flex';
+      launcherDesktop.style.flexDirection = 'column';
+
+      // --- Top Bar ---
+      const topBar = createAppLauncherTopBar();
+      launcherDesktop.appendChild(topBar);
+
+      // --- App Grid ---
+      const grid = document.createElement('div');
+      grid.className = 'app-launcher-grid';
+      grid.style.display = 'grid';
+      grid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(90px, 1fr))';
+      grid.style.gap = '32px';
+      grid.style.width = 'min(90vw, 900px)';
+      grid.style.maxWidth = '100vw';
+      grid.style.margin = 'auto';
+      grid.style.justifyItems = 'center';
+      grid.style.alignItems = 'start';
+      grid.style.padding = '0 0 90px 0';
+      grid.style.flex = '1 1 0';
+      grid.style.alignItems = 'center';
+      grid.style.justifyContent = 'center';
+      grid.style.alignContent = 'center';
+      // Only use startMenuApps to populate the grid
+      if (startMenuApps) {
+        startMenuApps.forEach(app => {
+          const appItem = document.createElement('div');
+          appItem.className = 'app-launcher-app';
+          appItem.style.display = 'flex';
+          appItem.style.flexDirection = 'column';
+          appItem.style.alignItems = 'center';
+          appItem.style.justifyContent = 'center';
+          appItem.style.minHeight = '120px';
+          appItem.style.cursor = 'pointer';
+          appItem.style.userSelect = 'none';
+          appItem.tabIndex = 0;
+          appItem.setAttribute('data-app-name', app.id);
+          appItem.innerHTML = `<div class="icon-container ${app.iconBgClass}" style="width:64px;height:64px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:28px;box-shadow:0 4px 16px rgba(0,0,0,0.18);margin-bottom:10px;"><i class="fas ${app.iconClass}"></i></div><span style="font-size:14px;color:#fff;margin-top:5px;text-shadow:0 1px 4px #222;text-align:center;width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;">${app.name}</span>`;
+          // Attach click event to the entire appItem
+          appItem.addEventListener('click', function (e) {
+            openApp(app.id, app.name, app.iconClass, app.iconBgClass, appItem);
+          });
+          grid.appendChild(appItem);
+        });
+      }
+      launcherDesktop.appendChild(grid);
+      // Add to desktop area
+      if (desktopArea) desktopArea.appendChild(launcherDesktop);
+      // Add a class to desktopArea for mode
+      if (desktopArea) desktopArea.classList.add('app-launcher-mode');
+      // Add a class to body for mode
+      document.body.classList.add('app-launcher-mode');
+      // Attach desktop context menu to app-launcher-desktop
+      //if (launcherDesktop) {
+       // launcherDesktop.addEventListener('contextmenu', function (e) {
+      //    // Prevent right-click context menu in app launcher mode
+      //      e.preventDefault();
+      //      return false;
+      //    });
+      //}
+
+      // Show and animate in the taskbar for app launcher mode
+      if (taskbar) {
+        taskbar.style.display = '';
+        taskbar.classList.add('anim-slide-up');
+        taskbar.addEventListener('animationend', function handler() {
+          taskbar.removeEventListener('animationend', handler);
+          taskbar.classList.remove('anim-slide-up');
+        });
+      }
+
+      // --- Animate in top bar and grid ---
+      // Animate in the top bar
+      topBar.classList.add('anim-slide-down');
+      topBar.addEventListener('animationend', function handler() {
+        topBar.removeEventListener('animationend', handler);
+        topBar.classList.remove('anim-slide-down');
+      });
+      // Animate in the app grid
+      grid.classList.add('anim-zoom-in');
+      grid.addEventListener('animationend', function handler() {
+        grid.removeEventListener('animationend', handler);
+        grid.classList.remove('anim-zoom-in');
+      });
+      // Ensure taskbar position is correct for app launcher mode
+      updateAppLauncherTaskbarPosition();
+    }
+  }
+  function switchToDesktopMode() {
+    const desktopArea = document.getElementById('desktop-area');
+    const desktopIconsContainer = document.querySelector('.desktop-icons');
+    const taskbar = document.querySelector('.taskbar');
+    const widgetsScreen = document.getElementById('widgets-screen');
+    const widgetsToggleBtn = document.getElementById('widgets-toggle-btn');
+    const appLauncherBtn = document.getElementById('app-launcher-btn');
+    const launcherDesktop = document.getElementById('app-launcher-desktop');
+    let animCount = 0, animDone = 0;
+
+    function onAnimEnd() {
+      animDone++;
+      if (animDone >= animCount) finishRestore();
+    }
+
+    // Animate out App Launcher UI if present
+    if (launcherDesktop) {
+      const grid = launcherDesktop.querySelector('.app-launcher-grid');
+      if (grid && grid.offsetParent !== null) {
+        animCount++;
+        grid.classList.add('anim-zoom-out');
+        grid.addEventListener('animationend', function handler() {
+          grid.removeEventListener('animationend', handler);
+          grid.classList.remove('anim-zoom-out');
+          grid.style.display = 'none';
+          onAnimEnd();
+        });
+      }
+      const topBar = launcherDesktop.querySelector('.app-launcher-top-bar');
+      if (topBar && topBar.offsetParent !== null) {
+        animCount++;
+        topBar.classList.add('anim-slide-up');
+        topBar.addEventListener('animationend', function handler() {
+          topBar.removeEventListener('animationend', handler);
+          topBar.classList.remove('anim-slide-up');
+          topBar.style.display = 'none';
+          onAnimEnd();
+        });
+      }
+    }
+
+    // ADD THIS:
+    const launcherTaskbar = launcherDesktop.querySelector('.taskbar');
+    if (taskbar && taskbar.style.display !== 'none') {
+      animCount++;
+      taskbar.classList.add('anim-slide-down');
+      taskbar.addEventListener('animationend', function handler() {
+        taskbar.removeEventListener('animationend', handler);
+        taskbar.classList.remove('anim-slide-down');
+        taskbar.style.display = 'none';
+        onAnimEnd();
+      });
+    }
+
+    if (animCount === 0) finishRestore();
+
+    function finishRestore() {
+      // Remove App Launcher DOM
+      const launcherDesktop = document.getElementById('app-launcher-desktop');
+      if (launcherDesktop) launcherDesktop.remove();
+
+
+      // Remove all wrappers
+      document.querySelectorAll('.app-launcher-taskbar-right, .app-launcher-taskbar-right .taskbar-right').forEach(el => el.remove());
+      // Re-render the right icons
+      const taskbarRight = document.querySelector('.taskbar-right');
+      if (taskbarRight && typeof renderPinnedTaskbarIcons === 'function') {
+        renderPinnedTaskbarIcons();
+      }
+
+      // Restore desktop icons container and pointer events
+      if (desktopIconsContainer) {
+        desktopIconsContainer.style.display = '';
+        desktopIconsContainer.style.pointerEvents = '';
+        desktopIconsContainer.classList.add('anim-slide-right');
+        desktopIconsContainer.addEventListener('animationend', function handler() {
+          desktopIconsContainer.removeEventListener('animationend', handler);
+          desktopIconsContainer.classList.remove('anim-slide-right');
+        });
+      }
+
+      // Restore taskbar
+      if (taskbar) {
+        taskbar.style.display = '';
+        taskbar.classList.add('anim-slide-up');
+        taskbar.addEventListener('animationend', function handler() {
+          taskbar.removeEventListener('animationend', handler);
+          taskbar.classList.remove('anim-slide-up');
+        });
+      }
+
+
+
+      // Restore widgets and toggle
+      if (widgetsScreen) {
+        widgetsScreen.style.display = '';
+        if (!widgetsScreen.classList.contains('widgets-hidden')) {
+          widgetsScreen.classList.add('anim-slide-in-right');
+          widgetsScreen.addEventListener('animationend', function handler() {
+            widgetsScreen.removeEventListener('animationend', handler);
+            widgetsScreen.classList.remove('anim-slide-in-right');
+          });
+        }
+        window.widgetsVisible = !widgetsScreen.classList.contains('widgets-hidden');
+      }
+
+      if (widgetsScreen) {
+        widgetsScreen.style.display = '';
+        window.widgetsVisible = !widgetsScreen.classList.contains('widgets-hidden');
+      }
+
+      if (widgetsToggleBtn) widgetsToggleBtn.style.display = '';
+      // Restore App Launcher desktop icon if missing
+      if (
+        desktopIconsContainer &&
+        window._appLauncherIconWasPresent &&
+        !document.querySelector('.desktop-icon[data-app=\"app-launcher\"]')
+      ) {
+        const appLauncherIcon = document.createElement('div');
+        appLauncherIcon.className = 'desktop-icon';
+        appLauncherIcon.setAttribute('data-app', 'app-launcher');
+        appLauncherIcon.innerHTML = `
+      <div class="icon-container blue-icon"><i class="fas fa-th"></i></div>
+      <span>App launcher</span>
+    `;
+        desktopIconsContainer.appendChild(appLauncherIcon);
+      }
+      window._appLauncherIconWasPresent = undefined;
+
+      // Remove mode classes
+      if (desktopArea) {
+        desktopArea.classList.remove('app-launcher-mode');
+        desktopArea.classList.remove('easy-mode'); // FIX: Remove easy-mode
+      }
+      document.body.classList.remove('app-launcher-mode');
+      document.body.classList.remove('easy-mode'); // FIX: Remove easy-mode
+      if (appLauncherBtn) appLauncherBtn.style.display = '';
+      if (widgetsToggleBtn) widgetsToggleBtn.style.display = '';
+      // --- Restore window headers and size for all open windows ---
+      for (const id in openWindows) {
+        const winObj = openWindows[id];
+        const win = winObj.element;
+        if (!win) continue;
+        // Restore window-header if hidden
+        const header = win.querySelector('.window-header');
+        if (header) header.style.display = '';
+        // Restore settings-header if hidden
+        const settingsHeader = win.querySelector('.settings-header');
+        if (settingsHeader) settingsHeader.style.display = '';
+        // Restore window-controls
+        const controls = win.querySelector('.window-controls');
+        if (controls) controls.style.display = '';
+        // Move window-title back to header if it was in sidebar
+        const sidebar = win.querySelector('.file-explorer-sidebar, .settings-sidebar, .app-store-sidebar');
+        const windowTitle = sidebar && sidebar.querySelector('.easy-mode-window-title');
+        if (windowTitle && header) {
+          windowTitle.classList.remove('easy-mode-window-title');
+          windowTitle.style = '';
+          header.insertBefore(windowTitle, header.firstChild);
+          const sep = sidebar.querySelector('.easy-mode-title-separator');
+          if (sep) sep.remove();
+        }
+        // Restore window size and remove maximized/fullscreen styles
+        win.classList.remove('maximized');
+        win.style.borderRadius = '';
+        // Add transition for smooth animation
+        win.style.transition = 'width 0.32s cubic-bezier(0.4,0,0.2,1), height 0.32s cubic-bezier(0.4,0,0.2,1), left 0.32s cubic-bezier(0.4,0,0.2,1), top 0.32s cubic-bezier(0.4,0,0.2,1)';
+
+        // Set default size
+        let targetWidth, targetHeight;
+        if (win.classList.contains('calculator-window')) {
+          targetWidth = 530;
+          targetHeight = 560;
+          win.style.width = targetWidth + 'px';
+          win.style.height = targetHeight + 'px';
+        } else if (win.classList.contains('photoshop-window')) {
+          targetWidth = Math.round(window.innerWidth * 0.9);
+          targetHeight = Math.round(window.innerHeight * 0.85);
+          win.style.width = targetWidth + 'px';
+          win.style.height = targetHeight + 'px';
+        } else {
+          targetWidth = 800;
+          targetHeight = 600;
+          win.style.width = targetWidth + 'px';
+          win.style.height = targetHeight + 'px';
+        }
+
+        // Now center the window after the size is applied
+        requestAnimationFrame(() => {
+          // Use the targetWidth/targetHeight for centering, not offsetWidth/offsetHeight
+          const left = Math.max(0, Math.round((window.innerWidth - targetWidth) / 2));
+          const top = Math.max(0, Math.round((window.innerHeight - targetHeight) / 2));
+          win.style.left = left + 'px';
+          win.style.top = top + 'px';
+        });
+
+        // Remove the transition after the animation completes
+        win.addEventListener('transitionend', function handler(ev) {
+          if (['width', 'height', 'left', 'top'].includes(ev.propertyName)) {
+            win.style.transition = '';
+            win.removeEventListener('transitionend', handler);
+          }
+        });
+      }
+    }
+
+    // ... existing code in switchToDesktopMode ...
+
+    // Move right icons back to the main taskbar
+    const launcherTaskbarRight = document.querySelector('.app-launcher-taskbar-right .taskbar-right');
+    const mainTaskbarRight = document.querySelector('.taskbar-right');
+    if (launcherTaskbarRight && mainTaskbarRight) {
+      Array.from(launcherTaskbarRight.children).forEach(child => {
+        mainTaskbarRight.appendChild(child);
+      });
+    }
+
+    // Restore taskbar right icons
+    const taskbarRight = document.querySelector('.taskbar-right');
+    if (taskbarRight) {
+      taskbarRight.style.display = '';
+      // If you have a render function, call it:
+      if (typeof renderPinnedTaskbarIcons === 'function') {
+        renderPinnedTaskbarIcons();
+      }
+      // --- FIX: Re-attach context menu listeners to right icons ---
+      taskbarRight.querySelectorAll('.taskbar-icon, .taskbar-time, .taskbar-ai').forEach(attachTaskbarIconListeners);
+    }
+    if (widgetsScreen) {
+      window.widgetsVisible = !widgetsScreen.classList.contains('widgets-hidden');
+    }
+    if (widgetsToggleBtn) widgetsToggleBtn.style.display = 'flex';
+  }
+
+
+
+
+
+
+
+
+
+  // --- START MENU LOGIC (moved to bottom for robustness) ---
+
+  // Define the app list before any function that uses it
+  const startMenuApps = [
+    { id: 'my-files', name: 'My Files', iconClass: 'fa-folder', iconBgClass: 'pink-icon', iconBgMenuClass: 'pink-bg', category: 'SYSTEM APPS' },
+    { id: 'this-pc', name: 'This PC', iconClass: 'fa-desktop', iconBgClass: 'pink-icon', iconBgMenuClass: 'pink-bg', category: 'SYSTEM APPS' },
+    { id: 'web-files', name: 'Web Files', iconClass: 'fa-folder-open', iconBgClass: 'green-icon', iconBgMenuClass: 'green-bg', category: 'SYSTEM APPS' },
+    { id: 'trash-sm', name: 'Trash', iconClass: 'fa-trash', iconBgClass: 'purple-icon', iconBgMenuClass: 'purple-bg', category: 'SYSTEM APPS' },
+    { id: 'settings-sm', name: 'Settings', iconClass: 'fa-cog', iconBgClass: 'pink-icon', iconBgMenuClass: 'pink-bg', category: 'SYSTEM APPS' },
+    { id: 'site-builder-sm', name: 'Site Builder', iconClass: 'fa-globe', iconBgClass: 'pink-icon', iconBgMenuClass: 'pink-bg', category: 'CUSTOMISE' },
+    { id: 'app-store-sm', name: 'AppStore', iconClass: 'fa-store', iconBgClass: 'green-icon', iconBgMenuClass: 'green-bg', category: 'CUSTOMISE' },
+    { id: 'social-master', name: 'Social Master', iconClass: 'fa-users', iconBgClass: 'purple-icon', iconBgMenuClass: 'purple-bg', category: 'CUSTOMISE' },
+    { id: 'personalize', name: 'Personalize', iconClass: 'fa-cog', iconBgClass: 'pink-icon', iconBgMenuClass: 'pink-bg', category: 'CUSTOMISE' },
+    { id: 'word-doc', name: 'Word doc', iconClass: 'fa-file-word', iconBgClass: 'pink-icon', iconBgMenuClass: 'pink-bg', category: 'DOCS' },
+    { id: 'excel-numbers', name: 'Excel Numbers', iconClass: 'fa-file-excel', iconBgClass: 'green-icon', iconBgMenuClass: 'green-bg', category: 'DOCS' },
+    { id: 'notepad', name: 'Notepad', iconClass: 'fa-sticky-note', iconBgClass: 'purple-icon', iconBgMenuClass: 'purple-bg', category: 'DOCS' },
+    { id: 'wordpad', name: 'Wordpad', iconClass: 'fa-file-alt', iconBgClass: 'pink-icon', iconBgMenuClass: 'pink-bg', category: 'DOCS' },
+    { id: 'calculator-sm', name: 'Calculator', iconClass: 'fa-calculator', iconBgClass: 'gray-icon', iconBgMenuClass: 'gray-bg', category: 'PRODUCTIVITY' },
+    { id: 'photoshop-sm', name: 'Photoshop', iconClass: 'fa-palette', iconBgClass: 'blue-icon', iconBgMenuClass: 'blue-bg', category: 'PRODUCTIVITY' },
+    { id: 'calendar-sm', name: 'Calendar', iconClass: 'fa-calendar-alt', iconBgClass: 'purple-icon', iconBgMenuClass: 'purple-bg', category: 'PRODUCTIVITY' },
+    { id: 'notes', name: 'Notes', iconClass: 'far fa-clipboard', iconBgClass: 'pink-icon', iconBgMenuClass: 'pink-bg', category: 'PRODUCTIVITY' },
+    { id: 'app-launcher', name: 'App launcher', iconClass: 'fa-th', iconBgClass: 'blue-icon', iconBgMenuClass: 'blue-bg', category: 'SYSTEM APPS' }
+  ];
+
+  let startMenuAppSortMode = 'category'; // 'category' or 'alphabet'
+
+  function categoryLinkClickHandler(e) {
+    e.preventDefault();
+    console.log('Category link clicked!'); // DEBUG
+    startMenuAppSortMode = (startMenuAppSortMode === 'category') ? 'alphabet' : 'category';
+    populateStartMenuApps();
+    // Update button text/icon
+    const categoryLink = e.currentTarget;
+    if (startMenuAppSortMode === 'category') {
+      categoryLink.innerHTML = '<i class="fas fa-arrow-down-a-z"></i> Alphabet';
+    } else {
+      categoryLink.innerHTML = '<i class="fas fa-sliders-h"></i> Category';
+    }
+  }
+
+  function attachCategoryLinkHandler() {
+    const categoryLink = document.querySelector('.start-menu-category-link');
+    if (categoryLink) {
+      categoryLink.removeEventListener('click', categoryLinkClickHandler);
+      categoryLink.addEventListener('click', categoryLinkClickHandler);
+    }
+  }
+
+  function populateStartMenuApps() {
+    console.log('populateStartMenuApps called, mode:', startMenuAppSortMode); // DEBUG
+    const startMenuLeftPanel = document.querySelector('.start-menu-left-panel');
+    if (!startMenuLeftPanel) return;
+    const existingSections = startMenuLeftPanel.querySelectorAll('.app-grid-section');
+    existingSections.forEach(section => section.remove());
+
+    if (startMenuAppSortMode === 'alphabet') {
+      // Alphabet mode: single grid, all apps sorted by name
+      const allApps = [...startMenuApps].sort((a, b) => a.name.localeCompare(b.name));
+      const appGridSection = document.createElement('div');
+      appGridSection.className = 'app-grid-section';
+      const appGrid = document.createElement('div');
+      appGrid.className = 'app-grid';
+      allApps.forEach(app => {
+        const appItem = document.createElement('div');
+        appItem.className = 'app-grid-item';
+        appItem.setAttribute('data-app-id', app.id);
+        appItem.setAttribute('data-app-name', app.name.toLowerCase());
+        appItem.innerHTML = `
+        <div class=\"app-icon-bg ${app.iconBgMenuClass}\">\n          <i class=\"fas ${app.iconClass}\"></i>\n        </div>\n        <span>${app.name}</span>\n      `;
+        const openStartMenuApp = (e) => {
+          openApp(app.id, app.name, app.iconClass, app.iconBgClass, appItem);
+          closeStartMenuAnimated();
+        };
+        appItem.addEventListener('click', openStartMenuApp);
+        appGrid.appendChild(appItem);
+      });
+      appGridSection.appendChild(appGrid);
+      startMenuLeftPanel.appendChild(appGridSection);
+    } else {
+      // Category mode (default)
+      const categories = {};
+      startMenuApps.forEach(app => {
+        if (!categories[app.category]) categories[app.category] = [];
+        categories[app.category].push(app);
+      });
+      for (const categoryName in categories) {
+        if (categories[categoryName].length > 0) {
+          const appGridSection = document.createElement('div');
+          appGridSection.className = 'app-grid-section';
+          appGridSection.setAttribute('data-category-name', categoryName);
+          const categoryHeader = document.createElement('h4');
+          categoryHeader.textContent = categoryName;
+          appGridSection.appendChild(categoryHeader);
+          const appGrid = document.createElement('div');
+          appGrid.className = 'app-grid';
+          categories[categoryName].forEach(app => {
+            const appItem = document.createElement('div');
+            appItem.className = 'app-grid-item';
+            appItem.setAttribute('data-app-id', app.id);
+            appItem.setAttribute('data-app-name', app.name.toLowerCase());
+            appItem.innerHTML = `
+            <div class=\"app-icon-bg ${app.iconBgMenuClass}\">\n              <i class=\"fas ${app.iconClass}\"></i>\n            </div>\n            <span>${app.name}</span>\n          `;
+            const openStartMenuApp = (e) => {
+              openApp(app.id, app.name, app.iconClass, app.iconBgClass, appItem);
+              closeStartMenuAnimated();
+            };
+            appItem.addEventListener('click', openStartMenuApp);
+            appGrid.appendChild(appItem);
+          });
+          appGridSection.appendChild(appGrid);
+          startMenuLeftPanel.appendChild(appGridSection);
+        }
+      }
+    }
+    attachCategoryLinkHandler(); // Ensure handler is always attached
+  }
+
+  function filterStartMenuApps(searchTerm) {
+    const startMenuLeftPanel = document.querySelector('.start-menu-left-panel');
+    if (!startMenuLeftPanel) return;
+    const term = searchTerm.toLowerCase();
+    const appSections = startMenuLeftPanel.querySelectorAll('.app-grid-section');
+    appSections.forEach(section => {
+      const appItems = [];
+      startMenuApps.forEach(app => {
+        // ... create appItem, add listeners, etc ...
+        grid.appendChild(appItem);
+        appItems.push(appItem);
+      }); // <-- End of forEach
+
+      // Now define the function here:
+      function openAppFromLauncher(appItem) {
+        appItems.forEach(item => item.classList.remove('selected'));
+        appItem.classList.add('selected');
+        openApp(
+          appItem.getAttribute('data-app-id') || appItem.getAttribute('data-app-name'),
+          appItem.querySelector('span').textContent,
+          appItem.querySelector('i').className.split(' ').find(cls => cls.startsWith('fa-')),
+          appItem.className.split(' ').find(cls => cls.endsWith('-icon'))
+        );
+        closeLauncher();
+      }
+      let sectionHasVisibleItems = false;
+      appItems.forEach(item => {
+        const appName = item.getAttribute('data-app-name');
+        const isVisible = appName.includes(term);
+        item.style.display = isVisible ? '' : 'none';
+        if (isVisible) sectionHasVisibleItems = true;
+      });
+      section.style.display = sectionHasVisibleItems ? '' : 'none';
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    const startMenuLeftPanel = document.querySelector('.start-menu-left-panel');
+    if (startMenuLeftPanel) {
+      startMenuLeftPanel.addEventListener('click', function (e) {
+        const categoryLink = e.target.closest('.start-menu-category-link');
+        if (categoryLink) {
+          e.preventDefault();
+          console.log('Category link clicked!'); // DEBUG
+          startMenuAppSortMode = (startMenuAppSortMode === 'category') ? 'alphabet' : 'category';
+          populateStartMenuApps();
+          // Update button text/icon
+          if (startMenuAppSortMode === 'category') {
+            categoryLink.innerHTML = '<i class="fas fa-arrow-down-a-z"></i> Alphabet';
+          } else {
+            categoryLink.innerHTML = '<i class="fas fa-sliders-h"></i> Category';
           }
         }
-        const iconLeft = GRID_GAP + col * (GRID_CELL_WIDTH + GRID_GAP);
-        const iconTop = GRID_GAP + row * (GRID_CELL_HEIGHT + GRID_GAP);
-        icon.style.position = 'absolute';
-        icon.style.left = iconLeft + 'px';
-        icon.style.top = iconTop + 'px';
-        icon.dataset.homeLeft = String(iconLeft);
-        icon.dataset.homeTop = String(iconTop);
-        occupied[`${col},${row}`] = true;
       });
-    } catch (mainError) {
-      console.error('[GridInit] CRITICAL ERROR during main part of initializeDesktopIconPositions:', mainError);
     }
-  }
-
-  // Move this to the top-level scope, before any function that uses it
-// ... existing code ...
-
-// --- START MENU LOGIC (moved to bottom for robustness) ---
-
-// Define the app list before any function that uses it
-const startMenuApps = [
-  { id: 'this-pc', name: 'This PC', iconClass: 'fa-desktop', iconBgClass: 'pink-icon', iconBgMenuClass: 'pink-bg', category: 'SYSTEM APPS' },
-  { id: 'web-files', name: 'Web Files', iconClass: 'fa-folder-open', iconBgClass: 'green-icon', iconBgMenuClass: 'green-bg', category: 'SYSTEM APPS' },
-  { id: 'trash-sm', name: 'Trash', iconClass: 'fa-trash', iconBgClass: 'purple-icon', iconBgMenuClass: 'purple-bg', category: 'SYSTEM APPS' },
-  { id: 'settings-sm', name: 'Settings', iconClass: 'fa-cog', iconBgClass: 'pink-icon', iconBgMenuClass: 'pink-bg', category: 'SYSTEM APPS' }, 
-  { id: 'site-builder-sm', name: 'Site Builder', iconClass: 'fa-globe', iconBgClass: 'pink-icon', iconBgMenuClass: 'pink-bg', category: 'CUSTOMISE' },
-  { id: 'app-store-sm', name: 'AppStore', iconClass: 'fa-store', iconBgClass: 'green-icon', iconBgMenuClass: 'green-bg', category: 'CUSTOMISE' },
-  { id: 'social-master', name: 'Social Master', iconClass: 'fa-users', iconBgClass: 'purple-icon', iconBgMenuClass: 'purple-bg', category: 'CUSTOMISE' },
-  { id: 'personalize', name: 'Personalize', iconClass: 'fa-cog', iconBgClass: 'pink-icon', iconBgMenuClass: 'pink-bg', category: 'CUSTOMISE' },
-  { id: 'word-doc', name: 'Word doc', iconClass: 'fa-file-word', iconBgClass: 'pink-icon', iconBgMenuClass: 'pink-bg', category: 'DOCS' },
-  { id: 'excel-numbers', name: 'Excel Numbers', iconClass: 'fa-file-excel', iconBgClass: 'green-icon', iconBgMenuClass: 'green-bg', category: 'DOCS' },
-  { id: 'notepad', name: 'Notepad', iconClass: 'fa-sticky-note', iconBgClass: 'purple-icon', iconBgMenuClass: 'purple-bg', category: 'DOCS' },
-  { id: 'wordpad', name: 'Wordpad', iconClass: 'fa-file-alt', iconBgClass: 'pink-icon', iconBgMenuClass: 'pink-bg', category: 'DOCS' },
-  { id: 'calculator-sm', name: 'Calculator', iconClass: 'fa-calculator', iconBgClass: 'gray-icon', iconBgMenuClass: 'gray-bg', category: 'PRODUCTIVITY' },
-  { id: 'photoshop-sm', name: 'Photoshop', iconClass: 'fa-palette', iconBgClass: 'blue-icon', iconBgMenuClass: 'blue-bg', category: 'PRODUCTIVITY' },
-  { id: 'calendar-sm', name: 'Calendar', iconClass: 'fa-calendar-alt', iconBgClass: 'purple-icon', iconBgMenuClass: 'purple-bg', category: 'PRODUCTIVITY' },
-  { id: 'notes', name: 'Notes', iconClass: 'far fa-clipboard', iconBgClass: 'pink-icon', iconBgMenuClass: 'pink-bg', category: 'PRODUCTIVITY' },
-  { id: 'app-launcher', name: 'App launcher', iconClass: 'fa-th', iconBgClass: 'blue-icon', iconBgMenuClass: 'blue-bg', category: 'SYSTEM APPS' }
-];
-
-let startMenuAppSortMode = 'category'; // 'category' or 'alphabet'
-
-function categoryLinkClickHandler(e) {
-  e.preventDefault();
-  console.log('Category link clicked!'); // DEBUG
-  startMenuAppSortMode = (startMenuAppSortMode === 'category') ? 'alphabet' : 'category';
-  populateStartMenuApps();
-  // Update button text/icon
-  const categoryLink = e.currentTarget;
-  if (startMenuAppSortMode === 'category') {
-    categoryLink.innerHTML = '<i class="fas fa-arrow-down-a-z"></i> Alphabet';
-  } else {
-    categoryLink.innerHTML = '<i class="fas fa-sliders-h"></i> Category';
-  }
-}
-
-function attachCategoryLinkHandler() {
-  const categoryLink = document.querySelector('.start-menu-category-link');
-  if (categoryLink) {
-    categoryLink.removeEventListener('click', categoryLinkClickHandler);
-    categoryLink.addEventListener('click', categoryLinkClickHandler);
-  }
-}
-
-function populateStartMenuApps() {
-  console.log('populateStartMenuApps called, mode:', startMenuAppSortMode); // DEBUG
-  const startMenuLeftPanel = document.querySelector('.start-menu-left-panel');
-  if (!startMenuLeftPanel) return;
-  const existingSections = startMenuLeftPanel.querySelectorAll('.app-grid-section');
-  existingSections.forEach(section => section.remove());
-
-  if (startMenuAppSortMode === 'alphabet') {
-    // Alphabet mode: single grid, all apps sorted by name
-    const allApps = [...startMenuApps].sort((a, b) => a.name.localeCompare(b.name));
-    const appGridSection = document.createElement('div');
-    appGridSection.className = 'app-grid-section';
-    const appGrid = document.createElement('div');
-    appGrid.className = 'app-grid';
-    allApps.forEach(app => {
-      const appItem = document.createElement('div');
-      appItem.className = 'app-grid-item';
-      appItem.setAttribute('data-app-id', app.id);
-      appItem.setAttribute('data-app-name', app.name.toLowerCase());
-      appItem.innerHTML = `
-        <div class=\"app-icon-bg ${app.iconBgMenuClass}\">\n          <i class=\"fas ${app.iconClass}\"></i>\n        </div>\n        <span>${app.name}</span>\n      `;
-      const openStartMenuApp = (e) => {
-        openApp(app.id, app.name, app.iconClass, app.iconBgClass, appItem);
-        if(window.startMenu) window.startMenu.style.display = 'none';
-      };
-      appItem.addEventListener('click', openStartMenuApp);
-      appGrid.appendChild(appItem);
-    });
-    appGridSection.appendChild(appGrid);
-    startMenuLeftPanel.appendChild(appGridSection);
-  } else {
-    // Category mode (default)
-    const categories = {};
-    startMenuApps.forEach(app => {
-      if (!categories[app.category]) categories[app.category] = [];
-      categories[app.category].push(app);
-    });
-    for (const categoryName in categories) {
-      if (categories[categoryName].length > 0) {
-        const appGridSection = document.createElement('div');
-        appGridSection.className = 'app-grid-section';
-        appGridSection.setAttribute('data-category-name', categoryName);
-        const categoryHeader = document.createElement('h4');
-        categoryHeader.textContent = categoryName;
-        appGridSection.appendChild(categoryHeader);
-        const appGrid = document.createElement('div');
-        appGrid.className = 'app-grid';
-        categories[categoryName].forEach(app => {
-          const appItem = document.createElement('div');
-          appItem.className = 'app-grid-item';
-          appItem.setAttribute('data-app-id', app.id);
-          appItem.setAttribute('data-app-name', app.name.toLowerCase());
-          appItem.innerHTML = `
-            <div class=\"app-icon-bg ${app.iconBgMenuClass}\">\n              <i class=\"fas ${app.iconClass}\"></i>\n            </div>\n            <span>${app.name}</span>\n          `;
-          const openStartMenuApp = (e) => {
-            openApp(app.id, app.name, app.iconClass, app.iconBgClass, appItem);
-            if(window.startMenu) window.startMenu.style.display = 'none';
-          };
-          appItem.addEventListener('click', openStartMenuApp);
-          appGrid.appendChild(appItem);
-        });
-        appGridSection.appendChild(appGrid);
-        startMenuLeftPanel.appendChild(appGridSection);
-      }
-    }
-  }
-  attachCategoryLinkHandler(); // Ensure handler is always attached
-}
-
-function filterStartMenuApps(searchTerm) {
-  const startMenuLeftPanel = document.querySelector('.start-menu-left-panel');
-  if (!startMenuLeftPanel) return;
-  const term = searchTerm.toLowerCase();
-  const appSections = startMenuLeftPanel.querySelectorAll('.app-grid-section');
-  appSections.forEach(section => {
-    const appItems = [];
-    startMenuApps.forEach(app => {
-      // ... create appItem, add listeners, etc ...
-      grid.appendChild(appItem);
-      appItems.push(appItem);
-    }); // <-- End of forEach
-
-    // Now define the function here:
-    function openAppFromLauncher(appItem) {
-      appItems.forEach(item => item.classList.remove('selected'));
-      appItem.classList.add('selected');
-      openApp(
-        appItem.getAttribute('data-app-id') || appItem.getAttribute('data-app-name'),
-        appItem.querySelector('span').textContent,
-        appItem.querySelector('i').className.split(' ').find(cls => cls.startsWith('fa-')),
-        appItem.className.split(' ').find(cls => cls.endsWith('-icon'))
-      );
-      closeLauncher();
-    }
-    let sectionHasVisibleItems = false;
-    appItems.forEach(item => {
-      const appName = item.getAttribute('data-app-name');
-      const isVisible = appName.includes(term);
-      item.style.display = isVisible ? '' : 'none';
-      if (isVisible) sectionHasVisibleItems = true;
-    });
-    section.style.display = sectionHasVisibleItems ? '' : 'none';
+    populateStartMenuApps();
+    attachCategoryLinkHandler();
   });
-}
 
-document.addEventListener('DOMContentLoaded', function() {
-  const startMenuLeftPanel = document.querySelector('.start-menu-left-panel');
-  if (startMenuLeftPanel) {
-    startMenuLeftPanel.addEventListener('click', function(e) {
-      const categoryLink = e.target.closest('.start-menu-category-link');
-      if (categoryLink) {
-        e.preventDefault();
-        console.log('Category link clicked!'); // DEBUG
-        startMenuAppSortMode = (startMenuAppSortMode === 'category') ? 'alphabet' : 'category';
-        populateStartMenuApps();
-        // Update button text/icon
-        if (startMenuAppSortMode === 'category') {
-          categoryLink.innerHTML = '<i class="fas fa-arrow-down-a-z"></i> Alphabet';
-        } else {
-          categoryLink.innerHTML = '<i class="fas fa-sliders-h"></i> Category';
-        }
-      }
+  // --- Desktop Icon Arrangement Mode ---
+  let desktopIconArrangeMode = localStorage.getItem('desktopIconArrangeMode') || 'align-grid'; // 'auto-arrange' or 'align-grid'
+
+  // Save and load icon order
+  function getDesktopIconOrder() {
+    try {
+      return JSON.parse(localStorage.getItem('desktopIconOrder') || '[]');
+    } catch (e) { return []; }
+  }
+  function setDesktopIconOrder(order) {
+    localStorage.setItem('desktopIconOrder', JSON.stringify(order));
+  }
+  function getOrderedDesktopIcons() {
+    const order = getDesktopIconOrder();
+    const icons = Array.from(document.querySelectorAll('.desktop-icon'));
+    if (!order.length) return icons;
+    return icons.slice().sort((a, b) => {
+      const aApp = a.getAttribute('data-app');
+      const bApp = b.getAttribute('data-app');
+      const aIdx = order.indexOf(aApp);
+      const bIdx = order.indexOf(bApp);
+      if (aIdx === -1 && bIdx === -1) return 0;
+      if (aIdx === -1) return 1;
+      if (bIdx === -1) return -1;
+      return aIdx - bIdx;
     });
   }
-  populateStartMenuApps();
-  attachCategoryLinkHandler();
-});
-// ... existing code ...
+
+
+
+
+
+
+
+
+
+
+
+
+
+  // Patch executeContextMenuAction to handle toggling
+  const _originalExecuteContextMenuAction = executeContextMenuAction;
+
+
+
 
 
   function updateCurrentTime() {
     const now = new Date();
     const hours = String(now.getHours()).padStart(2, '0');
     const minutes = String(now.getMinutes()).padStart(2, '0');
-    if(currentTimeEl) currentTimeEl.textContent = `${hours}:${minutes}`;
+    if (currentTimeEl) currentTimeEl.textContent = `${hours}:${minutes}`;
   }
-  
-  if(startButton && startMenu) {
-    startButton.addEventListener('click', function() {
+  if (startButton && startMenu) {
+    startButton.addEventListener('click', function () {
       if (startMenu.classList.contains('start-menu-style-app-launcher')) {
         openAppLauncherWindow(startButton);
         return;
@@ -836,8 +2283,8 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   }
-  
-  document.addEventListener('click', function(e) {
+
+  document.addEventListener('click', function (e) {
     if (startMenu && !startMenu.contains(e.target) && e.target !== startButton && !startButton.contains(e.target)) {
       if (startMenu.style.display === 'block') {
         startMenu.classList.remove('start-menu-anim-open');
@@ -850,99 +2297,23 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     }
     if (contextMenu && !contextMenu.classList.contains('hidden') && !contextMenu.contains(e.target)) {
-        hideContextMenu();
+      hideContextMenu();
     }
-    if (e.target === desktopArea && !isDraggingSelector && !draggedIcon) { 
-        clearIconSelection();
+    if (e.target === desktopArea && !isDraggingSelector && !draggedIcon) {
+      clearIconSelection();
     }
   });
-  
-  if (desktopIcons.length > 0) {
-    desktopIcons.forEach(icon => {
-      // Function to handle app opening
-      const openAppFromIcon = function(e) {
-        e.stopPropagation(); 
-        e.preventDefault();  
-        const appName = this.getAttribute('data-app');
-        const appTitleElement = this.querySelector('span');
-        const appTitle = appTitleElement ? appTitleElement.textContent : 'Unknown App';
-        const iconElement = this.querySelector('i');
-        const iconContainer = this.querySelector('.icon-container');
-        const iconClass = iconElement ? iconElement.className.split(' ').find(cls => cls.startsWith('fa-')) : 'fa-question-circle';
-        const iconBgClass = iconContainer ? iconContainer.className.split(' ').find(cls => cls.endsWith('-icon')) : 'gray-icon';
-        if (!appName) return;
-        openApp(appName, appTitle, iconClass, iconBgClass, this);
-      };
 
-      // Desktop: Double click to open
-      icon.addEventListener('dblclick', function(e) {
-        if (window.innerWidth > MOBILE_BREAKPOINT) {
-          openAppFromIcon.call(this, e);
-        }
-      });
-
-      // Mobile: Single tap to open
-      icon.addEventListener('click', function(e) {
-        if (window.innerWidth <= MOBILE_BREAKPOINT) {
-          openAppFromIcon.call(this, e);
-        }
-      });
-
-      icon.addEventListener('mousedown', function(e) {
-        if (e.button !== 0) return;
-        if (!this.classList.contains('selected')) {
-            clearIconSelection();
-            this.classList.add('selected');
-            selectedDesktopIcons.add(this);
-        }
-        draggedIcon = this;
-        isActuallyDraggingIcon = false;
-        dragStartMouseX = e.clientX;
-        dragStartMouseY = e.clientY;
-        dragOffsetX = e.clientX - draggedIcon.getBoundingClientRect().left;
-        dragOffsetY = e.clientY - draggedIcon.getBoundingClientRect().top;
-        // Store original position for single drag
-        iconOriginalLeft = draggedIcon.style.left;
-        iconOriginalTop = draggedIcon.style.top;
-        // --- Multi-drag: store initial positions of all selected icons ---
-        if (selectedDesktopIcons.size > 1) {
-          multiDragInitialPositions = Array.from(selectedDesktopIcons).map(icon => {
-            const rect = icon.getBoundingClientRect();
-            const parentRect = icon.parentElement.getBoundingClientRect();
-            return {
-              icon,
-              left: rect.left - parentRect.left + icon.parentElement.scrollLeft,
-              top: rect.top - parentRect.top + icon.parentElement.scrollTop
-            };
-          });
-          multiDragStartMouseX = e.clientX;
-          multiDragStartMouseY = e.clientY;
-          // Store original positions for multi-drag
-          multiDragOriginalPositions = Array.from(selectedDesktopIcons).map(icon => ({
-            icon,
-            left: icon.style.left,
-            top: icon.style.top
-          }));
-        } else {
-          multiDragInitialPositions = null;
-          multiDragOriginalPositions = null;
-        }
-        document.addEventListener('mousemove', globalOnIconMouseMove);
-        document.addEventListener('mouseup', globalOnIconMouseUp);
-      });
-    });
-  } else {
-    console.warn('[Init] No desktop icons found to attach listeners.');
-  }
+  document.querySelectorAll('.desktop-icon').forEach(setupDesktopIcon);
 
   document.querySelectorAll('.menu-item').forEach(item => {
-    item.addEventListener('click', function() {
+    item.addEventListener('click', function () {
       const span = this.querySelector('span');
       if (!span) {
         const itemName = this.textContent.trim();
         if (itemName === 'WEBSITE') { /* ... */ }
         else if (itemName === 'SETTINGS') { openApp('settings', 'Settings', 'fa-cog', 'green'); }
-        if(startMenu) startMenu.style.display = 'none';
+        closeStartMenuAnimated();
         return;
       }
       const appTitle = span.textContent;
@@ -955,27 +2326,17 @@ document.addEventListener('DOMContentLoaded', function() {
       if (appTitle === 'Settings') appName = 'settings';
       if (appName && appTitle && iconClass && iconBgClass) {
         openApp(appName, appTitle, iconClass, iconBgClass);
-        if(startMenu) startMenu.style.display = 'none';
+        closeStartMenuAnimated();
       }
     });
   });
 
-  function getAppIconDetails(appName) {
-    let iconClass = 'fa-window-maximize'; 
-    let iconBgClass = 'gray-icon'; 
-    const desktopIcon = document.querySelector(`.desktop-icon[data-app="${appName}"]`);
-    if (desktopIcon) {
-        const iElem = desktopIcon.querySelector('i');
-        const cElem = desktopIcon.querySelector('.icon-container');
-        if(iElem) iconClass = iElem.className.split(' ').find(cls => cls.startsWith('fa-')) || iconClass;
-        if(cElem) iconBgClass = cElem.className.split(' ').find(cls => cls.endsWith('-icon')) || iconBgClass;
-    }
-    return { iconClass, iconBgClass };
-  }
+
 
   function openApp(appName, appTitle, iconClassFromClick, iconBgClassFromClick, iconElementForAnim) {
-    // Allow multiple windows only for 'my-files'
-    if (appName !== 'my-files') {
+    // Prevent duplicate windows for all apps except those that should allow multiples
+    const allowMultiple = (appName === 'my-files'); // Add more app names if needed
+    if (!allowMultiple) {
       for (const id in openWindows) {
         if (openWindows[id].name === appName && openWindows[id].element && !openWindows[id].element.classList.contains('minimized')) {
           makeWindowActive(openWindows[id].element);
@@ -988,8 +2349,27 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       }
     }
-    windowIdCounter++;
-    const windowId = `window-${windowIdCounter}`;
+
+    // --- FIX: Remove pinned-only icon if present ---
+// --- Get pinned icon rect BEFORE removing it ---
+let iconRect = null;
+const pinnedIcon = taskbarAppIconsContainer.querySelector('.taskbar-app-icon.pinned-only[data-app-name="' + appName + '"]');
+if (iconElementForAnim && iconElementForAnim.getBoundingClientRect) {
+  iconRect = iconElementForAnim.getBoundingClientRect();
+} else if (pinnedIcon && pinnedIcon.getBoundingClientRect) {
+  iconRect = pinnedIcon.getBoundingClientRect();
+} else {
+  const desktopIcon = document.querySelector(`.desktop-icon[data-app="${appName}"]`);
+  if (desktopIcon) {
+    iconRect = desktopIcon.getBoundingClientRect();
+  }
+}
+if (pinnedIcon) pinnedIcon.remove();
+
+windowIdCounter++;
+const windowId = `window-${windowIdCounter}`;
+
+
     let windowElement = null;
     let isFileExplorer = false;
     let delayedContentLoader = null;
@@ -997,19 +2377,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const finalIconClass = iconClassFromClick || appDetails.iconClass;
     const finalIconBgClass = iconBgClassFromClick || appDetails.iconBgClass;
 
-    // --- Use the passed icon element for animation if available ---
-    let iconRect = null;
-    if (iconElementForAnim && iconElementForAnim.getBoundingClientRect) {
-      iconRect = iconElementForAnim.getBoundingClientRect();
-    } else {
-      const desktopIcon = document.querySelector(`.desktop-icon[data-app="${appName}"]`);
-      if (desktopIcon) {
-        iconRect = desktopIcon.getBoundingClientRect();
-      }
-    }
+
 
     // --- Prepare window shell only, delay content ---
-    switch(appName) {
+    switch (appName) {
       case 'app-launcher':
         openAppLauncherWindow(iconElementForAnim);
         return;
@@ -1022,7 +2393,7 @@ document.addEventListener('DOMContentLoaded', function() {
           setupSidebarToggleForFileExplorer(windowElement);
         };
         break;
-      case 'settings': 
+      case 'settings':
       case 'settings-sm':
         windowElement = createWindowFromTemplate('settings-app', windowId, true);
         appTitle = 'Settings';
@@ -1107,12 +2478,68 @@ document.addEventListener('DOMContentLoaded', function() {
       }
       // ---
       const taskbarIcon = createTaskbarIcon(windowId, appName, finalIconClass, appTitle);
-      openWindows[windowId] = { element: windowElement, taskbarIcon: taskbarIcon, name: appName, title: appTitle };
+      openWindows[windowId] = { 
+        element: windowElement,
+        taskbarIcon: taskbarIcon,
+        name: appName,
+        title: appTitle,
+        iconClass: finalIconClass,
+        iconBgClass: finalIconBgClass,
+        appTitle: appTitle
+       };
       makeWindowActive(windowElement);
+      // --- EASY MODE: maximize and hide header ---
+      if (window._easyMode || document.body.classList.contains('easy-mode')) {
+        // Maximize window to fill desktop area
+        windowElement.classList.add('maximized');
+        windowElement.style.left = '0px';
+        windowElement.style.top = '0px';
+        windowElement.style.width = '100%';
+        windowElement.style.height = '100%';
+        windowElement.style.borderRadius = '0';
+        // Hide window header
+        const header = windowElement.querySelector('.window-header');
+        if (header) header.style.display = 'none';
+        // Also hide settings-header if present
+        const settingsHeader = windowElement.querySelector('.settings-header');
+        if (settingsHeader) settingsHeader.style.display = 'none';
+        // Optionally hide window controls
+        const controls = windowElement.querySelector('.window-controls');
+        if (controls) controls.style.display = 'none';
+        // --- Move window-title to sidebar ---
+        const windowTitle = windowElement.querySelector('.window-title');
+        const sidebar = windowElement.querySelector('.file-explorer-sidebar, .settings-sidebar, .app-store-sidebar');
+        if (windowTitle && sidebar && !sidebar.querySelector('.easy-mode-window-title')) {
+          // Clone or move the windowTitle (move is better to preserve events/icons)
+          windowTitle.classList.add('easy-mode-window-title');
+          // Remove margin/padding if any
+          windowTitle.style.margin = '0';
+          windowTitle.style.padding = '0 10px 2px 10px';
+          windowTitle.style.display = 'flex';
+          windowTitle.style.alignItems = 'center';
+          windowTitle.style.gap = '4px';
+          windowTitle.style.fontSize = '14px';
+          windowTitle.style.fontWeight = 'bold';
+          windowTitle.style.background = 'none';
+          windowTitle.style.border = 'none';
+          windowTitle.style.whiteSpace = 'nowrap';
+          // Insert at top of sidebar
+          sidebar.insertBefore(windowTitle, sidebar.firstChild);
+          // Add a separator after the title
+          const sep = document.createElement('div');
+          sep.className = 'easy-mode-title-separator';
+          sep.style.height = '1px';
+          sep.style.background = 'rgba(255,255,255,0.10)';
+          sep.style.margin = '8px 0 8px 0';
+          sidebar.insertBefore(sep, windowTitle.nextSibling);
+        }
+      }
       // Do not call setupFileExplorerInteraction or other content loaders here!
-    } 
+    }
+    // Always update the taskbar after opening an app
+    renderPinnedTaskbarIcons();
   }
-  
+
   function createWindowFromTemplate(templateId, windowId, delayContent) {
     const template = document.getElementById(`${templateId}-template`);
     if (!template) return null;
@@ -1136,7 +2563,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     return windowElement;
   }
-  
+
   function createGenericWindow(title, iconClass, iconBgClass, windowId, delayContent) {
     const windowElement = document.createElement('div');
     windowElement.className = 'window';
@@ -1168,7 +2595,7 @@ document.addEventListener('DOMContentLoaded', function() {
     positionWindowCenter(windowElement);
     return windowElement;
   }
-  
+
   function positionWindowCenter(windowElement) {
     if (window.innerWidth <= MOBILE_BREAKPOINT) {
       windowElement.style.left = '0px';
@@ -1204,7 +2631,6 @@ document.addEventListener('DOMContentLoaded', function() {
     windowElement.style.left = `${Math.max(0, Math.min(left, maxLeft))}px`;
     windowElement.style.top = `${Math.max(0, Math.min(top, maxTop))}px`; // Ensure top is at least 0
   }
-  
   function setupWindowControls(windowElement) {
     if (window.innerWidth > MOBILE_BREAKPOINT) { // Only make draggable on larger screens
       makeWindowDraggable(windowElement);
@@ -1215,7 +2641,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const maximizeButton = windowElement.querySelector('.window-maximize');
     const header = windowElement.querySelector('.window-header') || windowElement.querySelector('.settings-header');
     if (closeButton) {
-      closeButton.addEventListener('click', function(e) { 
+      closeButton.addEventListener('click', function (e) {
         e.stopPropagation();
         const currentTaskbarIcon = openWindows[windowId] ? openWindows[windowId].taskbarIcon : null;
         // --- Animation: close effect ---
@@ -1231,24 +2657,28 @@ document.addEventListener('DOMContentLoaded', function() {
         windowElement.addEventListener('animationend', function handler(ev) {
           windowElement.classList.remove('window-anim-open', 'window-anim-maximize', 'window-anim-close');
           if (ev.animationName === 'windowClose') {
+            currentTaskbarIcon.classList.remove('opened-app');
             // Remove taskbar icon
             if (currentTaskbarIcon && currentTaskbarIcon.parentNode) currentTaskbarIcon.parentNode.removeChild(currentTaskbarIcon);
             // Remove window from openWindows
             delete openWindows[windowId];
             windowElement.remove();
+            renderPinnedTaskbarIcons();
             if (activeWindow === windowElement) activeWindow = null;
-            updateTaskbarActiveState(); 
+            updateTaskbarActiveState();
             windowElement._isClosing = false;
+            if (typeof updateAppLauncherTaskbarPosition === 'function') updateAppLauncherTaskbarPosition();
+            closeStartMenuAnimated();
           }
         }, { once: true });
         // ---
       });
     }
     if (minimizeButton) {
-      minimizeButton.addEventListener('click', function(e) { 
-        e.stopPropagation(); 
+      minimizeButton.addEventListener('click', function (e) {
+        e.stopPropagation();
         const currentTaskbarIcon = openWindows[windowId] ? openWindows[windowId].taskbarIcon : null;
-        animateWindowToTaskbar(windowElement, currentTaskbarIcon, function() {
+        animateWindowToTaskbar(windowElement, currentTaskbarIcon, function () {
           windowElement.style.display = 'none';
           windowElement.classList.add('minimized');
           if (currentTaskbarIcon) {
@@ -1256,14 +2686,15 @@ document.addEventListener('DOMContentLoaded', function() {
             currentTaskbarIcon.classList.remove('active');
           }
           if (activeWindow === windowElement) {
-              activeWindow = null;
-              updateTaskbarActiveState();
+            activeWindow = null;
+            updateTaskbarActiveState();
           }
+          if (typeof updateAppLauncherTaskbarPosition === 'function') updateAppLauncherTaskbarPosition();
         });
       });
-    }    
+    }
     if (maximizeButton) {
-      maximizeButton.addEventListener('click', function(e) {
+      maximizeButton.addEventListener('click', function (e) {
         e.stopPropagation();
         if (window.innerWidth <= MOBILE_BREAKPOINT) return;
         windowElement.classList.remove('window-anim-open', 'window-anim-maximize', 'window-anim-close');
@@ -1294,11 +2725,14 @@ document.addEventListener('DOMContentLoaded', function() {
           makeWindowDraggable(windowElement);
           makeWindowActive(windowElement);
           windowElement.addEventListener('transitionend', function handler(ev) {
-            if (["width","height","left","top"].includes(ev.propertyName)) {
+            if (["width", "height", "left", "top"].includes(ev.propertyName)) {
               windowElement.style.transition = '';
               windowElement.removeEventListener('transitionend', handler);
+              // After restore
+              if (typeof updateAppLauncherTaskbarPosition === 'function') updateAppLauncherTaskbarPosition();
             }
           });
+
         } else {
           // --- MAXIMIZE ---
           // Save current rect for restore
@@ -1312,11 +2746,17 @@ document.addEventListener('DOMContentLoaded', function() {
           windowElement.style.left = '0px';
           windowElement.style.top = '0px';
           windowElement.style.resize = 'none';
+
+
           windowElement.addEventListener('transitionend', function handler(ev) {
-            if (["width","height","left","top"].includes(ev.propertyName)) {
+
+            if (["width", "height", "left", "top"].includes(ev.propertyName)) {
               windowElement.classList.add('maximized');
+
               windowElement.style.transition = '';
               windowElement.removeEventListener('transitionend', handler);
+                        // After maximize
+                        if (typeof updateAppLauncherTaskbarPosition === 'function') updateAppLauncherTaskbarPosition();
             }
           });
           maximizeButton.classList.add('window-restore');
@@ -1325,12 +2765,15 @@ document.addEventListener('DOMContentLoaded', function() {
             header.style.cursor = 'default';
           }
           makeWindowActive(windowElement);
+
         }
+        // --- App Launcher Taskbar Position Logic ---
+        updateAppLauncherTaskbarPosition();
       });
-    } 
+    }
     // Add double-click to header to toggle maximize/restore
     if (maximizeButton && header) {
-      header.addEventListener('dblclick', function(e) {
+      header.addEventListener('dblclick', function (e) {
         if (window.innerWidth <= MOBILE_BREAKPOINT) return; // No maximize on mobile
         maximizeButton.click();
       });
@@ -1338,7 +2781,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Pop-out button logic
     const popoutButton = windowElement.querySelector('.window-popout');
     if (popoutButton) {
-      popoutButton.addEventListener('click', function(e) {
+      popoutButton.addEventListener('click', function (e) {
         e.stopPropagation();
         // Get original window position and size
         const rect = windowElement.getBoundingClientRect();
@@ -1414,7 +2857,7 @@ document.addEventListener('DOMContentLoaded', function() {
               iconClass: iconClass,
               iconBgClass: iconBgClass
             };
-          } catch (e) {}
+          } catch (e) { }
           // Listen for popout window close
           const restoreApp = () => {
             // Use appName and appTitle to reopen
@@ -1443,43 +2886,21 @@ document.addEventListener('DOMContentLoaded', function() {
         if (logOutButton) {
           logOutButton.addEventListener('click', (e) => {
             e.preventDefault();
-            showConfirmDialog({
-              title: "Log out?",
-              message: "Are you sure you want to log out?",
-              iconClass: "fa-sign-out-alt",
-              okText: "Log out",
-              cancelText: "Cancel"
-            }).then(confirmed => {
-              if (confirmed) {
-                if (typeof startMenu !== 'undefined' && startMenu) startMenu.style.display = 'none';
-                window._loggingOut = true;
-                if (window._allPopoutWindows && Array.isArray(window._allPopoutWindows)) {
-                  window._allPopoutWindows = window._allPopoutWindows.filter(win => {
-                    if (win && !win.closed) {
-                      try { win.close(); } catch (e) {}
-                      return false;
-                    }
-                    return false;
-                  });
-                }
-                setTimeout(() => { window._loggingOut = false; }, 2000);
-              }
-            });
+            handleLogout();
           });
         }
         // ... existing code ...
       });
     }
-    windowElement.addEventListener('mousedown', function(e) {
+    windowElement.addEventListener('mousedown', function (e) {
       // Only activate if not clicking a control button
       if (e.target.closest('.window-controls button') || e.target.closest('.window-control-btn')) return;
       makeWindowActive(windowElement);
     });
   }
-
   // Helper to re-attach drag handler after restore
   function dragMouseDownWrapper(windowElement) {
-    return function(e) {
+    return function (e) {
       if (window.innerWidth <= MOBILE_BREAKPOINT) return;
       const header = windowElement.querySelector('.window-header') || windowElement.querySelector('.settings-header');
       if (!header) return;
@@ -1584,34 +3005,40 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function toggleMinimizeWindow(windowElement, taskbarIcon) {
     if (windowElement.classList.contains('minimized')) {
-        // --- Animate restore from taskbar ---
-        windowElement.style.display = 'flex';
-        windowElement.classList.remove('minimized');
-        if (taskbarIcon) taskbarIcon.classList.remove('minimized');
-        // Bring to front BEFORE animation
-        makeWindowActive(windowElement);
-        animateWindowFromTaskbar(windowElement, taskbarIcon, function() {
-        });
+      // --- Animate restore from taskbar ---
+      windowElement.style.display = 'flex';
+      windowElement.classList.remove('minimized');
+      if (taskbarIcon) taskbarIcon.classList.remove('minimized');
+      // Bring to front BEFORE animation
+      makeWindowActive(windowElement);
+      animateWindowFromTaskbar(windowElement, taskbarIcon, function () {
+        // After restore
+        if (typeof updateAppLauncherTaskbarPosition === 'function') updateAppLauncherTaskbarPosition();
+      });
     } else {
-        // --- Animate minimize to taskbar ---
-        animateWindowToTaskbar(windowElement, taskbarIcon, function() {
-          windowElement.style.display = 'none';
-          windowElement.classList.add('minimized');
-          if (taskbarIcon) {
-            taskbarIcon.classList.add('minimized');
-            taskbarIcon.classList.remove('active');
-          }
-          if (activeWindow === windowElement) {
-              activeWindow = null;
-              updateTaskbarActiveState();
-          }
-        });
+      // --- Animate minimize to taskbar ---
+      animateWindowToTaskbar(windowElement, taskbarIcon, function () {
+        windowElement.style.display = 'none';
+        windowElement.classList.add('minimized');
+        if (taskbarIcon) {
+          taskbarIcon.classList.add('minimized');
+          taskbarIcon.classList.remove('active');
+        }
+        if (activeWindow === windowElement) {
+          activeWindow = null;
+          updateTaskbarActiveState();
+        }
+        // After minimize is complete and .minimized is added
+        if (typeof updateAppLauncherTaskbarPosition === 'function') updateAppLauncherTaskbarPosition();
+      });
+
     }
+
   }
-  
+
   function makeWindowActive(windowElement) {
     if (!windowElement || windowElement._isClosing) return;
-    if (activeWindow === windowElement && !windowElement.classList.contains('minimized')) return; 
+    if (activeWindow === windowElement && !windowElement.classList.contains('minimized')) return;
     if (activeWindow && openWindows[activeWindow.id]) {
       activeWindow.classList.remove('active');
       if (openWindows[activeWindow.id] && openWindows[activeWindow.id].taskbarIcon) {
@@ -1635,11 +3062,11 @@ document.addEventListener('DOMContentLoaded', function() {
   function updateTaskbarActiveState() {
     document.querySelectorAll('.taskbar-app-icon').forEach(icon => icon.classList.remove('active'));
     if (activeWindow && openWindows[activeWindow.id] && !activeWindow.classList.contains('minimized')) {
-        const activeTaskbarIcon = openWindows[activeWindow.id].taskbarIcon;
-        if (activeTaskbarIcon) activeTaskbarIcon.classList.add('active');
+      const activeTaskbarIcon = openWindows[activeWindow.id].taskbarIcon;
+      if (activeTaskbarIcon) activeTaskbarIcon.classList.add('active');
     }
   }
-  
+
   function makeWindowDraggable(windowElement) {
     if (window.innerWidth <= MOBILE_BREAKPOINT) {
       // On smaller screens, windows are fullscreen and not draggable.
@@ -1667,7 +3094,7 @@ document.addEventListener('DOMContentLoaded', function() {
       // windowElement.onmousedown = dragMouseDown; 
       // Decided against this for now to prevent conflicts if content is interactive.
       console.warn("Window has no .window-header or .settings-header, cannot make draggable by header.", windowElement);
-      return; 
+      return;
     }
 
     function dragMouseDown(e) {
@@ -1697,6 +3124,7 @@ document.addEventListener('DOMContentLoaded', function() {
       header.style.cursor = 'grabbing';
       // If maximized, restore to previous size/position for drag
       if (windowElement.classList.contains('maximized')) {
+
         wasMaximizedBeforeDrag = true;
         prevRect = {
           width: windowElement.dataset.prevWidth,
@@ -1720,7 +3148,9 @@ document.addEventListener('DOMContentLoaded', function() {
           left: windowElement.style.left,
           top: windowElement.style.top
         };
+        if (typeof updateAppLauncherTaskbarPosition === 'function') updateAppLauncherTaskbarPosition();
       }
+
     }
 
     function elementDrag(e) {
@@ -1837,7 +3267,7 @@ document.addEventListener('DOMContentLoaded', function() {
           windowElement.removeEventListener('animationend', handler);
         });
         windowElement.addEventListener('transitionend', function handler(ev) {
-          if (["width","height","left","top"].includes(ev.propertyName)) {
+          if (["width", "height", "left", "top"].includes(ev.propertyName)) {
             windowElement.style.transition = '';
             windowElement.removeEventListener('transitionend', handler);
           }
@@ -1854,6 +3284,8 @@ document.addEventListener('DOMContentLoaded', function() {
         clearTimeout(snapHintDelayTimer);
         snapHintDelayTimer = null;
       }
+      // --- App Launcher Taskbar Position Logic ---
+      updateAppLauncherTaskbarPosition();
     }
   }
 
@@ -1869,27 +3301,26 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     const iconEl = document.createElement('div');
     iconEl.className = 'taskbar-app-icon';
+    iconEl.classList.add('opened-app');
     iconEl.setAttribute('data-window-id', windowId);
     iconEl.setAttribute('title', appTitle || appName.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()));
     iconEl.innerHTML = `<div class="icon-container ${iconBgClass}"><i class="fas ${iconClass}"></i></div>`;
-    iconEl.addEventListener('click', function() {
-        const targetWindowId = this.getAttribute('data-window-id');
-        const windowToFocus = openWindows[targetWindowId] ? openWindows[targetWindowId].element : null;
-        if (windowToFocus) {
-            if (windowToFocus.classList.contains('minimized')) {
-                toggleMinimizeWindow(windowToFocus, this);
-            } else if (activeWindow === windowToFocus) {
-                toggleMinimizeWindow(windowToFocus, this);
-            } else {
-                makeWindowActive(windowToFocus);
-            }
+    iconEl.addEventListener('click', function () {
+      const targetWindowId = this.getAttribute('data-window-id');
+      const windowToFocus = openWindows[targetWindowId] ? openWindows[targetWindowId].element : null;
+      if (windowToFocus) {
+        if (windowToFocus.classList.contains('minimized')) {
+          toggleMinimizeWindow(windowToFocus, this);
+        } else if (activeWindow === windowToFocus) {
+          toggleMinimizeWindow(windowToFocus, this);
+        } else {
+          makeWindowActive(windowToFocus);
         }
+      }
     });
     taskbarAppIconsContainer.appendChild(iconEl);
     return iconEl;
   }
-
-  
 
   function filterStartMenuApps(searchTerm) {
     if (!startMenuLeftPanel) return;
@@ -1929,45 +3360,54 @@ document.addEventListener('DOMContentLoaded', function() {
   if (startMenuSearchTop) {
     startMenuSearchTop.addEventListener('input', (e) => {
       filterStartMenuApps(e.target.value);
-      if(startMenuSearchBottom) startMenuSearchBottom.value = e.target.value;
+      if (startMenuSearchBottom) startMenuSearchBottom.value = e.target.value;
     });
   }
   if (startMenuSearchBottom) {
     startMenuSearchBottom.addEventListener('input', (e) => {
       filterStartMenuApps(e.target.value);
-      if(startMenuSearchTop) startMenuSearchTop.value = e.target.value;
+      if (startMenuSearchTop) startMenuSearchTop.value = e.target.value;
     });
   }
 
-  const logOutButton = document.querySelector('.start-menu-logout-button') || document.querySelector('.logout-button');
-if (logOutButton) {
-  logOutButton.addEventListener('click', (e) => {
-    e.preventDefault();
-    showConfirmDialog({
-      title: "Log out?",
-      message: "Are you sure you want to log out?",
-      iconClass: "fa-sign-out-alt",
-      okText: "Log out",
-      cancelText: "Cancel"
-    }).then(confirmed => {
-      if (confirmed) {
-        if (typeof startMenu !== 'undefined' && startMenu) startMenu.style.display = 'none';
-        window._loggingOut = true;
-        if (window._allPopoutWindows && Array.isArray(window._allPopoutWindows)) {
-          window._allPopoutWindows = window._allPopoutWindows.filter(win => {
-            if (win && !win.closed) {
-              try { win.close(); } catch (e) {}
-              return false;
-            }
-            return false;
-          });
-        }
-        setTimeout(() => { window._loggingOut = false; }, 2000);
+  // --- App Launcher Taskbar Position Logic ---
+  function updateAppLauncherTaskbarPosition() {
+    if (!document.body.classList.contains('app-launcher-mode')) return;
+    const taskbar = document.querySelector('.taskbar');
+    if (!taskbar) return;
+    // Check if any window is maximized and not minimized
+    const anyMaximized = Object.values(openWindows).some(w =>
+      w.element &&
+      document.body.contains(w.element) && // Must be in the DOM
+      w.element.style.display !== 'none' && // Must be visible
+      w.element.classList.contains('maximized') &&
+      !w.element.classList.contains('minimized')
+
+    );
+    if (anyMaximized) {
+      if (!taskbar.classList.contains('taskbar-lowered')) {
+        // Remove, then add in next frame for transition
+        taskbar.classList.remove('taskbar-lowered');
+        requestAnimationFrame(() => {
+          taskbar.classList.add('taskbar-lowered');
+        });
       }
-    });
-  });
-}
-  
+    } else {
+      if (taskbar.classList.contains('taskbar-lowered')) {
+        // Remove in next frame for transition
+        taskbar.classList.remove('taskbar-lowered');
+        // Optionally, you can use requestAnimationFrame here too if you want to ensure a transition back up
+      }
+    }
+  }
+  // Patch maximize/restore/minimize logic to call updateAppLauncherTaskbarPosition
+  // 1. After maximize/restore in setupWindowControls
+  // 2. After minimize/restore in toggleMinimizeWindow
+  // ... existing code ...
+
+
+
+
   function setupSettingsApp(settingsWindowElement) {
     const sidebarNavLinks = settingsWindowElement.querySelectorAll('.settings-nav li a');
     const contentHeaderTitle = settingsWindowElement.querySelector('.settings-content-header h2');
@@ -1989,8 +3429,8 @@ if (logOutButton) {
       });
     }
     sidebarNavLinks.forEach(link => {
-      link.addEventListener('click', function(e) {
-      e.preventDefault();
+      link.addEventListener('click', function (e) {
+        e.preventDefault();
         setActiveSection(this.getAttribute('data-section'));
       });
     });
@@ -2000,7 +3440,7 @@ if (logOutButton) {
       const themeOptions = appearanceContent.querySelectorAll('.appearance-option');
       const appearanceOptionsContainer = appearanceContent.querySelector('.appearance-options');
       if (appearanceOptionsContainer) {
-        appearanceOptionsContainer.addEventListener('click', function(e) {
+        appearanceOptionsContainer.addEventListener('click', function (e) {
           const optionEl = e.target.closest('.appearance-option');
           if (!optionEl) return;
           themeOptions.forEach(opt => opt.classList.remove('active'));
@@ -2071,7 +3511,7 @@ if (logOutButton) {
         // Update menu/sidebar selected (uses var(--accent-color) in CSS)
       }
       accentSwatches.forEach(swatch => {
-        swatch.addEventListener('click', function() {
+        swatch.addEventListener('click', function () {
           let colorKey = 'multicolor';
           for (const key in accentColorMap) {
             if (this.classList.contains(key)) { colorKey = key; break; }
@@ -2088,22 +3528,22 @@ if (logOutButton) {
         // Set initial value from localStorage or default
         const savedBehavior = localStorage.getItem('popoutCloseBehavior') || 'close';
         popoutCloseDropdown.value = savedBehavior;
-        popoutCloseDropdown.addEventListener('change', function() {
+        popoutCloseDropdown.addEventListener('change', function () {
           localStorage.setItem('popoutCloseBehavior', this.value);
         });
       }
     }
     const closeButtonRed = settingsWindowElement.querySelector('.window-control-btn.red');
     if (closeButtonRed) {
-        const windowId = settingsWindowElement.id;
-        closeButtonRed.addEventListener('click', () => {
-            const currentTaskbarIcon = openWindows[windowId] ? openWindows[windowId].taskbarIcon : null;
-            settingsWindowElement.remove();
-            if (currentTaskbarIcon) currentTaskbarIcon.remove();
-            delete openWindows[windowId];
-            if (activeWindow === settingsWindowElement) activeWindow = null;
-            updateTaskbarActiveState();
-        });
+      const windowId = settingsWindowElement.id;
+      closeButtonRed.addEventListener('click', () => {
+        const currentTaskbarIcon = openWindows[windowId] ? openWindows[windowId].taskbarIcon : null;
+        settingsWindowElement.remove();
+        if (currentTaskbarIcon) currentTaskbarIcon.remove();
+        delete openWindows[windowId];
+        if (activeWindow === settingsWindowElement) activeWindow = null;
+        updateTaskbarActiveState();
+      });
     }
     // Failsafe: Hide and remove drag selector if present in settings app
     if (window.dragSelector) {
@@ -2185,14 +3625,14 @@ if (logOutButton) {
       }
       // Sidebar button click
       sidebar.querySelectorAll('button[data-section]').forEach(btn => {
-        btn.addEventListener('click', function() {
+        btn.addEventListener('click', function () {
           const section = this.getAttribute('data-section');
           let label = this.childNodes[1] ? this.childNodes[1].textContent.trim() : this.textContent.trim();
           showPanel(section, label);
         });
       });
       // Back button in window header (mobile only)
-      headerBackBtn.addEventListener('click', function() {
+      headerBackBtn.addEventListener('click', function () {
         if (isMobile()) {
           mobileContainer.classList.remove('show-panel');
           windowEl.classList.remove('show-panel');
@@ -2200,7 +3640,7 @@ if (logOutButton) {
         }
       });
       // Responsive: reset panel on resize
-      window.addEventListener('resize', function() {
+      window.addEventListener('resize', function () {
         if (!isMobile()) {
           mobileContainer.classList.remove('show-panel');
           windowEl.classList.remove('show-panel');
@@ -2284,15 +3724,15 @@ if (logOutButton) {
         displayHistory.textContent = '';
       }
     }
-    
+
     function getDisplayOperation(op) {
-        switch(op) {
-            case 'add': return '+';
-            case 'subtract': return '−';
-            case 'multiply': return '×';
-            case 'divide': return '÷';
-            default: return '';
-        }
+      switch (op) {
+        case 'add': return '+';
+        case 'subtract': return '−';
+        case 'multiply': return '×';
+        case 'divide': return '÷';
+        default: return '';
+      }
     }
 
     function appendNumber(number) {
@@ -2308,16 +3748,16 @@ if (logOutButton) {
     function chooseOperation(selectedOperation) {
       if (currentOperand === '' && previousOperand === '') return;
       if (currentOperand === '' && previousOperand !== '') { // Allow changing operator
-          operation = selectedOperation;
-          updateDisplay();
-          return;
+        operation = selectedOperation;
+        updateDisplay();
+        return;
       }
       if (previousOperand !== '') {
         compute();
       }
       operation = selectedOperation;
       previousOperand = currentOperand;
-      currentOperand = ''; 
+      currentOperand = '';
       displayNeedsReset = false; // Allow immediate input after op selection
     }
 
@@ -2355,11 +3795,11 @@ if (logOutButton) {
       if (currentOperand.includes('.')) {
         const parts = currentOperand.split('.');
         if (parts[1] && parts[1].length > 8) {
-            currentOperand = parseFloat(currentOperand).toFixed(8);
+          currentOperand = parseFloat(currentOperand).toFixed(8);
         }
       }
       if (currentOperand.length > 16) { // Handle potential overflow
-          currentOperand = parseFloat(currentOperand).toExponential(8);
+        currentOperand = parseFloat(currentOperand).toExponential(8);
       }
 
       operation = null;
@@ -2377,77 +3817,77 @@ if (logOutButton) {
 
     function clearEntry() {
       currentOperand = '0';
-      displayNeedsReset = false; 
+      displayNeedsReset = false;
       updateDisplay();
     }
-    
+
     function backspace() {
-        if (displayNeedsReset) {
-            clearAll();
-            return;
-        }
-        if (currentOperand.length > 1) {
-            currentOperand = currentOperand.slice(0, -1);
-        } else {
-            currentOperand = '0';
-        }
+      if (displayNeedsReset) {
+        clearAll();
+        return;
+      }
+      if (currentOperand.length > 1) {
+        currentOperand = currentOperand.slice(0, -1);
+      } else {
+        currentOperand = '0';
+      }
     }
 
     function inputDecimal() {
-        if (displayNeedsReset) {
-             currentOperand = '0.';
-             displayNeedsReset = false;
-             return;
-        }
-        if (!currentOperand.includes('.')) {
-            currentOperand += '.';
-        }
+      if (displayNeedsReset) {
+        currentOperand = '0.';
+        displayNeedsReset = false;
+        return;
+      }
+      if (!currentOperand.includes('.')) {
+        currentOperand += '.';
+      }
     }
-    
+
     function negate() {
-        if (currentOperand === '0' || currentOperand === 'Error') return;
-        currentOperand = String(parseFloat(currentOperand) * -1);
+      if (currentOperand === '0' || currentOperand === 'Error') return;
+      currentOperand = String(parseFloat(currentOperand) * -1);
     }
 
     function percent() {
-        if (currentOperand === 'Error') return;
-        if (previousOperand && operation) { // Calculate percentage of previousOperand
-            const prev = parseFloat(previousOperand);
-            const curr = parseFloat(currentOperand);
-            currentOperand = String((prev * curr) / 100);
-        } else { // Calculate percentage of currentOperand itself (e.g., 50% -> 0.5)
-            currentOperand = String(parseFloat(currentOperand) / 100);
-        }
-        displayNeedsReset = true; // Result of an operation
+      if (currentOperand === 'Error') return;
+      if (previousOperand && operation) { // Calculate percentage of previousOperand
+        const prev = parseFloat(previousOperand);
+        const curr = parseFloat(currentOperand);
+        currentOperand = String((prev * curr) / 100);
+      } else { // Calculate percentage of currentOperand itself (e.g., 50% -> 0.5)
+        currentOperand = String(parseFloat(currentOperand) / 100);
+      }
+      displayNeedsReset = true; // Result of an operation
     }
 
     function inverse() { // 1/x
-        if (currentOperand === 'Error') return;
-        const num = parseFloat(currentOperand);
-        if (num === 0) {
-            currentOperand = "Error";
-        } else {
-            currentOperand = String(1 / num);
-        }
-        displayNeedsReset = true;
+      if (currentOperand === 'Error') return;
+      const num = parseFloat(currentOperand);
+      if (num === 0) {
+        currentOperand = "Error";
+      } else {
+        currentOperand = String(1 / num);
+      }
+      displayNeedsReset = true;
     }
 
     function square() { // x²
-        if (currentOperand === 'Error') return;
-        const num = parseFloat(currentOperand);
-        currentOperand = String(num * num);
-        displayNeedsReset = true;
+      if (currentOperand === 'Error') return;
+      const num = parseFloat(currentOperand);
+      currentOperand = String(num * num);
+      displayNeedsReset = true;
     }
 
     function sqrt() { // √x
-        if (currentOperand === 'Error') return;
-        const num = parseFloat(currentOperand);
-        if (num < 0) {
-            currentOperand = "Error";
-        } else {
-            currentOperand = String(Math.sqrt(num));
-        }
-        displayNeedsReset = true;
+      if (currentOperand === 'Error') return;
+      const num = parseFloat(currentOperand);
+      if (num < 0) {
+        currentOperand = "Error";
+      } else {
+        currentOperand = String(Math.sqrt(num));
+      }
+      displayNeedsReset = true;
     }
 
     // Memory functions
@@ -2464,23 +3904,23 @@ if (logOutButton) {
         const value = button.dataset.value;
 
         if (action === 'decimal') {
-            inputDecimal();
+          inputDecimal();
         } else if (action === 'negate') {
-            negate();
+          negate();
         } else if (action === 'percent') {
-            percent();
+          percent();
         } else if (action === 'inverse') {
-            inverse();
+          inverse();
         } else if (action === 'square') {
-            square();
+          square();
         } else if (action === 'sqrt') {
-            sqrt();
+          sqrt();
         } else if (action === 'clear') {
           clearAll();
         } else if (action === 'clear-entry') {
           clearEntry();
         } else if (action === 'backspace') {
-            backspace();
+          backspace();
         } else if (action === 'equals') {
           compute();
         } else if (['add', 'subtract', 'multiply', 'divide'].includes(action)) {
@@ -2488,25 +3928,25 @@ if (logOutButton) {
         } else if (value !== undefined) { // Number button
           appendNumber(value);
         } else if (action === 'memory-clear') {
-            memoryClear();
+          memoryClear();
         } else if (action === 'memory-recall') {
-            memoryRecall();
+          memoryRecall();
         } else if (action === 'memory-add') {
-            memoryAdd();
+          memoryAdd();
         } else if (action === 'memory-subtract') {
-            memorySubtract();
+          memorySubtract();
         } else if (action === 'memory-store') {
-            memoryStore();
+          memoryStore();
         } else if (action === 'history') {
-            console.log("Calculator History button clicked (not implemented)");
+          console.log("Calculator History button clicked (not implemented)");
         }
         updateDisplay();
         // Highlight active operator
         calculatorWindowElement.querySelectorAll('.calc-btn-operator').forEach(opBtn => {
-            opBtn.classList.remove('active-operator');
-            if (opBtn.dataset.action === operation) {
-                opBtn.classList.add('active-operator');
-            }
+          opBtn.classList.remove('active-operator');
+          if (opBtn.dataset.action === operation) {
+            opBtn.classList.add('active-operator');
+          }
         });
 
       });
@@ -2515,6 +3955,11 @@ if (logOutButton) {
   }
 
   function globalOnIconMouseMove(e) {
+    const desktopArea = document.getElementById('desktop-area');
+    if (desktopArea && (desktopArea.classList.contains('app-launcher-mode') || document.body.classList.contains('app-launcher-mode'))) {
+      // Prevent drag selector in app launcher mode
+      return;
+    }
     if (!draggedIcon) return;
     e.preventDefault();
     if (!isActuallyDraggingIcon) {
@@ -2534,7 +3979,7 @@ if (logOutButton) {
         const dx = e.clientX - multiDragStartMouseX;
         const dy = e.clientY - multiDragStartMouseY;
         // Move all icons visually during drag (no clamping)
-        multiDragInitialPositions.forEach(({icon, left, top}) => {
+        multiDragInitialPositions.forEach(({ icon, left, top }) => {
           icon.style.position = 'absolute';
           icon.style.left = `${left + dx}px`;
           icon.style.top = `${top + dy}px`;
@@ -2543,6 +3988,8 @@ if (logOutButton) {
         });
       } else {
         // Single icon: let it follow the mouse freely
+        const desktopIconsContainer = document.querySelector('.desktop-icons');
+        if (!desktopIconsContainer) return;
         const containerRect = desktopIconsContainer.getBoundingClientRect();
         let newLeft = e.clientX - containerRect.left - dragOffsetX + desktopIconsContainer.scrollLeft;
         let newTop = e.clientY - containerRect.top - dragOffsetY + desktopIconsContainer.scrollTop;
@@ -2553,6 +4000,11 @@ if (logOutButton) {
   }
 
   function globalOnIconMouseUp(e) {
+    const desktopArea = document.getElementById('desktop-area');
+    if (desktopArea && (desktopArea.classList.contains('app-launcher-mode') || document.body.classList.contains('app-launcher-mode'))) {
+      // Prevent drag selector in app launcher mode
+      return;
+    }
     if (!draggedIcon) {
       document.removeEventListener('mousemove', globalOnIconMouseMove);
       document.removeEventListener('mouseup', globalOnIconMouseUp);
@@ -2566,7 +4018,7 @@ if (logOutButton) {
         const dy = e.clientY - multiDragStartMouseY;
         const occupied = {};
         // Mark all current slots as occupied except the ones being moved
-        desktopIcons.forEach(icon => {
+        document.querySelectorAll('.desktop-icon').forEach(icon => {
           if (!selectedDesktopIcons.has(icon)) {
             const left = parseInt(icon.style.left, 10);
             const top = parseInt(icon.style.top, 10);
@@ -2582,7 +4034,7 @@ if (logOutButton) {
         const maxCol = Math.floor((iconsContainer.clientWidth - GRID_GAP - 1) / (GRID_CELL_WIDTH + GRID_GAP));
         const maxRow = Math.floor((iconsContainer.clientHeight - GRID_GAP - 1) / (GRID_CELL_HEIGHT + GRID_GAP));
         const groupOccupied = {};
-        multiDragInitialPositions.forEach(({icon, left, top}, idx) => {
+        multiDragInitialPositions.forEach(({ icon, left, top }, idx) => {
           let newLeft = left + dx;
           let newTop = top + dy;
           let targetColumn = Math.max(0, Math.round((newLeft - GRID_GAP) / (GRID_CELL_WIDTH + GRID_GAP)));
@@ -2601,12 +4053,12 @@ if (logOutButton) {
             valid = false;
           }
           groupOccupied[`${targetColumn},${targetRow}`] = true;
-          newPositions.push({icon, targetColumn, targetRow});
+          newPositions.push({ icon, targetColumn, targetRow });
         });
         if (!valid) {
           // Snap all to original positions
           if (multiDragOriginalPositions) {
-            multiDragOriginalPositions.forEach(({icon, left, top}) => {
+            multiDragOriginalPositions.forEach(({ icon, left, top }) => {
               icon.style.left = left;
               icon.style.top = top;
               icon.style.transition = originalIconTransition || '';
@@ -2616,7 +4068,7 @@ if (logOutButton) {
           }
         } else {
           // Commit all new positions
-          newPositions.forEach(({icon, targetColumn, targetRow}) => {
+          newPositions.forEach(({ icon, targetColumn, targetRow }) => {
             let targetSnappedLeft = GRID_GAP + targetColumn * (GRID_CELL_WIDTH + GRID_GAP);
             let targetSnappedTop = GRID_GAP + targetRow * (GRID_CELL_HEIGHT + GRID_GAP);
             targetSnappedLeft = Math.max(GRID_GAP, Math.min(targetSnappedLeft, iconsContainer.clientWidth - icon.offsetWidth - GRID_GAP));
@@ -2637,7 +4089,7 @@ if (logOutButton) {
         const iconsContainer = draggedIcon.parentElement;
         // Mark all current slots as occupied except the dragged icon
         const occupied = {};
-        desktopIcons.forEach(icon => {
+        document.querySelectorAll('.desktop-icon').forEach(icon => {
           if (icon !== draggedIcon) {
             const left = parseInt(icon.style.left, 10);
             const top = parseInt(icon.style.top, 10);
@@ -2685,70 +4137,76 @@ if (logOutButton) {
 
   if (desktopArea && dragSelector) {
     desktopArea.addEventListener('mousedown', (e) => {
-        // Allow both left and right click to start drag selector
-        if (e.button !== 0 && e.button !== 2) return;
-        // Prevent drag selector in settings app
-        if (e.target.closest('.settings-app-window')) return;
-        if (e.target.closest('.desktop-icon') || 
-            e.target.closest('.window') || 
-            e.target.closest('.taskbar') || 
-            e.target.closest('.start-menu') || 
-            e.target.closest('.sidebar-widgets')) {
-            if (e.target.closest('.desktop-icon') && !e.target.closest('.desktop-icon.selected')){
-                 clearIconSelection();
-            } 
-            return;
+      // Prevent drag selector in app-launcher-mode or easy-mode
+      if (
+        desktopArea.classList.contains('app-launcher-mode') ||
+        document.body.classList.contains('app-launcher-mode') ||
+        desktopArea.classList.contains('easy-mode') ||
+        document.body.classList.contains('easy-mode')
+      ) return;
+      // Allow both left and right click to start drag selector
+      if (e.button !== 0 && e.button !== 2) return;
+      // Prevent drag selector in settings app
+      if (e.target.closest('.settings-app-window')) return;
+      if (e.target.closest('.desktop-icon') ||
+        e.target.closest('.window') ||
+        e.target.closest('.taskbar') ||
+        e.target.closest('.start-menu') ||
+        e.target.closest('.sidebar-widgets')) {
+        if (e.target.closest('.desktop-icon') && !e.target.closest('.desktop-icon.selected')) {
+          clearIconSelection();
         }
-        desktopArea.appendChild(dragSelector);
-        isDraggingSelector = true;
-        dragSelector.classList.remove('hidden');
-        const desktopRect = desktopArea.getBoundingClientRect();
-        dragSelectorStartX = e.clientX - desktopRect.left + desktopArea.scrollLeft;
-        dragSelectorStartY = e.clientY - desktopRect.top + desktopArea.scrollTop;
-        dragSelector.style.left = `${dragSelectorStartX}px`;
-        dragSelector.style.top = `${dragSelectorStartY}px`;
-        dragSelector.style.width = '0px';
-        dragSelector.style.height = '0px';
-        clearIconSelection();
-        // If right click, prevent context menu
-        if (e.button === 2) {
-          e.preventDefault();
-          hideContextMenu && hideContextMenu();
-        }
-        e.preventDefault(); 
+        return;
+      }
+      desktopArea.appendChild(dragSelector);
+      isDraggingSelector = true;
+      dragSelector.classList.remove('hidden');
+      const desktopRect = desktopArea.getBoundingClientRect();
+      dragSelectorStartX = e.clientX - desktopRect.left + desktopArea.scrollLeft;
+      dragSelectorStartY = e.clientY - desktopRect.top + desktopArea.scrollTop;
+      dragSelector.style.left = `${dragSelectorStartX}px`;
+      dragSelector.style.top = `${dragSelectorStartY}px`;
+      dragSelector.style.width = '0px';
+      dragSelector.style.height = '0px';
+      clearIconSelection();
+      // If right click, prevent context menu
+      if (e.button === 2) {
+        e.preventDefault();
+        hideContextMenu && hideContextMenu();
+      }
+      e.preventDefault();
     });
     document.addEventListener('mousemove', (e) => {
-        if (!isDraggingSelector) return;
-        if (dragSelector.parentElement !== desktopArea) return;
-        const desktopRect = desktopArea.getBoundingClientRect();
-        let currentX = e.clientX - desktopRect.left + desktopArea.scrollLeft;
-        let currentY = e.clientY - desktopRect.top + desktopArea.scrollTop;
-        const newLeft = Math.min(currentX, dragSelectorStartX);
-        const newTop = Math.min(currentY, dragSelectorStartY);
-        const newWidth = Math.abs(currentX - dragSelectorStartX);
-        const newHeight = Math.abs(currentY - dragSelectorStartY);
-        dragSelector.style.left = `${newLeft}px`;
-        dragSelector.style.top = `${newTop}px`;
-        dragSelector.style.width = `${newWidth}px`;
-        dragSelector.style.height = `${newHeight}px`;
-        updateSelectedIcons();
+      if (!isDraggingSelector) return;
+      if (dragSelector.parentElement !== desktopArea) return;
+      const desktopRect = desktopArea.getBoundingClientRect();
+      let currentX = e.clientX - desktopRect.left + desktopArea.scrollLeft;
+      let currentY = e.clientY - desktopRect.top + desktopArea.scrollTop;
+      const newLeft = Math.min(currentX, dragSelectorStartX);
+      const newTop = Math.min(currentY, dragSelectorStartY);
+      const newWidth = Math.abs(currentX - dragSelectorStartX);
+      const newHeight = Math.abs(currentY - dragSelectorStartY);
+      dragSelector.style.left = `${newLeft}px`;
+      dragSelector.style.top = `${newTop}px`;
+      dragSelector.style.width = `${newWidth}px`;
+      dragSelector.style.height = `${newHeight}px`;
+      updateSelectedIcons();
     });
   }
-
   document.addEventListener('mouseup', (e) => {
-        if (isDraggingSelector) {
-            isDraggingSelector = false;
-            dragSelector.classList.add('hidden');
-            if (selectedDesktopIcons.size === 0) clearIconSelection();
-        }
-        if (isDraggingFileSelector) {
-            isDraggingFileSelector = false;
-            if (fileExplorerContentArea && fileExplorerContentArea.contains(dragSelector)) { 
-                dragSelector.classList.add('hidden');
-                if(desktopArea) desktopArea.appendChild(dragSelector);
-            }
-        }
-    });
+    if (isDraggingSelector) {
+      isDraggingSelector = false;
+      dragSelector.classList.add('hidden');
+      if (selectedDesktopIcons.size === 0) clearIconSelection();
+    }
+    if (isDraggingFileSelector) {
+      isDraggingFileSelector = false;
+      if (fileExplorerContentArea && fileExplorerContentArea.contains(dragSelector)) {
+        dragSelector.classList.add('hidden');
+        if (desktopArea) desktopArea.appendChild(dragSelector);
+      }
+    }
+  });
 
   function setupFileExplorerInteraction(fileExplorerWindow) {
     // Prevent drag selector logic in Settings app
@@ -2756,105 +4214,104 @@ if (logOutButton) {
       return;
     }
     const contentArea = fileExplorerWindow.querySelector('.file-explorer-content');
-    fileExplorerContentArea = contentArea; 
-    currentSelectedFileItems = new Set(); 
+    fileExplorerContentArea = contentArea;
+    currentSelectedFileItems = new Set();
     if (!contentArea) return; // Prevent error if contentArea is missing
     const fileItems = contentArea.querySelectorAll('.file-item');
 
     fileItems.forEach(item => {
-      item.addEventListener('dblclick', function() { /* ... */ });
-      item.addEventListener('mousedown', function(e) {
+      item.addEventListener('dblclick', function () { /* ... */ });
+      item.addEventListener('mousedown', function (e) {
         if (e.button !== 0 && e.button !== 2) return;
         if (isDraggingFileSelector) return;
-        if (!e.ctrlKey && !e.shiftKey) { 
-            currentSelectedFileItems.forEach(fi => fi.classList.remove('selected'));
-            currentSelectedFileItems.clear();
-            this.classList.add('selected');
-            currentSelectedFileItems.add(this);
-        } 
-        e.stopPropagation(); 
+        if (!e.ctrlKey && !e.shiftKey) {
+          currentSelectedFileItems.forEach(fi => fi.classList.remove('selected'));
+          currentSelectedFileItems.clear();
+          this.classList.add('selected');
+          currentSelectedFileItems.add(this);
+        }
+        e.stopPropagation();
       });
     });
     contentArea.addEventListener('mousedown', (e) => {
-        if (e.button !== 0 && e.button !== 2) return;
-        if (e.target.closest('.file-item')) return; 
-        isDraggingFileSelector = true;
-        contentArea.appendChild(dragSelector);
-        dragSelector.classList.remove('hidden');
-        const contentRect = contentArea.getBoundingClientRect(); 
-        fileSelectorStartX = e.clientX - contentRect.left + contentArea.scrollLeft;
-        fileSelectorStartY = e.clientY - contentRect.top + contentArea.scrollTop;
-        dragSelector.style.left = `${fileSelectorStartX}px`;
-        dragSelector.style.top = `${fileSelectorStartY}px`;
-        dragSelector.style.width = '0px';
-        dragSelector.style.height = '0px';
-        currentSelectedFileItems.forEach(fi => fi.classList.remove('selected'));
-        currentSelectedFileItems.clear();
-        // If right click, prevent context menu
-        if (e.button === 2) {
-          e.preventDefault();
-          hideContextMenu && hideContextMenu();
-        }
+      if (e.button !== 0 && e.button !== 2) return;
+      isDraggingFileSelector = true;
+      contentArea.appendChild(dragSelector);
+      dragSelector.classList.remove('hidden');
+      const contentRect = contentArea.getBoundingClientRect();
+      fileSelectorStartX = e.clientX - contentRect.left + contentArea.scrollLeft;
+      fileSelectorStartY = e.clientY - contentRect.top + contentArea.scrollTop;
+      dragSelector.style.left = `${fileSelectorStartX}px`;
+      dragSelector.style.top = `${fileSelectorStartY}px`;
+      dragSelector.style.width = '0px';
+      dragSelector.style.height = '0px';
+      currentSelectedFileItems.forEach(fi => fi.classList.remove('selected'));
+      currentSelectedFileItems.clear();
+      // If right click, prevent context menu
+      if (e.button === 2) {
         e.preventDefault();
+        hideContextMenu && hideContextMenu();
+      }
+      e.preventDefault();
     });
     document.addEventListener('mousemove', (e) => {
-        if (!isDraggingFileSelector) return;
-        if (!fileExplorerContentArea || dragSelector.parentElement !== fileExplorerContentArea) return;
-        const contentRect = fileExplorerContentArea.getBoundingClientRect();
-        // Get toolbar and statusbar bounds
-        const fileExplorerWindow = fileExplorerContentArea.closest('.window');
-        let toolbarBottom = 0;
-        let statusbarTop = fileExplorerContentArea.clientHeight;
-        if (fileExplorerWindow) {
-          const toolbar = fileExplorerWindow.querySelector('.window-toolbar');
-          const statusbar = fileExplorerWindow.querySelector('.window-statusbar');
-          if (toolbar) {
-            const toolbarRect = toolbar.getBoundingClientRect();
-            toolbarBottom = toolbarRect.bottom - contentRect.top;
-            if (toolbarBottom < 0) toolbarBottom = 0;
-          }
-          if (statusbar) {
-            const statusbarRect = statusbar.getBoundingClientRect();
-            statusbarTop = statusbarRect.top - contentRect.top;
-            if (statusbarTop > fileExplorerContentArea.clientHeight) statusbarTop = fileExplorerContentArea.clientHeight;
-          }
+      if (!isDraggingFileSelector) return;
+      if (!fileExplorerContentArea || dragSelector.parentElement !== fileExplorerContentArea) return;
+      const contentRect = fileExplorerContentArea.getBoundingClientRect();
+      // Get toolbar and statusbar bounds
+      const fileExplorerWindow = fileExplorerContentArea.closest('.window');
+      let toolbarBottom = 0;
+      let statusbarTop = fileExplorerContentArea.clientHeight;
+      if (fileExplorerWindow) {
+        const toolbar = fileExplorerWindow.querySelector('.window-toolbar');
+        const statusbar = fileExplorerWindow.querySelector('.window-statusbar');
+        if (toolbar) {
+          const toolbarRect = toolbar.getBoundingClientRect();
+          toolbarBottom = toolbarRect.bottom - contentRect.top;
+          if (toolbarBottom < 0) toolbarBottom = 0;
         }
-        let currentX = e.clientX - contentRect.left + fileExplorerContentArea.scrollLeft;
-        let currentY = e.clientY - contentRect.top + fileExplorerContentArea.scrollTop;
-        // Clamp X and Y so drag selector does not go outside fileExplorerContentArea
-        currentX = Math.max(0, Math.min(currentX, fileExplorerContentArea.clientWidth));
-        currentY = Math.max(toolbarBottom, Math.min(currentY, statusbarTop));
-        // Clamp startX/startY as well
-        fileSelectorStartX = Math.max(0, Math.min(fileSelectorStartX, fileExplorerContentArea.clientWidth));
-        fileSelectorStartY = Math.max(toolbarBottom, Math.min(fileSelectorStartY, statusbarTop));
-        const newLeft = Math.min(currentX, fileSelectorStartX);
-        const newTop = Math.min(currentY, fileSelectorStartY);
-        const newWidth = Math.abs(currentX - fileSelectorStartX);
-        const newHeight = Math.abs(currentY - fileSelectorStartY);
-        dragSelector.style.left = `${newLeft}px`;
-        dragSelector.style.top = `${newTop}px`;
-        dragSelector.style.width = `${newWidth}px`;
-        dragSelector.style.height = `${newHeight}px`;
-        updateSelectedFileItems(fileExplorerContentArea, dragSelector, fileItems, currentSelectedFileItems);
+        if (statusbar) {
+          const statusbarRect = statusbar.getBoundingClientRect();
+          statusbarTop = statusbarRect.top - contentRect.top;
+          if (statusbarTop > fileExplorerContentArea.clientHeight) statusbarTop = fileExplorerContentArea.clientHeight;
+        }
+      }
+      let currentX = e.clientX - contentRect.left + fileExplorerContentArea.scrollLeft;
+      let currentY = e.clientY - contentRect.top + fileExplorerContentArea.scrollTop;
+      // Clamp X and Y so drag selector does not go outside fileExplorerContentArea
+      currentX = Math.max(0, Math.min(currentX, fileExplorerContentArea.clientWidth));
+      currentY = Math.max(toolbarBottom, Math.min(currentY, statusbarTop));
+      // Clamp startX/startY as well
+      fileSelectorStartX = Math.max(0, Math.min(fileSelectorStartX, fileExplorerContentArea.clientWidth));
+      fileSelectorStartY = Math.max(toolbarBottom, Math.min(fileSelectorStartY, statusbarTop));
+      const newLeft = Math.min(currentX, fileSelectorStartX);
+      const newTop = Math.min(currentY, fileSelectorStartY);
+      const newWidth = Math.abs(currentX - fileSelectorStartX);
+      const newHeight = Math.abs(currentY - fileSelectorStartY);
+      dragSelector.style.left = `${newLeft}px`;
+      dragSelector.style.top = `${newTop}px`;
+      dragSelector.style.width = `${newWidth}px`;
+      dragSelector.style.height = `${newHeight}px`;
+      updateSelectedFileItems(fileExplorerContentArea, dragSelector, fileItems, currentSelectedFileItems);
     });
     fileExplorerWindow.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-            if (isDraggingFileSelector) {
-                isDraggingFileSelector = false;
-                if (fileExplorerContentArea && fileExplorerContentArea.contains(dragSelector)) {
-                    dragSelector.classList.add('hidden');
-                    if(desktopArea) desktopArea.appendChild(dragSelector);
-                }
-            }
-            currentSelectedFileItems.forEach(fi => fi.classList.remove('selected'));
-            currentSelectedFileItems.clear();
+      if (e.key === 'Escape') {
+        if (isDraggingFileSelector) {
+          isDraggingFileSelector = false;
+          if (fileExplorerContentArea && fileExplorerContentArea.contains(dragSelector)) {
+            dragSelector.classList.add('hidden');
+            if (desktopArea) desktopArea.appendChild(dragSelector);
+          }
         }
+        currentSelectedFileItems.forEach(fi => fi.classList.remove('selected'));
+        currentSelectedFileItems.clear();
+      }
     });
     contentArea.addEventListener('click', (e) => {
-        if (!e.target.closest('.file-item') && !isDraggingFileSelector) {
-            currentSelectedFileItems.forEach(fi => fi.classList.remove('selected'));
-            currentSelectedFileItems.clear();
-        }
+      if (!e.target.closest('.file-item') && !isDraggingFileSelector) {
+        currentSelectedFileItems.forEach(fi => fi.classList.remove('selected'));
+        currentSelectedFileItems.clear();
+      }
     });
 
     // Add mobile menu toggle functionality
@@ -2906,452 +4363,1112 @@ if (logOutButton) {
       }
     });
 
-   
+
     // After creating the File Explorer window, call:
     // setupSidebarToggleForFileExplorer(fileExplorerWindow);
   }
 
   function hideContextMenu() {
-    if(contextMenu) contextMenu.classList.add('hidden');
+    if (contextMenu) contextMenu.classList.add('hidden');
   }
 
   //Arg Right Click menu for desktop, file explorer, and taskbar and icons
-
   // --- Global Context Menu for Text Selection (works everywhere except desktop, file explorer, taskbar) ---
-(function() {
-  // Save original executeContextMenuAction
-  const _originalExecuteContextMenuAction = executeContextMenuAction;
-  // Patch global contextmenu
-  document.addEventListener('contextmenu', function(e) {
-    const target = e.target;
-    if (
-      (target.tagName === 'INPUT' && !target.readOnly && !target.disabled) ||
-      (target.tagName === 'TEXTAREA' && !target.readOnly && !target.disabled) ||
-      (target.isContentEditable && !target.readOnly && !target.disabled)
-    ) {
-      // If inside .desktop-area, .file-explorer-content, .taskbar, let those handlers run
-      if (target.closest && (
-        target.closest('.desktop-area') ||
-        target.closest('.file-explorer-content') ||
-        target.closest('.widget-content') ||
-        target.closest('.notification-widget') ||
-        (target.closest('.taskbar') && !target.closest('.search-input'))
-      )) return;
-      e.preventDefault();
-      hideContextMenu && hideContextMenu();
-      currentContextMenuTarget = target;
-      let hasSelection = false;
-      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
-        hasSelection = target.selectionStart !== target.selectionEnd;
-      } else if (target.isContentEditable) {
-        const sel = window.getSelection();
-        hasSelection = sel && sel.rangeCount > 0 && !sel.getRangeAt(0).collapsed && target.contains(sel.anchorNode);
-      }
-      const menuItems = [];
-      menuItems.push({ label: 'Cut', action: 'text-cut', icon: 'fa-scissors', disabled: !hasSelection });
-      menuItems.push({ label: 'Copy', action: 'text-copy', icon: 'fa-copy', disabled: !hasSelection });
-      menuItems.push({ label: 'Paste', action: 'text-paste', icon: 'fa-clipboard' });
-      menuItems.push({ label: 'Delete', action: 'text-delete', icon: 'fa-trash', disabled: !hasSelection });
-      menuItems.push({ type: 'separator' });
-      menuItems.push({ label: 'Select All', action: 'text-select-all', icon: 'fa-i-cursor' });
-      populateContextMenu(menuItems, e.clientX, e.clientY);
-    }
-  }, true);
-  // Patch executeContextMenuAction
-  async function tryClipboardWrite(text, target, actionType) {
-    console.log('tryClipboardWrite called', text, target, actionType);
-    try {
-      if (typeof window.focus === 'function') window.focus();
-      if (target && typeof target.focus === 'function') target.focus();
-      await new Promise(resolve => setTimeout(resolve, 0));
-      await navigator.clipboard.writeText(text);
-      console.log('Clipboard API writeText succeeded');
-      return true;
-    } catch (err) {
-      console.warn('Clipboard API writeText failed', err);
-      // Fallback to execCommand
-      try {
-        if (target && typeof target.focus === 'function') target.focus();
-        if (actionType === 'cut' || actionType === 'copy') {
-          if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
-            const start = target.selectionStart;
-            const end = target.selectionEnd;
-            if (start !== end) {
-              target.setSelectionRange(start, end);
-            }
-          } else if (target.isContentEditable) {
-            const sel = window.getSelection();
-            if (sel && sel.rangeCount === 0) {
-              const range = document.createRange();
-              range.selectNodeContents(target);
-              sel.removeAllRanges();
-              sel.addRange(range);
-            }
-          }
-          const success = document.execCommand(actionType);
-          console.log('execCommand', actionType, 'result:', success);
-          if (!success) throw new Error('execCommand failed');
-          return true;
+  (function () {
+    // Save original executeContextMenuAction
+    const _originalExecuteContextMenuAction = executeContextMenuAction;
+    // Patch global contextmenu
+    document.addEventListener('contextmenu', function (e) {
+
+      const target = e.target;
+      if (
+        (target.tagName === 'INPUT' && !target.readOnly && !target.disabled) ||
+        (target.tagName === 'TEXTAREA' && !target.readOnly && !target.disabled) ||
+        (target.isContentEditable && !target.readOnly && !target.disabled)
+      ) {
+        // If inside .desktop-area, .file-explorer-content, .taskbar, let those handlers run
+        if (target.closest && (
+          target.closest('.desktop-area') ||
+          target.closest('.file-explorer-content') ||
+          target.closest('.widget-content') ||
+          target.closest('.notification-widget') ||
+          (target.closest('.taskbar') && !target.closest('.search-input'))
+        )) return;
+        e.preventDefault();
+        hideContextMenu && hideContextMenu();
+        currentContextMenuTarget = target;
+        let hasSelection = false;
+        if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+          hasSelection = target.selectionStart !== target.selectionEnd;
+        } else if (target.isContentEditable) {
+          const sel = window.getSelection();
+          hasSelection = sel && sel.rangeCount > 0 && !sel.getRangeAt(0).collapsed && target.contains(sel.anchorNode);
         }
-      } catch (fallbackErr) {
-        console.warn('execCommand fallback failed', fallbackErr);
+        const menuItems = [];
+        menuItems.push({ label: 'Cut', action: 'text-cut', icon: 'fa-scissors', disabled: !hasSelection });
+        menuItems.push({ label: 'Copy', action: 'text-copy', icon: 'fa-copy', disabled: !hasSelection });
+        menuItems.push({ label: 'Paste', action: 'text-paste', icon: 'fa-clipboard' });
+        menuItems.push({ label: 'Delete', action: 'text-delete', icon: 'fa-trash', disabled: !hasSelection });
+        menuItems.push({ type: 'separator' });
+        menuItems.push({ label: 'Select All', action: 'text-select-all', icon: 'fa-i-cursor' });
+        populateContextMenu(menuItems, e.clientX, e.clientY);
+      }
+    }, true);
+    // Patch executeContextMenuAction
+    async function tryClipboardWrite(text, target, actionType) {
+      console.log('tryClipboardWrite called', text, target, actionType);
+      try {
+        if (typeof window.focus === 'function') window.focus();
+        if (target && typeof target.focus === 'function') target.focus();
+        await new Promise(resolve => setTimeout(resolve, 0));
+        await navigator.clipboard.writeText(text);
+        console.log('Clipboard API writeText succeeded');
+        return true;
+      } catch (err) {
+        console.warn('Clipboard API writeText failed', err);
+        // Fallback to execCommand
+        try {
+          if (target && typeof target.focus === 'function') target.focus();
+          if (actionType === 'cut' || actionType === 'copy') {
+            if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+              const start = target.selectionStart;
+              const end = target.selectionEnd;
+              if (start !== end) {
+                target.setSelectionRange(start, end);
+              }
+            } else if (target.isContentEditable) {
+              const sel = window.getSelection();
+              if (sel && sel.rangeCount === 0) {
+                const range = document.createRange();
+                range.selectNodeContents(target);
+                sel.removeAllRanges();
+                sel.addRange(range);
+              }
+            }
+            const success = document.execCommand(actionType);
+            console.log('execCommand', actionType, 'result:', success);
+            if (!success) throw new Error('execCommand failed');
+            return true;
+          }
+        } catch (fallbackErr) {
+          console.warn('execCommand fallback failed', fallbackErr);
+          return false;
+        }
         return false;
       }
-      return false;
     }
-  }
-  async function tryClipboardRead(target) {
-    try {
-      if (typeof window.focus === 'function') window.focus();
-      if (target && typeof target.focus === 'function') target.focus();
-      await new Promise(resolve => setTimeout(resolve, 0));
-      return await navigator.clipboard.readText();
-    } catch (err) {
-      // Fallback to execCommand (paste)
+    async function tryClipboardRead(target) {
       try {
+        if (typeof window.focus === 'function') window.focus();
         if (target && typeof target.focus === 'function') target.focus();
-        const success = document.execCommand('paste');
-        if (!success) throw new Error('execCommand paste failed');
-        // For security, browsers may not return pasted text
-        // User may need to use Ctrl+V
-        return '';
-      } catch (fallbackErr) {
-        alert('Clipboard access is not available. Please use Ctrl+V.');
-        return '';
+        await new Promise(resolve => setTimeout(resolve, 0));
+        return await navigator.clipboard.readText();
+      } catch (err) {
+        // Fallback to execCommand (paste)
+        try {
+          if (target && typeof target.focus === 'function') target.focus();
+          const success = document.execCommand('paste');
+          if (!success) throw new Error('execCommand paste failed');
+          // For security, browsers may not return pasted text
+          // User may need to use Ctrl+V
+          return '';
+        } catch (fallbackErr) {
+          alert('Clipboard access is not available. Please use Ctrl+V.');
+          return '';
+        }
       }
     }
-  }
-  window.executeContextMenuAction = async function(action) {
-    console.log('[Patched] executeContextMenuAction called with:', action);
-    try {
-      console.log('Action:', action, 'Target:', currentContextMenuTarget);
-      if (!currentContextMenuTarget) {
-        console.warn('No currentContextMenuTarget!');
-        return _originalExecuteContextMenuAction.call(this, action);
-      }
-      const target = currentContextMenuTarget;
-      if (typeof target.focus === 'function') target.focus();
-      if (document.activeElement !== target) target.focus();
-      window.focus && window.focus();
-  
-      // --- ADD THIS ARRAY AT THE TOP OF THE FUNCTION ---
-      const allStartMenuStyles = [
-        'start-menu-style-default',
-        'start-menu-style-default-apps-only',
-        'start-menu-style-windows11',
-        'start-menu-list-style',
-        'start-menu-apps-only',
-        'start-menu-style-apps-list-only',
-        'start-menu-style-app-launcher'
-      ];
-      switch(action) {
-        case 'text-cut': {
-          console.log('[ContextMenu] text-cut triggered');
-          if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
-            const start = target.selectionStart;
-            const end = target.selectionEnd;
-            console.log('start:', start, 'end:', end, 'typeof start:', typeof start, 'typeof end:', typeof end);
-            if (start !== end) {
-              const selectedText = target.value.slice(start, end);
-              console.log('About to call tryClipboardWrite with:', selectedText, target, 'cut');
-              const ok = await tryClipboardWrite(selectedText, target, 'cut');
-              if (ok) {
-                target.value = target.value.slice(0, start) + target.value.slice(end);
-                target.setSelectionRange(start, start);
-                showShortTopNotification('Cutted');
-              } else {
-                alert('Cut failed: Clipboard could not be updated.');
-              }
-            }
-          } else if (target.isContentEditable) {
-            const sel = window.getSelection();
-            if (sel && !sel.isCollapsed) {
-              const selectedText = sel.toString();
-              console.log('About to call tryClipboardWrite with:', selectedText, target, 'cut');
-              const ok = await tryClipboardWrite(selectedText, target, 'cut');
-              if (ok) {
-                sel.deleteFromDocument();
-                showShortTopNotification('Cutted');
-              } else alert('Cut failed: Clipboard could not be updated.');
-            }
-          }
-          break;
-        }
-        case 'text-copy': {
-          console.log('[ContextMenu] text-copy triggered');
-          if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
-            const start = target.selectionStart;
-            const end = target.selectionEnd;
-            console.log('start:', start, 'end:', end, 'typeof start:', typeof start, 'typeof end:', typeof end);
-            if (start !== end) {
-              const selectedText = target.value.slice(start, end);
-              console.log('About to call tryClipboardWrite with:', selectedText, target, 'copy');
-              const ok = await tryClipboardWrite(selectedText, target, 'copy');
-              if (ok) showShortTopNotification('Copiated');
-              else alert('Copy failed: Clipboard could not be updated.');
-            }
-          } else if (target.isContentEditable) {
-            const sel = window.getSelection();
-            if (sel && !sel.isCollapsed) {
-              const selectedText = sel.toString();
-              console.log('About to call tryClipboardWrite with:', selectedText, target, 'copy');
-              const ok = await tryClipboardWrite(selectedText, target, 'copy');
-              if (ok) showShortTopNotification('Copiated');
-              else alert('Copy failed: Clipboard could not be updated.');
-            }
-          }
-          break;
-        }
-        case 'text-paste': {
-          console.log('[ContextMenu] text-paste triggered');
-          if (navigator.clipboard && navigator.clipboard.readText) {
-            try {
-              const text = await navigator.clipboard.readText();
-              console.log('Clipboard readText:', text);
-              if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
-                const start = target.selectionStart;
-                const end = target.selectionEnd;
-                const val = target.value;
-                target.value = val.slice(0, start) + text + val.slice(end);
-                target.setSelectionRange(start + text.length, start + text.length);
-              } else if (target.isContentEditable) {
-                document.execCommand('insertText', false, text);
-              }
-            } catch (err) {
-              console.error('Paste failed:', err);
-              alert('Paste failed: Clipboard could not be read.');
+    window.executeContextMenuAction = async function (action) {
+      // --- OPEN APP HANDLER ---
+      if (action === 'open-app') {
+        // For pinned-only taskbar icon
+        if (currentContextMenuTarget && currentContextMenuTarget.classList.contains('taskbar-app-icon') && currentContextMenuTarget.classList.contains('pinned-only')) {
+          const appName = currentContextMenuTarget.getAttribute('data-app-name');
+          const details = getAppIconDetails(appName);
+          // Try to focus/restore if already open
+          const openWin = Object.values(openWindows).find(w => w.name === appName && w.element);
+          if (openWin && openWin.element) {
+            if (openWin.element.classList.contains('minimized')) {
+              if (typeof toggleMinimizeWindow === 'function') toggleMinimizeWindow(openWin.element, openWin.taskbarIcon);
+            } else {
+              if (typeof makeWindowActive === 'function') makeWindowActive(openWin.element);
             }
           } else {
-            alert('Paste failed: Clipboard could not be read.');
+            if (typeof openApp === 'function') openApp(appName, appName.charAt(0).toUpperCase() + appName.slice(1).replace(/-/g, ' '), details.iconClass, details.iconBgClass);
           }
-          break;
+          hideContextMenu();
+          return;
         }
-        case 'text-delete': {
-          console.log('[ContextMenu] text-delete triggered');
-          if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
-            const start = target.selectionStart;
-            const end = target.selectionEnd;
-            console.log('start:', start, 'end:', end, 'typeof start:', typeof start, 'typeof end:', typeof end);
-            if (start !== end) {
-              const val = target.value;
-              target.value = val.slice(0, start) + val.slice(end);
-              target.setSelectionRange(start, start);
-            }
-          } else if (target.isContentEditable) {
-            const sel = window.getSelection();
-            if (sel && !sel.isCollapsed) sel.deleteFromDocument();
-          }
-          break;
-        }
-        case 'text-select-all': {
-          console.log('[ContextMenu] text-select-all triggered');
-          if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
-            target.focus();
-            target.select();
-            console.log('After select():', target.selectionStart, target.selectionEnd, target.value.length);
-          } else if (target.isContentEditable) {
-            const range = document.createRange();
-            range.selectNodeContents(target);
-            const sel = window.getSelection();
-            sel.removeAllRanges();
-            sel.addRange(range);
-            console.log('After selectNodeContents:', sel.toString());
-          }
-          break;
-        }
-        case 'open-music-player': {
-          // Show/hide the music player inside the volume panel
-          const volumePanel = document.getElementById('volume-panel');
-          if (volumePanel) {
-            const musicPanel = volumePanel.querySelector('.music-panel-box');
-            if (musicPanel) {
-              if (musicPanel.style.display === 'none') {
-                musicPanel.style.display = '';
-              } else {
-                musicPanel.style.display = 'none';
-              }
-            }
-          }
-          break;
-        }
-        case 'taskbar-mute': {
-          // Toggle mute state
-          const volumeBtn = document.getElementById('volume-btn');
-          if (volumeBtn) {
-            const icon = volumeBtn.querySelector('i');
-            const volumeSlider = document.getElementById('browser-volume-slider');
-            if (!isMuted) {
-              // Muting
-              if (volumeSlider) {
-                previousVolume = volumeSlider.value;
-                volumeSlider.value = 0;
-                // Trigger input event to update UI/volume
-                volumeSlider.dispatchEvent(new Event('input', { bubbles: true }));
-              }
-              if (icon) {
-                icon.classList.remove('fa-volume-up');
-                icon.classList.add('fa-volume-mute');
-              }
-              isMuted = true;
+
+        // For app-grid-item (start menu/app launcher)
+        if (currentContextMenuTarget && currentContextMenuTarget.classList.contains('app-grid-item')) {
+          const appName = currentContextMenuTarget.getAttribute('data-app-name') || currentContextMenuTarget.getAttribute('data-app-id');
+          const appTitle = currentContextMenuTarget.getAttribute('data-app-title') || currentContextMenuTarget.querySelector('span')?.textContent || appName;
+          const details = getAppIconDetails(appName);
+
+          // Try to focus/restore if already open
+          const openWin = Object.values(openWindows).find(w => w.name === appName && w.element);
+          if (openWin && openWin.element) {
+            if (openWin.element.classList.contains('minimized')) {
+              if (typeof toggleMinimizeWindow === 'function') toggleMinimizeWindow(openWin.element, openWin.taskbarIcon);
             } else {
-              // Unmuting
-              if (volumeSlider) {
-                volumeSlider.value = previousVolume;
-                volumeSlider.dispatchEvent(new Event('input', { bubbles: true }));
-              }
-              if (icon) {
-                icon.classList.remove('fa-volume-mute');
-                icon.classList.add('fa-volume-up');
-              }
-              isMuted = false;
+              if (typeof makeWindowActive === 'function') makeWindowActive(openWin.element);
             }
+          } else {
+            if (typeof openApp === 'function') openApp(appName, appTitle, details.iconClass, details.iconBgClass, this);
           }
-          break;
+          if (typeof hideContextMenu === 'function') hideContextMenu();
+          // Optionally close the start menu if you want:
+          if (typeof startMenu !== 'undefined' && startMenu) startMenu.style.display = 'none';
+          return;
         }
-        case 'mute-notifications': {
-          // Toggle notifications mute state
-          isNotificationsMuted = !isNotificationsMuted;
-          // Update notifications button icon
-          const notificationsBtn = document.getElementById('notifications-btn');
-          if (notificationsBtn) {
-            const icon = notificationsBtn.querySelector('i');
-            if (icon) {
-              if (isNotificationsMuted) {
-                icon.classList.remove('fa-bell');
-                icon.classList.add('fa-bell-slash');
-              } else {
-                icon.classList.remove('fa-bell-slash');
-                icon.classList.add('fa-bell');
+      }
+
+      // --- UNIVERSAL PIN/UNPIN HANDLER ---
+      if (action === 'pin-to-taskbar' || action === 'unpin-taskbar') {
+        let appName = null;
+        if (currentContextMenuTarget) {
+          appName = currentContextMenuTarget.getAttribute('data-app') || currentContextMenuTarget.getAttribute('data-app-name');
+          // If taskbar icon, try data-window-id to get app name from openWindows
+          if (!appName && currentContextMenuTarget.classList.contains('taskbar-app-icon')) {
+            const winId = currentContextMenuTarget.getAttribute('data-window-id');
+            if (winId && openWindows[winId]) appName = openWindows[winId].name;
+          }
+          // If still not found, try data-app-name on pinned-only icon
+          if (!appName && currentContextMenuTarget.classList.contains('pinned-only')) {
+            appName = currentContextMenuTarget.getAttribute('data-app-name');
+          }
+        }
+        if (appName) {
+          if (action === 'pin-to-taskbar') {
+            pinAppToTaskbar(appName);
+            if (typeof showShortTopNotification === 'function') showShortTopNotification('Pinned to Taskbar');
+          } else {
+            unpinAppFromTaskbar(appName);
+            if (typeof showShortTopNotification === 'function') showShortTopNotification('Unpinned from Taskbar');
+          }
+        }
+        if (typeof hideContextMenu === 'function') hideContextMenu();
+        return;
+      }
+
+      console.log('[Patched] executeContextMenuAction called with:', action);
+      try {
+        console.log('Action:', action, 'Target:', currentContextMenuTarget);
+        if (!currentContextMenuTarget) {
+          console.warn('No currentContextMenuTarget!');
+          return _originalExecuteContextMenuAction.call(this, action);
+        }
+        const target = currentContextMenuTarget;
+        if (typeof target.focus === 'function') target.focus();
+        if (document.activeElement !== target) target.focus();
+        window.focus && window.focus();
+
+        // --- ADD THIS ARRAY AT THE TOP OF THE FUNCTION ---
+        const allStartMenuStyles = [
+          'start-menu-style-default',
+          'start-menu-style-default-apps-only',
+          'start-menu-style-windows11',
+          'start-menu-list-style',
+          'start-menu-apps-only',
+          'start-menu-style-apps-list-only',
+          'start-menu-style-app-launcher'
+        ];
+        switch (action) {
+          case 'text-cut': {
+            console.log('[ContextMenu] text-cut triggered');
+            if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+              const start = target.selectionStart;
+              const end = target.selectionEnd;
+              console.log('start:', start, 'end:', end, 'typeof start:', typeof start, 'typeof end:', typeof end);
+              if (start !== end) {
+                const selectedText = target.value.slice(start, end);
+                console.log('About to call tryClipboardWrite with:', selectedText, target, 'cut');
+                const ok = await tryClipboardWrite(selectedText, target, 'cut');
+                if (ok) {
+                  target.value = target.value.slice(0, start) + target.value.slice(end);
+                  target.setSelectionRange(start, start);
+                  showShortTopNotification('Cutted');
+                } else {
+                  alert('Cut failed: Clipboard could not be updated.');
+                }
               }
-            }
-          }
-          // Optionally, you can show a toast or feedback here
-          break;
-        }
-        case 'show-only-1-notification':
-          desktopNotificationMode = 'one';
-          showShortTopNotification('Desktop notifications: Only 1');
-          break;
-        case 'show-only-3-notifications':
-          desktopNotificationMode = 'three';
-          showShortTopNotification('Desktop notifications: Only 3');
-          break;
-        case 'show-all-notifications':
-          desktopNotificationMode = 'all';
-          showShortTopNotification('Desktop notifications: All');
-          break;
-        case 'clear-all-notifications': {
-          // Remove all notification cards from the panel
-          const notificationsPanel = document.getElementById('notifications-panel');
-          if (notificationsPanel) {
-            const notifPanelContent = notificationsPanel.querySelector('.notifications-panel-content');
-            if (notifPanelContent) {
-              notifPanelContent.querySelectorAll('.notif-card').forEach(card => card.remove());
-              notifPanelContent.querySelectorAll('.notif-section-label').forEach(label => label.remove());
-              notifPanelContent.querySelectorAll('.notif-list').forEach(list => list.remove());
-              // Show empty state
-              const headerRow = notifPanelContent.querySelector('.notif-header-row');
-              const tempHeader = headerRow ? headerRow.cloneNode(true) : null;
-              notifPanelContent.innerHTML = '';
-              if (tempHeader) notifPanelContent.appendChild(tempHeader);
-              const emptyMsg = document.createElement('div');
-              emptyMsg.className = 'no-notifications-msg';
-              emptyMsg.textContent = 'No new notifications';
-              emptyMsg.style.cssText = 'display: flex; align-items: center; justify-content: center; height: 100%; color: #888; font-size: 1.15rem; font-weight: 500; text-align: center; margin-top: 60px;';
-              notifPanelContent.appendChild(emptyMsg);
-              setNotificationsBtnOpacity();
-              updateNotificationsBadge();
-            }
-          }
-          // Remove all desktop toast notifications
-          const toastContainer = document.getElementById('os-toast-container');
-          if (toastContainer) {
-            Array.from(toastContainer.children).forEach(child => child.remove());
-          }
-          break;
-        }
-        case 'show-wallet-icon':
-          window.walletDisplayMode = 'icon';
-          window.updateWalletBtnDisplay && window.updateWalletBtnDisplay();
-          break;
-        case 'show-account-balance':
-          window.walletDisplayMode = 'balance';
-          window.updateWalletBtnDisplay && window.updateWalletBtnDisplay();
-          break;
- // --- START MENU STYLE CASES: REPLACE ANY OLD/NESTED ONES WITH THESE ---
- case 'start-menu-style-default':
-  if (startMenu) {
-    startMenu.classList.remove(...allStartMenuStyles);
-    startMenu.classList.add('start-menu-style-default');
-    startMenuAppSortMode = 'category';
-    populateStartMenuApps();
-    startMenu.style.display = 'block';
-  }
-  break;
-case 'start-menu-style-default-apps-only':
-  if (startMenu) {
-    startMenu.classList.remove(...allStartMenuStyles);
-    startMenu.classList.add('start-menu-style-default-apps-only');
-    startMenuAppSortMode = 'category';
-    populateStartMenuApps();
-    startMenu.style.display = 'block';
-  }
-  break;
-case 'start-menu-style-windows11':
-  if (startMenu) {
-    startMenu.classList.remove(...allStartMenuStyles);
-    startMenu.classList.add('start-menu-style-windows11');
-    startMenuAppSortMode = 'alphabet';
-    populateStartMenuApps();
-    startMenu.style.display = 'block';
-  }
-  break;
-case 'start-menu-style-apps-list-with-sidebar':
-  if (startMenu) {
-    startMenu.classList.remove(...allStartMenuStyles);
-    startMenu.classList.add('start-menu-list-style');
-    startMenuAppSortMode = 'category';
-    populateStartMenuApps();
-    startMenu.style.display = 'block';
-  }
-  break;
-case 'start-menu-style-apps-list-only':
-  if (startMenu) {
-    startMenu.classList.remove(...allStartMenuStyles);
-    startMenu.classList.add('start-menu-style-apps-list-only');
-    startMenuAppSortMode = 'category';
-    populateStartMenuApps();
-    startMenu.style.display = 'block';
-  }
-  break;
-case 'start-menu-style-app-launcher':
-  if (startMenu) {
-    startMenu.classList.remove(...allStartMenuStyles);
-    startMenu.classList.add('start-menu-style-app-launcher');
-    startMenu.style.display = 'none';
-  }
-  
-            if (startMenu) {
-              startMenu.className = startMenu.className
-              .split(' ')
-              .filter(cls => !cls.startsWith('start-menu-style-') && cls !== 'start-menu-apps-only' && cls !== 'start-menu-list-style')
-              .join(' ');
-            startMenu.classList.add('start-menu-style-app-launcher');
-            startMenu.style.display = 'none';
+            } else if (target.isContentEditable) {
+              const sel = window.getSelection();
+              if (sel && !sel.isCollapsed) {
+                const selectedText = sel.toString();
+                console.log('About to call tryClipboardWrite with:', selectedText, target, 'cut');
+                const ok = await tryClipboardWrite(selectedText, target, 'cut');
+                if (ok) {
+                  sel.deleteFromDocument();
+                  showShortTopNotification('Cutted');
+                } else alert('Cut failed: Clipboard could not be updated.');
+              }
             }
             break;
-        default:
-          _originalExecuteContextMenuAction.call(this, action);
+          }
+          case 'text-copy': {
+            console.log('[ContextMenu] text-copy triggered');
+            if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+              const start = target.selectionStart;
+              const end = target.selectionEnd;
+              console.log('start:', start, 'end:', end, 'typeof start:', typeof start, 'typeof end:', typeof end);
+              if (start !== end) {
+                const selectedText = target.value.slice(start, end);
+                console.log('About to call tryClipboardWrite with:', selectedText, target, 'copy');
+                const ok = await tryClipboardWrite(selectedText, target, 'copy');
+                if (ok) showShortTopNotification('Copiated');
+                else alert('Copy failed: Clipboard could not be updated.');
+              }
+            } else if (target.isContentEditable) {
+              const sel = window.getSelection();
+              if (sel && !sel.isCollapsed) {
+                const selectedText = sel.toString();
+                console.log('About to call tryClipboardWrite with:', selectedText, target, 'copy');
+                const ok = await tryClipboardWrite(selectedText, target, 'copy');
+                if (ok) showShortTopNotification('Copiated');
+                else alert('Copy failed: Clipboard could not be updated.');
+              }
+            }
+            break;
+          }
+          case 'text-paste': {
+            console.log('[ContextMenu] text-paste triggered');
+            if (navigator.clipboard && navigator.clipboard.readText) {
+              try {
+                const text = await navigator.clipboard.readText();
+                console.log('Clipboard readText:', text);
+                if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+                  const start = target.selectionStart;
+                  const end = target.selectionEnd;
+                  const val = target.value;
+                  target.value = val.slice(0, start) + text + val.slice(end);
+                  target.setSelectionRange(start + text.length, start + text.length);
+                } else if (target.isContentEditable) {
+                  document.execCommand('insertText', false, text);
+                }
+              } catch (err) {
+                console.error('Paste failed:', err);
+                alert('Paste failed: Clipboard could not be read.');
+              }
+            } else {
+              alert('Paste failed: Clipboard could not be read.');
+            }
+            break;
+          }
+          case 'text-delete': {
+            console.log('[ContextMenu] text-delete triggered');
+            if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+              const start = target.selectionStart;
+              const end = target.selectionEnd;
+              console.log('start:', start, 'end:', end, 'typeof start:', typeof start, 'typeof end:', typeof end);
+              if (start !== end) {
+                const val = target.value;
+                target.value = val.slice(0, start) + val.slice(end);
+                target.setSelectionRange(start, start);
+              }
+            } else if (target.isContentEditable) {
+              const sel = window.getSelection();
+              if (sel && !sel.isCollapsed) sel.deleteFromDocument();
+            }
+            break;
+          }
+          case 'text-select-all': {
+            console.log('[ContextMenu] text-select-all triggered');
+            if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+              target.focus();
+              target.select();
+              console.log('After select():', target.selectionStart, target.selectionEnd, target.value.length);
+            } else if (target.isContentEditable) {
+              const range = document.createRange();
+              range.selectNodeContents(target);
+              const sel = window.getSelection();
+              sel.removeAllRanges();
+              sel.addRange(range);
+              console.log('After selectNodeContents:', sel.toString());
+            }
+            break;
+          }
+          case 'open-music-player': {
+            const volumePanel = document.getElementById('volume-panel');
+            if (volumePanel) {
+              const musicPanel = volumePanel.querySelector('.music-panel-box');
+              if (window._playlistPanelRemoveTimeout) {
+                clearTimeout(window._playlistPanelRemoveTimeout);
+                window._playlistPanelRemoveTimeout = null;
+              }
+              // Remove all playlist panels immediately
+              const playlistPanels = volumePanel.querySelectorAll('.playlist-panel-slide');
+              const isMusicVisible = musicPanel && getComputedStyle(musicPanel).display !== 'none';
+              const isPlaylistVisible = playlistPanels.length > 0;
+              if (isMusicVisible || isPlaylistVisible) {
+                // Hide both
+                playlistPanels.forEach(panel => {
+                  if (panel.parentNode) panel.parentNode.removeChild(panel);
+                });
+                if (musicPanel) musicPanel.style.display = 'none';
+              } else {
+                // Both are hidden, show music player
+                if (musicPanel) musicPanel.style.display = '';
+              }
+            }
+            break;
+          }
+          case 'taskbar-mute': {
+            // Toggle mute state
+            const volumeBtn = document.getElementById('volume-btn');
+            const volumeSlider = document.getElementById('browser-volume-slider');
+            if (volumeBtn && volumeSlider) {
+              if (!isMuted) {
+                // Muting
+                previousVolume = volumeSlider.value;
+                volumeSlider.value = 0;
+                volumeSlider.dispatchEvent(new Event('input', { bubbles: true }));
+                updateVolumeUI(0);
+              } else {
+                // Unmuting
+                volumeSlider.value = previousVolume;
+                volumeSlider.dispatchEvent(new Event('input', { bubbles: true }));
+                updateVolumeUI(parseInt(previousVolume, 10));
+              }
+            }
+            break;
+          }
+          case 'mute-notifications': {
+            // Toggle notifications mute state
+            isNotificationsMuted = !isNotificationsMuted;
+            // Update notifications button icon
+            const notificationsBtn = document.getElementById('notifications-btn');
+            if (notificationsBtn) {
+              const icon = notificationsBtn.querySelector('i');
+              if (icon) {
+                if (isNotificationsMuted) {
+                  icon.classList.remove('fa-bell');
+                  icon.classList.add('fa-bell-slash');
+                } else {
+                  icon.classList.remove('fa-bell-slash');
+                  icon.classList.add('fa-bell');
+                }
+              }
+            }
+            // Optionally, you can show a toast or feedback here
+            break;
+          }
+          case 'show-only-1-notification':
+            desktopNotificationMode = 'one';
+            showShortTopNotification('Desktop notifications: Only 1');
+            break;
+          case 'show-only-3-notifications':
+            desktopNotificationMode = 'three';
+            showShortTopNotification('Desktop notifications: Only 3');
+            break;
+          case 'show-all-notifications':
+            desktopNotificationMode = 'all';
+            showShortTopNotification('Desktop notifications: All');
+            break;
+          case 'clear-all-notifications': {
+            // Remove all notification cards from the panel
+            const notificationsPanel = document.getElementById('notifications-panel');
+            if (notificationsPanel) {
+              const notifPanelContent = notificationsPanel.querySelector('.notifications-panel-content');
+              if (notifPanelContent) {
+                notifPanelContent.querySelectorAll('.notif-card').forEach(card => card.remove());
+                notifPanelContent.querySelectorAll('.notif-section-label').forEach(label => label.remove());
+                notifPanelContent.querySelectorAll('.notif-list').forEach(list => list.remove());
+                // Show empty state
+                const headerRow = notifPanelContent.querySelector('.notif-header-row');
+                const tempHeader = headerRow ? headerRow.cloneNode(true) : null;
+                notifPanelContent.innerHTML = '';
+                if (tempHeader) notifPanelContent.appendChild(tempHeader);
+                const emptyMsg = document.createElement('div');
+                emptyMsg.className = 'no-notifications-msg';
+                emptyMsg.textContent = 'No new notifications';
+                emptyMsg.style.cssText = 'display: flex; align-items: center; justify-content: center; height: 100%; color: #888; font-size: 1.15rem; font-weight: 500; text-align: center; margin-top: 60px;';
+                notifPanelContent.appendChild(emptyMsg);
+                setNotificationsBtnOpacity();
+                updateNotificationsBadge();
+              }
+            }
+            // Remove all desktop toast notifications
+            const toastContainer = document.getElementById('os-toast-container');
+            if (toastContainer) {
+              Array.from(toastContainer.children).forEach(child => child.remove());
+            }
+            break;
+          }
+          case 'show-wallet-icon':
+            window.walletDisplayMode = 'icon';
+            window.updateWalletBtnDisplay && window.updateWalletBtnDisplay();
+            break;
+          case 'show-account-balance':
+            window.walletDisplayMode = 'balance';
+            window.updateWalletBtnDisplay && window.updateWalletBtnDisplay();
+            break;
+          // --- START MENU STYLE CASES: REPLACE ANY OLD/NESTED ONES WITH THESE ---
+          case 'start-menu-style-default':
+            if (startMenu) {
+              startMenu.classList.remove(...allStartMenuStyles);
+              startMenu.classList.add('start-menu-style-default');
+              startMenuAppSortMode = 'category';
+              populateStartMenuApps();
+              startMenu.style.display = 'block';
+            }
+            break;
+          case 'start-menu-style-default-apps-only':
+            if (startMenu) {
+              startMenu.classList.remove(...allStartMenuStyles);
+              startMenu.classList.add('start-menu-style-default-apps-only');
+              startMenuAppSortMode = 'category';
+              populateStartMenuApps();
+              startMenu.style.display = 'block';
+            }
+            break;
+          case 'start-menu-style-windows11':
+            if (startMenu) {
+              startMenu.classList.remove(...allStartMenuStyles);
+              startMenu.classList.add('start-menu-style-windows11');
+              startMenuAppSortMode = 'alphabet';
+              populateStartMenuApps();
+              startMenu.style.display = 'block';
+            }
+            break;
+          case 'start-menu-style-apps-list-with-sidebar':
+            if (startMenu) {
+              startMenu.classList.remove(...allStartMenuStyles);
+              startMenu.classList.add('start-menu-list-style');
+              startMenuAppSortMode = 'category';
+              populateStartMenuApps();
+              startMenu.style.display = 'block';
+            }
+            break;
+          case 'start-menu-style-apps-list-only':
+            if (startMenu) {
+              startMenu.classList.remove(...allStartMenuStyles);
+              startMenu.classList.add('start-menu-style-apps-list-only');
+              startMenuAppSortMode = 'category';
+              populateStartMenuApps();
+              startMenu.style.display = 'block';
+            }
+            break;
+          case 'start-menu-style-app-launcher':
+            if (startMenu) {
+              startMenu.classList.remove(...allStartMenuStyles);
+              startMenu.classList.add('start-menu-style-app-launcher');
+              closeStartMenuAnimated();
+            }
+
+            if (startMenu) {
+              startMenu.className = startMenu.className
+                .split(' ')
+                .filter(cls => !cls.startsWith('start-menu-style-') && cls !== 'start-menu-apps-only' && cls !== 'start-menu-list-style')
+                .join(' ');
+              startMenu.classList.add('start-menu-style-app-launcher');
+              closeStartMenuAnimated();
+            }
+            break;
+          case 'open-settings':
+            openApp('settings', 'Settings', 'fa-cog', 'green');
+            break;
+          case 'uninstall-app': {
+            if (currentContextMenuTarget && currentContextMenuTarget.classList.contains('app-grid-item')) {
+              const appName = currentContextMenuTarget.getAttribute('data-app-name') || currentContextMenuTarget.getAttribute('data-app-id');
+              const appTitle = currentContextMenuTarget.getAttribute('data-app-title') || currentContextMenuTarget.querySelector('span')?.textContent || appName;
+              showConfirmDialog({
+                title: 'Uninstall App',
+                message: `Are you sure you want to uninstall <b>${appTitle}</b>? This cannot be undone!`,
+                iconClass: 'fa-trash',
+                okText: 'Uninstall',
+                cancelText: 'Cancel',
+                style: 'desktop'
+              }).then(confirmed => {
+                if (confirmed) {
+                  // Remove from startMenuApps array
+                  if (typeof startMenuApps !== 'undefined') {
+                    const idx = startMenuApps.findIndex(a => a.id === appName || a.name === appName || (a.name && a.name.toLowerCase().replace(/\s+/g, '-') === appName));
+                    if (idx !== -1) {
+                      startMenuApps.splice(idx, 1);
+                    }
+                  }
+                  // Remove from DOM if present
+                  if (currentContextMenuTarget && currentContextMenuTarget.parentElement) {
+                    currentContextMenuTarget.parentElement.removeChild(currentContextMenuTarget);
+                  }
+                  // Remove from desktop if present
+                  const desktopIcon = document.querySelector('.desktop-icon[data-app="' + appName + '"]');
+                  if (desktopIcon && desktopIcon.parentElement) {
+                    desktopIcon.parentElement.removeChild(desktopIcon);
+                  }
+                  // Remove from taskbar if pinned
+                  unpinAppFromTaskbar(appName);
+                  // Refresh start menu UI
+                  if (typeof populateStartMenuApps === 'function') populateStartMenuApps();
+                  if (typeof showShortTopNotification === 'function') showShortTopNotification('App uninstalled');
+                }
+                if (typeof hideContextMenu === 'function') hideContextMenu();
+              });
+            }
+            break;
+          }
+          case 'sort-name': {
+            // Only handle if desktop area is context
+            const desktopIconsContainer = document.querySelector('.desktop-icons');
+            if (desktopIconsContainer && (currentContextMenuTarget === desktopIconsContainer || currentContextMenuTarget.classList.contains('desktop-icons'))) {
+              const icons = Array.from(desktopIconsContainer.querySelectorAll('.desktop-icon'));
+              icons.sort((a, b) => {
+                const aName = a.querySelector('span')?.textContent?.toLowerCase() || '';
+                const bName = b.querySelector('span')?.textContent?.toLowerCase() || '';
+                return aName.localeCompare(bName);
+              });
+              icons.forEach(icon => desktopIconsContainer.appendChild(icon));
+              saveCurrentDesktopIconOrder();
+              if (typeof showShortTopNotification === 'function') showShortTopNotification('Sorted by name');
+              initializeDesktopIconPositions(); // Always re-layout
+            } else {
+              _originalExecuteContextMenuAction.call(this, action);
+            }
+            break;
+          }
+          case 'sort-date': {
+            const desktopIconsContainer = document.querySelector('.desktop-icons');
+            if (desktopIconsContainer && (currentContextMenuTarget === desktopIconsContainer || currentContextMenuTarget.classList.contains('desktop-icons'))) {
+              const icons = Array.from(desktopIconsContainer.querySelectorAll('.desktop-icon'));
+              icons.sort((a, b) => {
+                // Use data-created attribute if present, else fallback to DOM order
+                const aDate = a.getAttribute('data-created') || a.dataset.created || '';
+                const bDate = b.getAttribute('data-created') || b.dataset.created || '';
+                if (aDate && bDate) return aDate.localeCompare(bDate);
+                return 0; // fallback: keep DOM order
+              });
+              icons.forEach(icon => desktopIconsContainer.appendChild(icon));
+              saveCurrentDesktopIconOrder();
+              if (typeof showShortTopNotification === 'function') showShortTopNotification('Sorted by date');
+              initializeDesktopIconPositions(); // Always re-layout
+            } else {
+              _originalExecuteContextMenuAction.call(this, action);
+            }
+            break;
+          }
+          case 'sort-type': {
+            const desktopIconsContainer = document.querySelector('.desktop-icons');
+            if (desktopIconsContainer && (currentContextMenuTarget === desktopIconsContainer || currentContextMenuTarget.classList.contains('desktop-icons'))) {
+              // Get app ids from startMenuApps
+              const appIds = (window.startMenuApps || []).map(app => app.id);
+              const icons = Array.from(desktopIconsContainer.querySelectorAll('.desktop-icon'));
+              // Apps first, then files, both alphabetically
+              const isApp = icon => appIds.includes(icon.getAttribute('data-app'));
+              icons.sort((a, b) => {
+                const aIsApp = isApp(a);
+                const bIsApp = isApp(b);
+                if (aIsApp && !bIsApp) return -1;
+                if (!aIsApp && bIsApp) return 1;
+                // Both same type, sort by name
+                const aName = a.querySelector('span')?.textContent?.toLowerCase() || '';
+                const bName = b.querySelector('span')?.textContent?.toLowerCase() || '';
+                return aName.localeCompare(bName);
+              });
+              icons.forEach(icon => desktopIconsContainer.appendChild(icon));
+              saveCurrentDesktopIconOrder();
+              if (typeof showShortTopNotification === 'function') showShortTopNotification('Sorted by type (apps first)');
+              initializeDesktopIconPositions(); // Always re-layout
+            } else {
+              _originalExecuteContextMenuAction.call(this, action);
+            }
+            break;
+          }
+          case 'add-to-desktop':
+            if (currentContextMenuTarget && currentContextMenuTarget.classList.contains('app-grid-item')) {
+              const appName = currentContextMenuTarget.getAttribute('data-app-name') || currentContextMenuTarget.getAttribute('data-app-id');
+              const appTitle = currentContextMenuTarget.getAttribute('data-app-title') || currentContextMenuTarget.querySelector('span')?.textContent || appName;
+              // Get icon details from startMenuApps, fallback to getAppIconDetails
+              let details = { iconClass: 'fa-window-maximize', iconBgClass: 'gray-icon' };
+              if (typeof startMenuApps !== 'undefined') {
+                const appObj = startMenuApps.find(a =>
+                  a.id === appName ||
+                  a.name === appName ||
+                  (a.name && a.name.toLowerCase().replace(/\s+/g, '-') === appName)
+                );
+                if (appObj) {
+                  details.iconClass = appObj.iconClass || details.iconClass;
+                  details.iconBgClass = appObj.iconBgClass || details.iconBgClass;
+                } else {
+                  details = getAppIconDetails(appName);
+                }
+              } else {
+                details = getAppIconDetails(appName);
+              }
+              const desktopIconsContainer = document.querySelector('.desktop-icons');
+              if (!desktopIconsContainer) {
+                if (typeof showShortTopNotification === 'function') showShortTopNotification('Desktop not found');
+                break;
+              }
+              // Check if already on desktop
+              if (!desktopIconsContainer.querySelector('.desktop-icon[data-app="' + appName + '"]')) {
+                const icon = document.createElement('div');
+                icon.className = 'desktop-icon';
+                icon.setAttribute('data-app', appName);
+                icon.setAttribute('data-created', new Date().toISOString()); // Set creation date
+                icon.innerHTML = `
+              <div class="icon-container ${details.iconBgClass}"><i class="fas ${details.iconClass}"></i></div>
+              <span>${appTitle}</span>
+            `;
+                // --- Find first available grid slot ---
+                if (window.innerWidth > 1023) {
+                  // Use grid logic
+                  const leftOffset = GRID_GAP;
+                  const topOffset = GRID_GAP;
+                  const colWidth = GRID_CELL_WIDTH + GRID_GAP;
+                  const iconHeight = GRID_CELL_HEIGHT;
+                  const verticalGap = GRID_GAP;
+                  const taskbar = document.querySelector('.taskbar');
+                  const taskbarHeight = taskbar ? taskbar.offsetHeight : 0;
+                  const availableHeight = window.innerHeight - taskbarHeight - 50; // 30px bottom margin
+                  const maxRows = Math.max(1, Math.floor((availableHeight - topOffset) / (iconHeight + verticalGap)));
+                  const maxCols = Math.max(1, Math.floor((desktopIconsContainer.clientWidth - leftOffset) / colWidth));
+                  // Mark occupied slots
+                  const occupied = {};
+                  desktopIconsContainer.querySelectorAll('.desktop-icon').forEach(existingIcon => {
+                    const left = parseInt(existingIcon.style.left, 10);
+                    const top = parseInt(existingIcon.style.top, 10);
+                    if (!isNaN(left) && !isNaN(top)) {
+                      const col = Math.round((left - leftOffset) / colWidth);
+                      const row = Math.round((top - topOffset) / (iconHeight + verticalGap));
+                      occupied[`${col},${row}`] = true;
+                    }
+                  });
+                  // Find first free slot (column by column, then row)
+                  let found = false;
+                  let targetCol = 0, targetRow = 0;
+                  outer: for (let col = 0; col < maxCols; col++) {
+                    for (let row = 0; row < maxRows; row++) {
+                      if (!occupied[`${col},${row}`]) {
+                        targetCol = col;
+                        targetRow = row;
+                        found = true;
+                        break outer;
+                      }
+                    }
+                  }
+                  // Place icon at found slot
+                  const iconLeft = leftOffset + targetCol * colWidth;
+                  const iconTop = topOffset + targetRow * (iconHeight + verticalGap);
+                  icon.style.position = 'absolute';
+                  icon.style.left = iconLeft + 'px';
+                  icon.style.top = iconTop + 'px';
+                  icon.setAttribute('data-absolute', 'true');
+                }
+                desktopIconsContainer.appendChild(icon);
+                setupDesktopIcon(icon);
+                if (typeof showShortTopNotification === 'function') showShortTopNotification('Added to Desktop');
+                // Save positions if using absolute
+                if (window.innerWidth > 1023) saveDesktopIconPositions && saveDesktopIconPositions();
+              } else {
+                if (typeof showShortTopNotification === 'function') showShortTopNotification('Already on Desktop');
+              }
+              if (typeof hideContextMenu === 'function') hideContextMenu();
+            }
+            break;
+          case 'remove-from-desktop':
+            if (currentContextMenuTarget && currentContextMenuTarget.classList.contains('desktop-icon')) {
+              const appName = currentContextMenuTarget.getAttribute('data-app');
+              // Remove the icon from the DOM
+              const parent = currentContextMenuTarget.parentElement;
+              if (parent) {
+                parent.removeChild(currentContextMenuTarget);
+                // Update icon order and positions
+                saveCurrentDesktopIconOrder && saveCurrentDesktopIconOrder();
+                if (window.innerWidth > 1023 && typeof saveDesktopIconPositions === 'function') saveDesktopIconPositions();
+                if (typeof showShortTopNotification === 'function') showShortTopNotification('Removed from Desktop');
+              }
+              if (typeof hideContextMenu === 'function') hideContextMenu();
+            }
+            break;
+          case 'desktop-app-launcher-mode':
+            switchToAppLauncherMode();
+            return;
+          // --- EASY MODE ---
+          case 'app-launcher-easy-mode':
+          case 'single-task-mode': {
+            // Animate out desktop icons, widgets, and taskbar before switching
+            const desktopIconsContainer = document.querySelector('.desktop-icons');
+            const widgetsScreen = document.getElementById('widgets-screen');
+            const taskbar = document.querySelector('.taskbar');
+
+            let animCount = 0, animDone = 0;
+            function onAnimEnd() { animDone++; if (animDone >= animCount) finishSwitchToEasyMode(); }
+
+            if (desktopIconsContainer && desktopIconsContainer.style.display !== 'none') {
+              animCount++;
+              desktopIconsContainer.classList.add('anim-slide-left');
+              desktopIconsContainer.addEventListener('animationend', function handler() {
+                desktopIconsContainer.removeEventListener('animationend', handler);
+                desktopIconsContainer.classList.remove('anim-slide-left');
+                onAnimEnd();
+              });
+            }
+            if (widgetsScreen && widgetsScreen.style.display !== 'none') {
+              animCount++;
+              widgetsScreen.classList.add('anim-slide-right');
+              widgetsScreen.addEventListener('animationend', function handler() {
+                widgetsScreen.removeEventListener('animationend', handler);
+                widgetsScreen.classList.remove('anim-slide-right');
+                onAnimEnd();
+              });
+            }
+            if (taskbar && taskbar.style.display !== 'none') {
+              animCount++;
+              taskbar.classList.add('anim-slide-down');
+              taskbar.addEventListener('animationend', function handler() {
+                taskbar.removeEventListener('animationend', handler);
+                taskbar.classList.remove('anim-slide-down');
+                onAnimEnd();
+              });
+            }
+
+            // If nothing to animate, switch immediately
+            if (animCount === 0) finishSwitchToEasyMode();
+
+            // Move your existing easy mode switch code into this function:
+            function finishSwitchToEasyMode() {
+              // Prevent duplicate overlays
+              if (document.getElementById('app-launcher-desktop')) return;
+              // Set easy mode flag
+              window._easyMode = true;
+              // Switch to Easy Mode (like app launcher, but no taskbar, apps maximized, no min/max icons)
+              const desktopArea = document.getElementById('desktop-area');
+              const desktopIconsContainer = document.querySelector('.desktop-icons');
+              const taskbar = document.querySelector('.taskbar');
+              const widgetsScreen = document.getElementById('widgets-screen');
+              const widgetsToggleBtn = document.getElementById('widgets-toggle-btn');
+              const appLauncherBtn = document.getElementById('app-launcher-btn');
+              if (appLauncherBtn) appLauncherBtn.style.display = 'none';
+              if (desktopIconsContainer) {
+                desktopIconsContainer.style.display = 'none';
+                desktopIconsContainer.style.pointerEvents = 'none';
+              }
+              if (taskbar) taskbar.style.display = 'none';
+              if (widgetsScreen) widgetsScreen.style.display = 'none';
+              if (widgetsToggleBtn) widgetsToggleBtn.style.display = 'none';
+              // Remove any previous app-launcher-desktop if present
+              let launcherDesktop = document.getElementById('app-launcher-desktop');
+              if (launcherDesktop) launcherDesktop.remove();
+              // Remove App Launcher overlay if present
+              const appLauncherOverlay = document.getElementById('app-launcher-overlay');
+              if (appLauncherOverlay && appLauncherOverlay.parentNode) appLauncherOverlay.parentNode.removeChild(appLauncherOverlay);
+              // Remove App Launcher desktop icon if present
+              const appLauncherIcon = document.querySelector('.desktop-icon[data-app="app-launcher"]');
+              if (appLauncherIcon && appLauncherIcon.parentNode) {
+                window._appLauncherIconWasPresent = true;
+                appLauncherIcon.parentNode.removeChild(appLauncherIcon);
+              } else {
+                window._appLauncherIconWasPresent = false;
+              }
+              // Create the easy mode desktop container
+              launcherDesktop = document.createElement('div');
+              launcherDesktop.id = 'app-launcher-desktop';
+              launcherDesktop.style.position = 'absolute';
+              launcherDesktop.style.top = '0';
+              launcherDesktop.style.left = '0';
+              launcherDesktop.style.width = '100%';
+              launcherDesktop.style.height = '100%';
+              launcherDesktop.style.display = 'flex';
+              launcherDesktop.style.flexDirection = 'column';
+              // --- Top Bar ---
+              const topBar = createAppLauncherTopBar();
+              launcherDesktop.appendChild(topBar);
+
+
+
+              // --- App Grid ---
+              const grid = document.createElement('div');
+              grid.className = 'app-launcher-grid';
+              grid.style.display = 'grid';
+              grid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(90px, 1fr))';
+              grid.style.gap = '32px';
+              grid.style.width = 'min(90vw, 900px)';
+              grid.style.maxWidth = '100vw';
+              grid.style.margin = 'auto';
+              grid.style.justifyItems = 'center';
+              grid.style.alignItems = 'start';
+              grid.style.padding = '32px 0 0 0';
+              grid.style.flex = '1 1 0';
+              if (startMenuApps) {
+                startMenuApps.forEach(app => {
+                  const appItem = document.createElement('div');
+                  appItem.className = 'app-launcher-app';
+                  appItem.style.display = 'flex';
+                  appItem.style.flexDirection = 'column';
+                  appItem.style.alignItems = 'center';
+                  appItem.style.justifyContent = 'center';
+                  appItem.style.minHeight = '120px';
+                  appItem.style.cursor = 'pointer';
+                  appItem.style.userSelect = 'none';
+                  appItem.tabIndex = 0;
+                  appItem.setAttribute('data-app-name', app.id);
+                  appItem.innerHTML = `<div class="icon-container ${app.iconBgClass}" style="width:64px;height:64px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:28px;box-shadow:0 4px 16px rgba(0,0,0,0.18);margin-bottom:10px;"><i class="fas ${app.iconClass}"></i></div><span style="font-size:14px;color:#fff;margin-top:5px;text-shadow:0 1px 4px #222;text-align:center;width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;">${app.name}</span>`;
+                  appItem.addEventListener('click', function (e) {
+                    openApp(app.id, app.name, app.iconClass, app.iconBgClass, appItem);
+                  });
+                  grid.appendChild(appItem);
+                });
+              }
+              launcherDesktop.appendChild(grid);
+              if (desktopArea) desktopArea.appendChild(launcherDesktop);
+              if (desktopArea) desktopArea.classList.add('easy-mode');
+              document.body.classList.add('easy-mode');
+              if (launcherDesktop) {
+                launcherDesktop.addEventListener('contextmenu', function (e) {
+                  e.preventDefault();
+                  return false;
+                });
+              }
+              // Animate in top bar and grid
+              topBar.classList.add('anim-slide-down');
+              topBar.addEventListener('animationend', function handler() {
+                topBar.removeEventListener('animationend', handler);
+                topBar.classList.remove('anim-slide-down');
+              });
+              grid.classList.add('anim-zoom-in');
+              grid.addEventListener('animationend', function handler() {
+                grid.removeEventListener('animationend', handler);
+                grid.classList.remove('anim-zoom-in');
+              });
+
+            }
+            break;
+          }
+
+          case 'close-app': {
+            // Close the window associated with the taskbar icon
+            if (currentContextMenuTarget && currentContextMenuTarget.classList.contains('taskbar-app-icon')) {
+              const winId = currentContextMenuTarget.getAttribute('data-window-id');
+              if (winId && openWindows[winId] && openWindows[winId].element) {
+                const windowElement = openWindows[winId].element;
+                // If minimized, restore it first so close animation and logic work
+                if (windowElement.classList.contains('minimized')) {
+                  windowElement.classList.remove('minimized');
+                  windowElement.style.display = 'flex';
+                  if (openWindows[winId].taskbarIcon) openWindows[winId].taskbarIcon.classList.remove('minimized');
+                }
+                // Simulate click on the close button if present
+                const closeButton = windowElement.querySelector('.window-close');
+                if (closeButton) {
+                  closeButton.click();
+                } else {
+                  // Fallback: remove window directly
+                  windowElement.remove();
+                  if (openWindows[winId].taskbarIcon) openWindows[winId].taskbarIcon.remove();
+                  delete openWindows[winId];
+                  updateTaskbarActiveState && updateTaskbarActiveState();
+                }
+                if (typeof hideContextMenu === 'function') hideContextMenu();
+                return;
+              }
+            }
+            break;
+          }
+          case 'minimize-app': {
+            // Minimize the window associated with the taskbar icon
+            if (currentContextMenuTarget && currentContextMenuTarget.classList.contains('taskbar-app-icon')) {
+              const winId = currentContextMenuTarget.getAttribute('data-window-id');
+              if (winId && openWindows[winId] && openWindows[winId].element) {
+                const windowElement = openWindows[winId].element;
+                const taskbarIcon = openWindows[winId].taskbarIcon;
+                if (typeof toggleMinimizeWindow === 'function') {
+                  toggleMinimizeWindow(windowElement, taskbarIcon);
+                } else {
+                  windowElement.style.display = 'none';
+                  windowElement.classList.add('minimized');
+                  if (taskbarIcon) {
+                    taskbarIcon.classList.add('minimized');
+                    taskbarIcon.classList.remove('active');
+                  }
+                }
+                if (typeof hideContextMenu === 'function') hideContextMenu();
+                return;
+              }
+            }
+            break;
+          }
+
+          case 'hide-app-launcher-taskbar-right': {
+            // Toggle the App Launcher button in the taskbar
+            const appLauncherBtn = document.getElementById('app-launcher-btn');
+            if (appLauncherBtn) {
+              const isHidden = appLauncherBtn.style.display === 'none';
+              appLauncherBtn.style.display = isHidden ? '' : 'none';
+              // Update the context menu label
+              // Find the context menu item and update its label
+              const menuItem = currentContextMenuTarget.closest('.context-menu-item');
+              if (menuItem) {
+                const span = menuItem.querySelector('span');
+                if (span) {
+                  span.textContent = isHidden ? 'Show App Launcher' : 'Hide App Launcher';
+                }
+              }
+              if (typeof showShortTopNotification === 'function') {
+                showShortTopNotification(isHidden ? 'App Launcher shown' : 'App Launcher hidden');
+              }
+            }
+            if (typeof hideContextMenu === 'function') hideContextMenu();
+            break;
+          }
+
+          case 'hide-search-icon-taskbar-right': {
+            // Toggle the visibility of the global search icon in the right taskbar
+            const searchIconBtn = document.getElementById('global-search-btn');
+            if (searchIconBtn) {
+              const isHidden = searchIconBtn.style.display === 'none';
+              // Toggle display
+              searchIconBtn.style.display = isHidden ? '' : 'none';
+              // Update the context menu label (label should reflect the NEXT action)
+              const menuItem = currentContextMenuTarget.closest('.context-menu-item');
+              if (menuItem) {
+                const span = menuItem.querySelector('span');
+                if (span) {
+                  span.textContent = isHidden ? 'Show Search icon' : 'Hide Search icon';
+                }
+              }
+              if (typeof showShortTopNotification === 'function') {
+                showShortTopNotification(isHidden ? 'Search icon shown' : 'Search icon hidden');
+              }
+            }
+            if (typeof hideContextMenu === 'function') hideContextMenu();
+            break;
+          }
+
+          case 'hide-volume-taskbar-right': {
+            // Toggle the visibility of the volume button in the right taskbar
+            const volumeBtn = document.getElementById('volume-btn');
+            if (volumeBtn) {
+              const isHidden = volumeBtn.style.display === 'none';
+              volumeBtn.style.display = isHidden ? '' : 'none';
+              // Update the context menu label
+              const menuItem = currentContextMenuTarget.closest('.context-menu-item');
+              if (menuItem) {
+                const span = menuItem.querySelector('span');
+                if (span) {
+                  span.textContent = isHidden ? 'Show Volume' : 'Hide Volume';
+                }
+              }
+              if (typeof showShortTopNotification === 'function') {
+                showShortTopNotification(isHidden ? 'Volume button shown' : 'Volume button hidden');
+              }
+            }
+            if (typeof hideContextMenu === 'function') hideContextMenu();
+            break;
+          }
+
+          case 'hide-wallet-taskbar-right': {
+            // Toggle the visibility of the wallet button in the right taskbar
+            const walletBtn = document.getElementById('wallet-btn');
+            if (walletBtn) {
+              const isHidden = walletBtn.style.display === 'none';
+              walletBtn.style.display = isHidden ? '' : 'none';
+              // Update the context menu label
+              const menuItem = currentContextMenuTarget.closest('.context-menu-item');
+              if (menuItem) {
+                const span = menuItem.querySelector('span');
+                if (span) {
+                  span.textContent = isHidden ? 'Show Wallet' : 'Hide Wallet';
+                }
+              }
+              if (typeof showShortTopNotification === 'function') {
+                showShortTopNotification(isHidden ? 'Wallet button shown' : 'Wallet button hidden');
+              }
+            }
+            if (typeof hideContextMenu === 'function') hideContextMenu();
+            break;
+          }
+
+          case 'hide-full-screen-taskbar-right': {
+            // Toggle the visibility of the full screen button in the right taskbar
+            const fullscreenBtn = document.getElementById('fullscreen-btn');
+            if (fullscreenBtn) {
+              const isHidden = fullscreenBtn.style.display === 'none';
+              fullscreenBtn.style.display = isHidden ? '' : 'none';
+              // Update the context menu label
+              const menuItem = currentContextMenuTarget.closest('.context-menu-item');
+              if (menuItem) {
+                const span = menuItem.querySelector('span');
+                if (span) {
+                  span.textContent = isHidden ? 'Show Full Screen' : 'Hide Full Screen';
+                }
+              }
+              if (typeof showShortTopNotification === 'function') {
+                showShortTopNotification(isHidden ? 'Full screen button shown' : 'Full screen button hidden');
+              }
+            }
+            if (typeof hideContextMenu === 'function') hideContextMenu();
+            break;
+          }
+
+          case 'show-desktop': {
+            // Minimize all open windows
+            if (typeof openWindows === 'object' && typeof toggleMinimizeWindow === 'function') {
+              Object.values(openWindows).forEach(winObj => {
+                if (winObj.element && !winObj.element.classList.contains('minimized')) {
+                  toggleMinimizeWindow(winObj.element, winObj.taskbarIcon);
+                }
+              });
+              if (typeof showShortTopNotification === 'function') {
+                showShortTopNotification('All windows minimized');
+              }
+            }
+            if (typeof hideContextMenu === 'function') hideContextMenu();
+            break;
+          }
+
+          default:
+            _originalExecuteContextMenuAction.call(this, action);
+        }
+      } catch (err) {
+        console.error('Context menu action error:', err);
       }
-    } catch (err) {
-      console.error('Context menu action error:', err);
-    }
-  };
-  console.log('Patched executeContextMenuAction installed');
-})();
+    };
+    console.log('Patched executeContextMenuAction installed');
+  })();
 
   if (desktopArea) {
-    desktopArea.addEventListener('contextmenu', function(e) {
+    desktopArea.addEventListener('contextmenu', function (e) {
+      // Custom context menu for pinned-only taskbar icons
+      if (e.target.closest('.taskbar-app-icon.pinned-only')) {
+        currentContextMenuTarget = e.target.closest('.taskbar-app-icon.pinned-only');
+        const appName = currentContextMenuTarget.getAttribute('data-app-name');
+        const details = getAppIconDetails(appName);
+        const openWin = Object.values(openWindows).find(w => w.name === appName && w.element);
+        let menuItems;
+        if (openWin && openWin.element) {
+          if (openWin.element.classList.contains('minimized')) {
+            menuItems = [
+              { label: 'Open', action: 'open-app', icon: details.iconClass },
+              { label: 'Unpin from Taskbar', action: 'unpin-taskbar', icon: 'fa-thumbtack' },
+              { type: 'separator' },
+              { label: 'Close Window', action: 'close-app', icon: 'fa-xmark' }
+            ];
+          } else {
+            menuItems = [
+              { label: 'Minimize Window', action: 'minimize-app', icon: 'fa-window-minimize' },
+              { label: 'Unpin from Taskbar', action: 'unpin-taskbar', icon: 'fa-thumbtack' },
+              { type: 'separator' },
+              { label: 'Close Window', action: 'close-app', icon: 'fa-xmark' }
+            ];
+          }
+        } else {
+          menuItems = [
+            { label: 'Open', action: 'open-app', icon: details.iconClass },
+            { label: 'Unpin from Taskbar', action: 'unpin-taskbar', icon: 'fa-thumbtack' }
+          ];
+        }
+        populateContextMenu(menuItems, e.clientX, e.clientY);
+        e.preventDefault();
+        return;
+      }
+
+
+
+
+      
+
       // Skip if right-clicking the search input
       if (e.target.classList && e.target.classList.contains('search-input')) return;
       e.preventDefault();
@@ -3360,187 +5477,225 @@ case 'start-menu-style-app-launcher':
       const menuItems = [];
       if (e.target.closest('.taskbar .taskbar-app-icon.minimized')) {
         currentContextMenuTarget = e.target.closest('.taskbar-app-icon.minimized');
-        menuItems.push({ label: 'Open', action: 'open-taskbar-icon', icon: 'fa-folder-open'});
-        menuItems.push({ label: 'Pin To Taskbar', action: 'pin-to-taskbar', icon: 'fa-thumbtack' }); 
+        menuItems.push({ label: 'Open', action: 'open-taskbar-icon', icon: 'fa-folder-open' });
+        menuItems.push({ label: 'Pin To Taskbar', action: 'pin-to-taskbar', icon: 'fa-thumbtack' });
         menuItems.push({ type: 'separator' });
-        menuItems.push({ label: 'Close Window', action: 'close-app', icon: 'fa-xmark'});
+        menuItems.push({ label: 'Close Window', action: 'close-app', icon: 'fa-xmark' });
       } else if (e.target.closest('.trash-item ')) {
         currentContextMenuTarget = e.target.closest('.trash-item');
-        menuItems.push({ label: 'Open', action: 'open-file', icon: 'fa-folder-open'});
-        menuItems.push({ label: 'Open in new window', action: 'open-in-new-window', icon: 'fa-window-restore'});
+        menuItems.push({ label: 'Open', action: 'open-file', icon: 'fa-folder-open' });
         menuItems.push({ type: 'separator' });
-        menuItems.push({ label: 'Empty Trash', action: 'empty-trash', icon: 'fa-trash-alt'});
+        menuItems.push({ label: 'Empty Trash', action: 'empty-trash', icon: 'fa-trash-alt' });
         menuItems.push({ type: 'separator' });
-        menuItems.push({ label: 'Get info', action: 'get-info', icon: 'fa-info-circle'});
+        menuItems.push({ label: 'Get info', action: 'get-info', icon: 'fa-info-circle' });
       } else if (e.target.closest('.taskbar .taskbar-app-icon')) {
         currentContextMenuTarget = e.target.closest('.taskbar-app-icon');
-        menuItems.push({ label: 'Minimize Window', action: 'minimize-app', icon: 'fa-window-minimize'});
-        menuItems.push({ label: 'Pin To Taskbar', action: 'pin-to-taskbar', icon: 'fa-thumbtack' }); 
+        menuItems.push({ label: 'Minimize Window', action: 'minimize-app', icon: 'fa-window-minimize' });
+        menuItems.push({ label: 'Pin To Taskbar', action: 'pin-to-taskbar', icon: 'fa-thumbtack' });
         menuItems.push({ type: 'separator' });
-        menuItems.push({ label: 'Close Window', action: 'close-app', icon: 'fa-xmark'});
-        } else if (e.target.closest('.taskbar .taskbar-app-icons')) {
-          currentContextMenuTarget = e.target.closest('.taskbar-app-icons');
-          menuItems.push({ label: 'Hide search bar', action: 'hide-search-taskbar', icon: 'fa-search'});
-          menuItems.push({ label: 'Show / Hide Icons', action: 'show-hide-icons-taskbar-right', icon: 'fa-cog', subItems: [
-            { label: 'Hide Search icon', action: 'hide-search-icon-taskbar-right', icon: 'fa-search' },
-            { label: 'Hide App Launcher', action: 'hide-app-launcher-taskbar-right', icon: 'fa-search' },
-            { label: 'Hide Volume', action: 'hide-volume-taskbar-right', icon: 'fa-search' },
+        menuItems.push({ label: 'Close Window', action: 'close-app', icon: 'fa-xmark' });
+      } else if (e.target.closest('.taskbar .taskbar-app-icons')) {
+        currentContextMenuTarget = e.target.closest('.taskbar-app-icons');
+        // Determine if search bar is currently visible
+        const searchBar = document.querySelector('.taskbar .search-container');
+        const searchBarVisible = searchBar && searchBar.style.display !== 'none';
+        // Determine if the right search icon is currently visible
+        const searchIconBtn = document.getElementById('global-search-btn');
+        const searchIconVisible = searchIconBtn && searchIconBtn.style.display !== 'none';
+        // Determine if the App Launcher button is currently visible
+        const appLauncherBtn = document.getElementById('app-launcher-btn');
+        const appLauncherVisible = appLauncherBtn && appLauncherBtn.style.display !== 'none';
+        menuItems.push({
+          label: searchBarVisible ? 'Hide search bar' : 'Show search bar',
+          action: 'toggle-search-taskbar',
+          icon: 'fa-search'
+        });
+        menuItems.push({
+          label: 'Show / Hide Icons', action: 'show-hide-icons-taskbar-right', icon: 'fa-eye', subItems: [
+            { label: searchIconVisible ? 'Hide Search icon' : 'Show Search icon', action: 'hide-search-icon-taskbar-right', icon: 'fa-search' },
+            { label: appLauncherVisible ? 'Hide App Launcher' : 'Show App Launcher', action: 'hide-app-launcher-taskbar-right', icon: 'fa-th' },
+            // Use volume button visibility for label
+            (() => {
+              const volumeBtn = document.getElementById('volume-btn');
+              const volumeVisible = volumeBtn && volumeBtn.style.display !== 'none';
+              return { label: volumeVisible ? 'Hide Volume' : 'Show Volume', action: 'hide-volume-taskbar-right', icon: 'fa-volume-high' };
+            })(),
+            (() => {
+              const walletBtn = document.getElementById('wallet-btn');
+              const walletVisible = walletBtn && walletBtn.style.display !== 'none';
+              return { label: walletVisible ? 'Hide Wallet' : 'Show Wallet', action: 'hide-wallet-taskbar-right', icon: 'fa-wallet' };
+            })(),
             { type: 'separator' },
-            { label: 'Hide Desktop icons', action: 'hide-app-launcher-taskbar-right', icon: 'fa-search' },
-          ]});
-          menuItems.push({ type: 'separator' });
-          menuItems.push({ label: 'Customize Widgets', action: 'customize-widgets', icon: 'fa-server' });
-          menuItems.push({ label: 'Show desktop', action: 'show-desktop', icon: 'fa-display' });
-          menuItems.push({ type: 'separator' });
-          menuItems.push({ label: 'Customize Taskbar', action: 'customize-all-taskbar', icon: 'fa-cog', subItems: [
-            { label: 'Default', action: 'taskbar-icons-middle-alignment', icon: 'fa-search' },
-            { label: 'All Icons (including taskt menu) - Middle alignment', action: 'taskbar-icons-middle-alignment', icon: 'fa-search' },
+            (() => {
+              const fullscreenBtn = document.getElementById('fullscreen-btn');
+              const fullscreenVisible = fullscreenBtn && fullscreenBtn.style.display !== 'none';
+              return { label: fullscreenVisible ? 'Hide Full Screen' : 'Show Full Screen', action: 'hide-full-screen-taskbar-right', icon: 'fa-expand' };
+            })(),
+          ]
+        });
+        menuItems.push({ type: 'separator' });
+        menuItems.push({ label: 'Customize Widgets', action: 'customize-widgets', icon: 'fa-server' });
+        menuItems.push({ label: 'Show desktop', action: 'show-desktop', icon: 'fa-display' });
+        menuItems.push({ type: 'separator' });
+        menuItems.push({
+          label: 'Customize Taskbar', action: 'customize-all-taskbar', icon: 'fa-cog', subItems: [
+            { label: 'Default', action: 'taskbar-icons-middle-alignment', icon: 'fa-ellipsis' },
+            { label: 'All Icons (including taskt menu) - Middle alignment', action: 'taskbar-icons-middle-alignment', icon: 'fa-ellipsis-h' },
             { label: 'Icons - Left alignment', action: 'taskbar-icons-left-alignment', icon: 'fa-server' },
             { label: 'Icons and Text', action: 'taskbar-icons-and-text-apps', icon: 'fa-server' },
 
-          ]});
-        } else if (e.target.closest('.desktop-icon')) {
-          currentContextMenuTarget = e.target.closest('.desktop-icon');
-          menuItems.push({ label: 'Open', action: 'open-app', icon: 'fa-folder-open' });
-          menuItems.push({ label: 'Pin To Taskbar', action: 'pin-to-taskbar', icon: 'fa-thumbtack' }); 
-          menuItems.push({ type: 'separator' });
-          menuItems.push({ label: 'Delete', action: 'delete-icon', icon: 'fa-trash' });
-        } else if (e.target.closest('.start-button')) {
-          currentContextMenuTarget = e.target.closest('.start-button');
-          menuItems.push({ label: 'My Profile', action: 'my-profile-settings', icon: 'fa-user' });
-          menuItems.push({ label: 'Appearance', action: 'appearance-settings', icon: 'fa-paint-brush' });
-          menuItems.push({ label: 'Notifications', action: 'notifications-settings', icon: 'fa-bell' });
-          menuItems.push({ label: 'Privacy', action: 'privacy-settings', icon: 'fa-user-shield' });
-          menuItems.push({ label: 'Security', action: 'security-settings', icon: 'fa-lock' });
-          menuItems.push({ label: 'Integrations', action: 'integrations-settings', icon: 'fa-plug' });
-          menuItems.push({ label: 'Active Services', action: 'active-services', icon: 'fa-cogs' });
-          menuItems.push({ type: 'separator' });
-          menuItems.push({ label: 'My Website', action: 'my-website', icon: 'fa-globe' });
-          menuItems.push({ label: 'Products', action: 'products-settings', icon: 'fa-box-open' });
-          menuItems.push({ label: 'Payments', action: 'payments-settings', icon: 'fa-credit-card' });
-          menuItems.push({ label: 'Shipping', action: 'shipping-settings', icon: 'fa-shipping-fast' });
-          menuItems.push({ label: 'Customers & Privacy', action: 'customers-privacy-settings', icon: 'fa-users' });
-          menuItems.push({ label: 'Emails', action: 'emails-settings', icon: 'fa-envelope' });
-          menuItems.push({ label: 'Billing', action: 'billing-settings', icon: 'fa-file-invoice-dollar' });
-          menuItems.push({ type: 'separator' });
-          menuItems.push({ label: 'Open Settings', action: 'open-settings', icon: 'fa-cog' });
-          menuItems.push({ type: 'separator' });
-menuItems.push({
-  label: 'Start menu style',
-  action: 'start-menu-style',
-  icon: 'fa-table-cells',
-  subItems: [
-    {
-      label: 'Default',
-      action: 'start-menu-style-default',
-      icon: 'fa-braille',
-      checked: startMenu && startMenu.classList.contains('start-menu-style-default')
-    },
-    {
-      label: 'Default Apps only',
-      action: 'start-menu-style-default-apps-only',
-      icon: 'fa-braille',
-      checked: startMenu && startMenu.classList.contains('start-menu-style-default-apps-only')
-    },
-    {
-      label: 'Windows 11 Style',
-      action: 'start-menu-style-windows11',
-      icon: 'fa-windows',
-      checked: startMenu && startMenu.classList.contains('start-menu-style-windows11')
-    },
-    {
-      label: 'List with sidebar',
-      action: 'start-menu-style-apps-list-with-sidebar',
-      icon: 'fa-list-ul',
-      checked: startMenu && startMenu.classList.contains('start-menu-list-style') && !startMenu.classList.contains('start-menu-style-apps-list-only')
-    },
-    {
-      label: 'List Apps only',
-      action: 'start-menu-style-apps-list-only',
-      icon: 'fa-list-ul',
-      checked: startMenu && startMenu.classList.contains('start-menu-style-apps-list-only')
-    },
-    { type: 'separator' },
-    {
-      label: 'App Launcher',
-      action: 'start-menu-style-app-launcher',
-      icon: 'fa-rocket',
-      checked: startMenu && startMenu.classList.contains('start-menu-style-app-launcher')
-    }
-  ]
-});
-        } else if (e.target.closest('.file-explorer-content .file-item')) {
-          currentContextMenuTarget = e.target.closest('.file-item');
-          menuItems.push({ label: 'Open', action: 'open-file', icon: 'fa-folder-open'});
-          menuItems.push({ label: 'Open in new window', action: 'open-in-new-window', icon: 'fa-window-restore'});
-          menuItems.push({ label: 'Download', action: 'download', icon: 'fa-download'});
-        menuItems.push({ label: 'Preview', action: 'preview', icon: 'fa-eye'});
-        menuItems.push({ label: 'Upload files in this folder', action: 'upload-files', icon: 'fa-upload'});
+          ]
+        });
+      } else if (e.target.closest('.desktop-icon')) {
+        currentContextMenuTarget = e.target.closest('.desktop-icon');
+        menuItems.push({ label: 'Open', action: 'open-app', icon: 'fa-folder-open' });
+        menuItems.push({ label: 'Pin To Taskbar', action: 'pin-to-taskbar', icon: 'fa-thumbtack' });
         menuItems.push({ type: 'separator' });
-        menuItems.push({ label: 'Copy', action: 'copy-file', icon: 'fa-copy'});
-        menuItems.push({ label: 'Cut', action: 'cut-file', icon: 'fa-scissors'});
-        menuItems.push({ label: 'Duplicate', action: 'duplicate-file', icon: 'fa-clone'});
-        menuItems.push({ label: 'Move Into New Folder', action: 'into-new-folder', icon: 'fa-folder-plus'});
+        menuItems.push({ label: 'Remove from Desktop', action: 'remove-from-desktop', icon: 'fa-trash' });
+      } else if (e.target.closest('.start-button')) {
+        currentContextMenuTarget = e.target.closest('.start-button');
+        menuItems.push({ label: 'My Profile', action: 'my-profile-settings', icon: 'fa-user' });
+        menuItems.push({ label: 'Appearance', action: 'appearance-settings', icon: 'fa-paint-brush' });
+        menuItems.push({ label: 'Notifications', action: 'notifications-settings', icon: 'fa-bell' });
+        menuItems.push({ label: 'Privacy', action: 'privacy-settings', icon: 'fa-user-shield' });
+        menuItems.push({ label: 'Security', action: 'security-settings', icon: 'fa-lock' });
+        menuItems.push({ label: 'Integrations', action: 'integrations-settings', icon: 'fa-plug' });
+        menuItems.push({ label: 'Active Services', action: 'active-services', icon: 'fa-cogs' });
         menuItems.push({ type: 'separator' });
-        menuItems.push({ label: 'Delete file', action: 'into-trash', icon: 'fa-trash'});
-        menuItems.push({ label: 'Rename', action: 'rename', icon: 'fa-i-cursor'});
-        menuItems.push({ label: 'Create archive', action: 'create-archive', icon: 'fa-file-archive', subItems: [
-          { label: 'ZIP', action: 'archive-zip', icon: 'fa-file-archive' },
-          { label: 'TAR', action: 'archive-tar', icon: 'fa-file-archive' }
-        ]});
+        menuItems.push({ label: 'My Website', action: 'my-website', icon: 'fa-globe' });
+        menuItems.push({ label: 'Products', action: 'products-settings', icon: 'fa-box-open' });
+        menuItems.push({ label: 'Payments', action: 'payments-settings', icon: 'fa-credit-card' });
+        menuItems.push({ label: 'Shipping', action: 'shipping-settings', icon: 'fa-shipping-fast' });
+        menuItems.push({ label: 'Customers & Privacy', action: 'customers-privacy-settings', icon: 'fa-users' });
+        menuItems.push({ label: 'Emails', action: 'emails-settings', icon: 'fa-envelope' });
+        menuItems.push({ label: 'Billing', action: 'billing-settings', icon: 'fa-file-invoice-dollar' });
         menuItems.push({ type: 'separator' });
-        menuItems.push({ label: 'Share with...', action: 'share-with-others', icon: 'fa-random'});
+        menuItems.push({ label: 'Open Settings', action: 'open-settings', icon: 'fa-cog' });
         menuItems.push({ type: 'separator' });
-        menuItems.push({ label: 'Add to Favorites', action: 'add-folder-to-favorites', icon: 'fa-share-square'});
-        menuItems.push({ label: 'Get info', action: 'get-info', icon: 'fa-info-circle'});
+        menuItems.push({
+          label: 'Start menu style',
+          action: 'start-menu-style',
+          icon: 'fa-table-cells',
+          subItems: [
+            {
+              label: 'Default',
+              action: 'start-menu-style-default',
+              icon: 'fa-braille',
+              checked: startMenu && startMenu.classList.contains('start-menu-style-default')
+            },
+            {
+              label: 'Default Apps only',
+              action: 'start-menu-style-default-apps-only',
+              icon: 'fa-braille',
+              checked: startMenu && startMenu.classList.contains('start-menu-style-default-apps-only')
+            },
+            {
+              label: 'Windows 11 Style',
+              action: 'start-menu-style-windows11',
+              icon: 'fa-windows',
+              checked: startMenu && startMenu.classList.contains('start-menu-style-windows11')
+            },
+            {
+              label: 'List with sidebar',
+              action: 'start-menu-style-apps-list-with-sidebar',
+              icon: 'fa-list-ul',
+              checked: startMenu && startMenu.classList.contains('start-menu-list-style') && !startMenu.classList.contains('start-menu-style-apps-list-only')
+            },
+            {
+              label: 'List Apps only',
+              action: 'start-menu-style-apps-list-only',
+              icon: 'fa-list-ul',
+              checked: startMenu && startMenu.classList.contains('start-menu-style-apps-list-only')
+            },
+            { type: 'separator' },
+            {
+              label: 'App Launcher',
+              action: 'start-menu-style-app-launcher',
+              icon: 'fa-rocket',
+              checked: startMenu && startMenu.classList.contains('start-menu-style-app-launcher')
+            }
+          ]
+        });
+      } else if (e.target.closest('.file-explorer-content .file-item')) {
+        currentContextMenuTarget = e.target.closest('.file-item');
+        menuItems.push({ label: 'Open', action: 'open-file', icon: 'fa-folder-open' });
+        menuItems.push({ label: 'Open in new window', action: 'open-in-new-window', icon: 'fa-window-restore' });
+        menuItems.push({ label: 'Download', action: 'download', icon: 'fa-download' });
+        menuItems.push({ label: 'Preview', action: 'preview', icon: 'fa-eye' });
+        menuItems.push({ label: 'Upload files in this folder', action: 'upload-files', icon: 'fa-upload' });
+        menuItems.push({ type: 'separator' });
+        menuItems.push({ label: 'Copy', action: 'copy-file', icon: 'fa-copy' });
+        menuItems.push({ label: 'Cut', action: 'cut-file', icon: 'fa-scissors' });
+        menuItems.push({ label: 'Duplicate', action: 'duplicate-file', icon: 'fa-clone' });
+        menuItems.push({ label: 'Move Into New Folder', action: 'into-new-folder', icon: 'fa-folder-plus' });
+        menuItems.push({ type: 'separator' });
+        menuItems.push({ label: 'Delete file', action: 'into-trash', icon: 'fa-trash' });
+        menuItems.push({ label: 'Rename', action: 'rename', icon: 'fa-i-cursor' });
+        menuItems.push({
+          label: 'Create archive', action: 'create-archive', icon: 'fa-file-archive', subItems: [
+            { label: 'ZIP', action: 'archive-zip', icon: 'fa-file-archive' },
+            { label: 'TAR', action: 'archive-tar', icon: 'fa-file-archive' }
+          ]
+        });
+        menuItems.push({ type: 'separator' });
+        menuItems.push({ label: 'Share with...', action: 'share-with-others', icon: 'fa-random' });
+        menuItems.push({ type: 'separator' });
+        menuItems.push({ label: 'Add to Favorites', action: 'add-folder-to-favorites', icon: 'fa-share-square' });
+        menuItems.push({ label: 'Get info', action: 'get-info', icon: 'fa-info-circle' });
       } else if (e.target.closest('.file-explorer-sidebar .sidebar-section.drives-section .sidebar-item ')) {
         currentContextMenuTarget = e.target.closest('.sidebar-item');
-        menuItems.push({ label: 'Open', action: 'open-file', icon: 'fa-folder-open'});
-        menuItems.push({ label: 'Open in new window', action: 'open-in-new-window', icon: 'fa-window-restore'});
+        menuItems.push({ label: 'Open', action: 'open-file', icon: 'fa-folder-open' });
+        menuItems.push({ label: 'Open in new window', action: 'open-in-new-window', icon: 'fa-window-restore' });
         menuItems.push({ type: 'separator' });
-        menuItems.push({ label: 'Connect / Disconnect', action: 'connect-disconnect', icon: 'fa-info-circle'});
+        menuItems.push({ label: 'Connect / Disconnect', action: 'connect-disconnect', icon: 'fa-info-circle' });
       } else if (e.target.closest('.file-explorer-sidebar .sidebar-section.shared-section .sidebar-item ')) {
         currentContextMenuTarget = e.target.closest('.sidebar-item');
-        menuItems.push({ label: 'Open', action: 'open-file', icon: 'fa-folder-open'});
-        menuItems.push({ label: 'Open in new window', action: 'open-in-new-window', icon: 'fa-window-restore'});
+        menuItems.push({ label: 'Open', action: 'open-file', icon: 'fa-folder-open' });
+        menuItems.push({ label: 'Open in new window', action: 'open-in-new-window', icon: 'fa-window-restore' });
         menuItems.push({ type: 'separator' });
-        menuItems.push({ label: 'Get info', action: 'get-info', icon: 'fa-info-circle'});
+        menuItems.push({ label: 'Get info', action: 'get-info', icon: 'fa-info-circle' });
       } else if (e.target.closest('.file-explorer-sidebar .sidebar-section .sidebar-item ')) {
         currentContextMenuTarget = e.target.closest('.sidebar-item');
-        menuItems.push({ label: 'Open', action: 'open-file', icon: 'fa-folder-open'});
-        menuItems.push({ label: 'Open in new window', action: 'open-in-new-window', icon: 'fa-window-restore'});
+        menuItems.push({ label: 'Open', action: 'open-file', icon: 'fa-folder-open' });
+        menuItems.push({ label: 'Open in new window', action: 'open-in-new-window', icon: 'fa-window-restore' });
         menuItems.push({ type: 'separator' });
-        menuItems.push({ label: 'Get info', action: 'get-info', icon: 'fa-info-circle'});
+        menuItems.push({ label: 'Get info', action: 'get-info', icon: 'fa-info-circle' });
 
       } else if (e.target.closest('.file-explorer-content .file-explorer-elements')) {
         currentContextMenuTarget = e.target.closest('.file-explorer-elements');
-        menuItems.push({ label: 'View', action: 'list-view', icon: 'fa-eye', subItems: [
-          { label: 'Icons', action: 'view-icons', icon: 'fa-th-large' },
-          { label: 'List', action: 'view-list', icon: 'fa-list' }
-        ]});
-        menuItems.push({ label: 'Sort', action: 'sort', icon: 'fa-sort', subItems: [
-          { label: 'Name', action: 'sort-name', icon: 'fa-sort-alpha-down' },
-          { label: 'Date', action: 'sort-date', icon: 'fa-calendar-alt' },
-          { label: 'Type', action: 'sort-type', icon: 'fa-file' },
-          { label: 'Size', action: 'sort-size', icon: 'fa-file' },
-          { type: 'separator' },
-          { label: 'Permissions', action: 'sort-permissions', icon: 'fa-file' },
-          { type: 'separator' },
-          { label: 'Folder first', action: 'folder-first', icon: 'fa-file' },
-        ]});
+        menuItems.push({
+          label: 'View', action: 'list-view', icon: 'fa-eye', subItems: [
+            { label: 'Icons', action: 'view-icons', icon: 'fa-th-large' },
+            { label: 'List', action: 'view-list', icon: 'fa-list' }
+          ]
+        });
+        menuItems.push({
+          label: 'Sort', action: 'sort', icon: 'fa-sort', subItems: [
+            { label: 'Name', action: 'sort-name', icon: 'fa-sort-alpha-down' },
+            { label: 'Date', action: 'sort-date', icon: 'fa-calendar-alt' },
+            { label: 'Type', action: 'sort-type', icon: 'fa-file' },
+            { label: 'Size', action: 'sort-size', icon: 'fa-file' },
+            { type: 'separator' },
+            { label: 'Permissions', action: 'sort-permissions', icon: 'fa-file' },
+            { type: 'separator' },
+            { label: 'Folder first', action: 'folder-first', icon: 'fa-file' },
+          ]
+        });
         menuItems.push({ label: 'Refresh', action: 'reload', icon: 'fa-rotate-right', checked: true });
         menuItems.push({ type: 'separator' });
-        menuItems.push({ label: 'Paste', action: 'paste', icon: 'fa-paste', disabled: true});
+        menuItems.push({ label: 'Paste', action: 'paste', icon: 'fa-paste', disabled: true });
         menuItems.push({ label: 'Upload files', action: 'upload-files', icon: 'fa-upload' });
         menuItems.push({ label: 'New folder', action: 'new-folder', icon: 'fa-folder-plus' });
-        menuItems.push({ label: 'New file', action: 'new-file', icon: 'fa-file-medical', subItems: [
-          { label: 'Text file', action: 'new-text-file', icon: 'fa-file-alt' },
-          { label: 'Spreadsheet', action: 'new-spreadsheet', icon: 'fa-file-excel' },
-          { label: 'Presentation', action: 'new-presentation', icon: 'fa-file-powerpoint' }
-        ]});
-       
+        menuItems.push({
+          label: 'New file', action: 'new-file', icon: 'fa-file-medical', subItems: [
+            { label: 'Text file', action: 'new-text-file', icon: 'fa-file-alt' },
+            { label: 'Spreadsheet', action: 'new-spreadsheet', icon: 'fa-file-excel' },
+            { label: 'Presentation', action: 'new-presentation', icon: 'fa-file-powerpoint' }
+          ]
+        });
+
         menuItems.push({ type: 'separator' });
-        menuItems.push({ label: 'Share with...', action: 'share-with-others', icon: 'fa-random'});
+        menuItems.push({ label: 'Share with...', action: 'share-with-others', icon: 'fa-random' });
         menuItems.push({ type: 'separator' });
         menuItems.push({ label: 'Select all', action: 'select-all', icon: 'fa-check-square' });
         menuItems.push({ label: 'Add folder to Favorites', action: 'add-folder-to-favorites', icon: 'fa-share-square' });
@@ -3548,93 +5703,142 @@ menuItems.push({
         menuItems.push({ label: 'Get info', action: 'get-info', icon: 'fa-info-circle' });
       } else if (e.target.closest('.taskbar-icon #notifications-btn')) {
         currentContextMenuTarget = e.target.closest('#notifications-btn');
-        menuItems.push({ label: 'Clear all notifications', action: 'clear-all-notifications', icon: 'fa-broom'});
+        menuItems.push({ label: 'Clear all notifications', action: 'clear-all-notifications', icon: 'fa-broom' });
         menuItems.push({ type: 'separator' });
-        menuItems.push({ label: 'Customize notifications', action: 'customize-notifications', icon: 'fa-gear'});
-        menuItems.push({ label: 'Desktop notifications', action: 'new-file', icon: 'fa-comments', subItems: [
-          { label: 'Only 1 notification', action: 'show-only-1-notification', icon: 'fa-file-alt' },
-          { label: 'Only 3 Notifications', action: 'show-only-3-notifications', icon: 'fa-file-excel' },
-          { label: 'All notifications', action: 'show-all-notifications', icon: 'fa-file-powerpoint' }
-        ]});
+        menuItems.push({ label: 'Customize notifications', action: 'customize-notifications', icon: 'fa-gear' });
+        menuItems.push({
+          label: 'Desktop notifications', action: 'new-file', icon: 'fa-comments', subItems: [
+            { label: 'Only 1 notification', action: 'show-only-1-notification', checked: desktopNotificationMode === 'one' },
+            { label: 'Only 3 Notifications', action: 'show-only-3-notifications', checked: desktopNotificationMode === 'three' },
+            { label: 'All notifications', action: 'show-all-notifications', checked: desktopNotificationMode === 'all' }
+          ]
+        });
         menuItems.push({ type: 'separator' });
-        menuItems.push({ label: isNotificationsMuted ? 'Unmute Notifications' : 'Mute Notifications', action: 'mute-notifications', icon: isNotificationsMuted ? 'fa-bell' : 'fa-bell-slash'});
-          } else if (e.target.closest('.taskbar-icon #wallet-btn')) {
-            currentContextMenuTarget = e.target.closest('#wallet-btn');
-            menuItems.push({ label: 'Open Wallet Panel', action: 'taskbar-open-wallet', icon: 'fa-wallet'});
-            menuItems.push({ label: 'Open Wallet App', action: 'taskbar-open-wallet-app', icon: 'fa-money-check-dollar'});
-            menuItems.push({ type: 'separator' });
-            menuItems.push({ label: 'Display Settings', action: 'new-file', icon: 'fa-comments', subItems: [
-              { label: 'Show icon', action: 'show-wallet-icon', icon: 'fa-file-alt', checked: window.walletDisplayMode === 'icon' },
-              { label: 'Show account balance', action: 'show-account-balance', icon: 'fa-file-excel', checked: window.walletDisplayMode === 'balance' },
-            ]});
-          } else if (e.target.closest('.taskbar-right #volume-btn')) {
-            currentContextMenuTarget = e.target.closest('#volume-btn');
-            menuItems.push({ label: 'Open Volume', action: 'taskbar-open-volume', icon: 'fa-volume-high'});
-            menuItems.push({ label: 'Microphone', action: 'taskbar-open-calendar', icon: 'fa-microphone'});
-            // Dynamically set Show/Hide music player label
-            const volumePanel = document.getElementById('volume-panel');
-            let musicPanelVisible = true;
-            if (volumePanel) {
-              const musicPanel = volumePanel.querySelector('.music-panel-box');
-              if (musicPanel && (musicPanel.style.display === 'none' || getComputedStyle(musicPanel).display === 'none')) {
-                musicPanelVisible = false;
-              }
-            }
-            menuItems.push({ label: musicPanelVisible ? 'Hide music player' : 'Show music player', action: 'open-music-player', icon: 'fa-music'});
-            menuItems.push({ type: 'separator' });
-            menuItems.push({ label: 'Open sound settings', action: 'open-sound-settings', icon: 'fa-gear'});
-            menuItems.push({ label: isMuted ? 'Unmute' : 'Mute', action: 'taskbar-mute', icon: isMuted ? 'fa-volume-up' : 'fa-volume-mute'});
-          } else if (e.target.closest('.taskbar-right .taskbar-time')) {
-            currentContextMenuTarget = e.target.closest('.taskbar-time');
-            menuItems.push({ label: 'Date and Time Settings', action: 'taskbar-date-time-settings', icon: 'fa-gear'});
-            menuItems.push({ type: 'separator' });
-            menuItems.push({ label: 'Open Calendar', action: 'taskbar-open-calendar', icon: 'fa-calendar-days'});
-            menuItems.push({ label: 'Open Clock', action: 'taskbar-open-clock', icon: 'fa-clock'});
-          } else if (e.target.closest('.taskbar-right #ai-chat-btn')) {
-            currentContextMenuTarget = e.target.closest('#ai-chat-btn');
-            menuItems.push({ label: 'Open AI Chat', action: 'taskbar-open-ai-chat', icon: 'fa-comment-dots'});
-            menuItems.push({ label: 'Open New Chat', action: 'taskbar-new-chat', icon: 'fa-plus'});
-            menuItems.push({ type: 'separator' });
-            menuItems.push({ label: 'Chat Settings', action: 'taskbar-ai-chat-settings', icon: 'fa-gear'});
-            menuItems.push({ label: 'Chat history', action: 'taskbar-chat-history', icon: 'fa-history'});
-            menuItems.push({ label: 'Clear chat', action: 'taskbar-clear-chat', icon: 'fa-broom'});
+        menuItems.push({ label: isNotificationsMuted ? 'Unmute Notifications' : 'Mute Notifications', action: 'mute-notifications', icon: isNotificationsMuted ? 'fa-bell' : 'fa-bell-slash' });
+      } else if (e.target.closest('.taskbar-icon #wallet-btn')) {
+        currentContextMenuTarget = e.target.closest('#wallet-btn');
+        menuItems.push({ label: 'Open Wallet Panel', action: 'taskbar-open-wallet', icon: 'fa-wallet' });
+        menuItems.push({ label: 'Open Wallet App', action: 'taskbar-open-wallet-app', icon: 'fa-money-check-dollar' });
+        menuItems.push({ type: 'separator' });
+        menuItems.push({
+          label: 'Display Settings', action: 'new-file', icon: 'fa-comments', subItems: [
+            { label: 'Show icon', action: 'show-wallet-icon', icon: 'fa-file-alt', checked: window.walletDisplayMode === 'icon' },
+            { label: 'Show account balance', action: 'show-account-balance', icon: 'fa-file-excel', checked: window.walletDisplayMode === 'balance' },
+          ]
+        });
+      } else if (e.target.closest('.taskbar-right #volume-btn')) {
+        currentContextMenuTarget = e.target.closest('#volume-btn');
+        menuItems.push({ label: 'Open Volume', action: 'taskbar-open-volume', icon: 'fa-volume-high' });
+        menuItems.push({ label: 'Microphone', action: 'taskbar-open-calendar', icon: 'fa-microphone' });
+        // Dynamically set Show/Hide music player label
+        const volumePanel = document.getElementById('volume-panel');
+        let musicPanelVisible = true;
+        if (volumePanel) {
+          const musicPanel = volumePanel.querySelector('.music-panel-box');
+          if (musicPanel && (musicPanel.style.display === 'none' || getComputedStyle(musicPanel).display === 'none')) {
+            musicPanelVisible = false;
+          }
+        }
+        menuItems.push({ label: musicPanelVisible ? 'Hide music player' : 'Show music player', action: 'open-music-player', icon: 'fa-music' });
+        menuItems.push({ type: 'separator' });
+        menuItems.push({ label: 'Open sound settings', action: 'open-sound-settings', icon: 'fa-gear' });
+        menuItems.push({ label: isMuted ? 'Unmute' : 'Mute', action: 'taskbar-mute', icon: isMuted ? 'fa-volume-up' : 'fa-volume-mute' });
+      } else if (e.target.closest('.taskbar-right .taskbar-time')) {
+        currentContextMenuTarget = e.target.closest('.taskbar-time');
+        menuItems.push({ label: 'Date and Time Settings', action: 'taskbar-date-time-settings', icon: 'fa-gear' });
+        menuItems.push({ type: 'separator' });
+        menuItems.push({ label: 'Open Calendar', action: 'taskbar-open-calendar', icon: 'fa-calendar-days' });
+        menuItems.push({ label: 'Open Clock', action: 'taskbar-open-clock', icon: 'fa-clock' });
+      } else if (e.target.closest('.taskbar-right #ai-chat-btn')) {
+        currentContextMenuTarget = e.target.closest('#ai-chat-btn');
+        menuItems.push({ label: 'Open AI Chat', action: 'taskbar-open-ai-chat', icon: 'fa-comment-dots' });
+        menuItems.push({ label: 'Open New Chat', action: 'taskbar-new-chat', icon: 'fa-plus' });
+        menuItems.push({ type: 'separator' });
+        menuItems.push({ label: 'Chat Settings', action: 'taskbar-ai-chat-settings', icon: 'fa-gear' });
+        menuItems.push({ label: 'Chat history', action: 'taskbar-chat-history', icon: 'fa-history' });
+        menuItems.push({ label: 'Clear chat', action: 'taskbar-clear-chat', icon: 'fa-broom' });
 
-          } else if (e.target.closest('.taskbar-right #widgets-toggle-btn')) {
-            currentContextMenuTarget = e.target.closest('#widgets-toggle-btn');
-            menuItems.push({ label: 'Always show widgets', action: 'always-show-widgets', icon: 'fa-folder-open'});
-            menuItems.push({ label: 'Disable widgets', action: 'disable-widgets', icon: 'fa-copy'});
-            menuItems.push({ type: 'separator' });
-            menuItems.push({ label: 'Customize widgets', action: 'customize-widgets', icon: 'fa-gear'});
+      } else if (e.target.closest('.taskbar-right #widgets-toggle-btn')) {
+        currentContextMenuTarget = e.target.closest('#widgets-toggle-btn');
+        menuItems.push({ label: 'Always show widgets', action: 'always-show-widgets', icon: 'fa-folder-open' });
+        menuItems.push({ label: 'Disable widgets', action: 'disable-widgets', icon: 'fa-copy' });
+        menuItems.push({ type: 'separator' });
+        menuItems.push({ label: 'Customize widgets', action: 'customize-widgets', icon: 'fa-gear' });
 
-          } else if (
-            e.target === desktopArea ||
-            (e.target.classList && e.target.classList.contains('desktop-icons'))
-          ) {
-                menuItems.push({ label: 'View', icon: 'fa-eye', subItems: [
-              { label: 'Large icons', action: 'view-large' },
-              { label: 'Medium icons', action: 'view-medium' },
-              { label: 'Small icons', action: 'view-small' },
-              { type: 'separator' },
-              { label: 'Auto arrange icons', action: 'auto-arrange-icons' },
-              { label: 'Align icons to grid', action: 'align-icons-grid' },
-              { type: 'separator' },
-              { label: 'Hide desktop icons', action: 'show-desktop-icons' }
-          ]});
-          menuItems.push({ label: 'Sort by', icon: 'fa-sort', subItems: [
-            { label: 'Name', action: 'sort-name' },
-            { label: 'Date', action: 'sort-date' },
-            { label: 'Type', action: 'sort-type' }
-                    ]});
-                    menuItems.push({ label: 'Refresh', action: 'refresh', icon: 'fa-arrows-rotate' });
-          menuItems.push({ type: 'separator' });
-          menuItems.push({ label: 'New Folder', action: 'new-folder', icon: 'fa-folder-plus' });
-          menuItems.push({ type: 'separator' });
-          menuItems.push({ label: 'Personalize', action: 'personalize', icon: 'fa-paint-brush' });
-          menuItems.push({ label: 'Display Settings', action: 'display-settings', icon: 'fa-desktop' });
+      } else if (
+        e.target === desktopArea ||
+        (e.target.classList && e.target.classList.contains('desktop-icons'))
+      ) {
+        menuItems.push({
+          label: 'View', icon: 'fa-eye', subItems: [
+            { label: 'Desktop mode', action: 'desktop-mode', icon: 'fa-desktop' },
+            { label: 'App launcher mode', action: 'desktop-app-launcher-mode', icon: 'fa-grip' },
+            { label: 'Easy Mode', action: 'app-launcher-easy-mode', icon: 'fa-chalkboard' },
+            { type: 'separator' },
+            { label: 'Widgets Mode', action: 'widgets-mode', icon: 'fa-shapes' },
+
+
+          ]
+        });
+        menuItems.push({
+          label: 'Sort by', icon: 'fa-sort', subItems: [
+            { label: 'Name', action: 'sort-name', icon: 'fa-sort-alpha-down' },
+            { label: 'Date', action: 'sort-date', icon: 'fa-arrow-down-1-9' },
+            { label: 'Type', action: 'sort-type', icon: 'fa-arrow-down-wide-short' },
+          ]
+        });
+        menuItems.push({ label: 'Refresh', action: 'refresh', icon: 'fa-arrows-rotate' });
+        menuItems.push({ type: 'separator' });
+        menuItems.push({ label: 'Paste', action: 'paste', icon: 'fa-paste', disabled: true });
+        menuItems.push({ label: 'Upload files', action: 'upload-files', icon: 'fa-upload' });
+        menuItems.push({
+          label: 'New', action: 'create-new', icon: 'fa-file-medical', subItems: [
+            { label: 'Folder', action: 'new-folder', icon: 'fa-folder-plus' },
+            { type: 'separator' },
+            { label: 'File', action: 'new-file', icon: 'fa-file-medical' },
+            { label: 'Text file', action: 'new-text-file', icon: 'fa-file-alt' },
+            { label: 'Spreadsheet', action: 'new-spreadsheet', icon: 'fa-file-excel' },
+            { label: 'Presentation', action: 'new-presentation', icon: 'fa-file-powerpoint' }
+
+          ]
+        });
+
+        menuItems.push({ type: 'separator' });
+        menuItems.push({ label: 'Help & Support', action: 'help-and-support', icon: 'fa-question-circle' });
+        menuItems.push({ label: 'Personalize', action: 'personalize', icon: 'fa-paint-brush' });
+
       }
+
+      // After all menuItems are pushed, but before calling populateContextMenu:
+      for (const item of menuItems) {
+        if (item.action === 'pin-to-taskbar') {
+          let appName = null;
+          if (currentContextMenuTarget) {
+            appName = currentContextMenuTarget.getAttribute('data-app') || currentContextMenuTarget.getAttribute('data-app-name');
+            // If taskbar icon, try data-window-id to get app name from openWindows
+            if (!appName && currentContextMenuTarget.classList.contains('taskbar-app-icon')) {
+              const winId = currentContextMenuTarget.getAttribute('data-window-id');
+              if (winId && openWindows[winId]) appName = openWindows[winId].name;
+            }
+            if (!appName && currentContextMenuTarget.classList.contains('pinned-only')) {
+              appName = currentContextMenuTarget.getAttribute('data-app-name');
+            }
+          }
+          if (appName && isAppPinned(appName)) {
+            item.label = 'Unpin from Taskbar';
+            item.action = 'unpin-taskbar';
+          } else {
+            item.label = 'Pin To Taskbar';
+            item.action = 'pin-to-taskbar';
+          }
+        }
+      }
+
       if (menuItems.length > 0) populateContextMenu(menuItems, e.clientX, e.clientY);
     });
   }
+
+
 
   function populateContextMenu(menuItems, x, y) {
     if (!contextMenu) return;
@@ -3647,7 +5851,7 @@ menuItems.push({
       if (item.type === 'separator') {
         menuItemEl.className = 'context-menu-separator';
       } else {
-        menuItemEl.innerHTML = `<i class=\"fas ${item.icon || 'fa-question-circle'}\"></i><span>${item.label}</span>`;
+        menuItemEl.innerHTML = (item.icon ? `<i class=\"fas ${item.icon}\"></i>` : '') + `<span>${item.label}</span>`;
         if (item.disabled) menuItemEl.classList.add('disabled');
         // Only add .has-submenu and chevron if this is a top-level item with a submenu
         if (Array.isArray(item.subItems) && item.subItems.length > 0) {
@@ -3657,7 +5861,8 @@ menuItems.push({
           menuItemEl.appendChild(chevron); // Always last for flex
         }
         menuItemEl.addEventListener('click', async (e) => {
-          if (!item.disabled) {
+          if (!item.disabled && !(Array.isArray(item.subItems) && item.subItems.length > 0)) {
+
             console.log('Clicked menu item:', item.label, item.action);
             // Detailed logging for clipboard actions
             if (item.action && item.action.startsWith('text-')) {
@@ -3671,16 +5876,16 @@ menuItems.push({
             try {
               console.log('About to call window.executeContextMenuAction:', item.action, typeof window.executeContextMenuAction, window.executeContextMenuAction);
               await window.executeContextMenuAction(item.action);
-    } catch (err) {
-      console.error('Context menu action error:', err);
-    }
+            } catch (err) {
+              console.error('Context menu action error:', err);
+            }
             hideContextMenu();
           }
-          e.stopPropagation(); 
+          e.stopPropagation();
         });
         // Submenu logic
         if (Array.isArray(item.subItems) && item.subItems.length > 0) {
-          menuItemEl.addEventListener('mouseenter', function(e) {
+          menuItemEl.addEventListener('mouseenter', function (e) {
             if (submenuHideTimeout) clearTimeout(submenuHideTimeout);
             if (submenuEl && submenuEl.parentNode) submenuEl.parentNode.removeChild(submenuEl);
             submenuEl = document.createElement('div');
@@ -3698,7 +5903,7 @@ menuItems.push({
                 return;
               }
               const subItemEl = document.createElement('div');
-              subItemEl.className = 'context-menu-item';
+              subItemEl.className = 'context-menu-item context-menu-submenu-item';
               // Add check mark if this is the selected notification mode or wallet display mode
               let showCheck = false;
               if (
@@ -3711,7 +5916,8 @@ menuItems.push({
               ) {
                 showCheck = true;
               }
-              subItemEl.innerHTML = `<span>${subItem.label}</span>` + (showCheck ? '<i class="fas fa-check context-menu-checkmark"></i>' : '');
+              // Render icon for submenu item if present
+              subItemEl.innerHTML = (subItem.icon ? `<i class=\"fas ${subItem.icon}\"></i>` : '') + `<span>${subItem.label}</span>` + (showCheck ? '<i class="fas fa-check context-menu-checkmark"></i>' : '');
               if (subItem.disabled) subItemEl.classList.add('disabled');
               // Never add chevron or .has-submenu to submenu items
               subItemEl.addEventListener('click', (ev) => {
@@ -3777,13 +5983,13 @@ menuItems.push({
             }
             menuItemEl.addEventListener('mouseleave', keepSubmenuOpen);
             submenuEl.addEventListener('mouseleave', keepSubmenuOpen);
-            submenuEl.addEventListener('mouseenter', function() {
+            submenuEl.addEventListener('mouseenter', function () {
               if (submenuHideTimeout) clearTimeout(submenuHideTimeout);
               submenuHideTimeout = null;
             });
           });
           // Remove submenu immediately if mouse leaves both parent and submenu
-          menuItemEl.addEventListener('mouseleave', function(e) {
+          menuItemEl.addEventListener('mouseleave', function (e) {
             if (!submenuEl) return;
             if (submenuHideTimeout) clearTimeout(submenuHideTimeout);
             submenuHideTimeout = setTimeout(() => {
@@ -3844,22 +6050,247 @@ menuItems.push({
       contextMenu.removeEventListener('animationend', handler);
     });
   }
-
   function executeContextMenuAction(action) {
     if (!currentContextMenuTarget) return;
-    switch(action) {
-        case 'open-app':
-            if (currentContextMenuTarget.matches('.desktop-icon')) {
-                if (window.innerWidth <= MOBILE_BREAKPOINT) {
-                    // On mobile, trigger a single click
-                    currentContextMenuTarget.dispatchEvent(new MouseEvent('click', { bubbles: true, button: 0 }));
-                } else {
-                    // On desktop, trigger a double click
-                    currentContextMenuTarget.dispatchEvent(new MouseEvent('dblclick', { bubbles: true, button: 0 }));
-                }
+    switch (action) {
+      case 'open-app':
+        if (currentContextMenuTarget.matches('.desktop-icon')) {
+          if (window.innerWidth <= MOBILE_BREAKPOINT) {
+            // On mobile, trigger a single click
+            currentContextMenuTarget.dispatchEvent(new MouseEvent('click', { bubbles: true, button: 0 }));
+          } else {
+            // On desktop, trigger a double click
+            currentContextMenuTarget.dispatchEvent(new MouseEvent('dblclick', { bubbles: true, button: 0 }));
+          }
+        }
+        break;
+        case 'open-taskbar-icon': {
+          // Restore a minimized window from the taskbar context menu
+          if (currentContextMenuTarget && currentContextMenuTarget.classList.contains('taskbar-app-icon')) {
+            const winId = currentContextMenuTarget.getAttribute('data-window-id');
+            if (winId && openWindows[winId] && openWindows[winId].element) {
+              const windowElement = openWindows[winId].element;
+              const taskbarIcon = openWindows[winId].taskbarIcon;
+              if (windowElement.classList.contains('minimized')) {
+                if (typeof toggleMinimizeWindow === 'function') toggleMinimizeWindow(windowElement, taskbarIcon);
+              }
+              if (typeof makeWindowActive === 'function') makeWindowActive(windowElement);
+              if (typeof hideContextMenu === 'function') hideContextMenu();
             }
+          }
+          break;
+        }
+      case 'add-to-desktop':
+        if (currentContextMenuTarget && currentContextMenuTarget.classList.contains('app-grid-item')) {
+          const appName = currentContextMenuTarget.getAttribute('data-app-name') || currentContextMenuTarget.getAttribute('data-app-id');
+          const appTitle = currentContextMenuTarget.getAttribute('data-app-title') || currentContextMenuTarget.querySelector('span')?.textContent || appName;
+          // Get icon details from startMenuApps, fallback to getAppIconDetails
+          let details = { iconClass: 'fa-window-maximize', iconBgClass: 'gray-icon' };
+                    if (typeof startMenuApps !== 'undefined') {
+                      const appObj = startMenuApps.find(a =>
+                        a.id === appName ||
+                        a.name === appName ||
+                        (a.name && a.name.toLowerCase().replace(/\s+/g, '-') === appName)
+                      );
+            if (appObj) {
+              details.iconClass = appObj.iconClass || details.iconClass;
+              details.iconBgClass = appObj.iconBgClass || details.iconBgClass;
+            } else {
+              details = getAppIconDetails(appName);
+            }
+          } else {
+            details = getAppIconDetails(appName);
+          }
+          const desktopIconsContainer = document.querySelector('.desktop-icons');
+          if (!desktopIconsContainer) {
+            if (typeof showShortTopNotification === 'function') showShortTopNotification('Desktop not found');
             break;
-        // Add other actions here
+          }
+          // Check if already on desktop
+          if (!desktopIconsContainer.querySelector('.desktop-icon[data-app="' + appName + '"]')) {
+            const icon = document.createElement('div');
+            icon.className = 'desktop-icon';
+            icon.setAttribute('data-app', appName);
+            icon.setAttribute('data-created', new Date().toISOString()); // Set creation date
+            icon.innerHTML = `
+                    <div class="icon-container ${details.iconBgClass}"><i class="fas ${details.iconClass}"></i></div>
+                    <span>${appTitle}</span>
+                  `;
+            // --- Find first available grid slot ---
+            if (window.innerWidth > 1023) {
+              // Use grid logic
+              const leftOffset = GRID_GAP;
+              const topOffset = GRID_GAP;
+              const colWidth = GRID_CELL_WIDTH + GRID_GAP;
+              const iconHeight = GRID_CELL_HEIGHT;
+              const verticalGap = GRID_GAP;
+              const taskbar = document.querySelector('.taskbar');
+              const taskbarHeight = taskbar ? taskbar.offsetHeight : 0;
+              const availableHeight = window.innerHeight - taskbarHeight - 50; // 30px bottom margin
+              const maxRows = Math.max(1, Math.floor((availableHeight - topOffset) / (iconHeight + verticalGap)));
+              const maxCols = Math.max(1, Math.floor((desktopIconsContainer.clientWidth - leftOffset) / colWidth));
+              // Mark occupied slots
+              const occupied = {};
+              desktopIconsContainer.querySelectorAll('.desktop-icon').forEach(existingIcon => {
+                const left = parseInt(existingIcon.style.left, 10);
+                const top = parseInt(existingIcon.style.top, 10);
+                if (!isNaN(left) && !isNaN(top)) {
+                  const col = Math.round((left - leftOffset) / colWidth);
+                  const row = Math.round((top - topOffset) / (iconHeight + verticalGap));
+                  occupied[`${col},${row}`] = true;
+                }
+              });
+              // Find first free slot (column by column, then row)
+              let found = false;
+              let targetCol = 0, targetRow = 0;
+              outer: for (let col = 0; col < maxCols; col++) {
+                for (let row = 0; row < maxRows; row++) {
+                  if (!occupied[`${col},${row}`]) {
+                    targetCol = col;
+                    targetRow = row;
+                    found = true;
+                    break outer;
+                  }
+                }
+              }
+              // Place icon at found slot
+              const iconLeft = leftOffset + targetCol * colWidth;
+              const iconTop = topOffset + targetRow * (iconHeight + verticalGap);
+              icon.style.position = 'absolute';
+              icon.style.left = iconLeft + 'px';
+              icon.style.top = iconTop + 'px';
+              icon.setAttribute('data-absolute', 'true');
+            }
+            desktopIconsContainer.appendChild(icon);
+            setupDesktopIcon(icon);
+            if (typeof showShortTopNotification === 'function') showShortTopNotification('Added to Desktop');
+            // Save positions if using absolute
+            if (window.innerWidth > 1023) saveDesktopIconPositions && saveDesktopIconPositions();
+          } else {
+            if (typeof showShortTopNotification === 'function') showShortTopNotification('Already on Desktop');
+          }
+          if (typeof hideContextMenu === 'function') hideContextMenu();
+        }
+        break;
+      case 'open-settings':
+        openApp('settings', 'Settings', 'fa-cog', 'green');
+        break;
+      case 'sort-name': {
+        // Only handle if desktop area is context
+        const desktopIconsContainer = document.querySelector('.desktop-icons');
+        if (desktopIconsContainer && (currentContextMenuTarget === desktopIconsContainer || currentContextMenuTarget.classList.contains('desktop-icons'))) {
+          const icons = Array.from(desktopIconsContainer.querySelectorAll('.desktop-icon'));
+          icons.sort((a, b) => {
+            const aName = a.querySelector('span')?.textContent?.toLowerCase() || '';
+            const bName = b.querySelector('span')?.textContent?.toLowerCase() || '';
+            return aName.localeCompare(bName);
+          });
+          icons.forEach(icon => desktopIconsContainer.appendChild(icon));
+          saveCurrentDesktopIconOrder();
+          if (typeof showShortTopNotification === 'function') showShortTopNotification('Sorted by name');
+          initializeDesktopIconPositions(); // Always re-layout
+        } else {
+          _originalExecuteContextMenuAction.call(this, action);
+        }
+        break;
+      }
+      case 'sort-date': {
+        const desktopIconsContainer = document.querySelector('.desktop-icons');
+        if (desktopIconsContainer && (currentContextMenuTarget === desktopIconsContainer || currentContextMenuTarget.classList.contains('desktop-icons'))) {
+          const icons = Array.from(desktopIconsContainer.querySelectorAll('.desktop-icon'));
+          icons.sort((a, b) => {
+            // Use data-created attribute if present, else fallback to DOM order
+            const aDate = a.getAttribute('data-created') || a.dataset.created || '';
+            const bDate = b.getAttribute('data-created') || b.dataset.created || '';
+            if (aDate && bDate) return aDate.localeCompare(bDate);
+            return 0; // fallback: keep DOM order
+          });
+          icons.forEach(icon => desktopIconsContainer.appendChild(icon));
+          saveCurrentDesktopIconOrder();
+          if (typeof showShortTopNotification === 'function') showShortTopNotification('Sorted by date');
+          initializeDesktopIconPositions(); // Always re-layout
+        } else {
+          _originalExecuteContextMenuAction.call(this, action);
+        }
+        break;
+      }
+      case 'sort-type': {
+        const desktopIconsContainer = document.querySelector('.desktop-icons');
+        if (desktopIconsContainer && (currentContextMenuTarget === desktopIconsContainer || currentContextMenuTarget.classList.contains('desktop-icons'))) {
+          // Get app ids from startMenuApps
+          const appIds = (window.startMenuApps || []).map(app => app.id);
+          const icons = Array.from(desktopIconsContainer.querySelectorAll('.desktop-icon'));
+          // Apps first, then files, both alphabetically
+          const isApp = icon => appIds.includes(icon.getAttribute('data-app'));
+          icons.sort((a, b) => {
+            const aIsApp = isApp(a);
+            const bIsApp = isApp(b);
+            if (aIsApp && !bIsApp) return -1;
+            if (!aIsApp && bIsApp) return 1;
+            // Both same type, sort by name
+            const aName = a.querySelector('span')?.textContent?.toLowerCase() || '';
+            const bName = b.querySelector('span')?.textContent?.toLowerCase() || '';
+            return aName.localeCompare(bName);
+          });
+          icons.forEach(icon => desktopIconsContainer.appendChild(icon));
+          saveCurrentDesktopIconOrder();
+          if (typeof showShortTopNotification === 'function') showShortTopNotification('Sorted by type (apps first)');
+          initializeDesktopIconPositions(); // Always re-layout
+        } else {
+          _originalExecuteContextMenuAction.call(this, action);
+        }
+        break;
+      }
+      case 'remove-from-desktop':
+        if (currentContextMenuTarget && currentContextMenuTarget.classList.contains('desktop-icon')) {
+          const appName = currentContextMenuTarget.getAttribute('data-app');
+          // Remove the icon from the DOM
+          const parent = currentContextMenuTarget.parentElement;
+          if (parent) {
+            parent.removeChild(currentContextMenuTarget);
+            // Update icon order and positions
+            saveCurrentDesktopIconOrder && saveCurrentDesktopIconOrder();
+            if (window.innerWidth > 1023 && typeof saveDesktopIconPositions === 'function') saveDesktopIconPositions();
+            if (typeof showShortTopNotification === 'function') showShortTopNotification('Removed from Desktop');
+          }
+          if (typeof hideContextMenu === 'function') hideContextMenu();
+        }
+        break;
+
+      case 'app-launcher-easy-mode':
+      case 'single-task-mode':
+        switchToEasyMode();
+        return;
+      case 'desktop-mode':
+        switchToDesktopMode();
+        return;
+      case 'toggle-search-taskbar':
+        const searchBar = document.querySelector('.taskbar .search-container');
+        if (searchBar) {
+          const searchBarVisible = searchBar.style.display !== 'none';
+          searchBar.style.display = searchBarVisible ? 'none' : 'flex';
+          // Update the context menu label
+          const searchMenuItem = currentContextMenuTarget.closest('.context-menu-item');
+          if (searchMenuItem) {
+            searchMenuItem.querySelector('span').textContent = searchBarVisible ? 'Show search bar' : 'Hide search bar';
+          }
+        }
+        break;
+      case 'show-desktop': {
+        // Minimize all open windows
+        if (typeof openWindows === 'object' && typeof toggleMinimizeWindow === 'function') {
+          Object.values(openWindows).forEach(winObj => {
+            if (winObj.element && !winObj.element.classList.contains('minimized')) {
+              toggleMinimizeWindow(winObj.element, winObj.taskbarIcon);
+            }
+          });
+          if (typeof showShortTopNotification === 'function') {
+            showShortTopNotification('All windows minimized');
+          }
+        }
+        if (typeof hideContextMenu === 'function') hideContextMenu();
+        break;
+      }
     }
   }
 
@@ -3867,16 +6298,16 @@ menuItems.push({
   const widgetsScrollHandle = document.getElementById('widgets-scroll-handle');
   const widgetsScreen = document.getElementById('widgets-screen');
   if (widgetsScrollHandle && widgetsScreen) {
-    widgetsScrollHandle.addEventListener('wheel', function(e) {
+    widgetsScrollHandle.addEventListener('wheel', function (e) {
       // Forward the scroll to the widgets panel
       widgetsScreen.scrollTop += e.deltaY;
-      e.preventDefault();
+                    e.preventDefault();
     }, { passive: false });
-    
+
     // Enhanced widget scroll handle interaction
     initWidgetsInteraction();
   }
-  
+
   function initWidgetsInteraction() {
     if (!widgetsScrollHandle || !widgetsScreen) return;
 
@@ -3901,7 +6332,7 @@ menuItems.push({
   // Add a wheel event listener to main-content-area to scroll widgetsScreen if mouse is over its area
   const mainContentArea = document.querySelector('.main-content-area');
   if (mainContentArea && widgetsScreen) {
-    mainContentArea.addEventListener('wheel', function(e) {
+    mainContentArea.addEventListener('wheel', function (e) {
       if (window.innerWidth >= 1024) {
         const rect = widgetsScreen.getBoundingClientRect();
         if (
@@ -3920,8 +6351,8 @@ menuItems.push({
   setInterval(updateCurrentTime, 60000);
   if (typeof populateStartMenuApps === 'function') populateStartMenuApps();
   else console.error('populateStartMenuApps is not defined or not a function');
-  
-  initializeDesktopIconPositions(); 
+
+  initializeDesktopIconPositions();
 
   // Add snap overlay for snap hints if not present
   if (!document.getElementById('snap-overlay')) {
@@ -3964,8 +6395,8 @@ menuItems.push({
   }
 
   // Add App launcher desktop icon if not present
-  document.addEventListener('DOMContentLoaded', function() {
-      // ... existing code ...
+  document.addEventListener('DOMContentLoaded', function () {
+    // ... existing code ...
     // Add App launcher icon to desktop
     if (desktopIconsContainer && !document.querySelector('.desktop-icon[data-app="app-launcher"]')) {
       const appLauncherIcon = document.createElement('div');
@@ -3979,7 +6410,6 @@ menuItems.push({
     }
     // ... existing code ...
   });
-
   // --- App launcher window logic and event listener ---
   function openAppLauncherWindow(iconElementForAnim) {
     // Prevent multiple launchers
@@ -4004,6 +6434,7 @@ menuItems.push({
     overlay.style.transition = 'opacity 0.3s';
     overlay.style.opacity = '0';
     overlay.tabIndex = 0;
+    overlay.style.background = 'radial-gradient(circle, #050217a6 40%, #050217a6 100%)';
 
     // --- macOS-style search bar ---
     const searchBarContainer = document.createElement('div');
@@ -4031,10 +6462,8 @@ menuItems.push({
     searchInput.style.background = 'transparent';
     searchInput.style.color = '#fff';
     searchInput.style.fontSize = '20px';
-    searchInput.style.padding = '0 48px 0 20px';
     searchInput.style.outline = 'none';
     //searchInput.style.marginBottom = '24px'; // Remove this line
-    searchInput.style.backdropFilter = 'blur(8px)';
     searchInput.style.fontFamily = 'inherit';
     searchInput.style.letterSpacing = '0.01em';
     searchInput.autofocus = true;
@@ -4105,7 +6534,7 @@ menuItems.push({
         <div class=\"icon-container ${app.iconBgClass}\" style=\"${iconContainerStyle}\">
           <i class=\"fas ${app.iconClass}\"></i>
         </div>
-        <span style=\"font-size: 15px; color: #fff; text-shadow: 0 1px 4px #222; text-align: center; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 10px; display: block;\">${app.name}</span>
+        <span style=\"font-size: 14px; color: #fff; margin-top: 5px; text-shadow: 0 1px 4px #222; text-align: center; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;\">${app.name}</span>
       `;
       // Ensure the app name is always centered
       const appSpan = appItem.querySelector('span');
@@ -4116,15 +6545,15 @@ menuItems.push({
         appSpan.style.whiteSpace = 'nowrap';
         appSpan.style.overflow = 'hidden';
         appSpan.style.textOverflow = 'ellipsis';
-        appSpan.style.marginTop = '10px';
+        appSpan.style.marginTop = '5px';
       }
       // Add hover effect for macOS style
       const iconContainer = appItem.querySelector('.icon-container');
-      appItem.addEventListener('mouseenter', function() {
+      appItem.addEventListener('mouseenter', function () {
         appItem.style.transform = 'scale(1.10)';
         if (iconContainer) iconContainer.style.boxShadow = '0 8px 32px rgba(0,0,0,0.22)';
       });
-      appItem.addEventListener('mouseleave', function() {
+      appItem.addEventListener('mouseleave', function () {
         appItem.style.transform = '';
         if (iconContainer) iconContainer.style.boxShadow = '0 4px 16px rgba(0,0,0,0.18)';
       });
@@ -4148,6 +6577,49 @@ menuItems.push({
     overlay.appendChild(gridOuter);
     document.body.appendChild(overlay);
     setTimeout(() => { overlay.style.opacity = '1'; }, 10);
+
+    // --- Add footer with My Profile and Logout buttons ---
+    const footer = document.createElement('div');
+    footer.className = 'app-launcher-footer';
+    footer.style.display = 'flex';
+    footer.style.justifyContent = 'center';
+    footer.style.alignItems = 'center';
+    footer.style.width = '100%';
+    footer.style.maxWidth = 'min(90vw, 900px)';
+    footer.style.margin = '24px auto 32px auto';
+
+
+    footer.style.borderRadius = '18px';
+
+    footer.style.position = 'relative';
+    footer.style.bottom = '0';
+    footer.style.zIndex = '20';
+
+
+
+    const logoutBtn = document.createElement('button');
+    logoutBtn.className = 'app-launcher-logout-btn';
+    logoutBtn.innerHTML = '<i class="fas fa-sign-out-alt" style="margin-right:8px;"></i>Logout';
+    logoutBtn.style.background = 'rgb(255 255 255 / 15%)';
+    logoutBtn.style.color = '#fff';
+    logoutBtn.style.border = 'none';
+    logoutBtn.style.borderRadius = '10px';
+    logoutBtn.style.padding = '10px 22px';
+    logoutBtn.style.fontSize = '15px';
+    logoutBtn.style.cursor = 'pointer';
+    logoutBtn.style.display = 'flex';
+    logoutBtn.style.alignItems = 'center';
+    logoutBtn.style.transition = 'background 0.18s';
+    logoutBtn.addEventListener('mouseenter', () => { logoutBtn.style.background = 'var(--accent-color)' });
+    logoutBtn.addEventListener('mouseleave', () => { logoutBtn.style.background = 'rgb(255 255 255 / 15%)' });
+    logoutBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+      handleLogout();
+    });
+
+
+    footer.appendChild(logoutBtn);
+    overlay.appendChild(footer);
 
     // ... existing code ...
     // Keyboard navigation state
@@ -4181,7 +6653,7 @@ menuItems.push({
     // --- End fix ---
 
     // --- Search/filter logic ---
-    searchInput.addEventListener('input', function() {
+    searchInput.addEventListener('input', function () {
       const term = this.value.trim().toLowerCase();
       let visibleCount = 0;
       appItems.forEach(item => {
@@ -4202,7 +6674,7 @@ menuItems.push({
     });
 
     // On arrow keys and Enter, move selection or open
-    searchInput.addEventListener('keydown', function(e) {
+    searchInput.addEventListener('keydown', function (e) {
       const visibleApps = appItems.filter(item => item.style.display !== 'none');
       let arrowPressed = false;
       let selectedVisibleIndex = visibleApps.findIndex(item => item.classList.contains('selected'));
@@ -4328,7 +6800,7 @@ menuItems.push({
 
   const appLauncherBtn = document.getElementById('app-launcher-btn');
   if (appLauncherBtn) {
-    appLauncherBtn.addEventListener('click', function() {
+    appLauncherBtn.addEventListener('click', function () {
       const appLauncherIcon = document.querySelector('.desktop-icon[data-app="app-launcher"]');
       openAppLauncherWindow(appLauncherIcon);
     });
@@ -4353,7 +6825,7 @@ menuItems.push({
   // Patch window creation functions
   if (typeof createWindowFromTemplate === 'function') {
     const _originalCreateWindowFromTemplate = createWindowFromTemplate;
-    createWindowFromTemplate = function() {
+    createWindowFromTemplate = function () {
       const win = _originalCreateWindowFromTemplate.apply(this, arguments);
       attachSidebarResizeObserver(win);
       return win;
@@ -4361,7 +6833,7 @@ menuItems.push({
   }
   if (typeof createGenericWindow === 'function') {
     const _originalCreateGenericWindow = createGenericWindow;
-    createGenericWindow = function() {
+    createGenericWindow = function () {
       const win = _originalCreateGenericWindow.apply(this, arguments);
       attachSidebarResizeObserver(win);
       return win;
@@ -4371,7 +6843,7 @@ menuItems.push({
 // ... existing code ...
 
 // --- Global keyboard shortcut for App Launcher: Ctrl + Alt + Space ---
-document.addEventListener('keydown', function(e) {
+document.addEventListener('keydown', function (e) {
   // Ignore if focus is in an input, textarea, or contenteditable
   const active = document.activeElement;
   if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable)) return;
@@ -4389,11 +6861,11 @@ document.addEventListener('keydown', function(e) {
 
 // ... existing code ...
 // --- DESKTOP WIDGETS TOGGLE BUTTON ---
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
   const widgetsToggleBtn = document.getElementById('widgets-toggle-btn');
   const widgetsToggleArrow = document.getElementById('widgets-toggle-arrow');
   const widgetsScreen = document.getElementById('widgets-screen');
-  let widgetsVisible = true;
+  window.widgetsVisible = true;
   if (widgetsToggleBtn && widgetsToggleArrow && widgetsScreen) {
     const arrowIcon = widgetsToggleArrow.querySelector('i');
     function setChevronIcon(visible) {
@@ -4401,22 +6873,24 @@ document.addEventListener('DOMContentLoaded', function() {
       arrowIcon.classList.remove('fa-chevron-right', 'fa-chevron-left');
       arrowIcon.classList.add(visible ? 'fa-chevron-right' : 'fa-chevron-left');
     }
-    widgetsToggleBtn.addEventListener('click', function() {
+    widgetsToggleBtn.addEventListener('click', function () {
       if (window.innerWidth <= 1023) return; // Only on desktop
-      widgetsVisible = !widgetsVisible;
-      if (!widgetsVisible) {
+      window.widgetsVisible = !window.widgetsVisible;
+      if (!window.widgetsVisible) {
         widgetsScreen.classList.add('widgets-hidden');
         setChevronIcon(false);
       } else {
         widgetsScreen.classList.remove('widgets-hidden');
+        widgetsScreen.style.display = ''; // Always reset display when showing
         setChevronIcon(true);
       }
     });
     // On resize, always show widgets if switching to mobile
-    window.addEventListener('resize', function() {
+    window.addEventListener('resize', function () {
       if (window.innerWidth <= 1023) {
         widgetsScreen.classList.remove('widgets-hidden');
-        widgetsVisible = true;
+        widgetsScreen.style.display = '';
+        window.widgetsVisible = true;
         setChevronIcon(true);
       }
     });
@@ -4426,13 +6900,13 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 // ... existing code ...
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
   // ... existing code ...
   const aiChatBtn = document.getElementById('ai-chat-btn');
   const aiChatWindow = document.getElementById('ai-chat-window');
   let aiChatVisible = false;
   if (aiChatBtn && aiChatWindow) {
-    aiChatBtn.addEventListener('click', function() {
+    aiChatBtn.addEventListener('click', function () {
       if (window.innerWidth <= 1023) return;
       aiChatVisible = !aiChatVisible;
       if (aiChatVisible) {
@@ -4449,7 +6923,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   const aiChatCloseBtn = document.getElementById('ai-chat-close-btn');
   if (aiChatCloseBtn) {
-    aiChatCloseBtn.addEventListener('click', function() {
+    aiChatCloseBtn.addEventListener('click', function () {
       if (!aiChatVisible) return;
       aiChatVisible = false;
       aiChatWindow.classList.remove('ai-chat-visible');
@@ -4462,7 +6936,9 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 // ... existing code ...
 
-document.addEventListener('DOMContentLoaded', function() {
+
+
+document.addEventListener('DOMContentLoaded', function () {
   // ... existing code ...
   // GLOBAL SEARCH OVERLAY LOGIC
   const globalSearchBtn = document.getElementById('global-search-btn');
@@ -4509,7 +6985,7 @@ document.addEventListener('DOMContentLoaded', function() {
     globalSearchDropdownOpen = false;
   }
   if (globalSearchBtn && globalSearchOverlay) {
-    globalSearchBtn.addEventListener('click', function() {
+    globalSearchBtn.addEventListener('click', function () {
       if (window.innerWidth <= 1023) return;
       if (globalSearchOverlay.style.display !== 'flex') {
         globalSearchOverlay.style.display = 'flex';
@@ -4547,32 +7023,32 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       }
     });
-    globalSearchInput && globalSearchInput.addEventListener('keydown', function(e) {
+    globalSearchInput && globalSearchInput.addEventListener('keydown', function (e) {
       if (e.key === 'Escape') hideGlobalSearch();
     });
-    document.addEventListener('keydown', function(e) {
+    document.addEventListener('keydown', function (e) {
       if (globalSearchOverlay.style.display !== 'none' && e.key === 'Escape') hideGlobalSearch();
     });
-    globalSearchOverlay.addEventListener('mousedown', function(e) {
+    globalSearchOverlay.addEventListener('mousedown', function (e) {
       if (e.target === globalSearchOverlay) hideGlobalSearch();
     });
     // Dropdown logic
     if (globalSearchDropdownBtn && globalSearchDropdownList) {
-      globalSearchDropdownBtn.addEventListener('click', function(e) {
+      globalSearchDropdownBtn.addEventListener('click', function (e) {
         e.stopPropagation();
         if (globalSearchDropdownOpen) closeDropdown();
         else openDropdown();
       });
-      globalSearchDropdownList.addEventListener('mousedown', function(e) {
+      globalSearchDropdownList.addEventListener('mousedown', function (e) {
         e.stopPropagation();
       });
-      document.addEventListener('mousedown', function(e) {
+      document.addEventListener('mousedown', function (e) {
         if (globalSearchDropdownOpen && !globalSearchDropdownList.contains(e.target) && e.target !== globalSearchDropdownBtn) {
           closeDropdown();
         }
       });
       Array.from(globalSearchDropdownList.querySelectorAll('.dropdown-item')).forEach(item => {
-        item.addEventListener('click', function() {
+        item.addEventListener('click', function () {
           globalSearchDropdownList.querySelectorAll('.dropdown-item').forEach(i => i.classList.remove('selected'));
           item.classList.add('selected');
           // Set icon and text in the selected button
@@ -4590,7 +7066,9 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 // ... existing code ...
 
-document.addEventListener('DOMContentLoaded', function() {
+
+
+document.addEventListener('DOMContentLoaded', function () {
   // ... existing code ...
   const notificationsBtn = document.getElementById('notifications-btn');
   const notificationsPanel = document.getElementById('notifications-panel');
@@ -4628,7 +7106,6 @@ document.addEventListener('DOMContentLoaded', function() {
               <div class="notif-content">
                 <div class="notif-main-row">
                   <span class="notif-main-title">Andrei Caramitru made a new <b>sale</b></span>
-                 
                 </div>
                 <div class="notif-desc">in total of <b>4500 lei</b></div>
                 <div class="notif-meta">20m</div>
@@ -4681,7 +7158,7 @@ document.addEventListener('DOMContentLoaded', function() {
               <div class="notif-content">
                 <div class="notif-main-row">
                   <span class="notif-main-title">Andrei Caramitru made a new <b>sale</b></span>
-                  <span class="notif-dot"></span>
+
                 </div>
                 <div class="notif-desc">in total of <b>4500 lei</b></div>
                 <div class="notif-meta">20m</div>
@@ -4720,24 +7197,24 @@ document.addEventListener('DOMContentLoaded', function() {
       updateNotificationsBadge();
     }
     // Add event delegation for delete buttons
-    notificationsPanel.addEventListener('click', function(e) {
+    notificationsPanel.addEventListener('click', function (e) {
       if (e.target.classList.contains('notif-delete-btn')) {
         const notifCard = e.target.closest('.notif-card');
         if (notifCard) {
           const notifList = notifCard.parentElement;
-          
+
           // First slide out
           notifCard.classList.add('notif-card-removing');
           notifCard.style.transition = 'transform 0.3s ease-out, opacity 0.3s ease-out';
           notifCard.style.transform = 'translateX(120%)';
           notifCard.style.opacity = '0';
-          
+
           setTimeout(() => {
             // Prepare for height animation
             notifCard.style.overflow = 'hidden';
             notifCard.style.height = notifCard.offsetHeight + 'px';
             notifCard.style.transition = 'all 0.3s ease-out';
-            
+
             // Trigger height collapse
             requestAnimationFrame(() => {
               notifCard.style.height = '0';
@@ -4745,7 +7222,7 @@ document.addEventListener('DOMContentLoaded', function() {
               notifCard.style.marginBottom = '0';
               notifCard.style.padding = '0';
             });
-            
+
             // Remove after animations
             setTimeout(() => {
               notifCard.remove();
@@ -4755,17 +7232,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 const sectionLabel = notifList.previousElementSibling;
                 if (sectionLabel && sectionLabel.classList.contains('notif-section-label')) {
                   fadeOutSectionLabel(sectionLabel);
-                  
+
                   // Animate list collapse
                   notifList.style.height = notifList.offsetHeight + 'px';
                   notifList.style.overflow = 'hidden';
                   notifList.style.transition = 'all 0.3s ease-out';
-                  
+
                   requestAnimationFrame(() => {
                     notifList.style.height = '0';
                     notifList.style.marginTop = '0';
                     notifList.style.marginBottom = '0';
-                    
+
                     setTimeout(() => {
                       notifList.remove();
                       updateNotificationsBadge();
@@ -4776,14 +7253,14 @@ document.addEventListener('DOMContentLoaded', function() {
                         const tempHeader = headerRow ? headerRow.cloneNode(true) : null;
                         notifPanelContent.innerHTML = '';
                         if (tempHeader) notifPanelContent.appendChild(tempHeader);
-                        
+
                         const emptyMsg = document.createElement('div');
                         emptyMsg.className = 'no-notifications-msg';
                         emptyMsg.textContent = 'No new notifications';
                         emptyMsg.style.cssText = 'display: flex; align-items: center; justify-content: center; height: 100%; color: #888; font-size: 15px; font-weight: 400; text-align: center; margin-top: 60px; opacity: 0;';
                         notifPanelContent.appendChild(emptyMsg);
                         setNotificationsBtnOpacity();
-                        
+
                         requestAnimationFrame(() => {
                           emptyMsg.style.transition = 'opacity 0.3s ease-out';
                           emptyMsg.style.opacity = '1';
@@ -4795,8 +7272,8 @@ document.addEventListener('DOMContentLoaded', function() {
               }
             }, 300);
           }, 300);
-          
-          
+
+
         }
       }
       // Handle Clear all
@@ -4814,20 +7291,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 card.style.transition = 'transform 0.3s ease-out, opacity 0.3s ease-out';
                 card.style.transform = 'translateX(120%)';
                 card.style.opacity = '0';
-                
+
                 // Height collapse animation
                 setTimeout(() => {
                   card.style.overflow = 'hidden';
                   card.style.height = card.offsetHeight + 'px';
                   card.style.transition = 'all 0.3s ease-out';
-                  
+
                   requestAnimationFrame(() => {
                     card.style.height = '0';
                     card.style.marginTop = '0';
                     card.style.marginBottom = '0';
                     card.style.padding = '0';
                   });
-                  
+
                   // Remove after animations
                   setTimeout(() => {
                     card.remove();
@@ -4835,17 +7312,17 @@ document.addEventListener('DOMContentLoaded', function() {
                     // If this was the last card, animate out the section
                     if (index === notifCards.length - 1) {
                       fadeOutSectionLabel(sectionLabel);
-                      
+
                       // Animate list collapse
                       notifList.style.height = notifList.offsetHeight + 'px';
                       notifList.style.overflow = 'hidden';
                       notifList.style.transition = 'all 0.3s ease-out';
-                      
+
                       requestAnimationFrame(() => {
                         notifList.style.height = '0';
                         notifList.style.marginTop = '0';
                         notifList.style.marginBottom = '0';
-                        
+
                         setTimeout(() => {
                           notifList.remove();
                           updateNotificationsBadge();
@@ -4856,14 +7333,14 @@ document.addEventListener('DOMContentLoaded', function() {
                             const tempHeader = headerRow ? headerRow.cloneNode(true) : null;
                             notifPanelContent.innerHTML = '';
                             if (tempHeader) notifPanelContent.appendChild(tempHeader);
-                            
+
                             const emptyMsg = document.createElement('div');
                             emptyMsg.className = 'no-notifications-msg';
                             emptyMsg.textContent = 'No new notifications';
                             emptyMsg.style.cssText = 'display: flex; align-items: center; justify-content: center; height: 100%; color: #888; font-size: 1.15rem; font-weight: 500; text-align: center; margin-top: 60px; opacity: 0;';
                             notifPanelContent.appendChild(emptyMsg);
                             setNotificationsBtnOpacity();
-                            
+
                             requestAnimationFrame(() => {
                               emptyMsg.style.transition = 'opacity 0.3s ease-out';
                               emptyMsg.style.opacity = '1';
@@ -4876,7 +7353,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }, 300);
               }, index * 50); // Stagger each card's animation
             });
-            
+
             // Check if all notifications are gone
             const notifPanelContent = notificationsPanel.querySelector('.notifications-panel-content');
             if (notifPanelContent && !notifPanelContent.querySelector('.notif-card')) {
@@ -4889,13 +7366,13 @@ document.addEventListener('DOMContentLoaded', function() {
                   nextList.remove();
                 }
               });
-              
+
               // Clear content and show empty message
               const headerRow = notifPanelContent.querySelector('.notif-header-row');
               const tempHeader = headerRow ? headerRow.cloneNode(true) : null;
               notifPanelContent.innerHTML = '';
               if (tempHeader) notifPanelContent.appendChild(tempHeader);
-              
+
               const emptyMsg = document.createElement('div');
               emptyMsg.className = 'no-notifications-msg';
               emptyMsg.textContent = 'No new notifications';
@@ -4914,7 +7391,7 @@ document.addEventListener('DOMContentLoaded', function() {
       function checkNoNotifications() {
         const notifPanelContent = notificationsPanel.querySelector('.notifications-panel-content');
         if (!notifPanelContent) return;
-        
+
         // Check each notification section
         const notifLists = notifPanelContent.querySelectorAll('.notif-list');
         notifLists.forEach(list => {
@@ -4931,7 +7408,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Check if there are any notifications at all
         const anyNotif = notifPanelContent.querySelector('.notif-card');
         let emptyMsg = notifPanelContent.querySelector('.no-notifications-msg');
-        
+
         if (!anyNotif) {
           // Remove any remaining section labels first
           const remainingLabels = notifPanelContent.querySelectorAll('.notif-section-label');
@@ -4966,7 +7443,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
     let notificationBtnLock = false;
-    notificationsBtn.addEventListener('click', function(e) {
+    notificationsBtn.addEventListener('click', function (e) {
       // Do not stop propagation; let global click handler work
       if (notificationBtnLock) return;
       notificationBtnLock = true;
@@ -4990,7 +7467,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
     // Click outside to close
-    document.addEventListener('mousedown', function(e) {
+    document.addEventListener('mousedown', function (e) {
       if (notificationsVisible && notificationsPanel.style.display === 'flex') {
         const btn = notificationsBtn;
         if (!notificationsPanel.contains(e.target) && !btn.contains(e.target)) {
@@ -5007,7 +7484,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 // ... existing code ...
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
   // ... existing code ...
   const fullscreenBtn = document.getElementById('fullscreen-btn');
   if (fullscreenBtn) {
@@ -5046,7 +7523,7 @@ document.addEventListener('DOMContentLoaded', function() {
         fullscreenIcon.classList.add('fa-expand');
       }
     }
-    fullscreenBtn.addEventListener('click', function() {
+    fullscreenBtn.addEventListener('click', function () {
       if (isFullscreen()) {
         exitFullscreen();
       } else {
@@ -5062,28 +7539,13 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 // ... existing code ...
 
-document.addEventListener('DOMContentLoaded', function() {
-  // ... existing code ...
-  const appLauncherBtn = document.getElementById('app-launcher-btn');
-  if (appLauncherBtn) {
-    appLauncherBtn.addEventListener('click', function() {
-      // Try to find the desktop icon for animation, else pass null
-      const appLauncherIcon = document.querySelector('.desktop-icon[data-app="app-launcher"]');
-      openAppLauncherWindow(appLauncherIcon);
-    });
-  }
-});
-// ... existing code ...
-
-window.openAppLauncherWindow = openAppLauncherWindow;
-
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
   // ... existing code ...
   const widgetsScreen = document.getElementById('widgets-screen');
   function enableWidgetsScreenScroll() {
     if (!widgetsScreen) return;
     if (window.innerWidth >= 1024) {
-      widgetsScreen.addEventListener('wheel', function(e) {
+      widgetsScreen.addEventListener('wheel', function (e) {
         widgetsScreen.scrollTop += e.deltaY;
         // Do not preventDefault, so scroll bubbles if at top/bottom
       }, { passive: true });
@@ -5123,7 +7585,7 @@ function restoreDesktopIconPositions() {
         icon.removeAttribute('data-absolute');
       });
     }
-    return false;
+                    return false;
   }
   const icons = document.querySelectorAll('.desktop-icon');
   let restored = false;
@@ -5148,7 +7610,7 @@ function restoreDesktopIconPositions() {
 
 // Patch initializeDesktopIconPositions to restore positions if available, otherwise use grid
 const _originalInitDesktopIconPositions = initializeDesktopIconPositions;
-initializeDesktopIconPositions = function() {
+initializeDesktopIconPositions = function () {
   const desktopIconsContainer = document.querySelector('.desktop-icons');
   const icons = document.querySelectorAll('.desktop-icon');
   if (window.innerWidth > 1023) {
@@ -5168,12 +7630,12 @@ initializeDesktopIconPositions = function() {
 
 // Patch globalOnIconMouseUp to save positions after drag
 const _originalGlobalOnIconMouseUp = globalOnIconMouseUp;
-globalOnIconMouseUp = function(e) {
+globalOnIconMouseUp = function (e) {
   _originalGlobalOnIconMouseUp(e);
   if (window.innerWidth > 1023) saveDesktopIconPositions();
 };
 
-window.addEventListener('resize', function() {
+window.addEventListener('resize', function () {
   if (window.innerWidth > 1023) {
     // On resize, try to restore, if not, use grid
     const restored = restoreDesktopIconPositions();
@@ -5183,135 +7645,123 @@ window.addEventListener('resize', function() {
       }
     }
   }
+});
+
+// ... existing code ...
+const popoutButton = windowElement.querySelector('.window-popout');
+if (popoutButton) {
+  popoutButton.addEventListener('click', function (e) {
+    e.stopPropagation();
+    // Get original window position and size
+    const rect = windowElement.getBoundingClientRect();
+    const screenLeft = window.screenX || window.screenLeft || 0;
+    const screenTop = window.screenY || window.screenTop || 0;
+    const chromeHeight = (window.outerHeight - window.innerHeight) || 0;
+    const left = Math.round(screenLeft + rect.left);
+    const top = Math.round(screenTop + rect.top + chromeHeight);
+    const width = Math.round(rect.width);
+    const height = Math.round(rect.height);
+    // Open a new window with matching position and size
+    const popoutWin = window.open('', '_blank', `width=${width},height=${height},left=${left},top=${top},menubar=no,toolbar=no,location=no,status=no`);
+    if (!popoutWin) return;
+    // --- Cross-browser: Write HTML immediately after open ---
+    const doc = popoutWin.document;
+    doc.open();
+    doc.write(`<!DOCTYPE html><html><head><title>${windowElement.querySelector('.window-title span')?.textContent || 'App Popout'}</title>`);
+    // Copy stylesheets
+    Array.from(document.styleSheets).forEach(sheet => {
+      if (sheet.href) doc.write(`<link rel="stylesheet" href="${sheet.href}">`);
+    });
+    // Inject main JS file for popout functionality
+    doc.write('<script src="js/app.js"></script>');
+    doc.write('</head><body style="background: var(--primary-bg); margin:0;">');
+    // Write the entire window element, not just .window-content
+    if (windowElement) {
+      // Remove any existing inline styles that would conflict
+      windowElement.style.position = '';
+      windowElement.style.left = '';
+      windowElement.style.top = '';
+      windowElement.style.width = '';
+      windowElement.style.height = '';
+      // Write the .window element
+      doc.write(windowElement.outerHTML);
+      // Add style to make .window fill the viewport in the popout and hide the window header
+      doc.write('<style>.window{position:fixed!important;top:0!important;left:0!important;width:100vw!important;height:100vh!important;max-width:none!important;max-height:none!important;min-width:0!important;min-height:0!important;z-index:1!important;} .window-header{display:none!important;}</style>');
+    }
+    doc.write('</body></html>');
+    doc.close();
+    // --- End cross-browser popout logic ---
+    // Remove window from desktop and taskbar
+    const currentTaskbarIcon = openWindows[windowId] ? openWindows[windowId].taskbarIcon : null;
+    // --- Save icon and bg class for restore ---
+    let iconClass = null, iconBgClass = null;
+    const iconElem = windowElement.querySelector('.window-title .window-icon i');
+    const iconBgElem = windowElement.querySelector('.window-title .window-icon');
+    if (iconElem) iconClass = Array.from(iconElem.classList).find(cls => cls.startsWith('fa-'));
+    if (iconBgElem) iconBgClass = Array.from(iconBgElem.classList).find(cls => cls.endsWith('-icon'));
+    // --- Save appName and appTitle BEFORE removing window and openWindows ---
+    let restoreAppName = (openWindows[windowId]?.name || windowElement.getAttribute('data-app') || '').trim();
+    let restoreAppTitle = (openWindows[windowId]?.title || windowElement.querySelector('.window-title span')?.textContent || '').trim();
+    windowElement.remove();
+    if (currentTaskbarIcon) currentTaskbarIcon.remove();
+    if (openWindows[windowId]) delete openWindows[windowId];
+    if (activeWindow === windowElement) {
+      activeWindow = null;
+      updateTaskbarActiveState();
+    }
+    // --- Popout close behavior: restore if needed ---
+    const popoutBehavior = localStorage.getItem('popoutCloseBehavior') || 'close';
+    if (popoutBehavior === 'restore') {
+      // Fallback to getAppIconDetails if iconClass or iconBgClass missing
+      if (!iconClass || !iconBgClass) {
+        const details = getAppIconDetails(restoreAppName);
+        if (!iconClass) iconClass = details.iconClass;
+        if (!iconBgClass) iconBgClass = details.iconBgClass;
+      }
+      // Pass info to the popout window so it can notify us on close
+      try {
+        popoutWin._poppedOutAppInfo = {
+          appName: restoreAppName,
+          appTitle: restoreAppTitle,
+          iconClass: iconClass,
+          iconBgClass: iconBgClass
+        };
+      } catch (e) { }
+      // Listen for popout window close
+      const restoreApp = () => {
+        // Use appName and appTitle to reopen
+        const info = popoutWin._poppedOutAppInfo;
+        if (!window._loggingOut && info && info.appName) {
+          openApp(info.appName, info.appTitle, info.iconClass, info.iconBgClass);
+        }
+      };
+      // Use polling to detect close (since onbeforeunload in popout is unreliable cross-origin)
+      const pollInterval = setInterval(() => {
+        if (popoutWin.closed) {
+          clearInterval(pollInterval);
+          restoreApp();
+        }
+      }, 500);
+    }
+    // ... existing code ...
+    // At the top of the file, after other globals:
+    window._allPopoutWindows = window._allPopoutWindows || [];
+    // ... existing code ...
+    // In the popoutButton click handler, after 'if (!popoutWin) return;':
+    window._allPopoutWindows.push(popoutWin);
+    // ... existing code ...
+    // In the logout button event handler:
+    const logOutButton = document.querySelector('.start-menu-logout-button') || document.querySelector('.logout-button');
+    if (logOutButton) {
+      logOutButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        handleLogout();
       });
-      // ... existing code ...
-    const popoutButton = windowElement.querySelector('.window-popout');
-    if (popoutButton) {
-      popoutButton.addEventListener('click', function(e) {
-        e.stopPropagation();
-        // Get original window position and size
-        const rect = windowElement.getBoundingClientRect();
-        const screenLeft = window.screenX || window.screenLeft || 0;
-        const screenTop = window.screenY || window.screenTop || 0;
-        const chromeHeight = (window.outerHeight - window.innerHeight) || 0;
-        const left = Math.round(screenLeft + rect.left);
-        const top = Math.round(screenTop + rect.top + chromeHeight);
-        const width = Math.round(rect.width);
-        const height = Math.round(rect.height);
-        // Open a new window with matching position and size
-        const popoutWin = window.open('', '_blank', `width=${width},height=${height},left=${left},top=${top},menubar=no,toolbar=no,location=no,status=no`);
-        if (!popoutWin) return;
-        // --- Cross-browser: Write HTML immediately after open ---
-        const doc = popoutWin.document;
-        doc.open();
-        doc.write(`<!DOCTYPE html><html><head><title>${windowElement.querySelector('.window-title span')?.textContent || 'App Popout'}</title>`);
-        // Copy stylesheets
-        Array.from(document.styleSheets).forEach(sheet => {
-          if (sheet.href) doc.write(`<link rel="stylesheet" href="${sheet.href}">`);
-        });
-        // Inject main JS file for popout functionality
-        doc.write('<script src="js/app.js"></script>');
-        doc.write('</head><body style="background: var(--primary-bg); margin:0;">');
-        // Write the entire window element, not just .window-content
-        if (windowElement) {
-          // Remove any existing inline styles that would conflict
-          windowElement.style.position = '';
-          windowElement.style.left = '';
-          windowElement.style.top = '';
-          windowElement.style.width = '';
-          windowElement.style.height = '';
-          // Write the .window element
-          doc.write(windowElement.outerHTML);
-          // Add style to make .window fill the viewport in the popout and hide the window header
-          doc.write('<style>.window{position:fixed!important;top:0!important;left:0!important;width:100vw!important;height:100vh!important;max-width:none!important;max-height:none!important;min-width:0!important;min-height:0!important;z-index:1!important;} .window-header{display:none!important;}</style>');
-        }
-        doc.write('</body></html>');
-        doc.close();
-        // --- End cross-browser popout logic ---
-        // Remove window from desktop and taskbar
-        const currentTaskbarIcon = openWindows[windowId] ? openWindows[windowId].taskbarIcon : null;
-        // --- Save icon and bg class for restore ---
-        let iconClass = null, iconBgClass = null;
-        const iconElem = windowElement.querySelector('.window-title .window-icon i');
-        const iconBgElem = windowElement.querySelector('.window-title .window-icon');
-        if (iconElem) iconClass = Array.from(iconElem.classList).find(cls => cls.startsWith('fa-'));
-        if (iconBgElem) iconBgClass = Array.from(iconBgElem.classList).find(cls => cls.endsWith('-icon'));
-        // --- Save appName and appTitle BEFORE removing window and openWindows ---
-        let restoreAppName = (openWindows[windowId]?.name || windowElement.getAttribute('data-app') || '').trim();
-        let restoreAppTitle = (openWindows[windowId]?.title || windowElement.querySelector('.window-title span')?.textContent || '').trim();
-        windowElement.remove();
-        if (currentTaskbarIcon) currentTaskbarIcon.remove();
-        if (openWindows[windowId]) delete openWindows[windowId];
-        if (activeWindow === windowElement) {
-          activeWindow = null;
-          updateTaskbarActiveState();
-        }
-        // --- Popout close behavior: restore if needed ---
-        const popoutBehavior = localStorage.getItem('popoutCloseBehavior') || 'close';
-        if (popoutBehavior === 'restore') {
-          // Fallback to getAppIconDetails if iconClass or iconBgClass missing
-          if (!iconClass || !iconBgClass) {
-            const details = getAppIconDetails(restoreAppName);
-            if (!iconClass) iconClass = details.iconClass;
-            if (!iconBgClass) iconBgClass = details.iconBgClass;
-          }
-          // Pass info to the popout window so it can notify us on close
-          try {
-            popoutWin._poppedOutAppInfo = {
-              appName: restoreAppName,
-              appTitle: restoreAppTitle,
-              iconClass: iconClass,
-              iconBgClass: iconBgClass
-            };
-          } catch (e) {}
-          // Listen for popout window close
-          const restoreApp = () => {
-            // Use appName and appTitle to reopen
-            const info = popoutWin._poppedOutAppInfo;
-            if (!window._loggingOut && info && info.appName) {
-              openApp(info.appName, info.appTitle, info.iconClass, info.iconBgClass);
-            }
-          };
-          // Use polling to detect close (since onbeforeunload in popout is unreliable cross-origin)
-          const pollInterval = setInterval(() => {
-            if (popoutWin.closed) {
-              clearInterval(pollInterval);
-              restoreApp();
-            }
-          }, 500);
-        }
-        // ... existing code ...
-        // At the top of the file, after other globals:
-        window._allPopoutWindows = window._allPopoutWindows || [];
-        // ... existing code ...
-        // In the popoutButton click handler, after 'if (!popoutWin) return;':
-        window._allPopoutWindows.push(popoutWin);
-        // ... existing code ...
-        // In the logout button event handler:
-        const logOutButton = document.querySelector('.start-menu-logout-button') || document.querySelector('.logout-button');
-        if (logOutButton) {
-          logOutButton.addEventListener('click', () => {
-            if(startMenu) startMenu.style.display = 'none';
-            // Set a global flag to indicate logout in progress
-        window._loggingOut = true;
-            // Close all popout windows
-        if (window._allPopoutWindows && Array.isArray(window._allPopoutWindows)) {
-          window._allPopoutWindows = window._allPopoutWindows.filter(win => {
-            if (win && !win.closed) {
-              try { win.close(); } catch (e) {}
-              return false;
-            }
-            return false;
-          });
-        }
-            // Optionally, clear the flag after a short delay
-        setTimeout(() => { window._loggingOut = false; }, 2000);
-          });
-        }
-        // ... existing code ...
-      });
-  }
-  // ... existing code ...
+    }
+    // ... existing code ...
+  });
+}
+// ... existing code ...
 
 // ... existing code ...
 // --- SWIPE TO DELETE FOR NOTIFICATIONS ---
@@ -5333,14 +7783,14 @@ function enableNotificationSwipeToDelete() {
       card.insertBefore(swipeBg, card.firstChild);
     }
 
-    card.addEventListener('touchstart', function(e) {
+    card.addEventListener('touchstart', function (e) {
       if (e.touches.length !== 1) return;
       startX = e.touches[0].clientX;
       swiping = true;
       card.style.transition = 'none';
     });
 
-    card.addEventListener('touchmove', function(e) {
+    card.addEventListener('touchmove', function (e) {
       if (!swiping) return;
       currentX = e.touches[0].clientX;
       translateX = Math.max(0, currentX - startX); // Only allow right swipe
@@ -5348,7 +7798,7 @@ function enableNotificationSwipeToDelete() {
       swipeBg.style.opacity = Math.min(1, Math.abs(translateX) / threshold);
     });
 
-    card.addEventListener('touchend', function(e) {
+    card.addEventListener('touchend', function (e) {
       if (!swiping) return;
       swiping = false;
       card.style.transition = 'transform 0.2s';
@@ -5359,7 +7809,7 @@ function enableNotificationSwipeToDelete() {
           card.removeEventListener('transitionend', handler);
           const notifList = card.parentElement;
           card.remove();
-          
+
           // Check if this was the last notification in the section
           if (notifList && notifList.classList.contains('notif-list') && notifList.querySelectorAll('.notif-card').length === 0) {
             const sectionLabel = notifList.previousElementSibling;
@@ -5369,7 +7819,7 @@ function enableNotificationSwipeToDelete() {
               setTimeout(() => notifList.remove(), 400);
             }
           }
-          
+
           // Check if all notifications are gone
           setTimeout(checkNoNotifications, 400);
         });
@@ -5385,7 +7835,7 @@ function enableNotificationSwipeToDelete() {
 
 // ... existing code ...
 // --- GLOBAL SHORTCUT: Press 'N' to show a notification (OS-style) ---
-document.addEventListener('keydown', function(e) {
+document.addEventListener('keydown', function (e) {
   // Ignore if focus is in an input, textarea, or contenteditable
   const active = document.activeElement;
   if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable)) return;
@@ -5409,7 +7859,7 @@ document.addEventListener('keydown', function(e) {
         <div class="notif-content">
           <div class="notif-main-row">
             <span class="notif-main-title">New incoming notification</span>
-            <span class="notif-dot"></span>
+  
           </div>
           <div class="notif-desc">This is a test notification</div>
           <div class="notif-meta">now</div>
@@ -5429,7 +7879,6 @@ document.addEventListener('keydown', function(e) {
   }
 });
 // ... existing code ...
-// (Remove all right-click-to-notify logic for the bell)
 
 // ... existing code ...
 // --- WINDOWS 11 STYLE TOAST NOTIFICATION ---
@@ -5442,7 +7891,7 @@ function showToastNotification(opts = {}) {
     <div class="notif-content">
       <div class="notif-main-row">
         <span class="notif-main-title">New incoming notification1</span>
-        <span class="notif-dot"></span>
+
       </div>
       <div class="notif-desc">This is a test notification</div>
       <div class="notif-meta">now</div>
@@ -5540,7 +7989,8 @@ function updateToastStackPositions() {
     toast.style.position = 'absolute';
     toast.style.right = '0';
     toast.style.left = 'auto';
-    toast.style.margin = '20px';
+    toast.style.marginTop = '50px';
+    toast.style.marginRight = '10px';
     toast.style.transition = 'top 0.35s cubic-bezier(0.4,0,0.2,1), transform 0.45s cubic-bezier(0.4,0,0.2,1), opacity 0.45s cubic-bezier(0.4,0,0.2,1)'; // Smooth move
     toast.style.top = (idx * (toastHeight + margin)) + 'px';
     toast.style.zIndex = 999999 - idx;
@@ -5571,7 +8021,7 @@ function setupMobileSidebarForWindow(windowElement) {
   // If still not found, fallback to windowContent itself
   if (!contentArea && windowContent) contentArea = windowContent;
   // Debug log for diagnosis
-  
+
 
   if (!sidebar || !overlay || !menuToggle || !contentArea) return;
 
@@ -5638,7 +8088,7 @@ function setupMobileSidebarForWindow(windowElement) {
 
 // Patch updateSidebarForWindow to respect data-user-collapsed
 const _originalUpdateSidebarForWindow = updateSidebarForWindow;
-window.updateSidebarForWindow = function(windowEl) {
+window.updateSidebarForWindow = function (windowEl) {
   if (!windowEl) return;
   if (windowEl._isClosing) return;
   const sidebars = windowEl.querySelectorAll('.file-explorer-sidebar, .settings-sidebar, .app-store-sidebar, .start-menu-right-sidebar');
@@ -5671,7 +8121,7 @@ window.updateSidebarForWindow = function(windowEl) {
     }
     if (width >= 200 && width < 500) {
       sb.classList.add('sidebar-collapsed');
-      sb._hoverEnter = function() {
+      sb._hoverEnter = function () {
         const originalWidth = content ? content.offsetWidth : null;
         sb.classList.add('sidebar-hovered');
         sb.style.position = 'absolute';
@@ -5687,7 +8137,7 @@ window.updateSidebarForWindow = function(windowEl) {
           content.style.transform = 'translateX(220px)';
         }
       };
-      sb._hoverLeave = function() {
+      sb._hoverLeave = function () {
         sb.classList.remove('sidebar-hovered');
         sb.style.position = '';
         sb.style.left = '';
@@ -5715,182 +8165,182 @@ window.updateSidebarForWindow = function(windowEl) {
     }
   });
 }
-// ... existing code ...
+  // ... existing code ...
 
-(function() {
-  console.log('[Swipe] Swipe logic running');
-  // --- SWIPE CONTAINER LOGIC (universal: desktop + mobile) ---
-  if (!document.getElementById('swipe-container')) {
-    const swipeContainer = document.createElement('div');
-    swipeContainer.id = 'swipe-container';
-    swipeContainer.style.position = 'fixed';
-    swipeContainer.style.left = '0';
-    swipeContainer.style.top = '0';
-    swipeContainer.style.width = '100vw';
-    swipeContainer.style.height = '100vh';
-    swipeContainer.style.overflow = 'hidden';
-    swipeContainer.style.zIndex = '2147483647';
-    swipeContainer.style.display = 'flex';
-    swipeContainer.style.flexDirection = 'row';
-    swipeContainer.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)';
-    swipeContainer.style.background = '#111';
+  (function () {
+    console.log('[Swipe] Swipe logic running');
+    // --- SWIPE CONTAINER LOGIC (universal: desktop + mobile) ---
+    if (!document.getElementById('swipe-container')) {
+      const swipeContainer = document.createElement('div');
+      swipeContainer.id = 'swipe-container';
+      swipeContainer.style.position = 'fixed';
+      swipeContainer.style.left = '0';
+      swipeContainer.style.top = '0';
+      swipeContainer.style.width = '100vw';
+      swipeContainer.style.height = '100vh';
+      swipeContainer.style.overflow = 'hidden';
+      swipeContainer.style.zIndex = '2147483647';
+      swipeContainer.style.display = 'flex';
+      swipeContainer.style.flexDirection = 'row';
+      swipeContainer.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)';
+      swipeContainer.style.background = '#111';
 
-    // --- DO NOT HIDE ALL BODY CHILDREN ---
-    // Instead, move the real app content into the swipe screens
+      // --- DO NOT HIDE ALL BODY CHILDREN ---
+      // Instead, move the real app content into the swipe screens
 
-    // Left screen (Notifications)
-    const leftScreen = document.createElement('div');
-    leftScreen.className = 'swipe-screen-left';
-    leftScreen.style.width = '100vw';
-    leftScreen.style.height = '100vh';
-    leftScreen.style.flexShrink = '0';
-    leftScreen.style.display = 'flex';
-    leftScreen.style.flexDirection = 'column';
-    leftScreen.style.overflow = 'auto';
-    // Move notifications panel if it exists
-    const notificationsPanel = document.getElementById('notifications-panel');
-    if (notificationsPanel) {
-      leftScreen.appendChild(notificationsPanel);
-      notificationsPanel.style.display = 'flex';
-      notificationsPanel.style.position = 'static';
-      notificationsPanel.style.height = '100%';
-      notificationsPanel.style.width = '100%';
-      console.log('[Swipe] Forced notifications panel visible:', notificationsPanel, getComputedStyle(notificationsPanel).display);
-    } else {
-      leftScreen.innerHTML = '<div style="color:#fff;font-size:2rem;">Notifications</div>';
+      // Left screen (Notifications)
+      const leftScreen = document.createElement('div');
+      leftScreen.className = 'swipe-screen-left';
+      leftScreen.style.width = '100vw';
+      leftScreen.style.height = '100vh';
+      leftScreen.style.flexShrink = '0';
+      leftScreen.style.display = 'flex';
+      leftScreen.style.flexDirection = 'column';
+      leftScreen.style.overflow = 'auto';
+      // Move notifications panel if it exists
+      const notificationsPanel = document.getElementById('notifications-panel');
+      if (notificationsPanel) {
+        leftScreen.appendChild(notificationsPanel);
+        notificationsPanel.style.display = 'flex';
+        notificationsPanel.style.position = 'static';
+        notificationsPanel.style.height = '100%';
+        notificationsPanel.style.width = '100%';
+        console.log('[Swipe] Forced notifications panel visible:', notificationsPanel, getComputedStyle(notificationsPanel).display);
+      } else {
+        leftScreen.innerHTML = '<div style="color:#fff;font-size:2rem;">Notifications</div>';
+      }
+
+      // Home screen (middle, Desktop only - CLONE)
+      const homeScreen = document.createElement('div');
+      homeScreen.className = 'swipe-screen-home';
+      homeScreen.style.width = '100vw';
+      homeScreen.style.height = '100vh';
+      homeScreen.style.flexShrink = '0';
+      homeScreen.style.display = 'flex';
+      homeScreen.style.flexDirection = 'column';
+      homeScreen.style.overflow = 'auto';
+      // Clone the desktop area
+      const desktopArea = document.querySelector('.desktop-area');
+      if (desktopArea) {
+        const desktopClone = desktopArea.cloneNode(true);
+        desktopClone.classList.add('in-swipe');
+        desktopClone.removeAttribute('id'); // Remove duplicate ID
+        homeScreen.appendChild(desktopClone);
+        desktopClone.style.display = 'flex';
+        desktopClone.style.height = '100%';
+        desktopClone.style.width = '100%';
+      } else {
+        homeScreen.innerHTML = '<div style="color:#fff;font-size:2rem;margin-bottom:80px;">Home Screen</div>';
+      }
+
+      // Right screen (Widgets only - CLONE)
+      const rightScreen = document.createElement('div');
+      rightScreen.className = 'swipe-screen-right';
+      rightScreen.style.width = '100vw';
+      rightScreen.style.height = '100vh';
+      rightScreen.style.flexShrink = '0';
+      rightScreen.style.display = 'flex';
+      rightScreen.style.flexDirection = 'column';
+      rightScreen.style.overflow = 'auto';
+      // Clone the widgets screen
+      const widgetsScreen = document.getElementById('widgets-screen');
+      if (widgetsScreen) {
+        const widgetsClone = widgetsScreen.cloneNode(true);
+        widgetsClone.classList.add('in-swipe');
+        widgetsClone.removeAttribute('id'); // Remove duplicate ID
+        rightScreen.appendChild(widgetsClone);
+        widgetsClone.style.display = 'flex';
+        widgetsClone.style.position = 'static';
+        widgetsClone.style.height = '100%';
+        widgetsClone.style.width = '100%';
+      } else {
+        rightScreen.innerHTML = '<div style="color:#fff;font-size:2rem;">Widgets</div>';
+      }
+
+      swipeContainer.appendChild(leftScreen);
+      swipeContainer.appendChild(homeScreen);
+      swipeContainer.appendChild(rightScreen);
+      document.body.appendChild(swipeContainer);
+      console.log('[Swipe] Swipe container appended to body');
     }
 
-    // Home screen (middle, Desktop only - CLONE)
-    const homeScreen = document.createElement('div');
-    homeScreen.className = 'swipe-screen-home';
-    homeScreen.style.width = '100vw';
-    homeScreen.style.height = '100vh';
-    homeScreen.style.flexShrink = '0';
-    homeScreen.style.display = 'flex';
-    homeScreen.style.flexDirection = 'column';
-    homeScreen.style.overflow = 'auto';
-    // Clone the desktop area
-    const desktopArea = document.querySelector('.desktop-area');
-    if (desktopArea) {
-      const desktopClone = desktopArea.cloneNode(true);
-      desktopClone.classList.add('in-swipe');
-      desktopClone.removeAttribute('id'); // Remove duplicate ID
-      homeScreen.appendChild(desktopClone);
-      desktopClone.style.display = 'flex';
-      desktopClone.style.height = '100%';
-      desktopClone.style.width = '100%';
-    } else {
-      homeScreen.innerHTML = '<div style="color:#fff;font-size:2rem;margin-bottom:80px;">Home Screen</div>';
+    // --- 2. SWIPE/DRAG LOGIC ---
+    const swipeContainer = document.getElementById('swipe-container');
+    let currentScreen = 1; // 0 = left, 1 = home, 2 = right
+    let isDragging = false;
+    let dragStartX = 0;
+    let dragCurrentX = 0;
+    let dragStartTransform = 0;
+
+    function setScreen(index, animate = true) {
+      currentScreen = Math.max(0, Math.min(2, index));
+      if (!animate) swipeContainer.style.transition = 'none';
+      swipeContainer.style.transform = `translateX(${-100 * currentScreen}vw)`;
+      if (!animate) setTimeout(() => { swipeContainer.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)'; }, 30);
     }
 
-    // Right screen (Widgets only - CLONE)
-    const rightScreen = document.createElement('div');
-    rightScreen.className = 'swipe-screen-right';
-    rightScreen.style.width = '100vw';
-    rightScreen.style.height = '100vh';
-    rightScreen.style.flexShrink = '0';
-    rightScreen.style.display = 'flex';
-    rightScreen.style.flexDirection = 'column';
-    rightScreen.style.overflow = 'auto';
-    // Clone the widgets screen
-  const widgetsScreen = document.getElementById('widgets-screen');
-    if (widgetsScreen) {
-      const widgetsClone = widgetsScreen.cloneNode(true);
-      widgetsClone.classList.add('in-swipe');
-      widgetsClone.removeAttribute('id'); // Remove duplicate ID
-      rightScreen.appendChild(widgetsClone);
-      widgetsClone.style.display = 'flex';
-      widgetsClone.style.position = 'static';
-      widgetsClone.style.height = '100%';
-      widgetsClone.style.width = '100%';
-    } else {
-      rightScreen.innerHTML = '<div style="color:#fff;font-size:2rem;">Widgets</div>';
-    }
+    // Touch events (mobile)
+    swipeContainer.addEventListener('touchstart', function (e) {
+      if (e.touches.length !== 1) return;
+      isDragging = true;
+      dragStartX = e.touches[0].clientX;
+      dragCurrentX = dragStartX;
+      dragStartTransform = -100 * currentScreen;
+      swipeContainer.style.transition = 'none';
+    }, { passive: true });
+    swipeContainer.addEventListener('touchmove', function (e) {
+      if (!isDragging) return;
+      dragCurrentX = e.touches[0].clientX;
+      const dx = dragCurrentX - dragStartX;
+      swipeContainer.style.transform = `translateX(${dragStartTransform + (dx / window.innerWidth) * 100}vw)`;
+      e.preventDefault();
+    }, { passive: false });
+    swipeContainer.addEventListener('touchend', function (e) {
+      if (!isDragging) return;
+      isDragging = false;
+      const dx = dragCurrentX - dragStartX;
+      if (Math.abs(dx) > 60) {
+        if (dx < 0 && currentScreen < 2) setScreen(currentScreen + 1);
+        else if (dx > 0 && currentScreen > 0) setScreen(currentScreen - 1);
+        else setScreen(currentScreen);
+      } else {
+        setScreen(currentScreen);
+      }
+    }, { passive: true });
 
-    swipeContainer.appendChild(leftScreen);
-    swipeContainer.appendChild(homeScreen);
-    swipeContainer.appendChild(rightScreen);
-    document.body.appendChild(swipeContainer);
-    console.log('[Swipe] Swipe container appended to body');
-  }
+    // Mouse events (desktop)
+    swipeContainer.addEventListener('mousedown', function (e) {
+      if (e.button !== 0) return;
+      isDragging = true;
+      dragStartX = e.clientX;
+      dragCurrentX = dragStartX;
+      dragStartTransform = -100 * currentScreen;
+      swipeContainer.style.transition = 'none';
+      document.body.style.userSelect = 'none';
+    });
+    window.addEventListener('mousemove', function (e) {
+      if (!isDragging) return;
+      dragCurrentX = e.clientX;
+      const dx = dragCurrentX - dragStartX;
+      swipeContainer.style.transform = `translateX(${dragStartTransform + (dx / window.innerWidth) * 100}vw)`;
+    });
+    window.addEventListener('mouseup', function (e) {
+      if (!isDragging) return;
+      isDragging = false;
+      document.body.style.userSelect = '';
+      const dx = dragCurrentX - dragStartX;
+      if (Math.abs(dx) > 60) {
+        if (dx < 0 && currentScreen < 2) setScreen(currentScreen + 1);
+        else if (dx > 0 && currentScreen > 0) setScreen(currentScreen - 1);
+        else setScreen(currentScreen);
+      } else {
+        setScreen(currentScreen);
+      }
+    });
+    // --- 3. Initial state ---
+    setScreen(1, false); // Home by default
 
-  // --- 2. SWIPE/DRAG LOGIC ---
-  const swipeContainer = document.getElementById('swipe-container');
-  let currentScreen = 1; // 0 = left, 1 = home, 2 = right
-  let isDragging = false;
-  let dragStartX = 0;
-  let dragCurrentX = 0;
-  let dragStartTransform = 0;
-
-  function setScreen(index, animate = true) {
-    currentScreen = Math.max(0, Math.min(2, index));
-    if (!animate) swipeContainer.style.transition = 'none';
-    swipeContainer.style.transform = `translateX(${-100 * currentScreen}vw)`;
-    if (!animate) setTimeout(() => { swipeContainer.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)'; }, 30);
-  }
-
-  // Touch events (mobile)
-  swipeContainer.addEventListener('touchstart', function(e) {
-    if (e.touches.length !== 1) return;
-    isDragging = true;
-    dragStartX = e.touches[0].clientX;
-    dragCurrentX = dragStartX;
-    dragStartTransform = -100 * currentScreen;
-    swipeContainer.style.transition = 'none';
-  }, { passive: true });
-  swipeContainer.addEventListener('touchmove', function(e) {
-    if (!isDragging) return;
-    dragCurrentX = e.touches[0].clientX;
-    const dx = dragCurrentX - dragStartX;
-    swipeContainer.style.transform = `translateX(${dragStartTransform + (dx / window.innerWidth) * 100}vw)`;
-    e.preventDefault();
-  }, { passive: false });
-  swipeContainer.addEventListener('touchend', function(e) {
-    if (!isDragging) return;
-    isDragging = false;
-    const dx = dragCurrentX - dragStartX;
-    if (Math.abs(dx) > 60) {
-      if (dx < 0 && currentScreen < 2) setScreen(currentScreen + 1);
-      else if (dx > 0 && currentScreen > 0) setScreen(currentScreen - 1);
-      else setScreen(currentScreen);
-    } else {
-      setScreen(currentScreen);
-    }
-  }, { passive: true });
-
-  // Mouse events (desktop)
-  swipeContainer.addEventListener('mousedown', function(e) {
-    if (e.button !== 0) return;
-    isDragging = true;
-    dragStartX = e.clientX;
-    dragCurrentX = dragStartX;
-    dragStartTransform = -100 * currentScreen;
-    swipeContainer.style.transition = 'none';
-    document.body.style.userSelect = 'none';
-  });
-  window.addEventListener('mousemove', function(e) {
-    if (!isDragging) return;
-    dragCurrentX = e.clientX;
-    const dx = dragCurrentX - dragStartX;
-    swipeContainer.style.transform = `translateX(${dragStartTransform + (dx / window.innerWidth) * 100}vw)`;
-  });
-  window.addEventListener('mouseup', function(e) {
-    if (!isDragging) return;
-    isDragging = false;
-    document.body.style.userSelect = '';
-    const dx = dragCurrentX - dragStartX;
-    if (Math.abs(dx) > 60) {
-      if (dx < 0 && currentScreen < 2) setScreen(currentScreen + 1);
-      else if (dx > 0 && currentScreen > 0) setScreen(currentScreen - 1);
-      else setScreen(currentScreen);
-    } else {
-      setScreen(currentScreen);
-    }
-  });
-  // --- 3. Initial state ---
-  setScreen(1, false); // Home by default
-
-})();
+  })();
 // ... existing code ...
 
 // Show a short notification in the top middle of the screen
@@ -5936,7 +8386,7 @@ function setNotificationsBtnOpacity() {
 }
 
 // Also call setNotificationsBtnOpacity on DOMContentLoaded to initialize.
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
   // ... existing code ...
   setNotificationsBtnOpacity();
 });
@@ -5973,7 +8423,7 @@ updateNotificationsBadge();
 // ...
 // On DOMContentLoaded, call updateNotificationsBadge to initialize
 // ...
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
   setNotificationsBtnOpacity();
   updateNotificationsBadge();
 });
@@ -6016,7 +8466,7 @@ function updateSidebarForWindow(windowEl) {
     if (width >= 200 && width < 510) {
       sb.classList.add('sidebar-collapsed');
       if (userCollapsed) {
-        sb._hoverEnter = function() {
+        sb._hoverEnter = function () {
           const originalWidth = content ? content.offsetWidth : null;
           sb.classList.add('sidebar-hovered');
           sb.style.position = 'absolute';
@@ -6032,7 +8482,7 @@ function updateSidebarForWindow(windowEl) {
             content.style.transform = 'translateX(220px)';
           }
         };
-        sb._hoverLeave = function() {
+        sb._hoverLeave = function () {
           sb.classList.remove('sidebar-hovered');
           sb.style.position = '';
           sb.style.left = '';
@@ -6059,7 +8509,7 @@ function updateSidebarForWindow(windowEl) {
       // For width >= 500, only collapse if user wants it
       if (userCollapsed) {
         sb.classList.add('sidebar-collapsed');
-        sb._hoverEnter = function() {
+        sb._hoverEnter = function () {
           const originalWidth = content ? content.offsetWidth : null;
           sb.classList.add('sidebar-hovered');
           sb.style.position = 'absolute';
@@ -6068,14 +8518,14 @@ function updateSidebarForWindow(windowEl) {
           sb.style.height = '100%';
           sb.style.zIndex = '20';
           sb.style.width = '220px';
-sb.style.overflowY = 'auto';
+          sb.style.overflowY = 'auto';
           if (content && originalWidth) {
             content.style.width = originalWidth + 'px';
             content.style.transition = 'transform 0.25s cubic-bezier(0.4,0,0.2,1)';
             content.style.transform = 'translateX(220px)';
           }
         };
-        sb._hoverLeave = function() {
+        sb._hoverLeave = function () {
           sb.classList.remove('sidebar-hovered');
           sb.style.position = '';
           sb.style.left = '';
@@ -6106,7 +8556,7 @@ sb.style.overflowY = 'auto';
 // Remove all other sidebar hover/push logic and listeners below this point
 
 // --- Bulletproof: Attach ResizeObserver to all .window elements (guaranteed) ---
-(function() {
+(function () {
   function attachSidebarResizeObserver(win) {
     if (!win || win._sidebarResizeObserver) return;
     const ro = new ResizeObserver(() => {
@@ -6122,7 +8572,7 @@ sb.style.overflowY = 'auto';
   }
   if (typeof createWindowFromTemplate === 'function') {
     const _originalCreateWindowFromTemplate = createWindowFromTemplate;
-    createWindowFromTemplate = function() {
+    createWindowFromTemplate = function () {
       const win = _originalCreateWindowFromTemplate.apply(this, arguments);
       attachSidebarResizeObserver(win);
       return win;
@@ -6130,7 +8580,7 @@ sb.style.overflowY = 'auto';
   }
   if (typeof createGenericWindow === 'function') {
     const _originalCreateGenericWindow = createGenericWindow;
-    createGenericWindow = function() {
+    createGenericWindow = function () {
       const win = _originalCreateGenericWindow.apply(this, arguments);
       attachSidebarResizeObserver(win);
       return win;
@@ -6140,24 +8590,39 @@ sb.style.overflowY = 'auto';
 
 
 // --- Alert Confirmation Dialog ---
-function showConfirmDialog({ title, message, iconClass, okText = "OK", cancelText = "Cancel" }) {
+function showConfirmDialog({ title, message, iconClass, okText = "OK", cancelText = "Cancel", style = "logout" }) {
   return new Promise((resolve) => {
     let existing = document.getElementById('os-alert-overlay');
     if (existing) existing.remove();
     const overlay = document.createElement('div');
     overlay.id = 'os-alert-overlay';
-    overlay.className = 'alert-overlay';
-    overlay.innerHTML = `
-      <div class="alert-dialog">
-        <div class="alert-icon"><i class="fas ${iconClass || 'fa-question-circle'}"></i></div>
-        <div class="alert-title">${title || ''}</div>
-        <div class="alert-message">${message || ''}</div>
-        <div class="alert-actions">
-          <button class="alert-btn alert-cancel">${cancelText}</button>
-          <button class="alert-btn alert-ok">${okText}</button>
+    if (style === 'desktop') {
+      overlay.className = 'alert-overlay desktop-alert-overlay';
+      overlay.innerHTML = `
+        <div class="alert-dialog desktop-alert-dialog">
+          <div class="alert-icon"><i class="fas ${iconClass || 'fa-question-circle'}"></i></div>
+          <div class="alert-title">${title || ''}</div>
+          <div class="alert-message">${message || ''}</div>
+          <div class="alert-actions">
+            <button class="alert-btn alert-cancel desktop-alert-cancel">${cancelText}</button>
+            <button class="alert-btn alert-ok desktop-alert-ok">${okText}</button>
+          </div>
         </div>
-      </div>
-    `;
+      `;
+    } else {
+      overlay.className = 'alert-overlay';
+      overlay.innerHTML = `
+        <div class="alert-dialog">
+          <div class="alert-icon"><i class="fas ${iconClass || 'fa-question-circle'}"></i></div>
+          <div class="alert-title">${title || ''}</div>
+          <div class="alert-message">${message || ''}</div>
+          <div class="alert-actions">
+            <button class="alert-btn alert-cancel">${cancelText}</button>
+            <button class="alert-btn alert-ok">${okText}</button>
+          </div>
+        </div>
+      `;
+    }
     document.body.appendChild(overlay);
     setTimeout(() => overlay.classList.add('alert-overlay-bg-visible'), 10);
     setTimeout(() => overlay.querySelector('.alert-ok').focus(), 10);
@@ -6172,6 +8637,15 @@ function showConfirmDialog({ title, message, iconClass, okText = "OK", cancelTex
     });
   });
 }
+
+
+
+
+
+
+
+
+
 
 
 
