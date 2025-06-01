@@ -19,10 +19,210 @@ const volumePanel = document.querySelector('#volume-panel');
 
 
 
-
+// --- Taskbar Icon Animation Helpers ---
+function animateTaskbarIconIn(iconEl) {
+  // Force reflow before adding the class
+  void iconEl.offsetWidth;
+  iconEl.classList.add('anim-in');
+  iconEl.addEventListener('animationend', function handler(e) {
+    if (e.animationName === 'taskbarAppIconIn') {
+      iconEl.classList.remove('anim-in');
+      iconEl.removeEventListener('animationend', handler);
+    }
+  });
+}
+function animateTaskbarIconOut(iconEl, removeCallback) {
+  iconEl.classList.add('anim-out');
+  iconEl.addEventListener('animationend', function handler(e) {
+    if (e.animationName === 'taskbarAppIconOut') {
+      iconEl.removeEventListener('animationend', handler);
+      if (iconEl.parentNode) iconEl.parentNode.removeChild(iconEl);
+      if (typeof removeCallback === 'function') removeCallback();
+    }
+  });
+}
 
 document.addEventListener('DOMContentLoaded', function () {
-  // ... existing code ...
+
+
+
+  // --- Calendar Slide-out Logic ---
+  const calendarTodayBtn = document.getElementById('calendar-today-btn');
+  const calendarPanel = document.getElementById('calendar-panel');
+  const taskbarTime = document.querySelector('.taskbar-time');
+  let calendarPanelVisible = false;
+  let todayPanel = null;
+  
+  function positionTodayPanel() {
+    if (!todayPanel || !calendarPanel) return;
+    const rect = calendarPanel.getBoundingClientRect();
+    todayPanel.style.position = 'fixed';
+    todayPanel.style.left = rect.left + 'px';
+    todayPanel.style.width = rect.width + 'px';
+    todayPanel.style.zIndex = 5000;
+  }
+  
+// Centralized close function for today panel
+function closeTodayPanel() {
+  if (!todayPanel) return;
+  todayPanel.classList.remove('active');
+  window.removeEventListener('resize', positionTodayPanel);
+  setTimeout(() => {
+    if (todayPanel && todayPanel.parentNode) {
+      todayPanel.parentNode.removeChild(todayPanel);
+    }
+    todayPanel = null;
+  }, 350);
+}
+
+// Prevent outside click handler when pressing the today button
+calendarTodayBtn.addEventListener('pointerdown', function(e) {
+  e.stopPropagation();
+});
+
+
+// Toggle today panel on button click
+calendarTodayBtn.addEventListener('click', function() {
+  if (!todayPanel) {
+    // Open today panel
+        todayPanel = document.createElement('div');
+        todayPanel.className = 'calendar-today-panel-slide';
+        todayPanel.innerHTML = `
+          <div style="padding: 18px 18px 10px 18px; color: #fff; font-size: 16px; font-weight: 600; display: flex; align-items: center; justify-content: space-between;">
+            <span>Today Panel (placeholder)</span>
+            <button class="calendar-today-panel-close" style="background: none; border: none; color: #fff; font-size: 12px; cursor: pointer; padding: 0 4px; border-radius: 6px;"><i class="fas fa-times"></i></button>
+          </div>
+          <div style="padding: 18px 18px 10px 18px; color: #fff; font-size: 16px; font-weight: 500; display: flex; align-items: center; justify-content: center; height: 100%; text-align: center;">
+            <span>No events today</span>
+          </div>
+        `;
+        calendarPanel.parentNode.appendChild(todayPanel);
+        positionTodayPanel();
+        window.addEventListener('resize', positionTodayPanel);
+        setTimeout(() => {
+          todayPanel.classList.add('active');
+        }, 10);
+    
+        todayPanel.querySelector('.calendar-today-panel-close').onclick = function(ev) {
+          ev.stopPropagation();
+          closeTodayPanel();
+        };
+      } else {
+        // Close today panel
+        closeTodayPanel();
+      }
+    });
+    
+    // Outside click handler: always closes both panels if open
+document.addEventListener('mousedown', function(e) {
+  const clickedInsideCalendar = calendarPanel && calendarPanel.contains(e.target);
+  const clickedInsideTodayPanel = todayPanel && todayPanel.contains(e.target);
+  const clickedTaskbarTime = taskbarTime && taskbarTime.contains(e.target);
+  const clickedTodayBtn = calendarTodayBtn && calendarTodayBtn.contains(e.target);
+
+  // If click is on the today button, do nothing
+  if (clickedTodayBtn) return;
+
+  // If click is outside both panels and taskbar time, close both panels if open
+  if (!clickedInsideCalendar && !clickedInsideTodayPanel && !clickedTaskbarTime) {
+    if (calendarPanelVisible) hideCalendarPanel();
+    if (todayPanel) closeTodayPanel();
+  }
+});
+
+  
+
+
+
+  function showCalendarPanel() {
+    if (!calendarPanel) return;
+    calendarPanel.style.display = 'flex';
+    requestAnimationFrame(() => {
+      calendarPanel.classList.add('visible');
+      calendarPanelVisible = true;
+    });
+    renderCalendar();
+  }
+  function hideCalendarPanel() {
+    if (!calendarPanel) return;
+    calendarPanel.classList.remove('visible');
+    calendarPanelVisible = false;
+    setTimeout(() => {
+      if (!calendarPanelVisible) calendarPanel.style.display = 'none';
+    }, 350);
+  }
+  function toggleCalendarPanel() {
+    if (calendarPanelVisible) {
+      hideCalendarPanel();
+    } else {
+      showCalendarPanel();
+    }
+  }
+  if (taskbarTime && calendarPanel) {
+    taskbarTime.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleCalendarPanel();
+    });
+    document.addEventListener('mousedown', (e) => {
+      const todayPanel = document.querySelector('.calendar-today-panel-slide');
+      const calendarPanel = document.getElementById('calendar-panel');
+      const clickedInsideCalendar = calendarPanel && calendarPanel.contains(e.target);
+      const clickedInsideTodayPanel = todayPanel && todayPanel.contains(e.target);
+      const clickedTaskbarTime = taskbarTime && taskbarTime.contains(e.target);
+      const clickedTodayBtn = calendarTodayBtn && calendarTodayBtn.contains(e.target);
+    
+      // If click is on the today button, do nothing (let its handler run)
+      if (clickedTodayBtn) return;
+    
+      // If click is outside both panels and taskbar time, close both panels if open
+      if (!clickedInsideCalendar && !clickedInsideTodayPanel && !clickedTaskbarTime) {
+        if (calendarPanelVisible) hideCalendarPanel();
+        if (todayPanel) {
+          todayPanel.classList.remove('active');
+          setTimeout(() => {
+            if (todayPanel.parentNode) todayPanel.parentNode.removeChild(todayPanel);
+          
+        }, 350);
+        }
+      }
+    });
+    document.addEventListener('keydown', (e) => {
+      if (calendarPanelVisible && e.key === 'Escape') {
+        hideCalendarPanel();
+      }
+    });
+  }
+  // Simple calendar rendering (current month)
+  function renderCalendar() {
+    const calendarBody = document.getElementById('calendar-body');
+    const calendarMonth = document.getElementById('calendar-month');
+    if (!calendarBody || !calendarMonth) return;
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth();
+    const monthNames = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    calendarMonth.textContent = `${monthNames[month]} ${year}`;
+    // Calendar grid
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    let html = '<div class="calendar-days" style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center;font-size:0.95em;">';
+    const weekDays = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+    for (let d of weekDays) html += `<div class='calendar-day' style='font-weight:600;opacity:0.8;'>${d}</div>`;
+    html += '</div>';
+    html += '<div class="calendar-numbers" style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center;font-size:0.95em;">';
+    for (let i = 0; i < firstDay; i++) html += '<div></div>';
+    for (let day = 1; day <= daysInMonth; day++) {
+      const isToday = day === now.getDate();
+      html += `<div class='calendar-number' style='padding:6px 0;border-radius:7px;${isToday ? "background:rgba(255,255,255,0.13);font-weight:700;" : ""}'>${day}</div>`;
+    }
+    html += '</div>';
+    calendarBody.innerHTML = html;
+  }
+
+
   // GLOBAL SEARCH OVERLAY LOGIC
   const globalSearchBtn = document.getElementById('global-search-btn');
   const globalSearchOverlay = document.getElementById('global-search-overlay');
@@ -637,8 +837,7 @@ function attachTaskbarIconListeners(cloneBtn) {
   ) {
     return;
   }
-  // Mark as a clone for context menu logic
-  cloneBtn.setAttribute('data-app-launcher-clone', 'true');
+
 
   // Helper to attach the correct click logic to a button or div
   function attachLogicToEl(el) {
@@ -909,6 +1108,7 @@ function createAppLauncherTaskbarRightIcons() {
   });
   window.updateWalletBtnDisplay = updateWalletBtnDisplay;
 })();
+
 // ... existing code ...
 
 
@@ -1165,9 +1365,6 @@ document.addEventListener('DOMContentLoaded', function () {
   const desktopIconsContainer = document.querySelector('.desktop-icons');
 
 
-
-
-
   // Custom context menu for app-grid-item (start menu/app launcher)
   if (startMenuLeftPanel) {
     startMenuLeftPanel.addEventListener('contextmenu', function (e) {
@@ -1204,7 +1401,6 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  
   const taskbarAppIconsContainer = document.getElementById('taskbar-app-icons');
   // ... other variables ...
 
@@ -1226,14 +1422,41 @@ document.addEventListener('DOMContentLoaded', function () {
       pins.push(appName);
       setPinnedTaskbarApps(pins);
       renderPinnedTaskbarIcons();
+      // Animate in the new pinned icon
+      const iconEl = document.querySelector('.taskbar-app-icon.pinned-only[data-app-name="' + appName + '"]');
+      if (iconEl) animateTaskbarIconIn(iconEl);
     }
   }
   function unpinAppFromTaskbar(appName) {
-    const pins = getPinnedTaskbarApps().filter(a => a !== appName);
-    setPinnedTaskbarApps(pins);
-    renderPinnedTaskbarIcons();
+    const iconEl = document.querySelector('.taskbar-app-icon.pinned-only[data-app-name="' + appName + '"]');
+    if (iconEl) {
+      animateTaskbarIconOut(iconEl, function () {
+        const pins = getPinnedTaskbarApps().filter(a => a !== appName);
+        setPinnedTaskbarApps(pins);
+        renderPinnedTaskbarIcons();
+      });
+    } else {
+      const pins = getPinnedTaskbarApps().filter(a => a !== appName);
+      setPinnedTaskbarApps(pins);
+      renderPinnedTaskbarIcons();
+    }
   }
-  function renderPinnedTaskbarIcons() {
+  function renderPinnedTaskbarIcons(prevUnpinnedIdsArg) {
+    // --- PATCH: Collect IDs of currently open unpinned app icons before clearing ---
+    let prevUnpinnedIds;
+    if (prevUnpinnedIdsArg) {
+      prevUnpinnedIds = prevUnpinnedIdsArg;
+    } else {
+      prevUnpinnedIds = new Set();
+      Array.from(taskbarAppIconsContainer.querySelectorAll('.taskbar-app-icon.opened-app[data-window-id]')).forEach(el => {
+        prevUnpinnedIds.add(el.getAttribute('data-window-id'));
+      });
+    }
+    // --- PATCH: Collect IDs of currently open pinned app icons before clearing ---
+    const prevPinnedIds = new Set();
+    Array.from(taskbarAppIconsContainer.querySelectorAll('.taskbar-app-icon.pinned-only.opened-app[data-window-id]')).forEach(el => {
+      prevPinnedIds.add(el.getAttribute('data-window-id'));
+    });
     // Clear all icons and separators
     taskbarAppIconsContainer.innerHTML = '';
     const pins = getPinnedTaskbarApps();
@@ -1257,23 +1480,28 @@ document.addEventListener('DOMContentLoaded', function () {
       } else {
         iconEl.className = 'taskbar-app-icon pinned-only';
       }
+      // Always remove animation classes
+      iconEl.classList.remove('anim-in', 'anim-out');
       iconEl.setAttribute('data-app-name', appName);
       iconEl.setAttribute('title', appTitle);
       iconEl.innerHTML = `<div class="icon-container ${details.iconBgClass}"><i class="fas ${details.iconClass}"></i></div>`;
       iconEl.addEventListener('click', function () {
-        if (openWin && openWin.element) {
-          if (openWin.element.classList.contains('minimized')) {
-            toggleMinimizeWindow(openWin.element, iconEl);
-          } else if (activeWindow === openWin.element) {
-            toggleMinimizeWindow(openWin.element, iconEl);
+        const currentOpenWin = Object.values(openWindows).find(w => w.name === appName && w.element);
+        if (currentOpenWin && currentOpenWin.element) {
+          if (currentOpenWin.element.classList.contains('minimized')) {
+            toggleMinimizeWindow(currentOpenWin.element, iconEl);
+          } else if (activeWindow === currentOpenWin.element) {
+            toggleMinimizeWindow(currentOpenWin.element, iconEl);
           } else {
-            makeWindowActive(openWin.element);
+            makeWindowActive(currentOpenWin.element);
           }
         } else {
           openApp(appName, appTitle, details.iconClass, details.iconBgClass, this);
         }
       });
       taskbarAppIconsContainer.appendChild(iconEl);
+      // Do NOT animate in for pinned icons
+      // Never animate in/out here (old comment, now handled above)
     });
   
     // Add separator if there are open (unpinned) apps
@@ -1320,55 +1548,59 @@ document.addEventListener('DOMContentLoaded', function () {
         openWindows[winObj.element.id].taskbarIcon = iconEl;
       }
       taskbarAppIconsContainer.appendChild(iconEl);
+      // --- PATCH: Animate in only if this is a new unpinned icon ---
+      if (!prevUnpinnedIds.has(winObj.element.id)) {
+        animateTaskbarIconIn(iconEl);
+      }
     });
   
     // After rendering, update the active state
     updateTaskbarActiveState();
   }
 
-    // Add separator if there are open (unpinned) apps
-    const openUnpinned = Object.values(openWindows).filter(w => w.element && !isAppPinned(w.name));
-    if (openUnpinned.length > 0) {
-      const separator = document.createElement('div');
-      separator.className = 'taskbar-separator';
-      taskbarAppIconsContainer.appendChild(separator);
-    }
+  // Add separator if there are open (unpinned) apps
+  const openUnpinned = Object.values(openWindows).filter(w => w.element && !isAppPinned(w.name));
+  if (openUnpinned.length > 0) {
+    const separator = document.createElement('div');
+    separator.className = 'taskbar-separator';
+    taskbarAppIconsContainer.appendChild(separator);
+  }
 
-    // Render open (unpinned) app icons
-    Object.values(openWindows).forEach(winObj => {
-      if (!winObj.element) return;
-      const appName = winObj.name;
-      if (isAppPinned(appName)) return; // Pinned apps are only shown as pinned-only if not open
-      // Re-create the icon for open app
-      const details = getAppIconDetails(appName);
-      let iconClass = details.iconClass || 'fa-window-maximize';
-      let iconBgClass = details.iconBgClass || 'gray-icon';
-      // Try to get the icon background class from the desktop icon
-      const desktopIcon = document.querySelector(`.desktop-icon[data-app="${appName}"] .icon-container`);
-      if (desktopIcon) {
-        const bgClass = Array.from(desktopIcon.classList).find(cls => cls.endsWith('-icon'));
-        if (bgClass) iconBgClass = bgClass;
-      }
-      const appTitle = winObj.appTitle || appName.charAt(0).toUpperCase() + appName.slice(1).replace(/-/g, ' ');
-      const iconEl = document.createElement('div');
-      iconEl.className = 'taskbar-app-icon opened-app';
-      iconEl.setAttribute('data-window-id', winObj.element.id);
-      iconEl.setAttribute('title', appTitle);
-      iconEl.innerHTML = `<div class="icon-container ${iconBgClass}"><i class="fas ${iconClass}"></i></div>`;
-      iconEl.addEventListener('click', function () {
-        const windowToFocus = winObj.element;
-        if (windowToFocus) {
-          if (windowToFocus.classList.contains('minimized')) {
-            toggleMinimizeWindow(windowToFocus, iconEl);
-          } else if (activeWindow === windowToFocus) {
-            toggleMinimizeWindow(windowToFocus, iconEl);
-          } else {
-            makeWindowActive(windowToFocus);
-          }
+  // Render open (unpinned) app icons
+  Object.values(openWindows).forEach(winObj => {
+    if (!winObj.element) return;
+    const appName = winObj.name;
+    if (isAppPinned(appName)) return; // Pinned apps are only shown as pinned-only if not open
+    // Re-create the icon for open app
+    const details = getAppIconDetails(appName);
+    let iconClass = details.iconClass || 'fa-window-maximize';
+    let iconBgClass = details.iconBgClass || 'gray-icon';
+    // Try to get the icon background class from the desktop icon
+    const desktopIcon = document.querySelector(`.desktop-icon[data-app="${appName}"] .icon-container`);
+    if (desktopIcon) {
+      const bgClass = Array.from(desktopIcon.classList).find(cls => cls.endsWith('-icon'));
+      if (bgClass) iconBgClass = bgClass;
+    }
+    const appTitle = winObj.appTitle || appName.charAt(0).toUpperCase() + appName.slice(1).replace(/-/g, ' ');
+    const iconEl = document.createElement('div');
+    iconEl.className = 'taskbar-app-icon opened-app';
+    iconEl.setAttribute('data-window-id', winObj.element.id);
+    iconEl.setAttribute('title', appTitle);
+    iconEl.innerHTML = `<div class="icon-container ${iconBgClass}"><i class="fas ${iconClass}"></i></div>`;
+    iconEl.addEventListener('click', function () {
+      const windowToFocus = winObj.element;
+      if (windowToFocus) {
+        if (windowToFocus.classList.contains('minimized')) {
+          toggleMinimizeWindow(windowToFocus, iconEl);
+        } else if (activeWindow === windowToFocus) {
+          toggleMinimizeWindow(windowToFocus, iconEl);
+        } else {
+          makeWindowActive(windowToFocus);
         }
-      });
-      taskbarAppIconsContainer.appendChild(iconEl);
-    
+      }
+    });
+    taskbarAppIconsContainer.appendChild(iconEl);
+
   });
   // On load, render pinned icons
   if (document.readyState === 'loading') {
@@ -1754,13 +1986,13 @@ document.addEventListener('DOMContentLoaded', function () {
       // Add a class to body for mode
       document.body.classList.add('app-launcher-mode');
       // Attach desktop context menu to app-launcher-desktop
-      //if (launcherDesktop) {
-       // launcherDesktop.addEventListener('contextmenu', function (e) {
-      //    // Prevent right-click context menu in app launcher mode
-      //      e.preventDefault();
-      //      return false;
-      //    });
-      //}
+      if (launcherDesktop) {
+        launcherDesktop.addEventListener('contextmenu', function (e) {
+          // Prevent right-click context menu in app launcher mode
+          e.preventDefault();
+          return false;
+        });
+      }
 
       // Show and animate in the taskbar for app launcher mode
       if (taskbar) {
@@ -2016,6 +2248,20 @@ document.addEventListener('DOMContentLoaded', function () {
       }
       // --- FIX: Re-attach context menu listeners to right icons ---
       taskbarRight.querySelectorAll('.taskbar-icon, .taskbar-time, .taskbar-ai').forEach(attachTaskbarIconListeners);
+      // --- Ensure widgets toggle button is present and correct ---
+      let widgetsToggleBtn = document.getElementById('widgets-toggle-btn');
+      if (!widgetsToggleBtn) {
+        widgetsToggleBtn = document.createElement('button');
+        widgetsToggleBtn.id = 'widgets-toggle-btn';
+        widgetsToggleBtn.className = 'taskbar-icon';
+        widgetsToggleBtn.innerHTML = '<span id="widgets-toggle-arrow"><i class="fas fa-chevron-right"></i></span>';
+        taskbarRight.appendChild(widgetsToggleBtn);
+      } else {
+        // Enforce correct structure and IDs
+        widgetsToggleBtn.className = 'taskbar-icon';
+        widgetsToggleBtn.innerHTML = '<span id="widgets-toggle-arrow"><i class="fas fa-chevron-right"></i></span>';
+      }
+      attachWidgetsToggleBtnListener();
     }
     if (widgetsScreen) {
       window.widgetsVisible = !widgetsScreen.classList.contains('widgets-hidden');
@@ -2351,23 +2597,23 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // --- FIX: Remove pinned-only icon if present ---
-// --- Get pinned icon rect BEFORE removing it ---
-let iconRect = null;
-const pinnedIcon = taskbarAppIconsContainer.querySelector('.taskbar-app-icon.pinned-only[data-app-name="' + appName + '"]');
-if (iconElementForAnim && iconElementForAnim.getBoundingClientRect) {
-  iconRect = iconElementForAnim.getBoundingClientRect();
-} else if (pinnedIcon && pinnedIcon.getBoundingClientRect) {
-  iconRect = pinnedIcon.getBoundingClientRect();
-} else {
-  const desktopIcon = document.querySelector(`.desktop-icon[data-app="${appName}"]`);
-  if (desktopIcon) {
-    iconRect = desktopIcon.getBoundingClientRect();
-  }
-}
-if (pinnedIcon) pinnedIcon.remove();
+    // --- Get pinned icon rect BEFORE removing it ---
+    let iconRect = null;
+    const pinnedIcon = taskbarAppIconsContainer.querySelector('.taskbar-app-icon.pinned-only[data-app-name="' + appName + '"]');
+    if (iconElementForAnim && iconElementForAnim.getBoundingClientRect) {
+      iconRect = iconElementForAnim.getBoundingClientRect();
+    } else if (pinnedIcon && pinnedIcon.getBoundingClientRect) {
+      iconRect = pinnedIcon.getBoundingClientRect();
+    } else {
+      const desktopIcon = document.querySelector(`.desktop-icon[data-app="${appName}"]`);
+      if (desktopIcon) {
+        iconRect = desktopIcon.getBoundingClientRect();
+      }
+    }
+    if (pinnedIcon) pinnedIcon.remove();
 
-windowIdCounter++;
-const windowId = `window-${windowIdCounter}`;
+    windowIdCounter++;
+    const windowId = `window-${windowIdCounter}`;
 
 
     let windowElement = null;
@@ -2478,7 +2724,7 @@ const windowId = `window-${windowIdCounter}`;
       }
       // ---
       const taskbarIcon = createTaskbarIcon(windowId, appName, finalIconClass, appTitle);
-      openWindows[windowId] = { 
+      openWindows[windowId] = {
         element: windowElement,
         taskbarIcon: taskbarIcon,
         name: appName,
@@ -2486,10 +2732,10 @@ const windowId = `window-${windowIdCounter}`;
         iconClass: finalIconClass,
         iconBgClass: finalIconBgClass,
         appTitle: appTitle
-       };
+      };
       makeWindowActive(windowElement);
       // --- EASY MODE: maximize and hide header ---
-      if (window._easyMode || document.body.classList.contains('easy-mode')) {
+      if (window._easyMode && document.body.classList.contains('easy-mode')) {
         // Maximize window to fill desktop area
         windowElement.classList.add('maximized');
         windowElement.style.left = '0px';
@@ -2657,20 +2903,35 @@ const windowId = `window-${windowIdCounter}`;
         windowElement.addEventListener('animationend', function handler(ev) {
           windowElement.classList.remove('window-anim-open', 'window-anim-maximize', 'window-anim-close');
           if (ev.animationName === 'windowClose') {
-            currentTaskbarIcon.classList.remove('opened-app');
-            // Remove taskbar icon
-            if (currentTaskbarIcon && currentTaskbarIcon.parentNode) currentTaskbarIcon.parentNode.removeChild(currentTaskbarIcon);
-            // Remove window from openWindows
-            delete openWindows[windowId];
+            // Start icon out animation only for unpinned icons
+            if (currentTaskbarIcon && currentTaskbarIcon.parentNode) {
+              if (!currentTaskbarIcon.classList.contains('pinned-only')) {
+                animateTaskbarIconOut(currentTaskbarIcon, function () {
+                  // Delete openWindows entry before re-render
+                  delete openWindows[windowId];
+                  renderPinnedTaskbarIcons();
+                });
+              } else {
+                // Delete openWindows entry before re-render
+                delete openWindows[windowId];
+                renderPinnedTaskbarIcons();
+              }
+            } else {
+              // Delete openWindows entry before re-render
+              delete openWindows[windowId];
+              renderPinnedTaskbarIcons();
+            }
+            // Immediately do the rest of the cleanup
+            if (currentTaskbarIcon) currentTaskbarIcon.classList.remove('opened-app');
             windowElement.remove();
-            renderPinnedTaskbarIcons();
             if (activeWindow === windowElement) activeWindow = null;
             updateTaskbarActiveState();
             windowElement._isClosing = false;
             if (typeof updateAppLauncherTaskbarPosition === 'function') updateAppLauncherTaskbarPosition();
             closeStartMenuAnimated();
           }
-        }, { once: true });
+        }
+          , { once: true });
         // ---
       });
     }
@@ -2755,8 +3016,8 @@ const windowId = `window-${windowIdCounter}`;
 
               windowElement.style.transition = '';
               windowElement.removeEventListener('transitionend', handler);
-                        // After maximize
-                        if (typeof updateAppLauncherTaskbarPosition === 'function') updateAppLauncherTaskbarPosition();
+              // After maximize
+              if (typeof updateAppLauncherTaskbarPosition === 'function') updateAppLauncherTaskbarPosition();
             }
           });
           maximizeButton.classList.add('window-restore');
@@ -3066,7 +3327,6 @@ const windowId = `window-${windowIdCounter}`;
       if (activeTaskbarIcon) activeTaskbarIcon.classList.add('active');
     }
   }
-
   function makeWindowDraggable(windowElement) {
     if (window.innerWidth <= MOBILE_BREAKPOINT) {
       // On smaller screens, windows are fullscreen and not draggable.
@@ -4869,46 +5129,50 @@ const windowId = `window-${windowIdCounter}`;
           case 'open-settings':
             openApp('settings', 'Settings', 'fa-cog', 'green');
             break;
-          case 'uninstall-app': {
-            if (currentContextMenuTarget && currentContextMenuTarget.classList.contains('app-grid-item')) {
-              const appName = currentContextMenuTarget.getAttribute('data-app-name') || currentContextMenuTarget.getAttribute('data-app-id');
-              const appTitle = currentContextMenuTarget.getAttribute('data-app-title') || currentContextMenuTarget.querySelector('span')?.textContent || appName;
-              showConfirmDialog({
-                title: 'Uninstall App',
-                message: `Are you sure you want to uninstall <b>${appTitle}</b>? This cannot be undone!`,
-                iconClass: 'fa-trash',
-                okText: 'Uninstall',
-                cancelText: 'Cancel',
-                style: 'desktop'
-              }).then(confirmed => {
-                if (confirmed) {
-                  // Remove from startMenuApps array
-                  if (typeof startMenuApps !== 'undefined') {
-                    const idx = startMenuApps.findIndex(a => a.id === appName || a.name === appName || (a.name && a.name.toLowerCase().replace(/\s+/g, '-') === appName));
-                    if (idx !== -1) {
-                      startMenuApps.splice(idx, 1);
+            case 'uninstall-app': {
+              if (
+                currentContextMenuTarget &&
+                (currentContextMenuTarget.classList.contains('app-grid-item') ||
+                 currentContextMenuTarget.classList.contains('app-launcher-app'))
+              ) {
+                const appName = currentContextMenuTarget.getAttribute('data-app-name') || currentContextMenuTarget.getAttribute('data-app-id');
+                const appTitle = currentContextMenuTarget.getAttribute('data-app-title') || currentContextMenuTarget.querySelector('span')?.textContent || appName;
+                showConfirmDialog({
+                  title: 'Uninstall App',
+                  message: `Are you sure you want to uninstall <b>${appTitle}</b>? This cannot be undone!`,
+                  iconClass: 'fa-trash',
+                  okText: 'Uninstall',
+                  cancelText: 'Cancel',
+                  style: 'desktop'
+                }).then(confirmed => {
+                  if (confirmed) {
+                    // Remove from startMenuApps array
+                    if (typeof startMenuApps !== 'undefined') {
+                      const idx = startMenuApps.findIndex(a => a.id === appName || a.name === appName || (a.name && a.name.toLowerCase().replace(/\\s+/g, '-') === appName));
+                      if (idx !== -1) {
+                        startMenuApps.splice(idx, 1);
+                      }
                     }
+                    // Remove from DOM if present
+                    if (currentContextMenuTarget && currentContextMenuTarget.parentElement) {
+                      currentContextMenuTarget.parentElement.removeChild(currentContextMenuTarget);
+                    }
+                    // Remove from desktop if present
+                    const desktopIcon = document.querySelector('.desktop-icon[data-app=\"' + appName + '\"]');
+                    if (desktopIcon && desktopIcon.parentElement) {
+                      desktopIcon.parentElement.removeChild(desktopIcon);
+                    }
+                    // Remove from taskbar if pinned
+                    unpinAppFromTaskbar(appName);
+                    // Refresh start menu UI
+                    if (typeof populateStartMenuApps === 'function') populateStartMenuApps();
+                    if (typeof showShortTopNotification === 'function') showShortTopNotification('App uninstalled');
                   }
-                  // Remove from DOM if present
-                  if (currentContextMenuTarget && currentContextMenuTarget.parentElement) {
-                    currentContextMenuTarget.parentElement.removeChild(currentContextMenuTarget);
-                  }
-                  // Remove from desktop if present
-                  const desktopIcon = document.querySelector('.desktop-icon[data-app="' + appName + '"]');
-                  if (desktopIcon && desktopIcon.parentElement) {
-                    desktopIcon.parentElement.removeChild(desktopIcon);
-                  }
-                  // Remove from taskbar if pinned
-                  unpinAppFromTaskbar(appName);
-                  // Refresh start menu UI
-                  if (typeof populateStartMenuApps === 'function') populateStartMenuApps();
-                  if (typeof showShortTopNotification === 'function') showShortTopNotification('App uninstalled');
-                }
-                if (typeof hideContextMenu === 'function') hideContextMenu();
-              });
+                  if (typeof hideContextMenu === 'function') hideContextMenu();
+                });
+              }
+              break;
             }
-            break;
-          }
           case 'sort-name': {
             // Only handle if desktop area is context
             const desktopIconsContainer = document.querySelector('.desktop-icons');
@@ -5540,12 +5804,38 @@ const windowId = `window-${windowIdCounter}`;
         menuItems.push({
           label: 'Customize Taskbar', action: 'customize-all-taskbar', icon: 'fa-cog', subItems: [
             { label: 'Default', action: 'taskbar-icons-middle-alignment', icon: 'fa-ellipsis' },
-            { label: 'All Icons (including taskt menu) - Middle alignment', action: 'taskbar-icons-middle-alignment', icon: 'fa-ellipsis-h' },
+            { label: 'Windows 11 Style', action: 'taskbar-windows11-alignment', icon: 'fa-ellipsis-h' },
             { label: 'Icons - Left alignment', action: 'taskbar-icons-left-alignment', icon: 'fa-server' },
             { label: 'Icons and Text', action: 'taskbar-icons-and-text-apps', icon: 'fa-server' },
 
           ]
         });
+      } else if (e.target.closest('.app-launcher-mode .app-launcher-app')) {
+        currentContextMenuTarget = e.target.closest('.app-launcher-app');
+        const appName = currentContextMenuTarget.getAttribute('data-app-name') || currentContextMenuTarget.getAttribute('data-app-id');
+        const appTitle = currentContextMenuTarget.getAttribute('data-app-title') || currentContextMenuTarget.querySelector('span')?.textContent || appName;
+        const details = getAppIconDetails(appName);
+        // Determine if system app
+        let isSystemApp = false;
+        if (typeof startMenuApps !== 'undefined') {
+          const appObj = startMenuApps.find(a =>
+            a.id === appName ||
+            a.name === appName ||
+            (a.name && a.name.toLowerCase().replace(/\s+/g, '-') === appName)
+          );
+          if (appObj && appObj.category && appObj.category.toUpperCase().includes('SYSTEM')) isSystemApp = true;
+        }
+        const menuItems = [
+          { label: 'Open', action: 'open-app', icon: details.iconClass },
+          { label: isAppPinned(appName) ? 'Unpin from Taskbar' : 'Pin to Taskbar', action: isAppPinned(appName) ? 'unpin-taskbar' : 'pin-to-taskbar', icon: 'fa-thumbtack' },
+          { type: 'separator' },
+          isSystemApp
+            ? { label: 'Uninstall App', action: 'uninstall-app', icon: 'fa-trash', disabled: true }
+            : { label: 'Uninstall App', action: 'uninstall-app', icon: 'fa-trash' }
+        ];
+        populateContextMenu(menuItems, e.clientX, e.clientY);
+        e.preventDefault();
+        return;
       } else if (e.target.closest('.desktop-icon')) {
         currentContextMenuTarget = e.target.closest('.desktop-icon');
         menuItems.push({ label: 'Open', action: 'open-app', icon: 'fa-folder-open' });
@@ -5575,43 +5865,43 @@ const windowId = `window-${windowIdCounter}`;
         menuItems.push({
           label: 'Start menu style',
           action: 'start-menu-style',
-          icon: 'fa-table-cells',
+          icon: 'fa-rocket',
           subItems: [
             {
               label: 'Default',
               action: 'start-menu-style-default',
-              icon: 'fa-braille',
+              icon: 'fa-columns',
               checked: startMenu && startMenu.classList.contains('start-menu-style-default')
             },
             {
               label: 'Default Apps only',
               action: 'start-menu-style-default-apps-only',
-              icon: 'fa-braille',
+              icon: 'fa-grip',
               checked: startMenu && startMenu.classList.contains('start-menu-style-default-apps-only')
             },
             {
               label: 'Windows 11 Style',
               action: 'start-menu-style-windows11',
-              icon: 'fa-windows',
+              icon: 'fa-square-poll-horizontal',
               checked: startMenu && startMenu.classList.contains('start-menu-style-windows11')
             },
             {
               label: 'List with sidebar',
               action: 'start-menu-style-apps-list-with-sidebar',
-              icon: 'fa-list-ul',
+              icon: 'fa-book-open',
               checked: startMenu && startMenu.classList.contains('start-menu-list-style') && !startMenu.classList.contains('start-menu-style-apps-list-only')
             },
             {
               label: 'List Apps only',
               action: 'start-menu-style-apps-list-only',
-              icon: 'fa-list-ul',
+              icon: 'fa-table-list',
               checked: startMenu && startMenu.classList.contains('start-menu-style-apps-list-only')
             },
             { type: 'separator' },
             {
               label: 'App Launcher',
               action: 'start-menu-style-app-launcher',
-              icon: 'fa-rocket',
+              icon: 'fa-table-cells',
               checked: startMenu && startMenu.classList.contains('start-menu-style-app-launcher')
             }
           ]
@@ -5745,10 +6035,17 @@ const windowId = `window-${windowIdCounter}`;
         menuItems.push({ label: isMuted ? 'Unmute' : 'Mute', action: 'taskbar-mute', icon: isMuted ? 'fa-volume-up' : 'fa-volume-mute' });
       } else if (e.target.closest('.taskbar-right .taskbar-time')) {
         currentContextMenuTarget = e.target.closest('.taskbar-time');
-        menuItems.push({ label: 'Date and Time Settings', action: 'taskbar-date-time-settings', icon: 'fa-gear' });
-        menuItems.push({ type: 'separator' });
         menuItems.push({ label: 'Open Calendar', action: 'taskbar-open-calendar', icon: 'fa-calendar-days' });
-        menuItems.push({ label: 'Open Clock', action: 'taskbar-open-clock', icon: 'fa-clock' });
+        menuItems.push({ type: 'separator' });
+        menuItems.push({ label: 'Date and Time Settings', action: 'taskbar-date-time-settings', icon: 'fa-gear' });
+        menuItems.push({
+          label: 'Time & Date visibility', action: 'show-hide-time-date', icon: 'fa-eye', subItems: [
+            { label: 'Show time & date', action: 'always-show-time-date', icon: 'fa-eye' },
+            { label: 'Hide time & date', action: 'always-hide-time-date', icon: 'fa-eye-slash' },
+            { type: 'separator' },
+            { label: 'Show only in full screen', action: 'show-only-in-full-screen', icon: 'fa-chalkboard' },
+          ]
+        });
       } else if (e.target.closest('.taskbar-right #ai-chat-btn')) {
         currentContextMenuTarget = e.target.closest('#ai-chat-btn');
         menuItems.push({ label: 'Open AI Chat', action: 'taskbar-open-ai-chat', icon: 'fa-comment-dots' });
@@ -6064,34 +6361,34 @@ const windowId = `window-${windowIdCounter}`;
           }
         }
         break;
-        case 'open-taskbar-icon': {
-          // Restore a minimized window from the taskbar context menu
-          if (currentContextMenuTarget && currentContextMenuTarget.classList.contains('taskbar-app-icon')) {
-            const winId = currentContextMenuTarget.getAttribute('data-window-id');
-            if (winId && openWindows[winId] && openWindows[winId].element) {
-              const windowElement = openWindows[winId].element;
-              const taskbarIcon = openWindows[winId].taskbarIcon;
-              if (windowElement.classList.contains('minimized')) {
-                if (typeof toggleMinimizeWindow === 'function') toggleMinimizeWindow(windowElement, taskbarIcon);
-              }
-              if (typeof makeWindowActive === 'function') makeWindowActive(windowElement);
-              if (typeof hideContextMenu === 'function') hideContextMenu();
+      case 'open-taskbar-icon': {
+        // Restore a minimized window from the taskbar context menu
+        if (currentContextMenuTarget && currentContextMenuTarget.classList.contains('taskbar-app-icon')) {
+          const winId = currentContextMenuTarget.getAttribute('data-window-id');
+          if (winId && openWindows[winId] && openWindows[winId].element) {
+            const windowElement = openWindows[winId].element;
+            const taskbarIcon = openWindows[winId].taskbarIcon;
+            if (windowElement.classList.contains('minimized')) {
+              if (typeof toggleMinimizeWindow === 'function') toggleMinimizeWindow(windowElement, taskbarIcon);
             }
+            if (typeof makeWindowActive === 'function') makeWindowActive(windowElement);
+            if (typeof hideContextMenu === 'function') hideContextMenu();
           }
-          break;
         }
+        break;
+      }
       case 'add-to-desktop':
         if (currentContextMenuTarget && currentContextMenuTarget.classList.contains('app-grid-item')) {
           const appName = currentContextMenuTarget.getAttribute('data-app-name') || currentContextMenuTarget.getAttribute('data-app-id');
           const appTitle = currentContextMenuTarget.getAttribute('data-app-title') || currentContextMenuTarget.querySelector('span')?.textContent || appName;
           // Get icon details from startMenuApps, fallback to getAppIconDetails
           let details = { iconClass: 'fa-window-maximize', iconBgClass: 'gray-icon' };
-                    if (typeof startMenuApps !== 'undefined') {
-                      const appObj = startMenuApps.find(a =>
-                        a.id === appName ||
-                        a.name === appName ||
-                        (a.name && a.name.toLowerCase().replace(/\s+/g, '-') === appName)
-                      );
+          if (typeof startMenuApps !== 'undefined') {
+            const appObj = startMenuApps.find(a =>
+              a.id === appName ||
+              a.name === appName ||
+              (a.name && a.name.toLowerCase().replace(/\s+/g, '-') === appName)
+            );
             if (appObj) {
               details.iconClass = appObj.iconClass || details.iconClass;
               details.iconBgClass = appObj.iconBgClass || details.iconBgClass;
@@ -6301,7 +6598,7 @@ const windowId = `window-${windowIdCounter}`;
     widgetsScrollHandle.addEventListener('wheel', function (e) {
       // Forward the scroll to the widgets panel
       widgetsScreen.scrollTop += e.deltaY;
-                    e.preventDefault();
+      e.preventDefault();
     }, { passive: false });
 
     // Enhanced widget scroll handle interaction
@@ -6613,7 +6910,7 @@ const windowId = `window-${windowIdCounter}`;
     logoutBtn.addEventListener('mouseenter', () => { logoutBtn.style.background = 'var(--accent-color)' });
     logoutBtn.addEventListener('mouseleave', () => { logoutBtn.style.background = 'rgb(255 255 255 / 15%)' });
     logoutBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
+      e.stopPropagation();
       handleLogout();
     });
 
@@ -6861,19 +7158,25 @@ document.addEventListener('keydown', function (e) {
 
 // ... existing code ...
 // --- DESKTOP WIDGETS TOGGLE BUTTON ---
-document.addEventListener('DOMContentLoaded', function () {
+function attachWidgetsToggleBtnListener() {
   const widgetsToggleBtn = document.getElementById('widgets-toggle-btn');
   const widgetsToggleArrow = document.getElementById('widgets-toggle-arrow');
   const widgetsScreen = document.getElementById('widgets-screen');
-  window.widgetsVisible = true;
   if (widgetsToggleBtn && widgetsToggleArrow && widgetsScreen) {
-    const arrowIcon = widgetsToggleArrow.querySelector('i');
+    // Remove previous listeners by replacing with a clone
+    const newBtn = widgetsToggleBtn.cloneNode(true);
+    widgetsToggleBtn.parentNode.replaceChild(newBtn, widgetsToggleBtn);
+    const arrowIcon = newBtn.querySelector('i');
     function setChevronIcon(visible) {
       if (!arrowIcon) return;
       arrowIcon.classList.remove('fa-chevron-right', 'fa-chevron-left');
       arrowIcon.classList.add(visible ? 'fa-chevron-right' : 'fa-chevron-left');
     }
-    widgetsToggleBtn.addEventListener('click', function () {
+    // --- FIX: Sync state ---
+    window.widgetsVisible = !widgetsScreen.classList.contains('widgets-hidden');
+    // Set initial icon
+    setChevronIcon(window.widgetsVisible);
+    newBtn.addEventListener('click', function () {
       if (window.innerWidth <= 1023) return; // Only on desktop
       window.widgetsVisible = !window.widgetsVisible;
       if (!window.widgetsVisible) {
@@ -6881,22 +7184,25 @@ document.addEventListener('DOMContentLoaded', function () {
         setChevronIcon(false);
       } else {
         widgetsScreen.classList.remove('widgets-hidden');
-        widgetsScreen.style.display = ''; // Always reset display when showing
+        widgetsScreen.style.display = '';
         setChevronIcon(true);
       }
     });
     // On resize, always show widgets if switching to mobile
-    window.addEventListener('resize', function () {
+    window.addEventListener('resize', function resizeHandler() {
       if (window.innerWidth <= 1023) {
         widgetsScreen.classList.remove('widgets-hidden');
         widgetsScreen.style.display = '';
         window.widgetsVisible = true;
         setChevronIcon(true);
       }
-    });
-    // Set initial icon
-    setChevronIcon(true);
+    }, { once: true });
   }
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+  attachWidgetsToggleBtnListener();
+  // ... existing code ...
 });
 // ... existing code ...
 
@@ -7065,7 +7371,6 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 });
 // ... existing code ...
-
 
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -7585,7 +7890,7 @@ function restoreDesktopIconPositions() {
         icon.removeAttribute('data-absolute');
       });
     }
-                    return false;
+    return false;
   }
   const icons = document.querySelectorAll('.desktop-icon');
   let restored = false;
@@ -8637,15 +8942,6 @@ function showConfirmDialog({ title, message, iconClass, okText = "OK", cancelTex
     });
   });
 }
-
-
-
-
-
-
-
-
-
 
 
 

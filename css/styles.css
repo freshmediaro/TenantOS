@@ -461,6 +461,10 @@ button {
 
 .taskbar-icon:hover {
   background-color: var(--dark-mode-hover);
+  opacity: 1 !important;
+}
+.taskbar-icon:hover #notifications-btn {
+  opacity: 1 !important;
 }
 
 .taskbar-time {
@@ -469,6 +473,7 @@ button {
   align-items: flex-end;
   margin-left: 15px;
   margin-right: 15px;
+  cursor: pointer;
 }
 
 .date {
@@ -3373,7 +3378,11 @@ input:checked+.slider:before {
 
 
 body.light-windows .profile-name {
-  color: #000000;
+  color: var(--os-gray-dark);
+}
+
+body.light-windows .profile-info .profile-id {
+  color: var(--os-gray);
 }
 
 body.light-windows .window-controls button:hover,
@@ -3412,6 +3421,7 @@ body.light-windows .window-title span {
 body.light-windows .settings-nav li a:hover,
 body.light-windows .sidebar-item:hover {
   background-color: #ffffffda !important;
+  color: var(--accent-color) !important;
 }
 
 
@@ -3437,7 +3447,7 @@ body.light-windows .window-title,
 body.light-windows .window-icon i,
 body.light-windows .window-controls button,
 body.light-windows .window-controls button.window-popout i {
-  color: #222 !important;
+  color: var(--os-gray-dark) !important;
 }
 
 body.light-windows .menu-toggle,
@@ -3500,13 +3510,13 @@ body.light-windows .settings-nav li a i {
 }
 
 body.light-windows .window-toolbar {
-  color: #222 !important;
+  color: var(--os-gray-dark) !important;
   background-color: #f1f1f5 !important;
   border-bottom: 1px solid #e0e0e0;
 }
 
 body.light-windows .toolbar-button {
-  color: #222 !important;
+  color: var(--os-gray-dark) !important;
   background-color: #f1f1f5 !important;
 }
 
@@ -3515,7 +3525,7 @@ body.light-windows .toolbar-button:hover {
 }
 
 body.light-windows .path-breadcrumb {
-  color: #444 !important;
+  color: var(--os-gray-dark) !important;
   background: #fff !important;
 }
 
@@ -3541,6 +3551,14 @@ body.light-windows .window-statusbar,
 body.light-windows .window-statusbar * {
   color: #444 !important;
   background-color: #f1f1f5 !important;
+}
+
+body.light-windows .window-statusbar .slider {
+  background-color: var(--os-gray) !important; 
+}
+
+body.light-windows .window-statusbar input:checked+.slider {
+  background-color: var(--accent-color) !important;
 }
 
 body.light-windows .window-statusbar {
@@ -7171,6 +7189,7 @@ body.light-windows .settings-content .badge {
   transition: all 0.3s;
 }
 
+/* List style for start menu APPS ONLY */
 
 .start-menu.start-menu-style-apps-list-only {
   width: 280px;
@@ -7619,7 +7638,7 @@ body.light-windows .settings-content .badge {
   transform: translateX(-50%);
   width: auto !important;
   min-width: 72px !important;
-  max-width: 90vw;
+  max-width: 100vw;
   margin: 0 0 10px 0 !important;
   padding: 0 !important;
   bottom: 0 !important;
@@ -7921,4 +7940,196 @@ body.light-windows .settings-content .badge {
   margin: 0 15px 0 0;
   border-radius: 2px;
   align-self: center;
+}
+
+/* Calendar Slide-out Panel */
+.calendar-panel {
+  position: fixed;
+  transform: translateY(100%);
+  right: 15px;
+  bottom: 60px;
+  width: 360px;
+  max-width: 98vw;
+  background: #050217c5;
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.25);
+  border-radius: 20px;
+  z-index: 40000;
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.25s;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  backdrop-filter: blur(24px);
+-webkit-backdrop-filter: blur(24px); /* for Safari */
+height: 360px;
+}
+.calendar-panel.visible {
+  bottom: 60px !important;
+  pointer-events: auto !important;
+  opacity: 1 !important;
+  z-index: 60000;
+  transform: translateY(0);
+}
+
+/* App Launcher/Easy Mode: slide from top */
+.app-launcher-mode .calendar-panel,
+.easy-mode .calendar-panel {
+  top: 50px;
+  bottom: auto;
+  transform: translateY(-100%);
+}
+.app-launcher-mode .calendar-panel.visible,
+.easy-mode .calendar-panel.visible {
+  transform: translateY(0);
+}
+
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30px 26px 10px 30px;
+  font-size: 16px;
+  font-weight: 500;
+  color: #fff;
+}
+#calendar-close-btn {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.5em;
+  cursor: pointer;
+  padding: 0 6px;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+
+
+.calendar-body {
+  padding: 20px 22px 10px 22px;
+  color: #fff;
+  min-height: 220px;
+  /* Placeholder for calendar grid */
+}
+
+.calendar-day {
+  margin-bottom: 20px;
+}
+
+.calendar-number {
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+button#calendar-prev-btn,
+button#calendar-next-btn {
+  background: none; 
+  border: none; 
+  color: #fff !important; 
+  font-size: 14px; 
+  cursor: pointer; 
+  padding: 0 4px; 
+  border-radius: 6px;
+  opacity: 0.6;
+}
+
+button#calendar-today-btn {
+  background: none; 
+  border: none; 
+  color: #fff !important; 
+  font-size: 18px; 
+  cursor: pointer; 
+  padding: 0 4px; 
+  border-radius: 6px;
+  opacity: 0.6;
+}
+
+#calendar-prev-btn:hover,
+#calendar-next-btn:hover,
+#calendar-today-btn:hover {
+  opacity: 1;
+}
+
+.calendar-number:hover {
+  background: var(--dark-mode-hover);
+}
+
+@media (max-width: 500px) {
+  .calendar-panel {
+    min-width: 95vw;
+    left: 2.5vw;
+    transform: translateX(0) translateY(100%);
+  }
+  .calendar-panel.visible {
+    transform: translateX(0) translateY(0);
+  }
+}
+
+@keyframes taskbarAppIconIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes taskbarAppIconOut {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+}
+.taskbar-app-icon.anim-in {
+  animation: taskbarAppIconIn 0.28s cubic-bezier(0.4,0,0.2,1);
+}
+.taskbar-app-icon.anim-out {
+  animation: taskbarAppIconOut 0.22s cubic-bezier(0.4,0,0.2,1);
+}
+
+
+.calendar-today-panel-slide {
+  position: absolute;
+  left: 0;
+  right: 15px;
+  bottom: 430px;
+  margin: 0 auto;
+  background: #050217c5;
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.25);
+  border-radius: 20px;
+  backdrop-filter: blur(30px);
+  z-index: 10;
+  transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+  transform: translateY(200%);
+  height: calc(100vh - 430px);
+}
+
+.calendar-today-panel-slide.active {
+  transform: translateY(0);
+  height: calc(100vh - 430px) !important;
+  backdrop-filter: blur(30px);
+
+}
+
+.app-launcher-mode .calendar-today-panel-slide,
+.easy-mode .calendar-today-panel-slide {
+  top: 420px;
+  bottom: auto;
+  transform: translateY(-100%);
+}
+.app-launcher-mode .calendar-today-panel-slide.active,
+.easy-mode .calendar-today-panel-slide.active {
+  transform: translateY(0);
 }
