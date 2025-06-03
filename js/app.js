@@ -19,9 +19,145 @@ const volumePanel = document.querySelector('#volume-panel');
 
 
 
+//appstore
+// Example data (replace with API or JSON fetch)
+const featured = [
+  {
+    section: "HOW TO",
+    image: "img/featured1.jpg",
+    title: "Create a Stellar Podcast",
+    subtitle: "From scripting to sharing with the world, in five easy steps."
+  },
+  {
+    section: "MEET THE DEVELOPER",
+    image: "img/featured2.jpg",
+    title: "The Secret Keeper",
+    subtitle: "How the developer of Day One keeps your journal entries safe."
+  },
+  {
+    section: "EDITORS' CHOICE",
+    image: "img/featured3.jpg",
+    title: "Aurora HDR 2018",
+    subtitle: "Bring the best out of any photo."
+  }
+];
 
-//Notification
-//Notification system 
+const appSections = [
+  {
+    title: "Edit Photos and Images",
+    seeAll: "#",
+    apps: [
+      {
+        icon: "img/app1.png",
+        name: "Affinity Photo",
+        subtitle: "Redefining photo editing",
+        price: "$49.99"
+      },
+      {
+        icon: "img/app2.png",
+        name: "Luminar 2018: Pro photo editor",
+        subtitle: "Perfect photos in less time",
+        price: "$49.99"
+      },
+      {
+        icon: "img/app3.png",
+        name: "Photolemur 2",
+        subtitle: "Fully automatic photo editor",
+        price: "$19.99"
+      },
+      {
+        icon: "img/app4.png",
+        name: "Polarr Photo Editor",
+        subtitle: "Photography",
+        price: "GET"
+      },
+      {
+        icon: "img/app5.png",
+        name: "Anamorphic Pro",
+        subtitle: "Photography",
+        price: "$29.99"
+      },
+      {
+        icon: "img/app6.png",
+        name: "Hydra - HDR Photo Editor",
+        subtitle: "Create beautiful HDR images",
+        price: "$49.99"
+      },
+      {
+        icon: "img/app7.png",
+        name: "Acorn 6 Image Editor",
+        subtitle: "Image editor for humans",
+        price: "$29.99"
+      },
+      {
+        icon: "img/app8.png",
+        name: "Flare 2",
+        subtitle: "Smart photo editing",
+        price: "$9.99"
+      },
+      {
+        icon: "img/app9.png",
+        name: "RAW Power",
+        subtitle: "Photography",
+        price: "$13.99"
+      },
+      {
+        icon: "img/app10.png",
+        name: "Pictorial",
+        subtitle: "Photography",
+        price: "$59.99"
+      }
+    ]
+  }
+  // Add more sections as needed
+];
+
+
+function setupAppStore(windowElement) {
+  // Find the containers inside this window
+  const featuredContainer = windowElement.querySelector('#featured-cards');
+  const sectionsContainer = windowElement.querySelector('#appstore-sections');
+
+  // Render featured cards
+  featuredContainer.innerHTML = '';
+  featured.forEach(card => {
+    featuredContainer.innerHTML += `
+      <div class="featured-card">
+        <span class="section-link">${card.section}</span>
+        <img src="${card.image}" alt="${card.title}">
+        <h2>${card.title}</h2>
+        <p>${card.subtitle}</p>
+      </div>
+    `;
+  });
+
+  // Render app sections
+  sectionsContainer.innerHTML = '';
+  appSections.forEach(section => {
+    let appsHTML = section.apps.map(app => `
+      <div class="app-card">
+        <img src="${app.icon}" alt="${app.name}">
+        <h3>${app.name}</h3>
+        <p>${app.subtitle}</p>
+        <button>${app.price}</button>
+      </div>
+    `).join('');
+    sectionsContainer.innerHTML += `
+      <div class="appstore-section">
+        <div class="section-header">
+          <h2>${section.title}</h2>
+          <a href="${section.seeAll}">See All</a>
+        </div>
+        <div class="appstore-grid">
+          ${appsHTML}
+        </div>
+      </div>
+    `;
+  });
+}
+
+
+//Notification//Notification system 
 let notifications = [];
 let lastAddedNotificationId = null;
 
@@ -1588,9 +1724,9 @@ function fadeOutSectionLabel(sectionLabel) {
 
 // In setupFileExplorerInteraction or after creating the File Explorer window:
 function setupSidebarToggleForFileExplorer(fileExplorerWindow) {
-  const sidebar = fileExplorerWindow.querySelector('.file-explorer-sidebar');
-  const toggleLabel = fileExplorerWindow.querySelector('#file-explorer-sidebar-toggle-label');
-  const toggle = fileExplorerWindow.querySelector('#file-explorer-sidebar-toggle');
+  const sidebar = fileExplorerWindow.querySelector('.window-sidebar');
+  const toggleLabel = fileExplorerWindow.querySelector('#window-sidebar-toggle-label');
+  const toggle = fileExplorerWindow.querySelector('#window-sidebar-toggle');
   if (!sidebar || !toggle) return;
   // Only show toggle on desktop
   function updateToggleVisibility() {
@@ -1733,25 +1869,25 @@ let startButton = null;
 // --- START MENU LOGIC (top-level for widgets) ---
 // Define the app list before any function that uses it
   const startMenuApps = [
-    { id: 'my-files', name: 'My Files', iconClass: 'fa-folder', iconBgClass: 'pink-icon', iconBgMenuClass: 'pink-bg', category: 'SYSTEM APPS' },
-    { id: 'this-pc', name: 'This PC', iconClass: 'fa-desktop', iconBgClass: 'pink-icon', iconBgMenuClass: 'pink-bg', category: 'SYSTEM APPS' },
-    { id: 'web-files', name: 'Web Files', iconClass: 'fa-folder-open', iconBgClass: 'green-icon', iconBgMenuClass: 'green-bg', category: 'SYSTEM APPS' },
-    { id: 'trash-sm', name: 'Trash', iconClass: 'fa-trash', iconBgClass: 'purple-icon', iconBgMenuClass: 'purple-bg', category: 'SYSTEM APPS' },
-    { id: 'settings-sm', name: 'Settings', iconClass: 'fa-cog', iconBgClass: 'pink-icon', iconBgMenuClass: 'pink-bg', category: 'SYSTEM APPS' },
-    { id: 'site-builder-sm', name: 'Site Builder', iconClass: 'fa-globe', iconBgClass: 'pink-icon', iconBgMenuClass: 'pink-bg', category: 'CUSTOMISE' },
-    { id: 'app-store-sm', name: 'AppStore', iconClass: 'fa-store', iconBgClass: 'green-icon', iconBgMenuClass: 'green-bg', category: 'CUSTOMISE' },
-    { id: 'social-master', name: 'Social Master', iconClass: 'fa-users', iconBgClass: 'purple-icon', iconBgMenuClass: 'purple-bg', category: 'CUSTOMISE' },
-    { id: 'personalize', name: 'Personalize', iconClass: 'fa-cog', iconBgClass: 'pink-icon', iconBgMenuClass: 'pink-bg', category: 'CUSTOMISE' },
-    { id: 'word-doc', name: 'Word doc', iconClass: 'fa-file-word', iconBgClass: 'pink-icon', iconBgMenuClass: 'pink-bg', category: 'DOCS' },
-    { id: 'excel-numbers', name: 'Excel Numbers', iconClass: 'fa-file-excel', iconBgClass: 'green-icon', iconBgMenuClass: 'green-bg', category: 'DOCS' },
-    { id: 'notepad', name: 'Notepad', iconClass: 'fa-sticky-note', iconBgClass: 'purple-icon', iconBgMenuClass: 'purple-bg', category: 'DOCS' },
-    { id: 'wordpad', name: 'Wordpad', iconClass: 'fa-file-alt', iconBgClass: 'pink-icon', iconBgMenuClass: 'pink-bg', category: 'DOCS' },
-    { id: 'calculator-sm', name: 'Calculator', iconClass: 'fa-calculator', iconBgClass: 'gray-icon', iconBgMenuClass: 'gray-bg', category: 'PRODUCTIVITY' },
-    { id: 'photoshop-sm', name: 'Photoshop', iconClass: 'fa-palette', iconBgClass: 'blue-icon', iconBgMenuClass: 'blue-bg', category: 'PRODUCTIVITY' },
-    { id: 'calendar-sm', name: 'Calendar', iconClass: 'fa-calendar-alt', iconBgClass: 'purple-icon', iconBgMenuClass: 'purple-bg', category: 'PRODUCTIVITY' },
-    { id: 'notes', name: 'Notes', iconClass: 'far fa-clipboard', iconBgClass: 'pink-icon', iconBgMenuClass: 'pink-bg', category: 'PRODUCTIVITY' },
-    { id: 'app-launcher', name: 'App launcher', iconClass: 'fa-th', iconBgClass: 'blue-icon', iconBgMenuClass: 'blue-bg', category: 'SYSTEM APPS' },
-    { id: 'wallet', name: 'Wallet', iconClass: 'fa-wallet', iconBgClass: 'pink-icon', iconBgMenuClass: 'pink-bg', category: 'SYSTEM APPS' }
+    { id: 'my-files', name: 'My Files', iconClass: 'fa-folder', iconBgClass: 'pink-icon', category: 'SYSTEM APPS' },
+    { id: 'this-pc', name: 'This PC', iconClass: 'fa-desktop', iconBgClass: 'pink-icon', category: 'SYSTEM APPS' },
+    { id: 'web-files', name: 'Web Files', iconClass: 'fa-folder-open', iconBgClass: 'green-icon', category: 'SYSTEM APPS' },
+    { id: 'trash-sm', name: 'Trash', iconClass: 'fa-trash', iconBgClass: 'purple-icon', category: 'SYSTEM APPS' },
+    { id: 'settings-sm', name: 'Settings', iconClass: 'fa-cog', iconBgClass: 'pink-icon', category: 'SYSTEM APPS' },
+    { id: 'site-builder-sm', name: 'Site Builder', iconClass: 'fa-globe', iconBgClass: 'pink-icon', category: 'CUSTOMISE' },
+    { id: 'app-store-sm', name: 'AppStore', iconClass: 'fa-store', iconBgClass: 'green-icon', category: 'CUSTOMISE' },
+    { id: 'social-master', name: 'Social Master', iconClass: 'fa-users', iconBgClass: 'purple-icon', category: 'CUSTOMISE' },
+    { id: 'personalize', name: 'Personalize', iconClass: 'fa-cog', iconBgClass: 'pink-icon', category: 'CUSTOMISE' },
+    { id: 'word-doc', name: 'Word doc', iconClass: 'fa-file-word', iconBgClass: 'pink-icon', category: 'DOCS' },
+    { id: 'excel-numbers', name: 'Excel Numbers', iconClass: 'fa-file-excel', iconBgClass: 'green-icon', category: 'DOCS' },
+    { id: 'notepad', name: 'Notepad', iconClass: 'fa-sticky-note', iconBgClass: 'purple-icon', category: 'DOCS' },
+    { id: 'wordpad', name: 'Wordpad', iconClass: 'fa-file-alt', iconBgClass: 'pink-icon', category: 'DOCS' },
+    { id: 'calculator-sm', name: 'Calculator', iconClass: 'fa-calculator', iconBgClass: 'gray-icon', category: 'PRODUCTIVITY' },
+    { id: 'photoshop-sm', name: 'Photoshop', iconClass: 'fa-palette', iconBgClass: 'blue-icon', category: 'PRODUCTIVITY' },
+    { id: 'calendar-sm', name: 'Calendar', iconClass: 'fa-calendar-alt', iconBgClass: 'purple-icon', category: 'PRODUCTIVITY' },
+    { id: 'notes', name: 'Notes', iconClass: 'far fa-clipboard', iconBgClass: 'pink-icon', category: 'PRODUCTIVITY' },
+    { id: 'app-launcher', name: 'App launcher', iconClass: 'fa-th', iconBgClass: 'blue-icon', category: 'SYSTEM APPS' },
+    { id: 'wallet', name: 'Wallet', iconClass: 'fa-wallet', iconBgClass: 'pink-icon', category: 'SYSTEM APPS' }
   ];
 
   let startMenuAppSortMode = 'category'; // 'category' or 'alphabet'
@@ -1774,6 +1910,9 @@ function generateDesktopIcons() {
       const icon = document.createElement('div');
       icon.className = 'desktop-icon';
       icon.setAttribute('data-app', app.id);
+      icon.setAttribute('tabindex', '0');
+      icon.setAttribute('role', 'button');
+      icon.setAttribute('aria-label', app.name);
       icon.innerHTML = `
         <div class="icon-container ${app.iconBgClass}"><i class="fas ${app.iconClass}"></i></div>
         <span>${app.name}</span>
@@ -2097,6 +2236,107 @@ document.addEventListener('DOMContentLoaded', function () {
       }
       document.addEventListener('mousemove', globalOnIconMouseMove);
       document.addEventListener('mouseup', globalOnIconMouseUp);
+    });
+
+    // Add keyboard accessibility
+    icon.addEventListener('keydown', function (e) {
+      const icons = Array.from(document.querySelectorAll('.desktop-icon'));
+      const currentIndex = icons.indexOf(this);
+      let handled = false;
+      // Arrow navigation
+      if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.key)) {
+        let nextIndex = currentIndex;
+        const container = this.parentElement;
+        const iconRect = this.getBoundingClientRect();
+        const iconHeight = this.offsetHeight;
+        const iconWidth = this.offsetWidth;
+        // Calculate grid positions
+        const positions = icons.map(ic => ic.getBoundingClientRect());
+        if (e.key === "ArrowLeft") {
+          // Find icon to the left (same row, closest left)
+          let minDx = Infinity, target = null;
+          positions.forEach((rect, i) => {
+            if (i !== currentIndex && Math.abs(rect.top - iconRect.top) < iconHeight / 2 && rect.left < iconRect.left) {
+              const dx = iconRect.left - rect.left;
+              if (dx < minDx) { minDx = dx; target = i; }
+            }
+          });
+          if (target !== null) nextIndex = target;
+        } else if (e.key === "ArrowRight") {
+          let minDx = Infinity, target = null;
+          positions.forEach((rect, i) => {
+            if (i !== currentIndex && Math.abs(rect.top - iconRect.top) < iconHeight / 2 && rect.left > iconRect.left) {
+              const dx = rect.left - iconRect.left;
+              if (dx < minDx) { minDx = dx; target = i; }
+            }
+          });
+          if (target !== null) nextIndex = target;
+        } else if (e.key === "ArrowUp") {
+          let minDy = Infinity, target = null;
+          positions.forEach((rect, i) => {
+            if (i !== currentIndex && Math.abs(rect.left - iconRect.left) < iconWidth / 2 && rect.top < iconRect.top) {
+              const dy = iconRect.top - rect.top;
+              if (dy < minDy) { minDy = dy; target = i; }
+            }
+          });
+          if (target !== null) nextIndex = target;
+        } else if (e.key === "ArrowDown") {
+          let minDy = Infinity, target = null;
+          positions.forEach((rect, i) => {
+            if (i !== currentIndex && Math.abs(rect.left - iconRect.left) < iconWidth / 2 && rect.top > iconRect.top) {
+              const dy = rect.top - iconRect.top;
+              if (dy < minDy) { minDy = dy; target = i; }
+            }
+          });
+          if (target !== null) nextIndex = target;
+        }
+        if (nextIndex !== currentIndex) {
+          icons[nextIndex].focus();
+          handled = true;
+        }
+      }
+      // Enter/Space: open app
+      if ((e.key === 'Enter' || e.key === ' ') && !handled) {
+        if (window.innerWidth > MOBILE_BREAKPOINT) {
+          // Simulate double click
+          this.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
+        } else {
+          this.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        }
+        handled = true;
+      }
+      // Delete: remove from desktop
+      if (e.key === 'Delete') {
+        // Remove icon from DOM and update order
+        const parent = this.parentElement;
+        if (parent) {
+          parent.removeChild(this);
+          if (typeof saveCurrentDesktopIconOrder === 'function') saveCurrentDesktopIconOrder();
+          if (window.innerWidth > 1023 && typeof saveDesktopIconPositions === 'function') saveDesktopIconPositions();
+          if (typeof showShortTopNotification === 'function') showShortTopNotification('Removed from Desktop');
+        }
+        handled = true;
+      }
+      // Context menu key or Shift+F10
+      if (e.key === 'ContextMenu' || (e.shiftKey && e.key === 'F10')) {
+        // Open context menu at icon position
+        const rect = this.getBoundingClientRect();
+        if (typeof window.populateContextMenu === 'function') {
+          currentContextMenuTarget = this;
+          const menuItems = [
+            { label: 'Open', action: 'open-app', icon: 'fa-folder-open' },
+            { label: 'Pin To Taskbar', action: 'pin-to-taskbar', icon: 'fa-thumbtack' },
+            { type: 'separator' },
+            { label: 'Remove from Desktop', action: 'remove-from-desktop', icon: 'fa-trash' }
+          ];
+          window.populateContextMenu(menuItems, rect.left + rect.width / 2, rect.top + rect.height / 2);
+        }
+        handled = true;
+      }
+      if (handled) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
     });
   }
 
@@ -2572,7 +2812,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const controls = win.querySelector('.window-controls');
         if (controls) controls.style.display = '';
         // Move window-title back to header if it was in sidebar
-        const sidebar = win.querySelector('.file-explorer-sidebar, .settings-sidebar, .app-store-sidebar');
+        const sidebar = win.querySelector('.window-sidebar, .settings-sidebar, .app-store-sidebar');
         const windowTitle = sidebar && sidebar.querySelector('.easy-mode-window-title');
         if (windowTitle && header) {
           windowTitle.classList.remove('easy-mode-window-title');
@@ -2730,7 +2970,7 @@ document.addEventListener('DOMContentLoaded', function () {
         appItem.setAttribute('data-app', app.id);
         appItem.setAttribute('data-app-name', app.name.toLowerCase());
         appItem.innerHTML = `
-        <div class=\"app-icon-bg ${app.iconBgMenuClass}\">\n          <i class=\"fas ${app.iconClass}\"></i>\n        </div>\n        <span>${app.name}</span>\n      `;
+        <div class=\"app-icon-bg ${app.iconBgClass}\">\n          <i class=\"fas ${app.iconClass}\"></i>\n        </div>\n        <span>${app.name}</span>\n      `;
         const openStartMenuApp = (e) => {
           openApp(app.id, app.name, app.iconClass, app.iconBgClass, appItem);
           closeStartMenuAnimated();
@@ -2763,7 +3003,7 @@ document.addEventListener('DOMContentLoaded', function () {
             appItem.setAttribute('data-app', app.id);
             appItem.setAttribute('data-app-name', app.name.toLowerCase());
             appItem.innerHTML = `
-            <div class=\"app-icon-bg ${app.iconBgMenuClass}\">\n              <i class=\"fas ${app.iconClass}\"></i>\n            </div>\n            <span>${app.name}</span>\n          `;
+            <div class=\"app-icon-bg ${app.iconBgClass}\">\n              <i class=\"fas ${app.iconClass}\"></i>\n            </div>\n            <span>${app.name}</span>\n          `;
             const openStartMenuApp = (e) => {
               openApp(app.id, app.name, app.iconClass, app.iconBgClass, appItem);
               closeStartMenuAnimated();
@@ -3030,12 +3270,12 @@ document.addEventListener('DOMContentLoaded', function () {
         appTitle = 'Settings';
         delayedContentLoader = () => setupSettingsApp(windowElement);
         break;
-      case 'app-store':
-      case 'app-store-sm':
-        windowElement = createWindowFromTemplate('app-store', windowId, true);
-        appTitle = 'AppStore';
-        delayedContentLoader = () => setupFileExplorerInteraction(windowElement);
-        break;
+        case 'app-store':
+          case 'app-store-sm':
+            windowElement = createWindowFromTemplate('app-store', windowId, true);
+            appTitle = 'AppStore';
+            delayedContentLoader = () => setupAppStore(windowElement); // <-- FIXED
+            break;
       case 'calculator':
       case 'calculator-sm':
         windowElement = createWindowFromTemplate('calculator-app', windowId, true);
@@ -3139,7 +3379,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (controls) controls.style.display = 'none';
         // --- Move window-title to sidebar ---
         const windowTitle = windowElement.querySelector('.window-title');
-        const sidebar = windowElement.querySelector('.file-explorer-sidebar, .settings-sidebar, .app-store-sidebar');
+        const sidebar = windowElement.querySelector('.window-sidebar, .settings-sidebar, .app-store-sidebar');
         if (windowTitle && sidebar && !sidebar.querySelector('.easy-mode-window-title')) {
           // Clone or move the windowTitle (move is better to preserve events/icons)
           windowTitle.classList.add('easy-mode-window-title');
@@ -4199,7 +4439,7 @@ document.addEventListener('DOMContentLoaded', function () {
       settingsContent.style.overflowY = 'auto';
     }
     // Make settings content scrollable
-    const fileExplorerContent = settingsWindowElement.querySelector('.file-explorer-content');
+    const fileExplorerContent = settingsWindowElement.querySelector('.window-main-content');
     if (fileExplorerContent) {
       fileExplorerContent.classList.add('scrollable');
     }
@@ -4857,7 +5097,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (fileExplorerWindow.classList.contains('settings-app-window') || fileExplorerWindow.querySelector('.settings-content')) {
       return;
     }
-    const contentArea = fileExplorerWindow.querySelector('.file-explorer-content');
+    const contentArea = fileExplorerWindow.querySelector('.window-main-content');
     fileExplorerContentArea = contentArea;
     currentSelectedFileItems = new Set();
     if (!contentArea) return; // Prevent error if contentArea is missing
@@ -4960,7 +5200,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Add mobile menu toggle functionality
     const menuToggle = fileExplorerWindow.querySelector('.menu-toggle');
-    const sidebar = fileExplorerWindow.querySelector('.file-explorer-sidebar');
+    const sidebar = fileExplorerWindow.querySelector('.window-sidebar');
     const overlay = fileExplorerWindow.querySelector('.sidebar-overlay');
 
     if (menuToggle && sidebar && overlay) {
@@ -5030,10 +5270,10 @@ document.addEventListener('DOMContentLoaded', function () {
         (target.tagName === 'TEXTAREA' && !target.readOnly && !target.disabled) ||
         (target.isContentEditable && !target.readOnly && !target.disabled)
       ) {
-        // If inside .desktop-area, .file-explorer-content, .taskbar, let those handlers run
+        // If inside .desktop-area, .window-main-content, .taskbar, let those handlers run
         if (target.closest && (
           target.closest('.desktop-area') ||
-          target.closest('.file-explorer-content') ||
+          target.closest('.window-main-content') ||
           target.closest('.widget-content') ||
           target.closest('.notification-widget') ||
           (target.closest('.taskbar') && !target.closest('.search-input'))
@@ -6265,7 +6505,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
           ]
         });
-      } else if (e.target.closest('.file-explorer-content .file-item')) {
+      } else if (e.target.closest('.window-main-content .file-item')) {
         currentContextMenuTarget = e.target.closest('.file-item');
         menuItems.push({ label: 'Open', action: 'open-file', icon: 'fa-folder-open' });
         menuItems.push({ label: 'Open in new window', action: 'open-in-new-window', icon: 'fa-window-restore' });
@@ -6291,27 +6531,27 @@ document.addEventListener('DOMContentLoaded', function () {
         menuItems.push({ type: 'separator' });
         menuItems.push({ label: 'Add to Favorites', action: 'add-folder-to-favorites', icon: 'fa-share-square' });
         menuItems.push({ label: 'Get info', action: 'get-info', icon: 'fa-info-circle' });
-      } else if (e.target.closest('.file-explorer-sidebar .sidebar-section.drives-section .sidebar-item ')) {
+      } else if (e.target.closest('.window-sidebar .sidebar-section.drives-section .sidebar-item ')) {
         currentContextMenuTarget = e.target.closest('.sidebar-item');
         menuItems.push({ label: 'Open', action: 'open-file', icon: 'fa-folder-open' });
         menuItems.push({ label: 'Open in new window', action: 'open-in-new-window', icon: 'fa-window-restore' });
         menuItems.push({ type: 'separator' });
         menuItems.push({ label: 'Connect / Disconnect', action: 'connect-disconnect', icon: 'fa-info-circle' });
-      } else if (e.target.closest('.file-explorer-sidebar .sidebar-section.shared-section .sidebar-item ')) {
+      } else if (e.target.closest('.window-sidebar .sidebar-section.shared-section .sidebar-item ')) {
         currentContextMenuTarget = e.target.closest('.sidebar-item');
         menuItems.push({ label: 'Open', action: 'open-file', icon: 'fa-folder-open' });
         menuItems.push({ label: 'Open in new window', action: 'open-in-new-window', icon: 'fa-window-restore' });
         menuItems.push({ type: 'separator' });
         menuItems.push({ label: 'Get info', action: 'get-info', icon: 'fa-info-circle' });
-      } else if (e.target.closest('.file-explorer-sidebar .sidebar-section .sidebar-item ')) {
+      } else if (e.target.closest('.window-sidebar .sidebar-section .sidebar-item ')) {
         currentContextMenuTarget = e.target.closest('.sidebar-item');
         menuItems.push({ label: 'Open', action: 'open-file', icon: 'fa-folder-open' });
         menuItems.push({ label: 'Open in new window', action: 'open-in-new-window', icon: 'fa-window-restore' });
         menuItems.push({ type: 'separator' });
         menuItems.push({ label: 'Get info', action: 'get-info', icon: 'fa-info-circle' });
 
-      } else if (e.target.closest('.file-explorer-content .file-explorer-elements')) {
-        currentContextMenuTarget = e.target.closest('.file-explorer-elements');
+      } else if (e.target.closest('.window-main-content .window-app-content')) {
+        currentContextMenuTarget = e.target.closest('.window-app-content');
         menuItems.push({
           label: 'View', action: 'list-view', icon: 'fa-eye', subItems: [
             { label: 'Icons', action: 'view-icons', icon: 'fa-th-large' },
@@ -8371,7 +8611,7 @@ function updateToastStackPositions() {
 // --- Shared Mobile Sidebar Logic for All Windows with Sidebar ---
 function setupMobileSidebarForWindow(windowElement) {
   // Try all possible sidebar and content class combos for robustness
-  let sidebar = windowElement.querySelector('.file-explorer-sidebar, .settings-sidebar, .app-store-sidebar');
+  let sidebar = windowElement.querySelector('.window-sidebar, .settings-sidebar, .app-store-sidebar');
   let overlay = windowElement.querySelector('.sidebar-overlay');
   const windowContent = windowElement.querySelector('.window-content');
   if (windowContent && overlay && windowContent.firstElementChild !== overlay) {
@@ -8380,10 +8620,10 @@ function setupMobileSidebarForWindow(windowElement) {
   if (!overlay && windowContent) overlay = windowContent.querySelector('.sidebar-overlay');
   const menuToggle = windowElement.querySelector('.menu-toggle');
   // Try all possible content area classes
-  let contentArea = windowElement.querySelector('.file-explorer-content, .settings-content, .app-store-main-content');
+  let contentArea = windowElement.querySelector('.window-main-content, .settings-content, .app-store-main-content');
   // If not found, try direct child of window-content
   if (!contentArea && windowContent) {
-    contentArea = windowContent.querySelector('.file-explorer-content, .settings-content, .app-store-main-content');
+    contentArea = windowContent.querySelector('.window-main-content, .settings-content, .app-store-main-content');
   }
   // If still not found, fallback to windowContent itself
   if (!contentArea && windowContent) contentArea = windowContent;
@@ -8458,7 +8698,7 @@ const _originalUpdateSidebarForWindow = updateSidebarForWindow;
 window.updateSidebarForWindow = function (windowEl) {
   if (!windowEl) return;
   if (windowEl._isClosing) return;
-  const sidebars = windowEl.querySelectorAll('.file-explorer-sidebar, .settings-sidebar, .app-store-sidebar, .start-menu-right-sidebar');
+  const sidebars = windowEl.querySelectorAll('.window-sidebar, .settings-sidebar, .app-store-sidebar, .start-menu-right-sidebar');
   const width = windowEl.offsetWidth;
   const isMobile = window.innerWidth <= 767;
   sidebars.forEach(sb => {
@@ -8481,7 +8721,7 @@ window.updateSidebarForWindow = function (windowEl) {
       return;
     }
     // Otherwise, original logic
-    const content = sb.parentElement && sb.parentElement.querySelector('.file-explorer-content, .settings-content, .app-store-main-content');
+    const content = sb.parentElement && sb.parentElement.querySelector('.window-main-content, .settings-content, .app-store-main-content');
     if (content) {
       content.style.transform = '';
       content.style.width = '';
@@ -8807,7 +9047,7 @@ updateNotificationsBadge();
 function updateSidebarForWindow(windowEl) {
   if (!windowEl) return;
   if (windowEl._isClosing) return;
-  const sidebars = windowEl.querySelectorAll('.file-explorer-sidebar, .settings-sidebar, .app-store-sidebar, .start-menu-right-sidebar');
+  const sidebars = windowEl.querySelectorAll('.window-sidebar, .settings-sidebar, .app-store-sidebar, .start-menu-right-sidebar');
   const width = windowEl.offsetWidth;
   const isMobile = window.innerWidth <= 767;
   sidebars.forEach(sb => {
@@ -8824,7 +9064,7 @@ function updateSidebarForWindow(windowEl) {
     sb.style.height = '';
     sb.style.zIndex = '';
     sb.style.width = '';
-    const content = sb.parentElement && sb.parentElement.querySelector('.file-explorer-content, .settings-content, .app-store-main-content');
+    const content = sb.parentElement && sb.parentElement.querySelector('.window-main-content, .settings-content, .app-store-main-content');
     if (content) {
       content.style.transform = '';
       content.style.width = '';
@@ -9005,6 +9245,7 @@ function showConfirmDialog({ title, message, iconClass, okText = "OK", cancelTex
     });
   });
 }
+
 
 
 
