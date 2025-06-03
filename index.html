@@ -14,6 +14,7 @@
 
    <!-- Volume Panel -->
    <div id="volume-panel" class="volume-panel">
+    <button id="close-volume-panel" class="close-volume-panel-btn" title="Close"><i class="fas fa-times"></i></button>
     <div class="music-panel-box">
       <div class="music-panel-content">
         <div class="music-info-block">
@@ -57,54 +58,6 @@
         <div class="desktop-area" id="desktop-area">
           <!-- Desktop icons -->
           <div class="desktop-icons">
-            <div class="desktop-icon" data-app="my-files">
-              <div class="icon-container blue-icon">
-                <i class="fas fa-folder"></i>
-              </div>
-              <span>My Files</span>
-            </div>
-            
-            <div class="desktop-icon trash-item" data-app="trash"> 
-              <div class="icon-container gray-icon">
-                <i class="fas fa-trash"></i>
-              </div>
-              <span>Trash Bin</span>
-            </div>
-            
-            <div class="desktop-icon" data-app="app-store">
-              <div class="icon-container blue-app-icon">
-                <i class="fas fa-store"></i>
-              </div>
-              <span>AppStore</span>
-            </div>
-            
-            <div class="desktop-icon" data-app="settings">
-              <div class="icon-container green-icon">
-                <i class="fas fa-cog"></i>
-              </div>
-              <span>Settings</span>
-            </div>
-            
-            <div class="desktop-icon" data-app="site-builder">
-              <div class="icon-container cyan-icon">
-                <i class="fas fa-globe"></i>
-              </div>
-              <span>SiteBuilder</span>
-            </div>
-            
-            <div class="desktop-icon" data-app="wallet">
-              <div class="icon-container pink-icon">
-                <i class="fas fa-wallet"></i>
-              </div>
-              <span>Wallet</span>
-            </div>
-
-            <div class="desktop-icon" data-app="photoshop">
-              <div class="icon-container blue-icon">
-                <i class="fas fa-palette"></i>
-              </div>
-              <span>Photoshop</span>
-            </div>
           </div>
           
           <!-- Windows area for opened apps -->
@@ -117,218 +70,13 @@
           <div id="drag-selector" class="hidden"></div> <!-- Drag selector element -->
 
           <!-- Taskbar (must be inside .desktop-area for mobile swipe to work) -->
-          <div class="taskbar">
-            <div class="start-button" id="start-button">
-              <i class="fas fa-th"></i>
-            </div>
-            <div class="search-container">
-              <input type="text" placeholder="Search" class="search-input">
-              <i class="fas fa-search search-icon"></i>
-            </div>
-            <div class="taskbar-app-icons" id="taskbar-app-icons"></div>
-            <div class="taskbar-right">
-              <div class="taskbar-icon" style="position:relative;">
-                <button id="notifications-btn" class="taskbar-user-btn" >
-                  <i class="fas fa-bell"></i>
-                </button>
-              </div>
-              <div class="taskbar-icon">
-                <button id="wallet-btn" class="taskbar-user-btn">
-                  <i class="fas fa-wallet"></i>
-                </button>
-              </div>
-              <div class="taskbar-icon">
-                <button id="fullscreen-btn" class="taskbar-user-btn">
-                  <i class="fas fa-expand"></i>
-                </button>
-              </div>
-              <div class="taskbar-icon">
-                <button id="volume-btn" class="taskbar-user-btn" title="Volume">
-                  <i class="fas fa-volume-up"></i>
-                </button>
-              </div>
-              <div class="taskbar-icon">
-                <button id="global-search-btn" class="taskbar-search-btn">
-                  <i class="fas fa-search"></i>
-                </button>
-              </div>
-              <div class="taskbar-icon">
-                <button id="app-launcher-btn" class="taskbar-user-btn">
-                  <i class="fas fa-th"></i>
-                </button>
-              </div>
-              <div class="taskbar-time">
-                <span id="current-time">22:30</span>
-                <span class="date">Mie. 25 Aprilie</span>
-              </div>
-
-              <div class="taskbar-ai">
-                <button id="ai-chat-btn" class="taskbar-user-btn" ">
-                  <img src="img/alien.png" alt="User" class="user-avatar">
-                </button>
-              </div>
-              <button id="widgets-toggle-btn" class="taskbar-icon" >
-                <span id="widgets-toggle-arrow"><i class="fas fa-chevron-right"></i></span>
-              </button>
-            </div>
-          </div>
-
+          
         </div> <!-- End desktop-area -->
 
         <!-- Widgets Screen START -->
         <div id="widgets-screen">
-          <!-- Notifications widget -->
-          <div class="widget">
-            <div class="widget-header">
-              <span>Notifications</span>
-            </div>
-            <div class="widget-content notification-widget">
-              <div class="big-number">23</div>
-              <div class="widget-subtitle">No more events today</div>
-            </div>
-          </div>
-          
-          <!-- Disk space widget -->
-          <div class="widget">
-            <div class="widget-header">
-              <span>Disk space</span>
-            </div>
-            <div class="widget-content disk-space-widget">
-              <div class="big-number">23%</div>
-              <div class="progress-bar">
-                <div class="progress" style="width: 23%"></div>
-              </div>
-              <div class="widget-subtitle">15 GB / 50 GB</div>
-            </div>
-          </div>
-          
-          <!-- Email widget -->
-          <div class="widget">
-            <div class="widget-content email-widget">
-              <div class="widget-icon"><i class="fas fa-headphones"></i></div>
-              <div class="widget-data">
-                <div class="big-number">23</div>
-                <div class="widget-subtitle">Unread emails</div>
-              </div>
-            </div>
-          </div>
-          
-          <!-- Messages widget -->
-          <div class="widget">
-            <div class="widget-content messages-widget">
-              <div class="widget-icon"><i class="fas fa-dollar-sign"></i></div>
-              <div class="widget-data">
-                <div class="big-number">23</div>
-                <div class="widget-subtitle">Unread messages</div>
-              </div>
-            </div>
-          </div>
-          
-          <!-- Usage stats widgets -->
-          <div class="widget">
-            <div class="widget-content stats-widget">
-              <div class="stat-item">
-                <div class="stat-item-main">
-                    <span class="stat-item-title">Disk usage</span>
-                    <span class="stat-item-price">$257,25</span>
-                </div>
-                <div class="stat-item-chart chart-blue"></div> 
-                <div class="stat-item-value">
-                    <span class="big-number">125,5</span>
-                    <span class="stats-unit">GB</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div class="widget">
-            <div class="widget-content stats-widget">
-              <div class="stat-item">
-                <div class="stat-item-main">
-                    <span class="stat-item-title">Processing</span>
-                    <span class="stat-item-price">$257,25</span>
-                </div>
-                <div class="stat-item-chart chart-blue"></div> 
-                <div class="stat-item-value">
-                    <span class="big-number">50</span>
-                    <span class="stats-unit">PP</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div class="widget">
-            <div class="widget-content stats-widget">
-              <div class="stat-item">
-                <div class="stat-item-main">
-                    <span class="stat-item-title">Traffic</span>
-                    <span class="stat-item-price">$257,25</span>
-                </div>
-                <div class="stat-item-chart chart-red"></div> 
-                <div class="stat-item-value">
-                    <span class="big-number">12,5</span>
-                    <span class="stats-unit">GB</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <!-- Cost estimation widget -->
-          <div class="widget">
-            <div class="widget-header">
-              <span>Cost estimation so far:</span>
-            </div>
-            <div class="widget-content cost-widget">
-              <div class="cost-info">
-                <div class="cost-currency">$</div>
-                <div class="cost-amount">275</div>
-              </div>
-              <div class="days-left">
-                <div class="days-number">25</div>
-                <div class="days-text">Days left</div>
-              </div>
-            </div>
-          </div>
-          
-          <!-- LEI widget -->
-          <div class="widget lei-widget">
-            <div class="widget-content">
-              <div class="lei-header">
-                <div class="lei-icon"><img src="img/coin-icon.png" alt="LEI"></div>
-                <div class="lei-amount">2 587</div>
-                <div class="lei-currency">lei</div>
-              </div>
-              <div class="lei-main-content">
-                <div class="lei-chart-area">
-                  <div class="lei-chart-container">
-                    <!-- Placeholder for actual bar chart elements -->
-                     <div class="lei-chart-bars">
-                        <!-- Example bars - heights and colors would be dynamic in a real app -->
-                        <div class="bar" style="height: 60%; background: linear-gradient(to top, #4A90E2 30%, #F5A623 30%, #F5A623 60%, #BD10E0 60%);"></div>
-                        <div class="bar" style="height: 40%; background: linear-gradient(to top, #4A90E2 50%, #F5A623 50%);"></div>
-                        <div class="bar" style="height: 80%; background: linear-gradient(to top, #4A90E2 20%, #F5A623 20%, #F5A623 40%, #BD10E0 40%, #BD10E0 70%, #7ED321 70%);"></div>
-                        <div class="bar" style="height: 50%; background: linear-gradient(to top, #4A90E2 60%, #F5A623 60%);"></div>
-                        <div class="bar" style="height: 30%; background-color: #4A90E2;"></div>
-                        <div class="bar" style="height: 20%; background-color: #F5A623;"></div>
-                      </div>
-                  </div>
-                  <div class="time-indicators">
-                    <span>6 AM</span>
-                    <span>12 PM</span>
-                    <span>6 PM</span>
-                  </div>
-                </div>
-                <div class="lei-side-info">
-                  <div class="lei-side-item"><i class="fas fa-chart-line"></i> <span>58m</span></div>
-                  <div class="lei-side-item"><i class="fas fa-users"></i> <span>22m</span></div> 
-                  <div class="lei-side-item"><i class="fab fa-youtube"></i> <span>18m</span></div>
-                  <div class="lei-side-item"><i class="fab fa-whatsapp"></i> <span>9m</span></div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <!-- Widgets will be dynamically generated here by JavaScript -->
         </div> <!-- Widgets Screen END -->
-        <div id="widgets-scroll-handle"></div>
       </div> <!-- End main-content-area -->
       
       <!-- Start Menu -->
@@ -1189,7 +937,8 @@
     <div class="ai-chat-header">
       <button class="ai-menu-toggle" aria-label="Menu"><i class="fas fa-bars"></i></button>
       <div class="ai-chat-title"><i class="fas fa-robot"></i> <span> Alien Itelligence</span></div>
-      <button id="ai-chat-close-btn" class="ai-chat-close-btn" aria-label="Close chat">&times;</button>
+      <button id="ai-chat-close-btn" class="panel-close-btn" aria-label="Close chat"><i class="fas fa-times"></i></button>
+      
     </div>
     <div class="ai-chat-window-inner" style="height: calc(100vh - 50px); margin-top: 0; display: flex; flex-direction: column;">
       <!-- Chat content goes here -->
@@ -1230,7 +979,7 @@
     <div class="wallet-sidebar-header">
       <button class="wallet-menu-toggle" aria-label="Menu"><i class="fas fa-bars"></i></button>
       <div class="wallet-header-center"><i class="fas fa-wallet"></i> <span>Wallet</span></div>
-      <button class="wallet-close-btn" aria-label="Close"><i class="fas fa-times"></i></button>
+      <button class="panel-close-btn" id="wallet-close-btn" aria-label="Close"><i class="fas fa-times"></i></button>
     </div>
     <div class="wallet-sidebar-content">
       <!-- Wallet content goes here -->

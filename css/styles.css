@@ -220,10 +220,7 @@ button {
   transition: all 0.2s;
 }
 
-.icon-container i {
-  font-size: 24px;
-  color: white;
-}
+
 
 .blue-icon {
   background-color: var(--icon-bg-blue);
@@ -553,6 +550,9 @@ button {
   padding: 25px 20px 20px 20px;
   /* Generous padding */
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  position: absolute;
+    right: 50px;
+    top: -80px;
 }
 
 .site-logo-container {
@@ -690,8 +690,8 @@ button {
   color: white;
 }
 
-.app-icon-bg i {
-  font-size: 22px;
+.app-icon-bg i, .desktop-icon i {
+  font-size: 24px;
 }
 
 .pink-bg {
@@ -2638,6 +2638,52 @@ input:checked+.slider:before {
   padding: 15px 20px 15px 20px;
 }
 
+.notifications-header {
+display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    align-items: center;
+    align-content: center;
+
+}
+.notif-title span {
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.notif-title  i {
+  font-size: 12px;
+  margin-right: 7px;
+}
+
+.notif-menu-toggle {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 18px;
+  cursor: pointer;
+  z-index: 10;
+  opacity: 0.7;
+  transition: opacity 0.2s; }
+
+  .panel-close-btn {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+    z-index: 10;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+
+.panel-close-btn:hover {
+  opacity: 1;
+}
+
 .context-menu.submenu .context-menu-item {
   padding: 6px 25px;
 }
@@ -3496,7 +3542,7 @@ body.light-windows .window-controls button.window-close:hover::after {
 
 body.light-windows .window-controls button::before,
 body.light-windows .window-controls button::after {
-  background-color: #222 !important;
+  background-color: #222;
 }
 
 body.light-windows .window-controls button.window-close:hover::before,
@@ -3942,6 +3988,7 @@ body.light-windows .settings-content .badge {
 
 .ai-chat-title span {
   font-size: 14px;
+  font-weight: 600;
 }
 
 
@@ -4139,15 +4186,7 @@ body.light-windows .settings-content .badge {
   transform: translateX(0);
 }
 
-.notifications-panel-content {
-  flex: 1;
-  overflow-y: auto;
-  padding: 24px 14px 16px 14px;
-  display: flex;
-  flex-direction: column;
-  /* Remove height: 100%; */
-  position: relative;
-}
+
 
 .notif-header-row {
   display: flex;
@@ -4297,12 +4336,16 @@ body.light-windows .settings-content .badge {
 
 /* --- Notification Panel Design Styles --- */
 .notifications-panel-content {
-  padding: 24px 14px 16px 14px;
+  flex: 1;
+  padding: 16px 14px 16px 14px;
   display: flex;
   flex-direction: column;
   height: 100%;
   overflow-y: auto;
+  overflow-x: hidden;
+  position: relative;
 }
+
 
 .notif-header-row {
   display: flex;
@@ -4399,7 +4442,7 @@ body.light-windows .settings-content .badge {
 }
 
 .notif-card.unread:hover {
-  background: #ffffff15;
+  background: var(--dark-mode-hover);
 }
 
 
@@ -4488,10 +4531,12 @@ body.light-windows .settings-content .badge {
   height: 32px;
   border-radius: 50%;
   object-fit: cover;
-  margin-left: 10px;
   margin-top: 2px;
   flex-shrink: 0;
   border: 2px solid #18192b;
+  position: absolute;
+  bottom: 10px;
+  left: 35px;
   display: none;
 }
 
@@ -6993,22 +7038,10 @@ body.light-windows .settings-content .badge {
 
 .wallet-header-center span {
   font-size: 14px;
+  font-weight: 600;
 }
 
-.wallet-close-btn {
-  background: none;
-  border: none;
-  color: #fff;
-  font-size: 15px;
-  cursor: pointer;
-  z-index: 10;
-  opacity: 0.7;
-  transition: opacity 0.2s;
-}
 
-.wallet-close-btn:hover {
-  opacity: 1;
-}
 
 /* Notification badge for taskbar notifications button */
 .notif-badge {
@@ -8112,15 +8145,16 @@ button#calendar-today-btn {
   backdrop-filter: blur(30px);
   z-index: 10;
   transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
-  transform: translateY(200%);
+  transform: translateY(300%);
   height: calc(100vh - 430px);
+
 }
 
 .calendar-today-panel-slide.active {
   transform: translateY(0);
   height: calc(100vh - 430px) !important;
   backdrop-filter: blur(30px);
-
+ 
 }
 
 .app-launcher-mode .calendar-today-panel-slide,

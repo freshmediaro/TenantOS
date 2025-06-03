@@ -19,6 +19,270 @@ const volumePanel = document.querySelector('#volume-panel');
 
 
 
+
+//Notification
+//Notification system 
+let notifications = [];
+let lastAddedNotificationId = null;
+
+function clearAllNotifications() {
+  const notificationsPanel = document.getElementById('notifications-panel');
+  if (notificationsPanel) {
+    const notifCards = Array.from(notificationsPanel.querySelectorAll('.notif-card'));
+    let cardsToRemove = notifCards.length;
+    let prevPositions = notifCards.map(card => card.getBoundingClientRect().top);
+    let prevIds = notifCards.map(card => card.dataset.notifId);
+    notifCards.forEach((card, idx) => {
+      setTimeout(() => {
+        card.style.transition = 'transform 0.3s cubic-bezier(0.4,0,0.2,1), opacity 0.3s cubic-bezier(0.4,0,0.2,1)';
+        card.style.transform = 'translateX(120%)';
+        card.style.opacity = '0';
+        setTimeout(() => {
+          card.remove();
+          // FLIP animate remaining cards up
+          const remainingCards = Array.from(notificationsPanel.querySelectorAll('.notif-card'));
+          remainingCards.forEach(remCard => {
+            const notifId = remCard.dataset.notifId;
+            const prevIdx = prevIds.indexOf(notifId);
+            if (prevIdx !== -1) {
+              const oldTop = prevPositions[prevIdx];
+              const newTop = remCard.getBoundingClientRect().top;
+              const dy = oldTop - newTop;
+              if (dy !== 0) {
+                remCard.style.transition = 'none';
+                remCard.style.transform = `translateY(${dy}px)`;
+                requestAnimationFrame(() => {
+                  remCard.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)';
+                  remCard.style.transform = '';
+                });
+                remCard.addEventListener('transitionend', function handler() {
+                  remCard.style.transition = '';
+                  remCard.removeEventListener('transitionend', handler);
+                });
+              }
+            }
+          });
+          cardsToRemove--;
+          if (cardsToRemove === 0) {
+            notifications.length = 0;
+            renderNotificationsPanel();
+            if (typeof updateNotificationsBadge === 'function') updateNotificationsBadge();
+            const toastContainer = document.getElementById('os-toast-container');
+            if (toastContainer) {
+              Array.from(toastContainer.children).forEach(child => child.remove());
+            }
+          }
+        }, 300);
+      }, idx * 30); // 60ms delay between each
+    });
+  } else {
+    notifications.length = 0;
+    renderNotificationsPanel();
+    if (typeof updateNotificationsBadge === 'function') updateNotificationsBadge();
+    const toastContainer = document.getElementById('os-toast-container');
+    if (toastContainer) {
+      Array.from(toastContainer.children).forEach(child => child.remove());
+    }
+  }
+}
+
+function renderNotificationsPanel() {
+  const notificationsPanel = document.getElementById('notifications-panel');
+  if (!notificationsPanel) return;
+  let todaySection = notificationsPanel.querySelector('.notifications-panel-content');
+  if (!todaySection) {
+    todaySection = document.createElement('div');
+    todaySection.className = 'notifications-panel-content';
+    notificationsPanel.appendChild(todaySection);
+  }
+  todaySection.innerHTML = '';
+  // Header
+  const headerRow = document.createElement('div');
+  headerRow.className = 'notifications-header';
+  headerRow.innerHTML = `
+      <button class="notif-menu-toggle" aria-label="Menu"><i class="fas fa-bars"></i></button>
+      <div class="notif-title"><i class="fas fa-bell"></i> <span> Notifications</span></div>
+      <button id="notif-close-btn" class="panel-close-btn" aria-label="Close notifications"><i class="fas fa-times"></i></button>
+    `;
+  todaySection.appendChild(headerRow);
+  // Section label (only if notifications exist)
+  if (notifications.length > 0) {
+    const sectionLabel = document.createElement('div');
+    sectionLabel.className = 'notif-section-label';
+    sectionLabel.innerHTML = 'Today <span class="notif-clear">Clear all</span>';
+    todaySection.appendChild(sectionLabel);
+  }
+  // List
+  const todayList = document.createElement('div');
+  todayList.className = 'notif-list';
+  notifications.forEach((notif, idx) => {
+    const card = document.createElement('div');
+    card.className = 'notif-card' + (notif.unread ? ' unread' : '');
+    card.dataset.notifId = notif.id;
+    card.innerHTML = `
+      <button class="notif-delete-btn" title="Delete notification">&times;</button>
+      <div class="notif-icon-bg ${notif.iconBgClass}"><i class="fas ${notif.iconClass}"></i></div>
+      <div class="notif-content">
+        <div class="notif-main-row">
+          <span class="notif-main-title">${notif.title}</span>
+        </div>
+        <div class="notif-desc">${notif.desc}</div>
+        <div class="notif-meta">${notif.meta}</div>
+      </div>
+      <img class="notif-avatar" src="${notif.avatar}" />
+    `;
+    // --- SLIDE IN ANIMATION ONLY FOR NEWEST ---
+    if (notif.id && notif.id === lastAddedNotificationId) {
+      card.style.transform = 'translateX(120%)';
+      card.style.opacity = '0';
+      requestAnimationFrame(() => {
+        card.style.transition = 'transform 0.3s cubic-bezier(0.4,0,0.2,1), opacity 0.3s cubic-bezier(0.4,0,0.2,1)';
+        card.style.transform = 'translateX(0)';
+        card.style.opacity = '1';
+      });
+    }
+    todayList.appendChild(card);
+  });
+  todaySection.appendChild(todayList);
+  if (notifications.length === 0) {
+    const emptyMsg = document.createElement('div');
+    emptyMsg.className = 'no-notifications-msg';
+    emptyMsg.textContent = 'No new notifications';
+    emptyMsg.style.cssText = 'display: flex; align-items: center; justify-content: center; height: 100%; color: #888; font-size: 1.15rem; font-weight: 500; text-align: center; margin-top: 60px;';
+    todaySection.appendChild(emptyMsg);
+  }
+  if (typeof enableNotificationSwipeToDelete === 'function') enableNotificationSwipeToDelete();
+  if (typeof updateNotificationsBadge === 'function') updateNotificationsBadge();
+  // Clear the lastAddedNotificationId after rendering
+  lastAddedNotificationId = null;
+}
+
+function addNotification({
+  title = 'New incoming notification',
+  desc = 'This is a test notification',
+  meta = 'now',
+  iconClass = 'fa-shopping-cart',
+  iconBgClass = 'notif-bg-blue',
+  avatar = 'img/avatar.png',
+  unread = true
+} = {}) {
+  const notificationsPanel = document.getElementById('notifications-panel');
+  let prevPositions = [];
+  let prevIds = [];
+  let panelOpen = false;
+  if (notificationsPanel && notificationsPanel.style.display === 'flex' && notificationsPanel.classList.contains('notifications-visible')) {
+    panelOpen = true;
+    const prevCards = notificationsPanel.querySelectorAll('.notif-card');
+    prevCards.forEach(card => {
+      prevPositions.push(card.getBoundingClientRect().top);
+      prevIds.push(card.dataset.notifId);
+    });
+  }
+  // Add a unique id (timestamp-based)
+  const id = 'notif-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+  notifications.unshift({ id, title, desc, meta, iconClass, iconBgClass, avatar, unread });
+  lastAddedNotificationId = id;
+  renderNotificationsPanel();
+  // FLIP animation for existing notifications
+  if (panelOpen) {
+    const notifCards = notificationsPanel.querySelectorAll('.notif-card');
+    notifCards.forEach((card, idx) => {
+      const notifId = card.dataset.notifId;
+      if (notifId && notifId !== id) {
+        const prevIdx = prevIds.indexOf(notifId);
+        if (prevIdx !== -1) {
+          const oldTop = prevPositions[prevIdx];
+          const newTop = card.getBoundingClientRect().top;
+          const dy = oldTop - newTop;
+          if (dy !== 0) {
+            card.style.transition = 'none';
+            card.style.transform = `translateY(${dy}px)`;
+            requestAnimationFrame(() => {
+              card.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)';
+              card.style.transform = '';
+            });
+            card.addEventListener('transitionend', function handler() {
+              card.style.transition = '';
+              card.removeEventListener('transitionend', handler);
+            });
+          }
+        }
+      }
+    });
+  }
+  if (notificationsPanel && notificationsPanel.style.display !== 'flex') {
+    showToastNotification({
+      content: `
+        <button class="notif-delete-btn" title="Dismiss notification">&times;</button>
+        <div class="notif-icon-bg ${iconBgClass}"><i class="fas ${iconClass}"></i></div>
+        <div class="notif-content">
+          <div class="notif-main-row">
+            <span class="notif-main-title">${title}</span>
+          </div>
+          <div class="notif-desc">${desc}</div>
+          <div class="notif-meta">${meta}</div>
+        </div>
+        <img class="notif-avatar" src="${avatar}" />
+      `
+    });
+  }
+  if (typeof updateNotificationsBadge === 'function') updateNotificationsBadge();
+}
+
+// Show a toast notification in the bottom right
+function showToastNotification({ content }) {
+  let toastContainer = document.getElementById('os-toast-container');
+  if (!toastContainer) {
+    toastContainer = document.createElement('div');
+    toastContainer.id = 'os-toast-container';
+    toastContainer.style.position = 'fixed';
+    toastContainer.style.bottom = '32px';
+    toastContainer.style.right = '32px';
+    toastContainer.style.zIndex = '999999';
+    toastContainer.style.display = 'flex';
+    toastContainer.style.flexDirection = 'column-reverse';
+    toastContainer.style.gap = '12px';
+    document.body.appendChild(toastContainer);
+  }
+  const toast = document.createElement('div');
+  toast.className = 'os-toast-notification';
+  toast.innerHTML = content;
+  toast.style.background = 'var(--widget-bg)';
+  toast.style.backdropFilter = 'blur(30px)';
+  toast.style.color = '#fff';
+  toast.style.fontSize = '15px';
+  toast.style.fontWeight = '400';
+  toast.style.padding = '16px 24px 16px 16px';
+  toast.style.borderRadius = '16px';
+  toast.style.boxShadow = '0 4px 24px rgba(0,0,0,0.18)';
+  toast.style.opacity = '0';
+  toast.style.transform = 'translateY(40px)';
+  toast.style.transition = 'opacity 0.25s, transform 0.25s';
+  toast.style.position = 'relative';
+  toast.style.display = 'flex';
+  toast.style.alignItems = 'center';
+  toast.style.gap = '16px';
+  // Dismiss button logic
+  const dismissBtn = toast.querySelector('.notif-delete-btn');
+  if (dismissBtn) {
+    dismissBtn.addEventListener('click', () => {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateY(40px)';
+      setTimeout(() => toast.remove(), 250);
+    });
+  }
+  toastContainer.appendChild(toast);
+  setTimeout(() => {
+    toast.style.opacity = '1';
+    toast.style.transform = 'translateY(0)';
+  }, 10);
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateY(40px)';
+    setTimeout(() => toast.remove(), 250);
+  }, 4000);
+}
+
 // --- Taskbar Icon Animation Helpers ---
 function animateTaskbarIconIn(iconEl) {
   // Force reflow before adding the class
@@ -43,6 +307,104 @@ function animateTaskbarIconOut(iconEl, removeCallback) {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
+  // --- CLEANUP: Remove legacy/incorrect and duplicate desktop icons ---
+  var validAppIds = (window.startMenuApps || []).map(app => app.id);
+  var seen = new Set();
+  document.querySelectorAll('.desktop-icon').forEach(icon => {
+    var appId = icon.getAttribute('data-app');
+    // Remove if not a valid app id, or if already seen (duplicate)
+    if (!appId || !validAppIds.includes(appId) || seen.has(appId)) {
+      icon.remove();
+    } else {
+      seen.add(appId);
+    }
+  });
+
+  // --- Dynamically create the Taskbar ---
+  function createTaskbar() {
+    const desktopArea = document.getElementById('desktop-area');
+    if (!desktopArea) return;
+    // Create taskbar
+    const taskbar = document.createElement('div');
+    taskbar.className = 'taskbar';
+    // Start button
+    const startButton = document.createElement('div');
+    startButton.className = 'start-button';
+    startButton.id = 'start-button';
+    startButton.innerHTML = '<i class="fas fa-th"></i>';
+    // Search container
+    const searchContainer = document.createElement('div');
+    searchContainer.className = 'search-container';
+    searchContainer.innerHTML = '<input type="text" placeholder="Search" class="search-input"><i class="fas fa-search search-icon"></i>';
+    // App icons container
+    const appIcons = document.createElement('div');
+    appIcons.className = 'taskbar-app-icons';
+    appIcons.id = 'taskbar-app-icons';
+    // Taskbar right
+    const taskbarRight = document.createElement('div');
+    taskbarRight.className = 'taskbar-right';
+    // Notifications
+    const notifIcon = document.createElement('div');
+    notifIcon.className = 'taskbar-icon';
+    notifIcon.style.position = 'relative';
+    notifIcon.innerHTML = '<button id="notifications-btn" class="taskbar-user-btn"><i class="fas fa-bell"></i></button>';
+    // Wallet
+    const walletIcon = document.createElement('div');
+    walletIcon.className = 'taskbar-icon';
+    walletIcon.innerHTML = '<button id="wallet-btn" class="taskbar-user-btn"><i class="fas fa-wallet"></i></button>';
+    // Fullscreen
+    const fullscreenIcon = document.createElement('div');
+    fullscreenIcon.className = 'taskbar-icon';
+    fullscreenIcon.innerHTML = '<button id="fullscreen-btn" class="taskbar-user-btn"><i class="fas fa-expand"></i></button>';
+    // Volume
+    const volumeIcon = document.createElement('div');
+    volumeIcon.className = 'taskbar-icon';
+    volumeIcon.innerHTML = '<button id="volume-btn" class="taskbar-user-btn" title="Volume"><i class="fas fa-volume-up"></i></button>';
+    // Global search
+    const globalSearchIcon = document.createElement('div');
+    globalSearchIcon.className = 'taskbar-icon';
+    globalSearchIcon.innerHTML = '<button id="global-search-btn" class="taskbar-search-btn"><i class="fas fa-search"></i></button>';
+    // App launcher
+    const appLauncherIcon = document.createElement('div');
+    appLauncherIcon.className = 'taskbar-icon';
+    appLauncherIcon.innerHTML = '<button id="app-launcher-btn" class="taskbar-user-btn"><i class="fas fa-th"></i></button>';
+    // Time
+    const taskbarTime = document.createElement('div');
+    taskbarTime.className = 'taskbar-time';
+    taskbarTime.innerHTML = '<span id="current-time">22:30</span><span class="date">Mie. 25 Aprilie</span>';
+    // AI button
+    const taskbarAI = document.createElement('div');
+    taskbarAI.className = 'taskbar-ai';
+    taskbarAI.innerHTML = '<button id="ai-chat-btn" class="taskbar-user-btn"><img src="img/alien.png" alt="User" class="user-avatar"></button>';
+    // Widgets toggle
+    const widgetsToggleBtn = document.createElement('button');
+    widgetsToggleBtn.setAttribute('id', 'widgets-toggle-btn');
+    widgetsToggleBtn.setAttribute('class', 'taskbar-icon');
+    widgetsToggleBtn.innerHTML = '<span id="widgets-toggle-arrow"><i class="fas fa-chevron-right"></i></span>';
+    // Append right icons
+    taskbarRight.appendChild(notifIcon);
+    taskbarRight.appendChild(walletIcon);
+    taskbarRight.appendChild(fullscreenIcon);
+    taskbarRight.appendChild(volumeIcon);
+    taskbarRight.appendChild(globalSearchIcon);
+    taskbarRight.appendChild(appLauncherIcon);
+    taskbarRight.appendChild(taskbarTime);
+    taskbarRight.appendChild(taskbarAI);
+    taskbarRight.appendChild(widgetsToggleBtn);
+    // Assemble taskbar
+    taskbar.appendChild(startButton);
+    taskbar.appendChild(searchContainer);
+    taskbar.appendChild(appIcons);
+    taskbar.appendChild(taskbarRight);
+    // Insert into DOM (at the end of .desktop-area)
+    desktopArea.appendChild(taskbar);
+
+    // Attach robust listeners to right-side icons (wallet, volume, etc.)
+    taskbarRight.querySelectorAll('.taskbar-icon, .taskbar-time, .taskbar-ai').forEach(function(el) {
+      if (typeof attachTaskbarIconListeners === 'function') attachTaskbarIconListeners(el);
+    });
+  }
+  createTaskbar();
 
 
 
@@ -90,7 +452,7 @@ calendarTodayBtn.addEventListener('click', function() {
         todayPanel.innerHTML = `
           <div style="padding: 18px 18px 10px 18px; color: #fff; font-size: 16px; font-weight: 600; display: flex; align-items: center; justify-content: space-between;">
             <span>Today Panel (placeholder)</span>
-            <button class="calendar-today-panel-close" style="background: none; border: none; color: #fff; font-size: 12px; cursor: pointer; padding: 0 4px; border-radius: 6px;"><i class="fas fa-times"></i></button>
+            <button class="panel-close-btn" id="calendar-today-panel-close" aria-label="Close today panel"><i class="fas fa-times"></i></button>
           </div>
           <div style="padding: 18px 18px 10px 18px; color: #fff; font-size: 16px; font-weight: 500; display: flex; align-items: center; justify-content: center; height: 100%; text-align: center;">
             <span>No events today</span>
@@ -103,7 +465,7 @@ calendarTodayBtn.addEventListener('click', function() {
           todayPanel.classList.add('active');
         }, 10);
     
-        todayPanel.querySelector('.calendar-today-panel-close').onclick = function(ev) {
+        todayPanel.querySelector('#calendar-today-panel-close').onclick = function(ev) {
           ev.stopPropagation();
           closeTodayPanel();
         };
@@ -135,6 +497,18 @@ document.addEventListener('mousedown', function(e) {
 
 
   function showCalendarPanel() {
+    if (typeof window.hideWalletSidebar === 'function') window.hideWalletSidebar();
+    // Hide ai-chat panel if visible
+    const aiChatWindow = document.getElementById('ai-chat-window');
+    if (aiChatWindow && aiChatWindow.classList.contains('ai-chat-visible')) {
+      aiChatWindow.classList.remove('ai-chat-visible');
+      aiChatWindow.addEventListener('transitionend', function handler(e) {
+        if (e.propertyName === 'transform') {
+          aiChatWindow.style.display = 'none';
+          aiChatWindow.removeEventListener('transitionend', handler);
+        }
+      });
+    }
     if (!calendarPanel) return;
     calendarPanel.style.display = 'flex';
     requestAnimationFrame(() => {
@@ -232,6 +606,7 @@ document.addEventListener('mousedown', function(e) {
   const globalSearchSelected = document.getElementById('global-search-selected');
   let globalSearchDropdownOpen = false;
   function showGlobalSearch() {
+    if (typeof window.hideWalletSidebar === 'function') window.hideWalletSidebar();
     if (window.innerWidth <= 1023) return;
     globalSearchOverlay.style.display = 'flex';
     requestAnimationFrame(() => {
@@ -346,6 +721,57 @@ document.addEventListener('mousedown', function(e) {
       }
     }
   }
+
+  // --- Dynamic Widget Generation ---
+  function generateWidgets() {
+    const widgetsScreen = document.getElementById('widgets-screen');
+    if (!widgetsScreen) return;
+    widgetsScreen.innerHTML = '';
+    
+    // Widget templates for each app (customize as needed)
+    const widgetTemplates = {
+      'my-files': app => `<div class="widget"><div class="widget-header"><span>${app.name}</span></div><div class="widget-content notification-widget"><div class="big-number">23</div><div class="widget-subtitle">No more events today</div></div></div>`,
+      'this-pc': app => `<div class="widget"><div class="widget-header"><span>${app.name}</span></div><div class="widget-content disk-space-widget"><div class="big-number">23%</div><div class="progress-bar"><div class="progress" style="width: 23%"></div></div><div class="widget-subtitle">15 GB / 50 GB</div></div></div>`,
+      'web-files': app => `<div class="widget"><div class="widget-content email-widget"><div class="widget-icon"><i class="fas fa-headphones"></i></div><div class="widget-data"><div class="big-number">23</div><div class="widget-subtitle">Unread emails</div></div></div></div>`,
+      'trash-sm': app => `<div class="widget"><div class="widget-content messages-widget"><div class="widget-icon"><i class="fas fa-dollar-sign"></i></div><div class="widget-data"><div class="big-number">23</div><div class="widget-subtitle">Unread messages</div></div></div></div>`,
+      'settings-sm': app => `<div class="widget"><div class="widget-header"><span>${app.name}</span></div><div class="widget-content"><div class="big-number">Settings</div><div class="widget-subtitle">Configure your system</div></div></div>`,
+      'site-builder-sm': app => `<div class="widget"><div class="widget-header"><span>${app.name}</span></div><div class="widget-content"><div class="big-number">Site</div><div class="widget-subtitle">Build your website</div></div></div>`,
+      'app-store-sm': app => `<div class="widget"><div class="widget-header"><span>${app.name}</span></div><div class="widget-content"><div class="big-number">Store</div><div class="widget-subtitle">Find new apps</div></div></div>`,
+      'social-master': app => `<div class="widget"><div class="widget-header"><span>${app.name}</span></div><div class="widget-content"><div class="big-number">Social</div><div class="widget-subtitle">Connect with friends</div></div></div>`,
+      'personalize': app => `<div class="widget"><div class="widget-header"><span>${app.name}</span></div><div class="widget-content"><div class="big-number">Theme</div><div class="widget-subtitle">Personalize your desktop</div></div></div>`,
+      'word-doc': app => `<div class="widget"><div class="widget-header"><span>${app.name}</span></div><div class="widget-content"><div class="big-number">Docs</div><div class="widget-subtitle">Word documents</div></div></div>`,
+      'excel-numbers': app => `<div class="widget"><div class="widget-header"><span>${app.name}</span></div><div class="widget-content"><div class="big-number">Excel</div><div class="widget-subtitle">Spreadsheets</div></div></div>`,
+      'notepad': app => `<div class="widget"><div class="widget-header"><span>${app.name}</span></div><div class="widget-content"><div class="big-number">Notes</div><div class="widget-subtitle">Quick notes</div></div></div>`,
+      'wordpad': app => `<div class="widget"><div class="widget-header"><span>${app.name}</span></div><div class="widget-content"><div class="big-number">Wordpad</div><div class="widget-subtitle">Rich text notes</div></div></div>`,
+      'calculator-sm': app => `<div class="widget"><div class="widget-header"><span>${app.name}</span></div><div class="widget-content"><div class="big-number">Calc</div><div class="widget-subtitle">Calculator</div></div></div>`,
+      'photoshop-sm': app => `<div class="widget"><div class="widget-header"><span>${app.name}</span></div><div class="widget-content"><div class="big-number">Photo</div><div class="widget-subtitle">Edit images</div></div></div>`,
+      'calendar-sm': app => `<div class="widget"><div class="widget-header"><span>${app.name}</span></div><div class="widget-content"><div class="big-number">Calendar</div><div class="widget-subtitle">Your events</div></div></div>`,
+      'notes': app => `<div class="widget"><div class="widget-header"><span>${app.name}</span></div><div class="widget-content"><div class="big-number">Notes</div><div class="widget-subtitle">Sticky notes</div></div></div>`
+      // Add more mappings as needed
+    };
+    
+    startMenuApps.forEach(app => {
+      // Skip app-launcher itself
+      if (app.id === 'app-launcher') return;
+      let widgetHTML = '';
+      if (widgetTemplates[app.id]) {
+        widgetHTML = widgetTemplates[app.id](app);
+      } else {
+        widgetHTML = `<div class="widget"><div class="widget-header"><span>${app.name}</span></div><div class="widget-content"><div class="big-number">App</div><div class="widget-subtitle">${app.name} widget</div></div></div>`;
+      }
+      widgetsScreen.insertAdjacentHTML('beforeend', widgetHTML);
+    });
+  }
+
+  // Ensure widgets are visible by default on desktop
+  const widgetsScreen = document.getElementById('widgets-screen');
+  if (widgetsScreen && window.innerWidth > 1023) {
+    widgetsScreen.classList.remove('widgets-hidden');
+    widgetsScreen.style.display = '';
+  }
+  generateWidgets();
+
+
 });
 // ... existing code ...
 
@@ -358,6 +784,7 @@ function updateVolumeUI(value) {
   const volumePanel = document.getElementById('volume-panel');
   const icon = volumeBtn ? volumeBtn.querySelector('i') : null;
   const panelIcon = volumePanel ? volumePanel.querySelector('.volume-slider-panel i') : null;
+  const volumePercent = document.getElementById('volume-percentage');
   isMuted = (value === 0);
   if (icon) {
     icon.classList.remove('fa-volume-up', 'fa-volume-mute');
@@ -367,130 +794,17 @@ function updateVolumeUI(value) {
     panelIcon.classList.remove('fa-volume-up', 'fa-volume-mute');
     panelIcon.classList.add(isMuted ? 'fa-volume-mute' : 'fa-volume-up');
   }
+  if (volumePercent) {
+    volumePercent.textContent = value + '%';
+  }
 }
 
-if (volumeBtn && volumePanel) {
-  // Set initial state
-  volumePanel.style.display = 'none';
-
-  volumeBtn.addEventListener('click', (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    if (volumePanel.classList.contains('visible')) {
-      volumePanel.classList.remove('visible');
-      setTimeout(() => {
-        volumePanel.style.display = 'none';
-      }, 350);
-    } else {
-      volumePanel.style.display = 'flex';
-      requestAnimationFrame(() => {
-        volumePanel.classList.add('visible');
-      });
-    }
-  });
-
-  // Setup close button
-  const closeBtn = volumePanel.querySelector('#close-volume-panel');
-  if (closeBtn) {
-    closeBtn.addEventListener('click', () => {
-      volumePanel.classList.remove('visible');
-      setTimeout(() => {
-        volumePanel.style.display = 'none';
-      }, 350);
-    });
-  }
-
-  // Setup volume slider
-  const browserVolumeSlider = volumePanel.querySelector('#browser-volume-slider');
-  if (browserVolumeSlider) {
-    browserVolumeSlider.addEventListener('input', (e) => {
-      const value = parseInt(e.target.value, 10);
-      updateVolumeUI(value);
-      if (!isMuted) {
-        previousVolume = value;
-      }
-    });
-
-    // Mute/unmute logic for panel icon
-    const panelIcon = volumePanel.querySelector('.volume-slider-panel i');
-    if (panelIcon) {
-      panelIcon.style.cursor = 'pointer';
-      panelIcon.addEventListener('click', function () {
-        if (!isMuted) {
-          // Muting
-          if (browserVolumeSlider) {
-            previousVolume = browserVolumeSlider.value;
-            browserVolumeSlider.value = 0;
-            browserVolumeSlider.dispatchEvent(new Event('input', { bubbles: true }));
-          }
-        } else {
-          // Unmuting
-          if (browserVolumeSlider) {
-            browserVolumeSlider.value = previousVolume;
-            browserVolumeSlider.dispatchEvent(new Event('input', { bubbles: true }));
-          }
-        }
-      });
-    }
-
-    // Playlist panel logic
-    const musicPanel = volumePanel.querySelector('.music-panel-box');
-    const playlistBtn = musicPanel ? musicPanel.querySelector('.music-btn[title="Playlist"]') : null;
-    if (playlistBtn && musicPanel) {
-      playlistBtn.addEventListener('click', () => {
-        if (musicPanel.style.display === 'none') return;
-        let domPlaylistPanel = musicPanel.parentNode.querySelector('.playlist-panel-slide');
-        if (!domPlaylistPanel) {
-          domPlaylistPanel = document.createElement('div');
-          domPlaylistPanel.className = 'music-panel-box playlist-panel-slide';
-          domPlaylistPanel.style.position = 'absolute';
-          domPlaylistPanel.style.left = '0';
-          domPlaylistPanel.style.right = '0';
-          domPlaylistPanel.style.bottom = '100%';
-          domPlaylistPanel.style.margin = '0 auto 28px auto';
-          domPlaylistPanel.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)';
-          domPlaylistPanel.style.transform = 'translateY(100%)';
-          domPlaylistPanel.innerHTML = '<div style="padding: 18px 18px 10px 18px; color: #fff; font-size: 1.1rem; font-weight: 600;">Playlist (placeholder)</div>';
-          musicPanel.style.position = 'relative';
-          musicPanel.parentNode.insertBefore(domPlaylistPanel, musicPanel);
-          setTimeout(() => {
-            domPlaylistPanel.style.transform = 'translateY(0)';
-          }, 10);
-        } else {
-          domPlaylistPanel.style.transform = 'translateY(100%)';
-          if (window._playlistPanelRemoveTimeout) {
-            clearTimeout(window._playlistPanelRemoveTimeout);
-            window._playlistPanelRemoveTimeout = null;
-          }
-          window._playlistPanelRemoveTimeout = setTimeout(() => {
-            if (domPlaylistPanel && domPlaylistPanel.parentNode) {
-              domPlaylistPanel.parentNode.removeChild(domPlaylistPanel);
-            }
-            window._playlistPanelRemoveTimeout = null;
-          }, 350);
-        }
-      });
-    }
-  }
-
-  // Close panel when clicking outside
-  document.addEventListener('click', (e) => {
-    if (volumePanel.classList.contains('visible') &&
-      !volumePanel.contains(e.target) &&
-      !volumeBtn.contains(e.target)) {
-      volumePanel.classList.remove('visible');
-      setTimeout(() => {
-        volumePanel.style.display = 'none';
-      }, 350);
-    }
-  });
-}
+// ... existing code ...
 
 
 
 // Volume Panel: Live percentage and volume control
-function setupVolumePanel() {
+function setupVolumePanelListeners() {
   const volumeSlider = document.getElementById('browser-volume-slider');
   const volumePercent = document.getElementById('volume-percentage');
   // Try to find a global <audio> element (if you have one)
@@ -500,6 +814,7 @@ function setupVolumePanel() {
     const updateVolume = () => {
       const value = parseInt(volumeSlider.value, 10);
       volumePercent.textContent = value + '%';
+      updateVolumeUI(value);
       if (audio) {
         audio.volume = value / 100;
       }
@@ -558,8 +873,133 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   // ... existing code ...
-  setupVolumePanel();
+  setupVolumePanelListeners();
   setNotificationsBtnOpacity();
+
+  // Fix: Always attach close button event after DOM is ready
+  const volumePanel = document.getElementById('volume-panel');
+  const closeBtn = document.getElementById('close-volume-panel');
+  const volumeBtn = document.getElementById('volume-btn');
+  if (closeBtn && volumePanel) {
+    closeBtn.addEventListener('click', () => {
+      volumePanel.classList.remove('visible');
+      setTimeout(() => {
+        volumePanel.style.display = 'none';
+      }, 350);
+    });
+  }
+
+  // --- Mute/unmute logic for BOTH icons in the panel ---
+  const browserVolumeSlider = document.getElementById('browser-volume-slider');
+  // Icon in the slider panel
+  const panelIcon = volumePanel ? volumePanel.querySelector('.volume-slider-panel i') : null;
+  // Icon in the volume-panel-box (music section)
+  const boxIcon = volumePanel ? volumePanel.querySelector('.music-panel-box i.fas.fa-volume-up, .music-panel-box i.fas.fa-volume-mute') : null;
+
+  function handleMuteUnmuteClick() {
+    if (!browserVolumeSlider) return;
+    if (!isMuted) {
+      previousVolume = browserVolumeSlider.value;
+      browserVolumeSlider.value = 0;
+      browserVolumeSlider.dispatchEvent(new Event('input', { bubbles: true }));
+    } else {
+      browserVolumeSlider.value = previousVolume;
+      browserVolumeSlider.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+  }
+
+  if (panelIcon) {
+    panelIcon.style.cursor = 'pointer';
+    panelIcon.addEventListener('click', handleMuteUnmuteClick);
+  }
+  if (boxIcon) {
+    boxIcon.style.cursor = 'pointer';
+    boxIcon.addEventListener('click', handleMuteUnmuteClick);
+  }
+
+  // --- Playlist button logic: always attach after DOMContentLoaded ---
+  const musicPanel = volumePanel ? volumePanel.querySelector('.music-panel-box') : null;
+  const playlistBtn = musicPanel ? musicPanel.querySelector('.music-btn[title="Playlist"]') : null;
+  if (playlistBtn && musicPanel) {
+    playlistBtn.addEventListener('click', () => {
+      if (musicPanel.style.display === 'none') return;
+      let domPlaylistPanel = musicPanel.parentNode.querySelector('.playlist-panel-slide');
+      if (!domPlaylistPanel) {
+        domPlaylistPanel = document.createElement('div');
+        domPlaylistPanel.className = 'music-panel-box playlist-panel-slide';
+        domPlaylistPanel.style.position = 'absolute';
+        domPlaylistPanel.style.left = '0';
+        domPlaylistPanel.style.right = '0';
+        domPlaylistPanel.style.bottom = '100%';
+        domPlaylistPanel.style.margin = '0 auto 28px auto';
+        domPlaylistPanel.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)';
+        domPlaylistPanel.style.transform = 'translateY(100%)';
+        domPlaylistPanel.innerHTML = '<div style="padding: 18px 18px 10px 18px; color: #fff; font-size: 1.1rem; font-weight: 600;">Playlist (placeholder)</div>';
+        musicPanel.style.position = 'relative';
+        musicPanel.parentNode.insertBefore(domPlaylistPanel, musicPanel);
+        setTimeout(() => {
+          domPlaylistPanel.style.transform = 'translateY(0)';
+        }, 10);
+      } else {
+        domPlaylistPanel.style.transform = 'translateY(100%)';
+        if (window._playlistPanelRemoveTimeout) {
+          clearTimeout(window._playlistPanelRemoveTimeout);
+          window._playlistPanelRemoveTimeout = null;
+        }
+        window._playlistPanelRemoveTimeout = setTimeout(() => {
+          if (domPlaylistPanel && domPlaylistPanel.parentNode) {
+            domPlaylistPanel.parentNode.removeChild(domPlaylistPanel);
+          }
+          window._playlistPanelRemoveTimeout = null;
+        }, 350);
+      }
+    });
+  }
+
+  // --- Always close volume panel when clicking outside ---
+  document.addEventListener('mousedown', function(e) {
+    const panel = document.getElementById('volume-panel');
+    const btn = document.getElementById('volume-btn');
+    if (
+      panel &&
+      panel.classList.contains('visible') &&
+      !panel.contains(e.target) &&
+      !(btn && btn.contains(e.target))
+    ) {
+      panel.classList.remove('visible');
+      setTimeout(() => {
+        panel.style.display = 'none';
+      }, 350);
+    }
+  });
+
+  // --- Volume Panel Show/Hide Handler ---
+  function attachVolumeBtnHandler() {
+    const volumeBtn = document.getElementById('volume-btn');
+    const volumePanel = document.getElementById('volume-panel');
+    if (!volumeBtn || !volumePanel) return;
+    // Remove previous click handlers by cloning
+    const newBtn = volumeBtn.cloneNode(true);
+    volumeBtn.parentNode.replaceChild(newBtn, volumeBtn);
+    newBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      // Always reset display before toggling
+      if (volumePanel.classList.contains('visible')) {
+        volumePanel.classList.remove('visible');
+        setTimeout(() => {
+          volumePanel.style.display = 'none';
+        }, 350);
+      } else {
+        if (typeof window.hideWalletSidebar === 'function') window.hideWalletSidebar();
+        volumePanel.style.display = 'flex';
+        requestAnimationFrame(() => {
+          volumePanel.classList.add('visible');
+        });
+      }
+    });
+  }
+  attachVolumeBtnHandler();
 });
 // ... existing code ...
 
@@ -603,6 +1043,16 @@ if (logOutButton) {
 function getAppIconDetails(appName) {
   let iconClass = 'fa-window-maximize';
   let iconBgClass = 'gray-icon';
+  // First, try to get from startMenuApps
+  if (typeof startMenuApps !== 'undefined') {
+    const appObj = startMenuApps.find(a => a.id === appName);
+    if (appObj) {
+      iconClass = appObj.iconClass || iconClass;
+      iconBgClass = appObj.iconBgClass || iconBgClass;
+      return { iconClass, iconBgClass };
+    }
+  }
+  // Fallback: try to get from desktop icon
   const desktopIcon = document.querySelector(`.desktop-icon[data-app="${appName}"]`);
   if (desktopIcon) {
     const iElem = desktopIcon.querySelector('i');
@@ -826,8 +1276,11 @@ function createAppLauncherTopBar() {
 
 // Helper: Attach event listeners to a taskbar icon clone (robust, no event forwarding)
 function attachTaskbarIconListeners(cloneBtn) {
-  // Remove ID to avoid duplicate IDs in DOM
-  if (cloneBtn.id) cloneBtn.removeAttribute('id');
+  // Remove ID to avoid duplicate IDs in DOM, but do NOT remove id from widgets-toggle-btn, wallet-btn, notifications-btn, volume-btn, fullscreen-btn, global-search-btn, app-launcher-btn, ai-chat-btn
+  if (
+    cloneBtn.id &&
+    !['widgets-toggle-btn','wallet-btn','notifications-btn','volume-btn','fullscreen-btn','global-search-btn','app-launcher-btn','ai-chat-btn'].includes(cloneBtn.id)
+  ) cloneBtn.removeAttribute('id');
   // Only attach to buttons or clickable divs
   if (
     !(cloneBtn.tagName === 'BUTTON' ||
@@ -849,20 +1302,9 @@ function attachTaskbarIconListeners(cloneBtn) {
       if (el.tagName === 'BUTTON' && el.parentElement && el.parentElement.classList.contains('taskbar-icon')) {
         iconContainer = el.parentElement;
       }
-      // Wallet
-      if (iconContainer.classList.contains('taskbar-icon') && iconContainer.querySelector('.fa-wallet')) {
-        if (typeof showWalletSidebar === 'function') showWalletSidebar();
-      }
       // AI Chat
-      else if (iconContainer.classList.contains('taskbar-icon') && iconContainer.querySelector('.fa-comment-dots')) {
+      if (iconContainer.classList.contains('taskbar-icon') && iconContainer.querySelector('.fa-comment-dots')) {
         if (typeof openApp === 'function') openApp('ai-chat', 'AI Chat', 'fa-comment-dots', 'blue-icon');
-      }
-      // App Launcher
-      else if (iconContainer.classList.contains('taskbar-icon') && iconContainer.querySelector('.fa-th-large, .fa-th')) {
-        const widgetsScreen = document.getElementById('widgets-screen');
-        if (widgetsScreen) {
-          widgetsScreen.style.display = widgetsScreen.style.display === 'none' ? '' : 'none';
-        }
       }
       // Notifications (use the same function as the original button)
       else if (iconContainer.classList.contains('taskbar-icon') && iconContainer.querySelector('.fa-bell, .fa-bell-slash')) {
@@ -915,23 +1357,7 @@ function attachTaskbarIconListeners(cloneBtn) {
         }
         setTimeout(updateFullscreenIcon, 100); // update icon after state change
       }
-      // Volume
-      else if (iconContainer.classList.contains('taskbar-icon') && iconContainer.querySelector('.fa-volume-up, .fa-volume-mute')) {
-        const volumePanel = document.getElementById('volume-panel');
-        if (volumePanel) {
-          if (volumePanel.classList.contains('visible')) {
-            volumePanel.classList.remove('visible');
-            setTimeout(() => {
-              volumePanel.style.display = 'none';
-            }, 350);
-          } else {
-            volumePanel.style.display = 'flex';
-            requestAnimationFrame(() => {
-              volumePanel.classList.add('visible');
-            });
-          }
-        }
-      }
+      // REMOVE: Volume panel toggle logic from here. Handled exclusively by attachVolumeBtnHandler.
       // Global search (exclude volume)
       else if (iconContainer.classList.contains('taskbar-icon') && iconContainer.querySelector('.fa-search') && !iconContainer.querySelector('.fa-volume-up, .fa-volume-mute')) {
         const globalSearchOverlay = document.getElementById('global-search-overlay');
@@ -983,7 +1409,33 @@ function attachTaskbarIconListeners(cloneBtn) {
 
 } // <-- Properly close the function
 
+// --- Wallet Sidebar Toggle Logic ---
+function attachWalletBtnToggleHandler() {
+  const walletBtn = document.getElementById('wallet-btn');
+  const walletSidebar = document.getElementById('wallet-sidebar');
+  if (!walletBtn || !walletSidebar) return;
+  // Remove previous click handlers
+  walletBtn.replaceWith(walletBtn.cloneNode(true));
+  const newWalletBtn = document.getElementById('wallet-btn');
+  let walletVisible = walletSidebar.classList.contains('wallet-sidebar-visible');
+  newWalletBtn.addEventListener('click', function () {
+    if (window.innerWidth <= 1023) return;
+    walletVisible = walletSidebar.classList.contains('wallet-sidebar-visible');
+    if (!walletVisible) {
+      if (typeof window.showWalletSidebar === 'function') window.showWalletSidebar();
+    } else {
+      if (typeof window.hideWalletSidebar === 'function') window.hideWalletSidebar();
+    }
+  });
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+  attachWalletBtnToggleHandler();
+});
+// ... existing code ...
+
 (function () {
+  window.attachWalletBtnToggleHandler = attachWalletBtnToggleHandler;
   const origExecuteContextMenuAction = window.executeContextMenuAction;
   window.executeContextMenuAction = async function (action) {
     if (
@@ -1027,7 +1479,7 @@ function createAppLauncherTaskbarRightIcons() {
 (function () {
   const walletBtn = document.getElementById('wallet-btn');
   const walletSidebar = document.getElementById('wallet-sidebar');
-  const walletCloseBtn = walletSidebar ? walletSidebar.querySelector('.wallet-close-btn') : null;
+  const walletCloseBtn = walletSidebar ? walletSidebar.querySelector('#wallet-close-btn') : null;
   let walletVisible = false;
 
   // --- Wallet display mode state ---
@@ -1046,10 +1498,21 @@ function createAppLauncherTaskbarRightIcons() {
 
   function showWalletSidebar() {
     if (!walletSidebar) return;
+    const aiChatWindow = document.getElementById('ai-chat-window');
+    if (aiChatWindow && aiChatWindow.classList.contains('ai-chat-visible')) {
+      aiChatWindow.classList.remove('ai-chat-visible');
+      aiChatWindow.addEventListener('transitionend', function handler(e) {
+        if (e.propertyName === 'transform') {
+          aiChatWindow.style.display = 'none';
+          aiChatWindow.removeEventListener('transitionend', handler);
+        }
+      });
+    }
     walletSidebar.style.display = 'flex';
     setTimeout(() => walletSidebar.classList.add('wallet-sidebar-visible'), 10);
     walletVisible = true;
   }
+  window.showWalletSidebar = showWalletSidebar;
   function hideWalletSidebar() {
     if (!walletSidebar) return;
     walletSidebar.classList.remove('wallet-sidebar-visible');
@@ -1064,22 +1527,13 @@ function createAppLauncherTaskbarRightIcons() {
     walletSidebar.addEventListener('transitionend', walletSidebar._onTransitionEnd);
     walletVisible = false;
   }
+  window.hideWalletSidebar = hideWalletSidebar;
 
-  document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', function () {
     updateWalletBtnDisplay();
     if (walletBtn && walletSidebar) {
       walletBtn.addEventListener('click', function () {
         if (window.innerWidth <= 1023) return;
-        const aiChatWindow = document.getElementById('ai-chat-window');
-        if (aiChatWindow && aiChatWindow.classList.contains('ai-chat-visible')) {
-          aiChatWindow.classList.remove('ai-chat-visible');
-          aiChatWindow.addEventListener('transitionend', function handler(e) {
-            if (e.propertyName === 'transform') {
-              aiChatWindow.style.display = 'none';
-              aiChatWindow.removeEventListener('transitionend', handler);
-            }
-          });
-        }
         if (!walletVisible) {
           showWalletSidebar();
         } else {
@@ -1173,95 +1627,20 @@ function setupSidebarToggleForFileExplorer(fileExplorerWindow) {
   });
 }
 
-
+//Press N to open trigger notifications
 document.addEventListener('keydown', function (e) {
   const active = document.activeElement;
   if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable)) return;
   if (e.key === 'n' || e.key === 'N') {
-    const notificationsPanel = document.getElementById('notifications-panel');
-    if (!notificationsPanel) return;
-
-    // Get or create the Today section
-    let todaySection = notificationsPanel.querySelector('.notifications-panel-content');
-    if (!todaySection) {
-      todaySection = document.createElement('div');
-      todaySection.className = 'notifications-panel-content';
-      notificationsPanel.appendChild(todaySection);
-    }
-
-    // Check if we need to create the header
-    if (!todaySection.querySelector('.notif-header-row')) {
-      const headerRow = document.createElement('div');
-      headerRow.className = 'notif-header-row';
-      headerRow.innerHTML = `
-        <span class="notif-title">Notifications</span>
-        <div class="notif-tabs">
-          <button class="notif-tab notif-tab-active">All1</button>
-          <button class="notif-tab">Unread</button>
-        </div>
-      `;
-      todaySection.insertBefore(headerRow, todaySection.firstChild);
-    }
-
-    // Check if we need to create the Today section label and list
-    let todayList = todaySection.querySelector('.notif-list');
-    if (!todayList) {
-      // Remove any "no notifications" message if it exists
-      const emptyMsg = todaySection.querySelector('.no-notifications-msg');
-      if (emptyMsg) emptyMsg.remove();
-      setNotificationsBtnOpacity();
-
-
-      // Add the Today section label
-      const sectionLabel = document.createElement('div');
-      sectionLabel.className = 'notif-section-label';
-      sectionLabel.innerHTML = 'Today <span class="notif-clear">Clear all</span>';
-      todaySection.appendChild(sectionLabel);
-
-      // Add the notification list
-      todayList = document.createElement('div');
-      todayList.className = 'notif-list';
-      todaySection.appendChild(todayList);
-    }
-
-    // Create and add the new notification
-    const card = document.createElement('div');
-    card.className = 'notif-card unread';
-    card.style.transform = 'translateX(120%)';
-    card.style.opacity = '0';
-    card.innerHTML = `
-      <button class="notif-delete-btn" title="Delete notification">&times;</button>
-      <div class="notif-icon-bg notif-bg-blue"><i class="fas fa-shopping-cart"></i></div>
-      <div class="notif-content">
-        <div class="notif-main-row">
-          <span class="notif-main-title">New incoming notification</span>
-   
-        </div>
-        <div class="notif-desc">This is a test notification</div>
-        <div class="notif-meta">now</div>
-      </div>
-      <img class="notif-avatar" src="img/avatar.png" />
-    `;
-
-    todayList.insertBefore(card, todayList.firstChild);
-
-    // Animate the card in
-    requestAnimationFrame(() => {
-      card.style.transition = 'all 0.3s ease-out';
-      card.style.transform = 'translateX(0)';
-      card.style.opacity = '1';
-      updateNotificationsBadge();
+    addNotification({
+      title: 'New incoming notification',
+      desc: 'This is a test notification',
+      meta: 'now',
+      iconClass: 'fa-shopping-cart',
+      iconBgClass: 'notif-bg-blue',
+      avatar: 'img/avatar.png',
+      unread: true
     });
-
-    // Enable swipe-to-delete for the new card
-    if (typeof enableNotificationSwipeToDelete === 'function') {
-      enableNotificationSwipeToDelete();
-    }
-
-    // Show toast if panel is closed
-    if (notificationsPanel.style.display !== 'flex') {
-      showToastNotification();
-    }
   }
 });
 
@@ -1331,6 +1710,9 @@ document.addEventListener('contextmenu', function (e) {
 });
 
 
+// At the top of the file or before renderPinnedTaskbarIcons:
+window._animatedTaskbarWindows = window._animatedTaskbarWindows || new Set();
+
 
 // --- GLOBAL STATE (move to top of file) ---
 let openWindows = {};
@@ -1348,7 +1730,63 @@ let currentSelectedFileItems = new Set();
 let startMenu = null;
 let startButton = null;
 
+// --- START MENU LOGIC (top-level for widgets) ---
+// Define the app list before any function that uses it
+  const startMenuApps = [
+    { id: 'my-files', name: 'My Files', iconClass: 'fa-folder', iconBgClass: 'pink-icon', iconBgMenuClass: 'pink-bg', category: 'SYSTEM APPS' },
+    { id: 'this-pc', name: 'This PC', iconClass: 'fa-desktop', iconBgClass: 'pink-icon', iconBgMenuClass: 'pink-bg', category: 'SYSTEM APPS' },
+    { id: 'web-files', name: 'Web Files', iconClass: 'fa-folder-open', iconBgClass: 'green-icon', iconBgMenuClass: 'green-bg', category: 'SYSTEM APPS' },
+    { id: 'trash-sm', name: 'Trash', iconClass: 'fa-trash', iconBgClass: 'purple-icon', iconBgMenuClass: 'purple-bg', category: 'SYSTEM APPS' },
+    { id: 'settings-sm', name: 'Settings', iconClass: 'fa-cog', iconBgClass: 'pink-icon', iconBgMenuClass: 'pink-bg', category: 'SYSTEM APPS' },
+    { id: 'site-builder-sm', name: 'Site Builder', iconClass: 'fa-globe', iconBgClass: 'pink-icon', iconBgMenuClass: 'pink-bg', category: 'CUSTOMISE' },
+    { id: 'app-store-sm', name: 'AppStore', iconClass: 'fa-store', iconBgClass: 'green-icon', iconBgMenuClass: 'green-bg', category: 'CUSTOMISE' },
+    { id: 'social-master', name: 'Social Master', iconClass: 'fa-users', iconBgClass: 'purple-icon', iconBgMenuClass: 'purple-bg', category: 'CUSTOMISE' },
+    { id: 'personalize', name: 'Personalize', iconClass: 'fa-cog', iconBgClass: 'pink-icon', iconBgMenuClass: 'pink-bg', category: 'CUSTOMISE' },
+    { id: 'word-doc', name: 'Word doc', iconClass: 'fa-file-word', iconBgClass: 'pink-icon', iconBgMenuClass: 'pink-bg', category: 'DOCS' },
+    { id: 'excel-numbers', name: 'Excel Numbers', iconClass: 'fa-file-excel', iconBgClass: 'green-icon', iconBgMenuClass: 'green-bg', category: 'DOCS' },
+    { id: 'notepad', name: 'Notepad', iconClass: 'fa-sticky-note', iconBgClass: 'purple-icon', iconBgMenuClass: 'purple-bg', category: 'DOCS' },
+    { id: 'wordpad', name: 'Wordpad', iconClass: 'fa-file-alt', iconBgClass: 'pink-icon', iconBgMenuClass: 'pink-bg', category: 'DOCS' },
+    { id: 'calculator-sm', name: 'Calculator', iconClass: 'fa-calculator', iconBgClass: 'gray-icon', iconBgMenuClass: 'gray-bg', category: 'PRODUCTIVITY' },
+    { id: 'photoshop-sm', name: 'Photoshop', iconClass: 'fa-palette', iconBgClass: 'blue-icon', iconBgMenuClass: 'blue-bg', category: 'PRODUCTIVITY' },
+    { id: 'calendar-sm', name: 'Calendar', iconClass: 'fa-calendar-alt', iconBgClass: 'purple-icon', iconBgMenuClass: 'purple-bg', category: 'PRODUCTIVITY' },
+    { id: 'notes', name: 'Notes', iconClass: 'far fa-clipboard', iconBgClass: 'pink-icon', iconBgMenuClass: 'pink-bg', category: 'PRODUCTIVITY' },
+    { id: 'app-launcher', name: 'App launcher', iconClass: 'fa-th', iconBgClass: 'blue-icon', iconBgMenuClass: 'blue-bg', category: 'SYSTEM APPS' },
+    { id: 'wallet', name: 'Wallet', iconClass: 'fa-wallet', iconBgClass: 'pink-icon', iconBgMenuClass: 'pink-bg', category: 'SYSTEM APPS' }
+  ];
+
+  let startMenuAppSortMode = 'category'; // 'category' or 'alphabet'
+
+// ... existing code ...
+
+// --- DYNAMIC DESKTOP ICON GENERATION ---
+// List of app IDs to show on desktop by default
+const defaultDesktopAppIds = [
+  'my-files', 'trash-sm', 'app-store-sm', 'settings-sm', 'site-builder-sm', 'wallet', 'photoshop-sm'
+];
+
+function generateDesktopIcons() {
+  const desktopIconsContainer = document.querySelector('.desktop-icons');
+  if (!desktopIconsContainer) return;
+  desktopIconsContainer.innerHTML = '';
+  if (typeof startMenuApps !== 'undefined') {
+    startMenuApps.forEach(app => {
+      if (!defaultDesktopAppIds.includes(app.id)) return;
+      const icon = document.createElement('div');
+      icon.className = 'desktop-icon';
+      icon.setAttribute('data-app', app.id);
+      icon.innerHTML = `
+        <div class="icon-container ${app.iconBgClass}"><i class="fas ${app.iconClass}"></i></div>
+        <span>${app.name}</span>
+      `;
+      desktopIconsContainer.appendChild(icon);
+      if (typeof setupDesktopIcon === 'function') setupDesktopIcon(icon);
+    });
+  }
+}
+
 document.addEventListener('DOMContentLoaded', function () {
+  generateDesktopIcons();
+  // ... existing code ...
 
   // DOM Elements
   startButton = document.getElementById('start-button');
@@ -1423,12 +1861,12 @@ document.addEventListener('DOMContentLoaded', function () {
       setPinnedTaskbarApps(pins);
       renderPinnedTaskbarIcons();
       // Animate in the new pinned icon
-      const iconEl = document.querySelector('.taskbar-app-icon.pinned-only[data-app-name="' + appName + '"]');
+      const iconEl = document.querySelector('.taskbar-app-icon.pinned-only[data-app="' + appName + '"]');
       if (iconEl) animateTaskbarIconIn(iconEl);
     }
   }
   function unpinAppFromTaskbar(appName) {
-    const iconEl = document.querySelector('.taskbar-app-icon.pinned-only[data-app-name="' + appName + '"]');
+    const iconEl = document.querySelector('.taskbar-app-icon.pinned-only[data-app="' + appName + '"]');
     if (iconEl) {
       animateTaskbarIconOut(iconEl, function () {
         const pins = getPinnedTaskbarApps().filter(a => a !== appName);
@@ -1482,7 +1920,7 @@ document.addEventListener('DOMContentLoaded', function () {
       }
       // Always remove animation classes
       iconEl.classList.remove('anim-in', 'anim-out');
-      iconEl.setAttribute('data-app-name', appName);
+      iconEl.setAttribute('data-app', appName);
       iconEl.setAttribute('title', appTitle);
       iconEl.innerHTML = `<div class="icon-container ${details.iconBgClass}"><i class="fas ${details.iconClass}"></i></div>`;
       iconEl.addEventListener('click', function () {
@@ -1504,9 +1942,9 @@ document.addEventListener('DOMContentLoaded', function () {
       // Never animate in/out here (old comment, now handled above)
     });
   
-    // Add separator if there are open (unpinned) apps
+    // Add separator if there are open (unpinned) apps AND there is at least one pinned app
     const openUnpinned = Object.values(openWindows).filter(w => w.element && !isAppPinned(w.name));
-    if (openUnpinned.length > 0) {
+    if (pins.length > 0 && openUnpinned.length > 0) {
       const separator = document.createElement('div');
       separator.className = 'taskbar-separator';
       taskbarAppIconsContainer.appendChild(separator);
@@ -1548,8 +1986,9 @@ document.addEventListener('DOMContentLoaded', function () {
         openWindows[winObj.element.id].taskbarIcon = iconEl;
       }
       taskbarAppIconsContainer.appendChild(iconEl);
-      // --- PATCH: Animate in only if this is a new unpinned icon ---
+      // Animate in if this is a new unpinned icon
       if (!prevUnpinnedIds.has(winObj.element.id)) {
+        void iconEl.offsetWidth; // Force reflow before adding animation class
         animateTaskbarIconIn(iconEl);
       }
     });
@@ -1558,50 +1997,6 @@ document.addEventListener('DOMContentLoaded', function () {
     updateTaskbarActiveState();
   }
 
-  // Add separator if there are open (unpinned) apps
-  const openUnpinned = Object.values(openWindows).filter(w => w.element && !isAppPinned(w.name));
-  if (openUnpinned.length > 0) {
-    const separator = document.createElement('div');
-    separator.className = 'taskbar-separator';
-    taskbarAppIconsContainer.appendChild(separator);
-  }
-
-  // Render open (unpinned) app icons
-  Object.values(openWindows).forEach(winObj => {
-    if (!winObj.element) return;
-    const appName = winObj.name;
-    if (isAppPinned(appName)) return; // Pinned apps are only shown as pinned-only if not open
-    // Re-create the icon for open app
-    const details = getAppIconDetails(appName);
-    let iconClass = details.iconClass || 'fa-window-maximize';
-    let iconBgClass = details.iconBgClass || 'gray-icon';
-    // Try to get the icon background class from the desktop icon
-    const desktopIcon = document.querySelector(`.desktop-icon[data-app="${appName}"] .icon-container`);
-    if (desktopIcon) {
-      const bgClass = Array.from(desktopIcon.classList).find(cls => cls.endsWith('-icon'));
-      if (bgClass) iconBgClass = bgClass;
-    }
-    const appTitle = winObj.appTitle || appName.charAt(0).toUpperCase() + appName.slice(1).replace(/-/g, ' ');
-    const iconEl = document.createElement('div');
-    iconEl.className = 'taskbar-app-icon opened-app';
-    iconEl.setAttribute('data-window-id', winObj.element.id);
-    iconEl.setAttribute('title', appTitle);
-    iconEl.innerHTML = `<div class="icon-container ${iconBgClass}"><i class="fas ${iconClass}"></i></div>`;
-    iconEl.addEventListener('click', function () {
-      const windowToFocus = winObj.element;
-      if (windowToFocus) {
-        if (windowToFocus.classList.contains('minimized')) {
-          toggleMinimizeWindow(windowToFocus, iconEl);
-        } else if (activeWindow === windowToFocus) {
-          toggleMinimizeWindow(windowToFocus, iconEl);
-        } else {
-          makeWindowActive(windowToFocus);
-        }
-      }
-    });
-    taskbarAppIconsContainer.appendChild(iconEl);
-
-  });
   // On load, render pinned icons
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', renderPinnedTaskbarIcons);
@@ -1969,7 +2364,7 @@ document.addEventListener('DOMContentLoaded', function () {
           appItem.style.cursor = 'pointer';
           appItem.style.userSelect = 'none';
           appItem.tabIndex = 0;
-          appItem.setAttribute('data-app-name', app.id);
+          appItem.setAttribute('data-app', app.id);
           appItem.innerHTML = `<div class="icon-container ${app.iconBgClass}" style="width:64px;height:64px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:28px;box-shadow:0 4px 16px rgba(0,0,0,0.18);margin-bottom:10px;"><i class="fas ${app.iconClass}"></i></div><span style="font-size:14px;color:#fff;margin-top:5px;text-shadow:0 1px 4px #222;text-align:center;width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;">${app.name}</span>`;
           // Attach click event to the entire appItem
           appItem.addEventListener('click', function (e) {
@@ -2019,6 +2414,9 @@ document.addEventListener('DOMContentLoaded', function () {
       });
       // Ensure taskbar position is correct for app launcher mode
       updateAppLauncherTaskbarPosition();
+      // --- FIX: Re-attach volume panel listeners after mode switch ---
+      if (typeof setupVolumePanelListeners === 'function') setupVolumePanelListeners();
+      if (typeof attachVolumeBtnHandler === 'function') attachVolumeBtnHandler();
     }
   }
   function switchToDesktopMode() {
@@ -2225,6 +2623,14 @@ document.addEventListener('DOMContentLoaded', function () {
           }
         });
       }
+      // Always restore widgetsToggleBtn display on desktop mode (robust fix)
+      if (widgetsToggleBtn) widgetsToggleBtn.style.display = '';
+      // FINAL: Always show widgets toggle button in desktop mode
+      const widgetsToggleBtnFinal = document.getElementById('widgets-toggle-btn');
+      if (widgetsToggleBtnFinal) widgetsToggleBtnFinal.style.display = 'flex';
+      // --- FIX: Re-attach volume panel listeners after mode switch ---
+      if (typeof setupVolumePanelListeners === 'function') setupVolumePanelListeners();
+      if (typeof attachVolumeBtnHandler === 'function') attachVolumeBtnHandler();
     }
 
     // ... existing code in switchToDesktopMode ...
@@ -2266,7 +2672,8 @@ document.addEventListener('DOMContentLoaded', function () {
     if (widgetsScreen) {
       window.widgetsVisible = !widgetsScreen.classList.contains('widgets-hidden');
     }
-    if (widgetsToggleBtn) widgetsToggleBtn.style.display = 'flex';
+    // After restoring taskbar right icons, ensure widgetsToggleBtn is visible
+    if (widgetsToggleBtn) widgetsToggleBtn.style.display = '';
   }
 
 
@@ -2279,29 +2686,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // --- START MENU LOGIC (moved to bottom for robustness) ---
 
-  // Define the app list before any function that uses it
-  const startMenuApps = [
-    { id: 'my-files', name: 'My Files', iconClass: 'fa-folder', iconBgClass: 'pink-icon', iconBgMenuClass: 'pink-bg', category: 'SYSTEM APPS' },
-    { id: 'this-pc', name: 'This PC', iconClass: 'fa-desktop', iconBgClass: 'pink-icon', iconBgMenuClass: 'pink-bg', category: 'SYSTEM APPS' },
-    { id: 'web-files', name: 'Web Files', iconClass: 'fa-folder-open', iconBgClass: 'green-icon', iconBgMenuClass: 'green-bg', category: 'SYSTEM APPS' },
-    { id: 'trash-sm', name: 'Trash', iconClass: 'fa-trash', iconBgClass: 'purple-icon', iconBgMenuClass: 'purple-bg', category: 'SYSTEM APPS' },
-    { id: 'settings-sm', name: 'Settings', iconClass: 'fa-cog', iconBgClass: 'pink-icon', iconBgMenuClass: 'pink-bg', category: 'SYSTEM APPS' },
-    { id: 'site-builder-sm', name: 'Site Builder', iconClass: 'fa-globe', iconBgClass: 'pink-icon', iconBgMenuClass: 'pink-bg', category: 'CUSTOMISE' },
-    { id: 'app-store-sm', name: 'AppStore', iconClass: 'fa-store', iconBgClass: 'green-icon', iconBgMenuClass: 'green-bg', category: 'CUSTOMISE' },
-    { id: 'social-master', name: 'Social Master', iconClass: 'fa-users', iconBgClass: 'purple-icon', iconBgMenuClass: 'purple-bg', category: 'CUSTOMISE' },
-    { id: 'personalize', name: 'Personalize', iconClass: 'fa-cog', iconBgClass: 'pink-icon', iconBgMenuClass: 'pink-bg', category: 'CUSTOMISE' },
-    { id: 'word-doc', name: 'Word doc', iconClass: 'fa-file-word', iconBgClass: 'pink-icon', iconBgMenuClass: 'pink-bg', category: 'DOCS' },
-    { id: 'excel-numbers', name: 'Excel Numbers', iconClass: 'fa-file-excel', iconBgClass: 'green-icon', iconBgMenuClass: 'green-bg', category: 'DOCS' },
-    { id: 'notepad', name: 'Notepad', iconClass: 'fa-sticky-note', iconBgClass: 'purple-icon', iconBgMenuClass: 'purple-bg', category: 'DOCS' },
-    { id: 'wordpad', name: 'Wordpad', iconClass: 'fa-file-alt', iconBgClass: 'pink-icon', iconBgMenuClass: 'pink-bg', category: 'DOCS' },
-    { id: 'calculator-sm', name: 'Calculator', iconClass: 'fa-calculator', iconBgClass: 'gray-icon', iconBgMenuClass: 'gray-bg', category: 'PRODUCTIVITY' },
-    { id: 'photoshop-sm', name: 'Photoshop', iconClass: 'fa-palette', iconBgClass: 'blue-icon', iconBgMenuClass: 'blue-bg', category: 'PRODUCTIVITY' },
-    { id: 'calendar-sm', name: 'Calendar', iconClass: 'fa-calendar-alt', iconBgClass: 'purple-icon', iconBgMenuClass: 'purple-bg', category: 'PRODUCTIVITY' },
-    { id: 'notes', name: 'Notes', iconClass: 'far fa-clipboard', iconBgClass: 'pink-icon', iconBgMenuClass: 'pink-bg', category: 'PRODUCTIVITY' },
-    { id: 'app-launcher', name: 'App launcher', iconClass: 'fa-th', iconBgClass: 'blue-icon', iconBgMenuClass: 'blue-bg', category: 'SYSTEM APPS' }
-  ];
-
-  let startMenuAppSortMode = 'category'; // 'category' or 'alphabet'
+  
 
   function categoryLinkClickHandler(e) {
     e.preventDefault();
@@ -2342,7 +2727,7 @@ document.addEventListener('DOMContentLoaded', function () {
       allApps.forEach(app => {
         const appItem = document.createElement('div');
         appItem.className = 'app-grid-item';
-        appItem.setAttribute('data-app-id', app.id);
+        appItem.setAttribute('data-app', app.id);
         appItem.setAttribute('data-app-name', app.name.toLowerCase());
         appItem.innerHTML = `
         <div class=\"app-icon-bg ${app.iconBgMenuClass}\">\n          <i class=\"fas ${app.iconClass}\"></i>\n        </div>\n        <span>${app.name}</span>\n      `;
@@ -2375,7 +2760,7 @@ document.addEventListener('DOMContentLoaded', function () {
           categories[categoryName].forEach(app => {
             const appItem = document.createElement('div');
             appItem.className = 'app-grid-item';
-            appItem.setAttribute('data-app-id', app.id);
+            appItem.setAttribute('data-app', app.id);
             appItem.setAttribute('data-app-name', app.name.toLowerCase());
             appItem.innerHTML = `
             <div class=\"app-icon-bg ${app.iconBgMenuClass}\">\n              <i class=\"fas ${app.iconClass}\"></i>\n            </div>\n            <span>${app.name}</span>\n          `;
@@ -2412,7 +2797,7 @@ document.addEventListener('DOMContentLoaded', function () {
         appItems.forEach(item => item.classList.remove('selected'));
         appItem.classList.add('selected');
         openApp(
-          appItem.getAttribute('data-app-id') || appItem.getAttribute('data-app-name'),
+          appItem.getAttribute('data-app'),
           appItem.querySelector('span').textContent,
           appItem.querySelector('i').className.split(' ').find(cls => cls.startsWith('fa-')),
           appItem.className.split(' ').find(cls => cls.endsWith('-icon'))
@@ -2599,7 +2984,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // --- FIX: Remove pinned-only icon if present ---
     // --- Get pinned icon rect BEFORE removing it ---
     let iconRect = null;
-    const pinnedIcon = taskbarAppIconsContainer.querySelector('.taskbar-app-icon.pinned-only[data-app-name="' + appName + '"]');
+    const pinnedIcon = taskbarAppIconsContainer.querySelector('.taskbar-app-icon.pinned-only[data-app="' + appName + '"]');
     if (iconElementForAnim && iconElementForAnim.getBoundingClientRect) {
       iconRect = iconElementForAnim.getBoundingClientRect();
     } else if (pinnedIcon && pinnedIcon.getBoundingClientRect) {
@@ -2809,7 +3194,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     return windowElement;
   }
-
   function createGenericWindow(title, iconClass, iconBgClass, windowId, delayContent) {
     const windowElement = document.createElement('div');
     windowElement.className = 'window';
@@ -3578,7 +3962,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
       }
     });
-    taskbarAppIconsContainer.appendChild(iconEl);
     return iconEl;
   }
 
@@ -3599,7 +3982,7 @@ document.addEventListener('DOMContentLoaded', function () {
         appItems.forEach(item => item.classList.remove('selected'));
         appItem.classList.add('selected');
         openApp(
-          appItem.getAttribute('data-app-id') || appItem.getAttribute('data-app-name'),
+          appItem.getAttribute('data-app'),
           appItem.querySelector('span').textContent,
           appItem.querySelector('i').className.split(' ').find(cls => cls.startsWith('fa-')),
           appItem.className.split(' ').find(cls => cls.endsWith('-icon'))
@@ -3608,7 +3991,7 @@ document.addEventListener('DOMContentLoaded', function () {
       }
       let sectionHasVisibleItems = false;
       appItems.forEach(item => {
-        const appName = item.getAttribute('data-app-name');
+        const appName = item.getAttribute('data-app');
         const isVisible = appName.includes(term);
         item.style.display = isVisible ? '' : 'none';
         if (isVisible) sectionHasVisibleItems = true;
@@ -3874,6 +4257,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (mobileContainer && sidebar && panel && headerBackBtn && windowTitle && titleChevron && titlePanelTitle) {
       function showPanel(section, label) {
+        if (typeof window.hideWalletSidebar === 'function') window.hideWalletSidebar();
         // Set panel title in header
         titlePanelTitle.textContent = label;
         windowTitle.classList.add('show-detail');
@@ -4743,7 +5127,7 @@ document.addEventListener('DOMContentLoaded', function () {
       if (action === 'open-app') {
         // For pinned-only taskbar icon
         if (currentContextMenuTarget && currentContextMenuTarget.classList.contains('taskbar-app-icon') && currentContextMenuTarget.classList.contains('pinned-only')) {
-          const appName = currentContextMenuTarget.getAttribute('data-app-name');
+          const appName = currentContextMenuTarget.getAttribute('data-app');
           const details = getAppIconDetails(appName);
           // Try to focus/restore if already open
           const openWin = Object.values(openWindows).find(w => w.name === appName && w.element);
@@ -4762,7 +5146,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // For app-grid-item (start menu/app launcher)
         if (currentContextMenuTarget && currentContextMenuTarget.classList.contains('app-grid-item')) {
-          const appName = currentContextMenuTarget.getAttribute('data-app-name') || currentContextMenuTarget.getAttribute('data-app-id');
+          const appName = currentContextMenuTarget.getAttribute('data-app');
           const appTitle = currentContextMenuTarget.getAttribute('data-app-title') || currentContextMenuTarget.querySelector('span')?.textContent || appName;
           const details = getAppIconDetails(appName);
 
@@ -4788,7 +5172,7 @@ document.addEventListener('DOMContentLoaded', function () {
       if (action === 'pin-to-taskbar' || action === 'unpin-taskbar') {
         let appName = null;
         if (currentContextMenuTarget) {
-          appName = currentContextMenuTarget.getAttribute('data-app') || currentContextMenuTarget.getAttribute('data-app-name');
+          appName = currentContextMenuTarget.getAttribute('data-app');
           // If taskbar icon, try data-window-id to get app name from openWindows
           if (!appName && currentContextMenuTarget.classList.contains('taskbar-app-icon')) {
             const winId = currentContextMenuTarget.getAttribute('data-window-id');
@@ -4796,7 +5180,7 @@ document.addEventListener('DOMContentLoaded', function () {
           }
           // If still not found, try data-app-name on pinned-only icon
           if (!appName && currentContextMenuTarget.classList.contains('pinned-only')) {
-            appName = currentContextMenuTarget.getAttribute('data-app-name');
+            appName = currentContextMenuTarget.getAttribute('data-app');
           }
         }
         if (appName) {
@@ -5027,33 +5411,7 @@ document.addEventListener('DOMContentLoaded', function () {
             showShortTopNotification('Desktop notifications: All');
             break;
           case 'clear-all-notifications': {
-            // Remove all notification cards from the panel
-            const notificationsPanel = document.getElementById('notifications-panel');
-            if (notificationsPanel) {
-              const notifPanelContent = notificationsPanel.querySelector('.notifications-panel-content');
-              if (notifPanelContent) {
-                notifPanelContent.querySelectorAll('.notif-card').forEach(card => card.remove());
-                notifPanelContent.querySelectorAll('.notif-section-label').forEach(label => label.remove());
-                notifPanelContent.querySelectorAll('.notif-list').forEach(list => list.remove());
-                // Show empty state
-                const headerRow = notifPanelContent.querySelector('.notif-header-row');
-                const tempHeader = headerRow ? headerRow.cloneNode(true) : null;
-                notifPanelContent.innerHTML = '';
-                if (tempHeader) notifPanelContent.appendChild(tempHeader);
-                const emptyMsg = document.createElement('div');
-                emptyMsg.className = 'no-notifications-msg';
-                emptyMsg.textContent = 'No new notifications';
-                emptyMsg.style.cssText = 'display: flex; align-items: center; justify-content: center; height: 100%; color: #888; font-size: 1.15rem; font-weight: 500; text-align: center; margin-top: 60px;';
-                notifPanelContent.appendChild(emptyMsg);
-                setNotificationsBtnOpacity();
-                updateNotificationsBadge();
-              }
-            }
-            // Remove all desktop toast notifications
-            const toastContainer = document.getElementById('os-toast-container');
-            if (toastContainer) {
-              Array.from(toastContainer.children).forEach(child => child.remove());
-            }
+            clearAllNotifications();
             break;
           }
           case 'show-wallet-icon':
@@ -5135,7 +5493,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 (currentContextMenuTarget.classList.contains('app-grid-item') ||
                  currentContextMenuTarget.classList.contains('app-launcher-app'))
               ) {
-                const appName = currentContextMenuTarget.getAttribute('data-app-name') || currentContextMenuTarget.getAttribute('data-app-id');
+                const appName = currentContextMenuTarget.getAttribute('data-app');
                 const appTitle = currentContextMenuTarget.getAttribute('data-app-title') || currentContextMenuTarget.querySelector('span')?.textContent || appName;
                 showConfirmDialog({
                   title: 'Uninstall App',
@@ -5241,7 +5599,7 @@ document.addEventListener('DOMContentLoaded', function () {
           }
           case 'add-to-desktop':
             if (currentContextMenuTarget && currentContextMenuTarget.classList.contains('app-grid-item')) {
-              const appName = currentContextMenuTarget.getAttribute('data-app-name') || currentContextMenuTarget.getAttribute('data-app-id');
+              const appName = currentContextMenuTarget.getAttribute('data-app');
               const appTitle = currentContextMenuTarget.getAttribute('data-app-title') || currentContextMenuTarget.querySelector('span')?.textContent || appName;
               // Get icon details from startMenuApps, fallback to getAppIconDetails
               let details = { iconClass: 'fa-window-maximize', iconBgClass: 'gray-icon' };
@@ -5265,70 +5623,69 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (typeof showShortTopNotification === 'function') showShortTopNotification('Desktop not found');
                 break;
               }
-              // Check if already on desktop
-              if (!desktopIconsContainer.querySelector('.desktop-icon[data-app="' + appName + '"]')) {
-                const icon = document.createElement('div');
-                icon.className = 'desktop-icon';
-                icon.setAttribute('data-app', appName);
-                icon.setAttribute('data-created', new Date().toISOString()); // Set creation date
-                icon.innerHTML = `
+              // Robust check: if already on desktop, do not add
+              if (desktopIconsContainer.querySelector('.desktop-icon[data-app="' + appName + '"]')) {
+                if (typeof showShortTopNotification === 'function') showShortTopNotification('Already on Desktop');
+                break;
+              }
+              const icon = document.createElement('div');
+              icon.className = 'desktop-icon';
+              icon.setAttribute('data-app', appName);
+              icon.setAttribute('data-created', new Date().toISOString()); // Set creation date
+              icon.innerHTML = `
               <div class="icon-container ${details.iconBgClass}"><i class="fas ${details.iconClass}"></i></div>
               <span>${appTitle}</span>
             `;
-                // --- Find first available grid slot ---
-                if (window.innerWidth > 1023) {
-                  // Use grid logic
-                  const leftOffset = GRID_GAP;
-                  const topOffset = GRID_GAP;
-                  const colWidth = GRID_CELL_WIDTH + GRID_GAP;
-                  const iconHeight = GRID_CELL_HEIGHT;
-                  const verticalGap = GRID_GAP;
-                  const taskbar = document.querySelector('.taskbar');
-                  const taskbarHeight = taskbar ? taskbar.offsetHeight : 0;
-                  const availableHeight = window.innerHeight - taskbarHeight - 50; // 30px bottom margin
-                  const maxRows = Math.max(1, Math.floor((availableHeight - topOffset) / (iconHeight + verticalGap)));
-                  const maxCols = Math.max(1, Math.floor((desktopIconsContainer.clientWidth - leftOffset) / colWidth));
-                  // Mark occupied slots
-                  const occupied = {};
-                  desktopIconsContainer.querySelectorAll('.desktop-icon').forEach(existingIcon => {
-                    const left = parseInt(existingIcon.style.left, 10);
-                    const top = parseInt(existingIcon.style.top, 10);
-                    if (!isNaN(left) && !isNaN(top)) {
-                      const col = Math.round((left - leftOffset) / colWidth);
-                      const row = Math.round((top - topOffset) / (iconHeight + verticalGap));
-                      occupied[`${col},${row}`] = true;
-                    }
-                  });
-                  // Find first free slot (column by column, then row)
-                  let found = false;
-                  let targetCol = 0, targetRow = 0;
-                  outer: for (let col = 0; col < maxCols; col++) {
-                    for (let row = 0; row < maxRows; row++) {
-                      if (!occupied[`${col},${row}`]) {
-                        targetCol = col;
-                        targetRow = row;
-                        found = true;
-                        break outer;
-                      }
+              // --- Find first available grid slot ---
+              if (window.innerWidth > 1023) {
+                // Use grid logic
+                const leftOffset = GRID_GAP;
+                const topOffset = GRID_GAP;
+                const colWidth = GRID_CELL_WIDTH + GRID_GAP;
+                const iconHeight = GRID_CELL_HEIGHT;
+                const verticalGap = GRID_GAP;
+                const taskbar = document.querySelector('.taskbar');
+                const taskbarHeight = taskbar ? taskbar.offsetHeight : 0;
+                const availableHeight = window.innerHeight - taskbarHeight - 50; // 30px bottom margin
+                const maxRows = Math.max(1, Math.floor((availableHeight - topOffset) / (iconHeight + verticalGap)));
+                const maxCols = Math.max(1, Math.floor((desktopIconsContainer.clientWidth - leftOffset) / colWidth));
+                // Mark occupied slots
+                const occupied = {};
+                desktopIconsContainer.querySelectorAll('.desktop-icon').forEach(existingIcon => {
+                  const left = parseInt(existingIcon.style.left, 10);
+                  const top = parseInt(existingIcon.style.top, 10);
+                  if (!isNaN(left) && !isNaN(top)) {
+                    const col = Math.round((left - leftOffset) / colWidth);
+                    const row = Math.round((top - topOffset) / (iconHeight + verticalGap));
+                    occupied[`${col},${row}`] = true;
+                  }
+                });
+                // Find first free slot (column by column, then row)
+                let found = false;
+                let targetCol = 0, targetRow = 0;
+                outer: for (let col = 0; col < maxCols; col++) {
+                  for (let row = 0; row < maxRows; row++) {
+                    if (!occupied[`${col},${row}`]) {
+                      targetCol = col;
+                      targetRow = row;
+                      found = true;
+                      break outer;
                     }
                   }
-                  // Place icon at found slot
-                  const iconLeft = leftOffset + targetCol * colWidth;
-                  const iconTop = topOffset + targetRow * (iconHeight + verticalGap);
-                  icon.style.position = 'absolute';
-                  icon.style.left = iconLeft + 'px';
-                  icon.style.top = iconTop + 'px';
-                  icon.setAttribute('data-absolute', 'true');
                 }
-                desktopIconsContainer.appendChild(icon);
-                setupDesktopIcon(icon);
-                if (typeof showShortTopNotification === 'function') showShortTopNotification('Added to Desktop');
-                // Save positions if using absolute
-                if (window.innerWidth > 1023) saveDesktopIconPositions && saveDesktopIconPositions();
-              } else {
-                if (typeof showShortTopNotification === 'function') showShortTopNotification('Already on Desktop');
+                // Place icon at found slot
+                const iconLeft = leftOffset + targetCol * colWidth;
+                const iconTop = topOffset + targetRow * (iconHeight + verticalGap);
+                icon.style.position = 'absolute';
+                icon.style.left = iconLeft + 'px';
+                icon.style.top = iconTop + 'px';
+                icon.setAttribute('data-absolute', 'true');
               }
-              if (typeof hideContextMenu === 'function') hideContextMenu();
+              desktopIconsContainer.appendChild(icon);
+              setupDesktopIcon(icon);
+              if (typeof showShortTopNotification === 'function') showShortTopNotification('Added to Desktop');
+              // Save positions if using absolute
+              if (window.innerWidth > 1023 && saveDesktopIconPositions && saveDesktopIconPositions());
             }
             break;
           case 'remove-from-desktop':
@@ -5467,7 +5824,7 @@ document.addEventListener('DOMContentLoaded', function () {
                   appItem.style.cursor = 'pointer';
                   appItem.style.userSelect = 'none';
                   appItem.tabIndex = 0;
-                  appItem.setAttribute('data-app-name', app.id);
+                  appItem.setAttribute('data-app', app.id);
                   appItem.innerHTML = `<div class="icon-container ${app.iconBgClass}" style="width:64px;height:64px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:28px;box-shadow:0 4px 16px rgba(0,0,0,0.18);margin-bottom:10px;"><i class="fas ${app.iconClass}"></i></div><span style="font-size:14px;color:#fff;margin-top:5px;text-shadow:0 1px 4px #222;text-align:center;width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;">${app.name}</span>`;
                   appItem.addEventListener('click', function (e) {
                     openApp(app.id, app.name, app.iconClass, app.iconBgClass, appItem);
@@ -5496,7 +5853,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 grid.removeEventListener('animationend', handler);
                 grid.classList.remove('anim-zoom-in');
               });
-
+              // --- FIX: Re-attach volume panel listeners after mode switch ---
+              if (typeof setupVolumePanelListeners === 'function') setupVolumePanelListeners();
+              if (typeof attachVolumeBtnHandler === 'function') attachVolumeBtnHandler();
             }
             break;
           }
@@ -5697,7 +6056,7 @@ document.addEventListener('DOMContentLoaded', function () {
       // Custom context menu for pinned-only taskbar icons
       if (e.target.closest('.taskbar-app-icon.pinned-only')) {
         currentContextMenuTarget = e.target.closest('.taskbar-app-icon.pinned-only');
-        const appName = currentContextMenuTarget.getAttribute('data-app-name');
+        const appName = currentContextMenuTarget.getAttribute('data-app');
         const details = getAppIconDetails(appName);
         const openWin = Object.values(openWindows).find(w => w.name === appName && w.element);
         let menuItems;
@@ -5812,7 +6171,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
       } else if (e.target.closest('.app-launcher-mode .app-launcher-app')) {
         currentContextMenuTarget = e.target.closest('.app-launcher-app');
-        const appName = currentContextMenuTarget.getAttribute('data-app-name') || currentContextMenuTarget.getAttribute('data-app-id');
+        const appName = currentContextMenuTarget.getAttribute('data-app');
         const appTitle = currentContextMenuTarget.getAttribute('data-app-title') || currentContextMenuTarget.querySelector('span')?.textContent || appName;
         const details = getAppIconDetails(appName);
         // Determine if system app
@@ -6111,14 +6470,14 @@ document.addEventListener('DOMContentLoaded', function () {
         if (item.action === 'pin-to-taskbar') {
           let appName = null;
           if (currentContextMenuTarget) {
-            appName = currentContextMenuTarget.getAttribute('data-app') || currentContextMenuTarget.getAttribute('data-app-name');
+            appName = currentContextMenuTarget.getAttribute('data-app');
             // If taskbar icon, try data-window-id to get app name from openWindows
             if (!appName && currentContextMenuTarget.classList.contains('taskbar-app-icon')) {
               const winId = currentContextMenuTarget.getAttribute('data-window-id');
               if (winId && openWindows[winId]) appName = openWindows[winId].name;
             }
             if (!appName && currentContextMenuTarget.classList.contains('pinned-only')) {
-              appName = currentContextMenuTarget.getAttribute('data-app-name');
+              appName = currentContextMenuTarget.getAttribute('data-app');
             }
           }
           if (appName && isAppPinned(appName)) {
@@ -6379,15 +6738,13 @@ document.addEventListener('DOMContentLoaded', function () {
       }
       case 'add-to-desktop':
         if (currentContextMenuTarget && currentContextMenuTarget.classList.contains('app-grid-item')) {
-          const appName = currentContextMenuTarget.getAttribute('data-app-name') || currentContextMenuTarget.getAttribute('data-app-id');
+          const appName = currentContextMenuTarget.getAttribute('data-app');
           const appTitle = currentContextMenuTarget.getAttribute('data-app-title') || currentContextMenuTarget.querySelector('span')?.textContent || appName;
           // Get icon details from startMenuApps, fallback to getAppIconDetails
           let details = { iconClass: 'fa-window-maximize', iconBgClass: 'gray-icon' };
           if (typeof startMenuApps !== 'undefined') {
             const appObj = startMenuApps.find(a =>
-              a.id === appName ||
-              a.name === appName ||
-              (a.name && a.name.toLowerCase().replace(/\s+/g, '-') === appName)
+              a.id === appName
             );
             if (appObj) {
               details.iconClass = appObj.iconClass || details.iconClass;
@@ -6403,70 +6760,69 @@ document.addEventListener('DOMContentLoaded', function () {
             if (typeof showShortTopNotification === 'function') showShortTopNotification('Desktop not found');
             break;
           }
-          // Check if already on desktop
-          if (!desktopIconsContainer.querySelector('.desktop-icon[data-app="' + appName + '"]')) {
-            const icon = document.createElement('div');
-            icon.className = 'desktop-icon';
-            icon.setAttribute('data-app', appName);
-            icon.setAttribute('data-created', new Date().toISOString()); // Set creation date
-            icon.innerHTML = `
-                    <div class="icon-container ${details.iconBgClass}"><i class="fas ${details.iconClass}"></i></div>
-                    <span>${appTitle}</span>
-                  `;
-            // --- Find first available grid slot ---
-            if (window.innerWidth > 1023) {
-              // Use grid logic
-              const leftOffset = GRID_GAP;
-              const topOffset = GRID_GAP;
-              const colWidth = GRID_CELL_WIDTH + GRID_GAP;
-              const iconHeight = GRID_CELL_HEIGHT;
-              const verticalGap = GRID_GAP;
-              const taskbar = document.querySelector('.taskbar');
-              const taskbarHeight = taskbar ? taskbar.offsetHeight : 0;
-              const availableHeight = window.innerHeight - taskbarHeight - 50; // 30px bottom margin
-              const maxRows = Math.max(1, Math.floor((availableHeight - topOffset) / (iconHeight + verticalGap)));
-              const maxCols = Math.max(1, Math.floor((desktopIconsContainer.clientWidth - leftOffset) / colWidth));
-              // Mark occupied slots
-              const occupied = {};
-              desktopIconsContainer.querySelectorAll('.desktop-icon').forEach(existingIcon => {
-                const left = parseInt(existingIcon.style.left, 10);
-                const top = parseInt(existingIcon.style.top, 10);
-                if (!isNaN(left) && !isNaN(top)) {
-                  const col = Math.round((left - leftOffset) / colWidth);
-                  const row = Math.round((top - topOffset) / (iconHeight + verticalGap));
-                  occupied[`${col},${row}`] = true;
-                }
-              });
-              // Find first free slot (column by column, then row)
-              let found = false;
-              let targetCol = 0, targetRow = 0;
-              outer: for (let col = 0; col < maxCols; col++) {
-                for (let row = 0; row < maxRows; row++) {
-                  if (!occupied[`${col},${row}`]) {
-                    targetCol = col;
-                    targetRow = row;
-                    found = true;
-                    break outer;
-                  }
+          // Robust check: if already on desktop, do not add
+          if (desktopIconsContainer.querySelector('.desktop-icon[data-app="' + appName + '"]')) {
+            if (typeof showShortTopNotification === 'function') showShortTopNotification('Already on Desktop');
+            break;
+          }
+          const icon = document.createElement('div');
+          icon.className = 'desktop-icon';
+          icon.setAttribute('data-app', appName);
+          icon.setAttribute('data-created', new Date().toISOString()); // Set creation date
+          icon.innerHTML = `
+            <div class="icon-container ${details.iconBgClass}"><i class="fas ${details.iconClass}"></i></div>
+            <span>${appTitle}</span>
+          `;
+          // --- Find first available grid slot ---
+          if (window.innerWidth > 1023) {
+            // Use grid logic
+            const leftOffset = GRID_GAP;
+            const topOffset = GRID_GAP;
+            const colWidth = GRID_CELL_WIDTH + GRID_GAP;
+            const iconHeight = GRID_CELL_HEIGHT;
+            const verticalGap = GRID_GAP;
+            const taskbar = document.querySelector('.taskbar');
+            const taskbarHeight = taskbar ? taskbar.offsetHeight : 0;
+            const availableHeight = window.innerHeight - taskbarHeight - 50; // 30px bottom margin
+            const maxRows = Math.max(1, Math.floor((availableHeight - topOffset) / (iconHeight + verticalGap)));
+            const maxCols = Math.max(1, Math.floor((desktopIconsContainer.clientWidth - leftOffset) / colWidth));
+            // Mark occupied slots
+            const occupied = {};
+            desktopIconsContainer.querySelectorAll('.desktop-icon').forEach(existingIcon => {
+              const left = parseInt(existingIcon.style.left, 10);
+              const top = parseInt(existingIcon.style.top, 10);
+              if (!isNaN(left) && !isNaN(top)) {
+                const col = Math.round((left - leftOffset) / colWidth);
+                const row = Math.round((top - topOffset) / (iconHeight + verticalGap));
+                occupied[`${col},${row}`] = true;
+              }
+            });
+            // Find first free slot (column by column, then row)
+            let found = false;
+            let targetCol = 0, targetRow = 0;
+            outer: for (let col = 0; col < maxCols; col++) {
+              for (let row = 0; row < maxRows; row++) {
+                if (!occupied[`${col},${row}`]) {
+                  targetCol = col;
+                  targetRow = row;
+                  found = true;
+                  break outer;
                 }
               }
-              // Place icon at found slot
-              const iconLeft = leftOffset + targetCol * colWidth;
-              const iconTop = topOffset + targetRow * (iconHeight + verticalGap);
-              icon.style.position = 'absolute';
-              icon.style.left = iconLeft + 'px';
-              icon.style.top = iconTop + 'px';
-              icon.setAttribute('data-absolute', 'true');
             }
-            desktopIconsContainer.appendChild(icon);
-            setupDesktopIcon(icon);
-            if (typeof showShortTopNotification === 'function') showShortTopNotification('Added to Desktop');
-            // Save positions if using absolute
-            if (window.innerWidth > 1023) saveDesktopIconPositions && saveDesktopIconPositions();
-          } else {
-            if (typeof showShortTopNotification === 'function') showShortTopNotification('Already on Desktop');
+            // Place icon at found slot
+            const iconLeft = leftOffset + targetCol * colWidth;
+            const iconTop = topOffset + targetRow * (iconHeight + verticalGap);
+            icon.style.position = 'absolute';
+            icon.style.left = iconLeft + 'px';
+            icon.style.top = iconTop + 'px';
+            icon.setAttribute('data-absolute', 'true');
           }
-          if (typeof hideContextMenu === 'function') hideContextMenu();
+          desktopIconsContainer.appendChild(icon);
+          setupDesktopIcon(icon);
+          if (typeof showShortTopNotification === 'function') showShortTopNotification('Added to Desktop');
+          // Save positions if using absolute
+          if (window.innerWidth > 1023 && saveDesktopIconPositions && saveDesktopIconPositions());
         }
         break;
       case 'open-settings':
@@ -6588,6 +6944,9 @@ document.addEventListener('DOMContentLoaded', function () {
         if (typeof hideContextMenu === 'function') hideContextMenu();
         break;
       }
+      case 'clear-all-notifications':
+        clearAllNotifications();
+        break;
     }
   }
 
@@ -6709,6 +7068,7 @@ document.addEventListener('DOMContentLoaded', function () {
   });
   // --- App launcher window logic and event listener ---
   function openAppLauncherWindow(iconElementForAnim) {
+    if (typeof window.hideWalletSidebar === 'function') window.hideWalletSidebar();
     // Prevent multiple launchers
     if (document.getElementById('app-launcher-overlay')) {
       return;
@@ -6824,7 +7184,7 @@ document.addEventListener('DOMContentLoaded', function () {
       appItem.style.userSelect = 'none';
       appItem.style.transition = 'transform 0.18s cubic-bezier(0.4,0,0.2,1), box-shadow 0.18s cubic-bezier(0.4,0,0.2,1)';
       appItem.tabIndex = 0;
-      appItem.setAttribute('data-app-name', app.name.toLowerCase());
+      appItem.setAttribute('data-app', app.id);
       // Icon container style
       const iconContainerStyle = `width: 64px; height: 64px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 28px; box-shadow: 0 4px 16px rgba(0,0,0,0.18); margin-bottom: 10px;`;
       appItem.innerHTML = `
@@ -6918,7 +7278,7 @@ document.addEventListener('DOMContentLoaded', function () {
     footer.appendChild(logoutBtn);
     overlay.appendChild(footer);
 
-    // ... existing code ...
+  // ... existing code ...
     // Keyboard navigation state
     let selectedAppIndex = 0;
 
@@ -6940,7 +7300,7 @@ document.addEventListener('DOMContentLoaded', function () {
       appItems.forEach(item => item.classList.remove('selected'));
       appItem.classList.add('selected');
       openApp(
-        appItem.getAttribute('data-app-id') || appItem.getAttribute('data-app-name'),
+        appItem.getAttribute('data-app'),
         appItem.querySelector('span').textContent,
         appItem.querySelector('i').className.split(' ').find(cls => cls.startsWith('fa-')),
         appItem.className.split(' ').find(cls => cls.endsWith('-icon'))
@@ -6954,7 +7314,7 @@ document.addEventListener('DOMContentLoaded', function () {
       const term = this.value.trim().toLowerCase();
       let visibleCount = 0;
       appItems.forEach(item => {
-        const appName = item.getAttribute('data-app-name');
+        const appName = item.getAttribute('data-app');
         const isVisible = (!term || appName.includes(term));
         item.style.display = isVisible ? '' : 'none';
         if (isVisible) visibleCount++;
@@ -7103,7 +7463,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  // ... existing code ...
+// ... existing code ...
 
   // --- Bulletproof: Attach ResizeObserver to all .window elements ---
   function attachSidebarResizeObserver(win) {
@@ -7214,6 +7574,7 @@ document.addEventListener('DOMContentLoaded', function () {
   if (aiChatBtn && aiChatWindow) {
     aiChatBtn.addEventListener('click', function () {
       if (window.innerWidth <= 1023) return;
+      if (typeof window.hideWalletSidebar === 'function') window.hideWalletSidebar();
       aiChatVisible = !aiChatVisible;
       if (aiChatVisible) {
         aiChatWindow.style.display = 'flex';
@@ -7255,6 +7616,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const globalSearchSelected = document.getElementById('global-search-selected');
   let globalSearchDropdownOpen = false;
   function showGlobalSearch() {
+    if (typeof window.hideWalletSidebar === 'function') window.hideWalletSidebar();
     if (window.innerWidth <= 1023) return;
     globalSearchOverlay.style.display = 'flex';
     requestAnimationFrame(() => {
@@ -7379,388 +7741,129 @@ document.addEventListener('DOMContentLoaded', function () {
   const notificationsPanel = document.getElementById('notifications-panel');
   let notificationsVisible = false;
   if (notificationsPanel && notificationsBtn) {
-    // Add placeholder content if empty
-    if (!notificationsPanel.innerHTML.trim()) {
-      notificationsPanel.innerHTML = `
-        <div class="notifications-panel-content">
-          <div class="notif-header-row">
-            <span class="notif-title">Notifications</span>
-            <div class="notif-tabs">
-              <button class="notif-tab notif-tab-active">All</button>
-              <button class="notif-tab">Unread</button>
-            </div>
-          </div>
-          <div class="notif-section-label">Today <span class="notif-clear">Clear all</span></div>
-          <div class="notif-list">
-            <div class="notif-card unread">
-              <button class="notif-delete-btn" title="Delete notification">&times;</button>
-              <div class="notif-icon-bg notif-bg-blue"><i class="fas fa-shopping-cart"></i></div>
-              <div class="notif-content">
-                <div class="notif-main-row">
-                  <span class="notif-main-title">New sale</span>
-                
-                </div>
-                <div class="notif-desc">New sale from Andrei Caramitru</div>
-                <div class="notif-meta">1m</div>
-              </div>
-              <img class="notif-avatar" src="img/avatar.png" />
-            </div>
-            <div class="notif-card unread">
-              <button class="notif-delete-btn" title="Delete notification">&times;</button>
-              <div class="notif-icon-bg notif-bg-indigo"><i class="fas fa-bolt"></i></div>
-              <div class="notif-content">
-                <div class="notif-main-row">
-                  <span class="notif-main-title">Andrei Caramitru made a new <b>sale</b></span>
-                </div>
-                <div class="notif-desc">in total of <b>4500 lei</b></div>
-                <div class="notif-meta">20m</div>
-              </div>
-              <img class="notif-avatar" src="img/avatar.png" />
-            </div>
-            <div class="notif-card">
-              <button class="notif-delete-btn" title="Delete notification">&times;</button>
-              <div class="notif-icon-bg notif-bg-orange"><i class="fas fa-shopping-bag"></i></div>
-              <div class="notif-content">
-                <div class="notif-main-row">
-                  <span class="notif-main-title">Andrei Caramitru made a new sale</span>
-                </div>
-                <div class="notif-desc">in total of 4500 lei</div>
-                <div class="notif-meta">40m</div>
-              </div>
-              <img class="notif-avatar" src="img/avatar.png" />
-            </div>
-            <div class="notif-card">
-              <button class="notif-delete-btn" title="Delete notification">&times;</button>
-              <div class="notif-icon-bg notif-bg-green"><i class="fas fa-star"></i></div>
-              <div class="notif-content">
-                <div class="notif-main-row">
-                  <span class="notif-main-title">Andrei Caramitru posted a <b>review</b></span>
-                </div>
-                <div class="notif-desc">on <b>Blugi de blana imblaniti misto</b></div>
-                <div class="notif-meta">1h ago</div>
-              </div>
-              <img class="notif-avatar" src="img/avatar.png" />
-            </div>
-          </div>
-          <div class="notif-section-label">Yesterday <span class="notif-clear">Clear all</span></div>
-          <div class="notif-list">
-            <div class="notif-card unread">
-              <button class="notif-delete-btn" title="Delete notification">&times;</button>
-              <div class="notif-icon-bg notif-bg-blue"><i class="fas fa-shopping-cart"></i></div>
-              <div class="notif-content">
-                <div class="notif-main-row">
-                  <span class="notif-main-title">New sale</span>
-                 
-                </div>
-                <div class="notif-desc">New sale from Andrei Caramitru</div>
-                <div class="notif-meta">1m</div>
-              </div>
-              <img class="notif-avatar" src="img/avatar.png" />
-            </div>
-            <div class="notif-card unread">
-              <button class="notif-delete-btn" title="Delete notification">&times;</button>
-              <div class="notif-icon-bg notif-bg-indigo"><i class="fas fa-bolt"></i></div>
-              <div class="notif-content">
-                <div class="notif-main-row">
-                  <span class="notif-main-title">Andrei Caramitru made a new <b>sale</b></span>
-
-                </div>
-                <div class="notif-desc">in total of <b>4500 lei</b></div>
-                <div class="notif-meta">20m</div>
-              </div>
-              <img class="notif-avatar" src="img/avatar.png" />
-            </div>
-            <div class="notif-card">
-              <button class="notif-delete-btn" title="Delete notification">&times;</button>
-              <div class="notif-icon-bg notif-bg-orange"><i class="fas fa-shopping-bag"></i></div>
-              <div class="notif-content">
-                <div class="notif-main-row">
-                  <span class="notif-main-title">Andrei Caramitru made a new sale</span>
-                </div>
-                <div class="notif-desc">in total of 4500 lei</div>
-                <div class="notif-meta">40m</div>
-              </div>
-              <img class="notif-avatar" src="img/avatar.png" />
-            </div>
-            <div class="notif-card">
-              <button class="notif-delete-btn" title="Delete notification">&times;</button>
-              <div class="notif-icon-bg notif-bg-green"><i class="fas fa-star"></i></div>
-              <div class="notif-content">
-                <div class="notif-main-row">
-                  <span class="notif-main-title">Andrei Caramitru posted a <b>review</b></span>
-                </div>
-                <div class="notif-desc">on <b>Blugi de blana imblaniti misto</b></div>
-                <div class="notif-meta">1h ago</div>
-              </div>
-              <img class="notif-avatar" src="img/avatar.png" />
-            </div>
-          </div>
-        </div>
-      `;
-      // Enable swipe-to-delete after notifications are rendered
-      enableNotificationSwipeToDelete();
-      updateNotificationsBadge();
+    // Remove static HTML and render dynamically
+    notificationsPanel.innerHTML = '';
+    // Optionally, initialize with default notifications
+    if (notifications.length === 0) {
+      notifications.push(
+        {
+          title: 'New sale',
+          desc: 'New sale from Andrei Caramitru',
+          meta: '1m',
+          iconClass: 'fa-shopping-cart',
+          iconBgClass: 'notif-bg-blue',
+          avatar: 'img/avatar.png',
+          unread: true
+        },
+        {
+          title: 'Andrei Caramitru made a new <b>sale</b>',
+          desc: 'in total of <b>4500 lei</b>',
+          meta: '20m',
+          iconClass: 'fa-bolt',
+          iconBgClass: 'notif-bg-indigo',
+          avatar: 'img/avatar.png',
+          unread: true
+        },
+        {
+          title: 'Andrei Caramitru made a new sale',
+          desc: 'in total of 4500 lei',
+          meta: '40m',
+          iconClass: 'fa-shopping-bag',
+          iconBgClass: 'notif-bg-orange',
+          avatar: 'img/avatar.png',
+          unread: false
+        },
+        {
+          title: 'Andrei Caramitru posted a <b>review</b>',
+          desc: 'on <b>Blugi de blana imblaniti misto</b>',
+          meta: '1h ago',
+          iconClass: 'fa-star',
+          iconBgClass: 'notif-bg-green',
+          avatar: 'img/avatar.png',
+          unread: false
+        }
+      );
     }
-    // Add event delegation for delete buttons
+    renderNotificationsPanel();
+    // Add event delegation for delete buttons (already present, keep as is)
     notificationsPanel.addEventListener('click', function (e) {
+      if (e.target.classList.contains('notif-clear')) {
+        clearAllNotifications();
+        return;
+      }
       if (e.target.classList.contains('notif-delete-btn')) {
         const notifCard = e.target.closest('.notif-card');
         if (notifCard) {
           const notifList = notifCard.parentElement;
-
-          // First slide out
-          notifCard.classList.add('notif-card-removing');
-          notifCard.style.transition = 'transform 0.3s ease-out, opacity 0.3s ease-out';
+          const notificationsPanel = document.getElementById('notifications-panel');
+          // FLIP: measure positions before removal
+          const prevCards = notificationsPanel.querySelectorAll('.notif-card');
+          let prevPositions = [];
+          let prevIds = [];
+          prevCards.forEach(card => {
+            prevPositions.push(card.getBoundingClientRect().top);
+            prevIds.push(card.dataset.notifId);
+          });
+          // Animate the card out to the right
+          notifCard.style.transition = 'transform 0.3s cubic-bezier(0.4,0,0.2,1), opacity 0.3s cubic-bezier(0.4,0,0.2,1)';
           notifCard.style.transform = 'translateX(120%)';
           notifCard.style.opacity = '0';
-
           setTimeout(() => {
-            // Prepare for height animation
-            notifCard.style.overflow = 'hidden';
-            notifCard.style.height = notifCard.offsetHeight + 'px';
-            notifCard.style.transition = 'all 0.3s ease-out';
-
-            // Trigger height collapse
-            requestAnimationFrame(() => {
-              notifCard.style.height = '0';
-              notifCard.style.marginTop = '0';
-              notifCard.style.marginBottom = '0';
-              notifCard.style.padding = '0';
-            });
-
-            // Remove after animations
-            setTimeout(() => {
-              notifCard.remove();
-              updateNotificationsBadge();
-              // If this was the last notification in the list, animate out section label and list
-              if (notifList && notifList.classList.contains('notif-list') && notifList.querySelectorAll('.notif-card').length === 0) {
-                const sectionLabel = notifList.previousElementSibling;
-                if (sectionLabel && sectionLabel.classList.contains('notif-section-label')) {
-                  fadeOutSectionLabel(sectionLabel);
-
-                  // Animate list collapse
-                  notifList.style.height = notifList.offsetHeight + 'px';
-                  notifList.style.overflow = 'hidden';
-                  notifList.style.transition = 'all 0.3s ease-out';
-
+            // Remove from notifications array
+            const idx = Array.from(notifList.children).indexOf(notifCard);
+            let removedId = notifCard.dataset.notifId;
+            if (idx > -1) notifications.splice(idx, 1);
+            renderNotificationsPanel();
+            // FLIP: animate remaining cards up
+            const newCards = notificationsPanel.querySelectorAll('.notif-card');
+            newCards.forEach(card => {
+              const notifId = card.dataset.notifId;
+              const prevIdx = prevIds.indexOf(notifId);
+              if (prevIdx !== -1) {
+                const oldTop = prevPositions[prevIdx];
+                const newTop = card.getBoundingClientRect().top;
+                const dy = oldTop - newTop;
+                if (dy !== 0) {
+                  card.style.transition = 'none';
+                  card.style.transform = `translateY(${dy}px)`;
                   requestAnimationFrame(() => {
-                    notifList.style.height = '0';
-                    notifList.style.marginTop = '0';
-                    notifList.style.marginBottom = '0';
-
-                    setTimeout(() => {
-                      notifList.remove();
-                      updateNotificationsBadge();
-                      // Check if we need to show empty state
-                      const notifPanelContent = notificationsPanel.querySelector('.notifications-panel-content');
-                      if (notifPanelContent && !notifPanelContent.querySelector('.notif-card')) {
-                        const headerRow = notifPanelContent.querySelector('.notif-header-row');
-                        const tempHeader = headerRow ? headerRow.cloneNode(true) : null;
-                        notifPanelContent.innerHTML = '';
-                        if (tempHeader) notifPanelContent.appendChild(tempHeader);
-
-                        const emptyMsg = document.createElement('div');
-                        emptyMsg.className = 'no-notifications-msg';
-                        emptyMsg.textContent = 'No new notifications';
-                        emptyMsg.style.cssText = 'display: flex; align-items: center; justify-content: center; height: 100%; color: #888; font-size: 15px; font-weight: 400; text-align: center; margin-top: 60px; opacity: 0;';
-                        notifPanelContent.appendChild(emptyMsg);
-                        setNotificationsBtnOpacity();
-
-                        requestAnimationFrame(() => {
-                          emptyMsg.style.transition = 'opacity 0.3s ease-out';
-                          emptyMsg.style.opacity = '1';
-                        });
-                      }
-                    }, 300);
+                    card.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)';
+                    card.style.transform = '';
+                  });
+                  card.addEventListener('transitionend', function handler() {
+                    card.style.transition = '';
+                    card.removeEventListener('transitionend', handler);
                   });
                 }
               }
-            }, 300);
-          }, 300);
-
-
-        }
-      }
-      // Handle Clear all
-      if (e.target.classList.contains('notif-clear')) {
-        // Find the notif-list after the section label
-        const sectionLabel = e.target.closest('.notif-section-label');
-        if (sectionLabel) {
-          let notifList = sectionLabel.nextElementSibling;
-          if (notifList && notifList.classList.contains('notif-list')) {
-            // Animate out all notifications with stagger
-            const notifCards = Array.from(notifList.querySelectorAll('.notif-card'));
-            notifCards.forEach((card, index) => {
-              setTimeout(() => {
-                // Slide out animation
-                card.style.transition = 'transform 0.3s ease-out, opacity 0.3s ease-out';
-                card.style.transform = 'translateX(120%)';
-                card.style.opacity = '0';
-
-                // Height collapse animation
-                setTimeout(() => {
-                  card.style.overflow = 'hidden';
-                  card.style.height = card.offsetHeight + 'px';
-                  card.style.transition = 'all 0.3s ease-out';
-
-                  requestAnimationFrame(() => {
-                    card.style.height = '0';
-                    card.style.marginTop = '0';
-                    card.style.marginBottom = '0';
-                    card.style.padding = '0';
-                  });
-
-                  // Remove after animations
-                  setTimeout(() => {
-                    card.remove();
-                    updateNotificationsBadge();
-                    // If this was the last card, animate out the section
-                    if (index === notifCards.length - 1) {
-                      fadeOutSectionLabel(sectionLabel);
-
-                      // Animate list collapse
-                      notifList.style.height = notifList.offsetHeight + 'px';
-                      notifList.style.overflow = 'hidden';
-                      notifList.style.transition = 'all 0.3s ease-out';
-
-                      requestAnimationFrame(() => {
-                        notifList.style.height = '0';
-                        notifList.style.marginTop = '0';
-                        notifList.style.marginBottom = '0';
-
-                        setTimeout(() => {
-                          notifList.remove();
-                          updateNotificationsBadge();
-                          // Check if we need to show empty state
-                          const notifPanelContent = notificationsPanel.querySelector('.notifications-panel-content');
-                          if (notifPanelContent && !notifPanelContent.querySelector('.notif-card')) {
-                            const headerRow = notifPanelContent.querySelector('.notif-header-row');
-                            const tempHeader = headerRow ? headerRow.cloneNode(true) : null;
-                            notifPanelContent.innerHTML = '';
-                            if (tempHeader) notifPanelContent.appendChild(tempHeader);
-
-                            const emptyMsg = document.createElement('div');
-                            emptyMsg.className = 'no-notifications-msg';
-                            emptyMsg.textContent = 'No new notifications';
-                            emptyMsg.style.cssText = 'display: flex; align-items: center; justify-content: center; height: 100%; color: #888; font-size: 1.15rem; font-weight: 500; text-align: center; margin-top: 60px; opacity: 0;';
-                            notifPanelContent.appendChild(emptyMsg);
-                            setNotificationsBtnOpacity();
-
-                            requestAnimationFrame(() => {
-                              emptyMsg.style.transition = 'opacity 0.3s ease-out';
-                              emptyMsg.style.opacity = '1';
-                            });
-                          }
-                        }, 300);
-                      });
-                    }
-                  }, 300);
-                }, 300);
-              }, index * 50); // Stagger each card's animation
             });
-
-            // Check if all notifications are gone
-            const notifPanelContent = notificationsPanel.querySelector('.notifications-panel-content');
-            if (notifPanelContent && !notifPanelContent.querySelector('.notif-card')) {
-              // Remove any remaining section labels and lists
-              const remainingLabels = notifPanelContent.querySelectorAll('.notif-section-label');
-              remainingLabels.forEach(label => {
-                fadeOutSectionLabel(label);
-                const nextList = label.nextElementSibling;
-                if (nextList && nextList.classList.contains('notif-list')) {
-                  nextList.remove();
-                }
-              });
-
-              // Clear content and show empty message
-              const headerRow = notifPanelContent.querySelector('.notif-header-row');
-              const tempHeader = headerRow ? headerRow.cloneNode(true) : null;
-              notifPanelContent.innerHTML = '';
-              if (tempHeader) notifPanelContent.appendChild(tempHeader);
-
-              const emptyMsg = document.createElement('div');
-              emptyMsg.className = 'no-notifications-msg';
-              emptyMsg.textContent = 'No new notifications';
-              emptyMsg.style.cssText = 'display: flex; align-items: center; justify-content: center; height: 100%; color: #888; font-size: 1.15rem; font-weight: 500; text-align: center; margin-top: 60px;';
-              notifPanelContent.appendChild(emptyMsg);
-              setNotificationsBtnOpacity();
-              updateNotificationsBadge();
-            }
-          }
-        }
-      }
-      // Also check after deleting a single notification
-      if (e.target.classList.contains('notif-delete-btn')) {
-        setTimeout(checkNoNotifications, 400);
-      }
-      function checkNoNotifications() {
-        const notifPanelContent = notificationsPanel.querySelector('.notifications-panel-content');
-        if (!notifPanelContent) return;
-
-        // Check each notification section
-        const notifLists = notifPanelContent.querySelectorAll('.notif-list');
-        notifLists.forEach(list => {
-          if (!list.querySelector('.notif-card')) {
-            const sectionLabel = list.previousElementSibling;
-            if (sectionLabel && sectionLabel.classList.contains('notif-section-label')) {
-              fadeOutSectionLabel(sectionLabel);
-              // Remove the empty list after animation
-              setTimeout(() => list.remove(), 400);
-            }
-          }
-        });
-
-        // Check if there are any notifications at all
-        const anyNotif = notifPanelContent.querySelector('.notif-card');
-        let emptyMsg = notifPanelContent.querySelector('.no-notifications-msg');
-
-        if (!anyNotif) {
-          // Remove any remaining section labels first
-          const remainingLabels = notifPanelContent.querySelectorAll('.notif-section-label');
-          remainingLabels.forEach(label => {
-            if (!label.classList.contains('fading-out')) {
-              fadeOutSectionLabel(label);
-            }
-          });
-
-          // Clear everything except header row and add empty message
-          setTimeout(() => {
-            if (!notifPanelContent.querySelector('.notif-card')) {  // Double check no new notifications appeared
-              const headerRow = notifPanelContent.querySelector('.notif-header-row');
-              const tempHeader = headerRow ? headerRow.cloneNode(true) : null;
-              notifPanelContent.innerHTML = '';
-              if (tempHeader) notifPanelContent.appendChild(tempHeader);
-
-              emptyMsg = document.createElement('div');
-              emptyMsg.className = 'no-notifications-msg';
-              emptyMsg.textContent = 'No new notifications';
-              emptyMsg.style.cssText = 'display: flex; align-items: center; justify-content: center; height: 100%; color: #888; font-size: 1.15rem; font-weight: 500; text-align: center; margin-top: 60px;';
-              notifPanelContent.appendChild(emptyMsg);
-              setNotificationsBtnOpacity();
-              updateNotificationsBadge();
-            }
-          }, 400);  // Wait for fade out animations to complete
-        } else {
-          if (emptyMsg) emptyMsg.remove();
-          setNotificationsBtnOpacity();
-          updateNotificationsBadge();
+            if (typeof updateNotificationsBadge === 'function') updateNotificationsBadge();
+          }, 300);
         }
       }
     });
-    let notificationBtnLock = false;
+
     notificationsBtn.addEventListener('click', function (e) {
-      // Do not stop propagation; let global click handler work
-      if (notificationBtnLock) return;
-      notificationBtnLock = true;
-      setTimeout(() => { notificationBtnLock = false; }, 350);
-      // Hide AI chat if open
-      const aiChatWindow = document.getElementById('ai-chat-window');
-      if (aiChatWindow && aiChatWindow.classList.contains('ai-chat-visible')) {
-        aiChatWindow.classList.remove('ai-chat-visible');
-        aiChatWindow.style.display = 'none';
-      }
       notificationsVisible = !notificationsVisible;
       if (notificationsVisible) {
+        // Hide wallet sidebar if visible
+        if (typeof window.hideWalletSidebar === 'function') {
+          const walletSidebar = document.getElementById('wallet-sidebar');
+          if (walletSidebar && walletSidebar.classList.contains('wallet-sidebar-visible')) {
+            window.hideWalletSidebar();
+          }
+        }
+        // Hide ai-chat panel if visible
+        const aiChatWindow = document.getElementById('ai-chat-window');
+        if (aiChatWindow && aiChatWindow.classList.contains('ai-chat-visible')) {
+          aiChatWindow.classList.remove('ai-chat-visible');
+          aiChatWindow.addEventListener('transitionend', function handler(e) {
+            if (e.propertyName === 'transform') {
+              aiChatWindow.style.display = 'none';
+              aiChatWindow.removeEventListener('transitionend', handler);
+            }
+          });
+        }
         notificationsPanel.style.display = 'flex';
         setTimeout(() => notificationsPanel.classList.add('notifications-visible'), 10);
       } else {
@@ -7771,11 +7874,11 @@ document.addEventListener('DOMContentLoaded', function () {
         });
       }
     });
-    // Click outside to close
+
+    // Click-outside-to-close logic
     document.addEventListener('mousedown', function (e) {
       if (notificationsVisible && notificationsPanel.style.display === 'flex') {
-        const btn = notificationsBtn;
-        if (!notificationsPanel.contains(e.target) && !btn.contains(e.target)) {
+        if (!notificationsPanel.contains(e.target) && !notificationsBtn.contains(e.target)) {
           notificationsVisible = false;
           notificationsPanel.classList.remove('notifications-visible');
           notificationsPanel.addEventListener('transitionend', function handler() {
@@ -7786,7 +7889,10 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     });
   }
+  // ... existing code ...
 });
+
+
 // ... existing code ...
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -7914,8 +8020,8 @@ function restoreDesktopIconPositions() {
 }
 
 // Patch initializeDesktopIconPositions to restore positions if available, otherwise use grid
-const _originalInitDesktopIconPositions = initializeDesktopIconPositions;
-initializeDesktopIconPositions = function () {
+const _originalInitDesktopIconPositions = window.initializeDesktopIconPositions;
+window.initializeDesktopIconPositions = function() {
   const desktopIconsContainer = document.querySelector('.desktop-icons');
   const icons = document.querySelectorAll('.desktop-icon');
   if (window.innerWidth > 1023) {
@@ -7934,8 +8040,8 @@ initializeDesktopIconPositions = function () {
 };
 
 // Patch globalOnIconMouseUp to save positions after drag
-const _originalGlobalOnIconMouseUp = globalOnIconMouseUp;
-globalOnIconMouseUp = function (e) {
+const _originalGlobalOnIconMouseUp = window.globalOnIconMouseUp;
+window.globalOnIconMouseUp = function (e) {
   _originalGlobalOnIconMouseUp(e);
   if (window.innerWidth > 1023) saveDesktopIconPositions();
 };
@@ -7951,11 +8057,14 @@ window.addEventListener('resize', function () {
     }
   }
 });
-
 // ... existing code ...
-const popoutButton = windowElement.querySelector('.window-popout');
-if (popoutButton) {
-  popoutButton.addEventListener('click', function (e) {
+
+
+// --- WINDOW POPOUT ---
+function setupWindowPopout(windowElement, windowId) {
+  const popoutButton = windowElement.querySelector('.window-popout');
+  if (popoutButton) {
+    popoutButton.addEventListener('click', function (e) {
     e.stopPropagation();
     // Get original window position and size
     const rect = windowElement.getBoundingClientRect();
@@ -8066,9 +8175,10 @@ if (popoutButton) {
     // ... existing code ...
   });
 }
+}
 // ... existing code ...
 
-// ... existing code ...
+
 // --- SWIPE TO DELETE FOR NOTIFICATIONS ---
 function enableNotificationSwipeToDelete() {
   const notifCards = document.querySelectorAll('.notif-card');
@@ -8138,54 +8248,6 @@ function enableNotificationSwipeToDelete() {
 }
 // ... existing code ...
 
-// ... existing code ...
-// --- GLOBAL SHORTCUT: Press 'N' to show a notification (OS-style) ---
-document.addEventListener('keydown', function (e) {
-  // Ignore if focus is in an input, textarea, or contenteditable
-  const active = document.activeElement;
-  if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable)) return;
-  if (e.key === 'n' || e.key === 'N') {
-    const notificationsPanel = document.getElementById('notifications-panel');
-    if (!notificationsPanel) return;
-    if (notificationsPanel.style.display !== 'flex') {
-      notificationsPanel.style.display = 'flex';
-      setTimeout(() => notificationsPanel.classList.add('notifications-visible'), 10);
-    }
-    setTimeout(() => {
-      const notifList = notificationsPanel.querySelector('.notif-list');
-      if (!notifList) return;
-      const card = document.createElement('div');
-      card.className = 'notif-card unread';
-      card.style.transform = 'translateX(120%)';
-      card.style.opacity = '0.7';
-      card.innerHTML = `
-        <button class="notif-delete-btn" title="Delete notification">&times;</button>
-        <div class="notif-icon-bg notif-bg-blue"><i class="fas fa-shopping-cart"></i></div>
-        <div class="notif-content">
-          <div class="notif-main-row">
-            <span class="notif-main-title">New incoming notification</span>
-  
-          </div>
-          <div class="notif-desc">This is a test notification</div>
-          <div class="notif-meta">now</div>
-        </div>
-        <img class="notif-avatar" src="img/avatar.png" />
-      `;
-      notifList.insertBefore(card, notifList.firstChild);
-      setTimeout(() => {
-        card.style.transition = 'transform 0.45s cubic-bezier(0.4,0,0.2,1), opacity 0.45s cubic-bezier(0.4,0,0.2,1)';
-        card.style.transform = 'translateX(0)';
-        card.style.opacity = '1';
-      }, 10);
-      if (typeof enableNotificationSwipeToDelete === 'function') {
-        enableNotificationSwipeToDelete();
-      }
-    }, 100);
-  }
-});
-// ... existing code ...
-
-// ... existing code ...
 // --- WINDOWS 11 STYLE TOAST NOTIFICATION ---
 function showToastNotification(opts = {}) {
   if (isNotificationsMuted) return;
@@ -8305,7 +8367,7 @@ function updateToastStackPositions() {
 }
 // ... existing code ...
 
-// ... existing code ...
+
 // --- Shared Mobile Sidebar Logic for All Windows with Sidebar ---
 function setupMobileSidebarForWindow(windowElement) {
   // Try all possible sidebar and content class combos for robustness
@@ -8659,7 +8721,8 @@ function showShortTopNotification(message) {
   notif.style.top = '32px';
   notif.style.left = '50%';
   notif.style.transform = 'translateX(-50%)';
-  notif.style.background = 'rgba(50,50,70,0.97)';
+  notif.style.background = 'var(--widget-bg)';
+  notif.style.backdropFilter = 'blur(30px)';
   notif.style.color = '#fff';
   notif.style.fontSize = '16px';
   notif.style.fontWeight = '400';
@@ -8942,6 +9005,8 @@ function showConfirmDialog({ title, message, iconClass, okText = "OK", cancelTex
     });
   });
 }
+
+
 
 
 
