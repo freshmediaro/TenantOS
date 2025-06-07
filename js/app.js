@@ -17,28 +17,792 @@ let desktopNotificationMode = 'three'; // Default to 3 notifications stacked
 const volumeBtn = document.querySelector('#volume-btn');
 const volumePanel = document.querySelector('#volume-panel');
 
+// Utility: Ensure sidebar overlay and menu toggle exist in every window
+function ensureSidebarElements(windowElement) {
+  // Ensure sidebar overlay exists as first child of .window-content
+  const windowContent = windowElement.querySelector('.window-content');
+  if (windowContent && !windowContent.querySelector('.sidebar-overlay')) {
+    const overlay = document.createElement('div');
+    overlay.className = 'sidebar-overlay';
+    windowContent.insertBefore(overlay, windowContent.firstChild);
+  }
+  // Ensure menu toggle exists as first child of .window-header
+  const windowHeader = windowElement.querySelector('.window-header');
+  let menuToggle = windowHeader && windowHeader.querySelector('.menu-toggle');
+  if (windowHeader && !menuToggle) {
+    menuToggle = document.createElement('button');
+    menuToggle.className = 'menu-toggle';
+    menuToggle.innerHTML = '<i class="fas fa-bars"></i>';
+    windowHeader.insertBefore(menuToggle, windowHeader.firstChild);
+  }
+}
+
+// Patch updateSidebarForWindow to respect data-user-collapsed and auto-collapse at breakpoints
+if (typeof window.updateSidebarForWindow !== 'function') {
+  window.updateSidebarForWindow = function() {};
+}
+window.updateSidebarForWindow = window.updateSidebarForWindow || function() {};
+const _originalUpdateSidebarForWindow = window.updateSidebarForWindow;
+window.updateSidebarForWindow = function (windowEl) {
+  if (!windowEl) return;
+  if (windowEl._isClosing) return;
+  const sidebars = windowEl.querySelectorAll('.window-sidebar, .settings-sidebar, .app-store-sidebar');
+  const width = windowEl.offsetWidth;
+  const isMobile = window.innerWidth <= 767;
+  sidebars.forEach(sb => {
+    // Clean up previous event handlers
+    const menuToggle = windowEl.querySelector('.menu-toggle');
+    const overlay = windowEl.querySelector('.sidebar-overlay');
+    const contentArea = windowEl.querySelector('.window-main-content, .settings-content, .app-store-main-content');
+    if (menuToggle) menuToggle.onclick = null;
+    if (overlay) overlay.onclick = null;
+    sb.querySelectorAll('.sidebar-item').forEach(item => { item.onclick = null; });
+
+    if (isMobile) {
+      // Remove collapsed/hover logic
+      sb.removeAttribute('data-user-collapsed');
+      sb.classList.remove('sidebar-hovered', 'sidebar-collapsed');
+      // Attach mobile sidebar logic
+      if (menuToggle && overlay && contentArea) {
+        menuToggle.onclick = function() {
+          const isShowing = !sb.classList.contains('show');
+          sb.classList.toggle('show');
+          overlay.classList.toggle('show');
+          if (isShowing) {
+            contentArea.classList.add('sidebar-push-active');
+          } else {
+            contentArea.classList.remove('sidebar-push-active');
+          }
+        };
+        overlay.onclick = function() {
+          sb.classList.remove('show');
+          overlay.classList.remove('show');
+          contentArea.classList.remove('sidebar-push-active');
+        };
+        sb.querySelectorAll('.sidebar-item').forEach(item => {
+          item.onclick = function() {
+            sb.classList.remove('show');
+            overlay.classList.remove('show');
+            contentArea.classList.remove('sidebar-push-active');
+          };
+        });
+      }
+      return;
+    }
+
+    // User override
+    let userOverride = false;
+    if (sb.hasAttribute('data-user-collapsed')) {
+      userOverride = true;
+      if (sb.getAttribute('data-user-collapsed') === 'true') {
+        sb.classList.add('sidebar-collapsed');
+      } else {
+        sb.classList.remove('sidebar-collapsed');
+      }
+      // If window is very small or very large, remove user override
+      if (width < 200 || width > 700) {
+        sb.removeAttribute('data-user-collapsed');
+        userOverride = false;
+      }
+    }
+    // Auto-collapse if no user override and width in range
+    if (!userOverride) {
+      if (width >= 200 && width < 900) {
+        sb.classList.add('sidebar-collapsed');
+      } else {
+        sb.classList.remove('sidebar-collapsed');
+      }
+    }
+    // Hover logic
+    const content = sb.parentElement && sb.parentElement.querySelector('.window-main-content, .settings-content, .app-store-main-content');
+    if (content) {
+      content.style.transform = '';
+    }
+    // Remove previous listeners
+    if (sb._hoverEnter) sb.removeEventListener('mouseenter', sb._hoverEnter);
+    if (sb._hoverLeave) sb.removeEventListener('mouseleave', sb._hoverLeave);
+    delete sb._hoverEnter;
+    delete sb._hoverLeave;
+    sb.classList.remove('sidebar-hovered', 'sidebar-mobile');
+    sb.style.position = '';
+    sb.style.left = '';
+    sb.style.top = '';
+    sb.style.height = '';
+    sb.style.zIndex = '';
+    sb.style.width = '';
+    if (sb.classList.contains('sidebar-collapsed')) {
+      sb._hoverEnter = function () {
+        const mainContent = sb.parentElement.querySelector('.window-main-content');
+        // Invalidate any pending cleanup from previous hover-out
+        if (mainContent) {
+          mainContent._sidebarCleanupValid = false;
+          if (mainContent._sidebarCleanup) {
+            mainContent.removeEventListener('transitionend', mainContent._sidebarCleanup);
+            mainContent._sidebarCleanup = null;
+          }
+        }
+        sb.classList.add('sidebar-hovered');
+        // Only add push class if both collapsed and hovered
+        if (sb.classList.contains('sidebar-collapsed') && sb.classList.contains('sidebar-hovered')) {
+          if (mainContent) {
+            // Fix width before push
+            let parentWindow = sb.closest('.window');
+            let parentWidth = parentWindow ? parentWindow.offsetWidth : mainContent.parentElement.offsetWidth;
+            // Use 73px for collapsed sidebar width
+            let sidebarWidth = 73;
+            // If sb is visible and has offsetWidth, use it (in case of custom themes)
+            if (sb.offsetWidth && sb.offsetWidth < 200) sidebarWidth = sb.offsetWidth;
+            let contentWidth = parentWidth - sidebarWidth;
+            if (contentWidth < 0) contentWidth = 0;
+            let widthPx = contentWidth + 'px';
+            mainContent.style.setProperty('width', widthPx);
+            mainContent.style.setProperty('min-width', widthPx);
+            mainContent.style.setProperty('max-width', widthPx);
+            mainContent.classList.add('sidebar-push-active');
+          }
+        }
+      };
+      sb._hoverLeave = function () {
+        const mainContent = sb.parentElement.querySelector('.window-main-content');
+        // Invalidate any previous cleanup
+        if (mainContent) {
+          mainContent._sidebarCleanupValid = false;
+          if (mainContent._sidebarCleanup) {
+            mainContent.removeEventListener('transitionend', mainContent._sidebarCleanup);
+            mainContent._sidebarCleanup = null;
+          }
+        }
+        sb.classList.remove('sidebar-hovered');
+        // Remove push class and reset width after transition ends
+        if (mainContent) {
+          // Handler to clean up after transition
+          mainContent._sidebarCleanupValid = true;
+          const cleanup = function(e) {
+            if (!mainContent._sidebarCleanupValid) return;
+            if (!e || e.propertyName === 'width' || e.propertyName === 'max-width' || e.propertyName === 'min-width') {
+              mainContent.classList.remove('sidebar-push-active');
+              mainContent.style.removeProperty('width');
+              mainContent.style.removeProperty('min-width');
+              mainContent.style.removeProperty('max-width');
+              mainContent.removeEventListener('transitionend', cleanup);
+              mainContent._sidebarCleanup = null;
+              mainContent._sidebarCleanupValid = false;
+            }
+          };
+          mainContent._sidebarCleanup = cleanup;
+          mainContent.addEventListener('transitionend', cleanup);
+          // Fallback: if no transition, clean up after a short delay
+          setTimeout(() => cleanup({propertyName: 'width'}), 250);
+        }
+      };
+      sb.addEventListener('mouseenter', sb._hoverEnter);
+      sb.addEventListener('mouseleave', sb._hoverLeave);
+    }
+  });
+}
+  
+
+
+//Email App Content
+function setupEmailApp(windowElement) {
+  // Sidebar: do NOT set content here. Sidebar content is defined in index.html template using the generic sidebar structure.
+  // Only update dynamic values (like unread counts, user name, etc.) here if needed.
+
+  // --- Ensure sidebar toggle and overlay exist (for consistent sidebar behavior) ---
+  ensureSidebarElements(windowElement); 
+
+  if (typeof window.updateSidebarForWindow === 'function') {
+    window.updateSidebarForWindow(windowElement);
+  }
+  if (typeof attachSidebarResizeObserver === 'function') {
+    attachSidebarResizeObserver(windowElement);
+  }
+
+  // Email data (grouped by day)
+  const emails = [
+    {
+      id: 1,
+      sender: 'Andrei Antoniade',
+      avatar: 'fa-fire',
+      subject: 'Subiectul si predicat iti explic ce este de explicat',
+      preview: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry.',
+      date: '17:30',
+      bigdate: '04:30 AM • Sunday, April 11, 2025',
+      size: '6.1 KB',
+      unread: true,
+      icon: 'fa-fire',
+      color: '#FF6B6B',
+      day: 'Today',
+      content: `<b>Hello dear testmail</b><br><br>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.<br><br>It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.`
+    },
+    {
+      id: 2,
+      sender: 'Andrei Antoniade',
+      avatar: 'fa-apple',
+      subject: 'Inca un subiect despre care nu vreau sa vorbesc cu nimeni si nim...',
+      preview: 'Another preview text for this email.',
+      date: '22:41',
+      bigdate: '04:30 AM • Sunday, April 11, 2025',
+      size: '6.1 MB',
+      unread: true,
+      icon: 'fa-apple',
+      color: '#fff',
+      day: 'Today',
+      content: 'This is the content of the second email.'
+    },
+    {
+      id: 3,
+      sender: 'Andrei Antoniade',
+      avatar: 'fa-facebook',
+      subject: 'Inca un subiect despre care nu a putut sa vorbesc cu nimeni s.a fie afis...',
+      preview: 'Preview for facebook email.',
+      date: '21 jul',
+      bigdate: '04:30 AM • Sunday, April 11, 2025',
+      size: '7.5 MB',
+      unread: false,
+      icon: 'fa-facebook',
+      color: '#1877f3',
+      day: 'Today',
+      content: 'This is the content of the facebook email.'
+    },
+    {
+      id: 4,
+      sender: 'Andrei Antoniade',
+      avatar: 'fa-dribbble',
+      subject: 'Subiectul si predicat iti explic ce este de explicat',
+      preview: 'Dribbble preview.',
+      date: '23 April',
+      bigdate: '04:30 AM • Sunday, April 11, 2025',
+      size: '12 MB',
+      unread: false,
+      icon: 'fa-dribbble',
+      color: '#ea4c89',
+      day: 'Today',
+      content: 'This is the content of the dribbble email.'
+    },
+    {
+      id: 5,
+      sender: 'Andrei Antoniade',
+      avatar: 'fa-fonticons-fi',
+      subject: 'Subiectul si predicat iti explic ce este de explicat',
+      preview: 'Fonticons preview.',
+      date: '21 May',
+      bigdate: '04:30 AM • Sunday, April 11, 2025',
+      size: '6.1 KB',
+      unread: false,
+      icon: 'fa-fonticons-fi',
+      color: '#3b5998',
+      day: 'Today',
+      content: 'This is the content of the fonticons email.'
+    },
+    // Yesterday group
+    {
+      id: 6,
+      sender: 'Andrei Antoniade',
+      avatar: 'fa-dribbble',
+      subject: 'Subiectul si predicat iti explic ce este de explicat',
+      preview: 'Yesterday preview.',
+      date: '17:30',
+      bigdate: '04:30 AM • Sunday, April 11, 2025',
+      size: '6.1 KB',
+      unread: false,
+      icon: 'fa-dribbble',
+      color: '#ea4c89',
+      day: 'Yesterday',
+      content: 'This is the content of the yesterday email.',
+      attachedfile: '<i class="fas fa-paperclip"></i>'
+    },
+    {
+      id: 7,
+      sender: 'Andrei Antoniade',
+      avatar: 'fa-arrow-down',
+      subject: 'Subiectul si predicat iti explic ce este de explicat',
+      preview: 'Yesterday preview 2.',
+      date: '22:41',
+      bigdate: '04:30 AM • Sunday, April 11, 2025',
+      size: '6.1 KB',
+      unread: false,
+      icon: 'fa-arrow-down',
+      color: '#8A8A9E',
+      day: 'Yesterday',
+      content: 'This is the content of the yesterday email 2.'
+    },
+    {
+      id: 8,
+      sender: 'Andrei Antoniade',
+      avatar: 'fa-arrow-down',
+      subject: 'Subiectul si predicat iti explic ce este de explicat',
+      preview: 'Yesterday preview 2.',
+      date: '22:41',
+      bigdate: '04:30 AM • Sunday, April 11, 2025',
+      size: '6.1 KB',
+      unread: true,
+      icon: 'fa-arrow-down',
+      color: '#8A8A9E',
+      day: 'Yesterday',
+      content: 'This is the content of the yesterday email 2.'
+    },
+    {
+      id: 9,
+      sender: 'Andrei Antoniade',
+      avatar: 'fa-arrow-down',
+      subject: 'Subiectul si predicat iti explic ce este de explicat',
+      preview: 'Yesterday preview 2.',
+      date: '22:41',
+      bigdate: '04:30 AM • Sunday, April 11, 2025',
+      size: '6.1 KB',
+      unread: false,
+      icon: 'fa-arrow-down',
+      color: '#8A8A9E',
+      day: 'Yesterday',
+      content: 'This is the content of the yesterday email 2.'
+    },
+    {
+      id: 10,
+      sender: 'Andrei Antoniade',
+      avatar: 'fa-arrow-down',
+      subject: 'Subiectul si predicat iti explic ce este de explicat',
+      preview: 'Yesterday preview 2.',
+      date: '22:41',
+      bigdate: '04:30 AM • Sunday, April 11, 2025',
+      size: '6.1 KB',
+      unread: true,
+      icon: 'fa-arrow-down',
+      color: '#8A8A9E',
+      day: 'Yesterday',
+      content: 'This is the content of the yesterday email 2.'
+    },
+    {
+      id: 11,
+      sender: 'Andrei Antoniade',
+      avatar: 'fa-arrow-down',
+      subject: 'Subiectul si predicat iti explic ce este de explicat',
+      preview: 'Yesterday preview 2.',
+      date: '22:41',
+      bigdate: '04:30 AM • Sunday, April 11, 2025',
+      size: '6.1 KB',
+      unread: false,
+      icon: 'fa-arrow-down',
+      color: '#8A8A9E',
+      day: 'Yesterday',
+      content: 'This is the content of the yesterday email 2.'
+    }
+  ];
+
+  // Group emails by day
+  const groupedEmails = emails.reduce((acc, email) => {
+    if (!acc[email.day]) acc[email.day] = [];
+    acc[email.day].push(email);
+    return acc;
+  }, {});
+
+  const emailListSection = windowElement.querySelector('.email-list-section');
+  const emailList = windowElement.querySelector('.email-list');
+  const emailContentSection = windowElement.querySelector('.email-content-section .email-content');
+
+  function renderEmailList(selectedId) {
+    if (!emailList) return;
+    emailList.innerHTML = '';
+    Object.keys(groupedEmails).forEach(day => {
+      // Day header
+      const dayHeader = document.createElement('li');
+      dayHeader.className = 'email-list-day-header';
+      dayHeader.textContent = day + (day === 'Today' ? ' - 12 messages' : day === 'Yesterday' ? ' - 72 messages' : '');
+      emailList.appendChild(dayHeader);
+      groupedEmails[day].forEach(email => {
+        const li = document.createElement('li');
+        li.className = 'email-list-item' + (email.id === selectedId ? ' selected' : '') + (email.unread ? ' unread' : '');
+        li.innerHTML = `
+        <div class="email-list-avatar-meta">
+          <div class="email-list-avatar" style="color:${email.color};"><i class="fab ${email.icon}"></i></div>
+          <span class="email-list-size">${email.size}</span>
+        </div>
+          <div class="email-list-main" style="flex:1; min-width:0;">
+           <div class="email-list-sender-meta" >
+            <div class="email-list-sender" >${email.sender}</div>
+                      <div class="email-list-meta" >
+                      ${email.attachedfile ? `<span class="email-list-attachedfile"> ${email.attachedfile}</span>` : ''}
+            <span class="email-list-date" style="display:block; color:#8A8A9E; font-size:13px;">${email.date}</span>
+          </div></div>
+            <div class="email-list-subject" >${email.subject}</div>
+            <div class="email-list-preview" >${email.preview}</div>
+          </div>
+
+        `;
+        li.onclick = () => {
+          console.log('Email clicked:', email.id, email.subject);
+
+          if (isMobileEmailApp()) {
+            showEmailContentPanel();
+          }
+          renderEmailList(email.id);
+          renderEmailContent(email);
+        };
+        li.ondblclick = () => {
+          // Generate a unique window ID for each email content popout
+          let emailContentWindowCount = 1;
+          while (openWindows[`email-content-window-${emailContentWindowCount}`]) {
+            emailContentWindowCount++;
+          }
+          const windowId = `email-content-window-${emailContentWindowCount}`;
+          // Create the window from template
+          const emailContentWindow = createWindowFromTemplate('email-content-window', windowId, false);
+          if (!emailContentWindow) return;
+          // Inject the full email-content-section structure
+          const content = emailContentWindow.querySelector('.email-content-body');
+          if (content) {
+            content.innerHTML = `
+              <section class="email-content-section">
+                <div class="window-toolbar">
+                  <div class="toolbar-buttons-left">
+                                      <button class="toolbar-button" title="Reply"><i class="fas fa-reply"></i><span>Reply</span></button>
+                    <button class="toolbar-button" title="Reply All"><i class="fas fa-reply-all"></i><span>Replay all</span></button>
+                    <button class="toolbar-button" title="Forward"><i class="fas fa-share"></i><span>Forward</span></button>
+                  </div>
+                  <div class="toolbar-buttons-right">
+                  
+                    <button class="toolbar-button" title="Move"><i class="fas fa-folder-open"></i> <span>Move</span></button>
+                    <button class="toolbar-button" title="Spam"><i class="fas fa-shield-virus"></i> <span>Spam</span></button>
+                    <button class="toolbar-button" title="Delete"><i class="fas fa-trash"></i> <span>Delete</span></button>
+                                  <button class="toolbar-button mailmore-btn" title="More"><i class="fas fa-ellipsis-h"></i></button>
+                  </div>
+                </div>
+                <div class="email-content">
+                  <div class="email-content-header" >
+                    <div style="display:flex; align-items:center; gap:24px;">
+                      <div class="email-content-avatar" ><i class="fab ${email.icon}"></i></div>
+                      <div>
+                        <div class="email-content-sender">${email.sender}</div>
+                        <div class="email-content-from" >From: <span class='email-content-from-address'>info@yourdomain.ro</span></div>
+                        <div class="email-content-to">To: <span class='email-content-to-address'>info@mydomain.ro</span></div>
+                      </div>
+                    </div>
+                    <div class="opened-email-meta">
+                      <div class="opened-email-meta-date"><div>${email.bigdate}</div> <i class="fa-regular fa-star"></i></div>
+                      <div class="opened-email-meta-size">${email.size}</div>
+                    </div>
+                  </div>
+                  <div class="email-content-subject" >${email.subject}</div>
+                  <div class="email-content-body" >${email.content}</div>
+                </div>
+              </section>
+            `;
+          }
+          // Register the window in openWindows and show taskbar icon
+          const iconClass = 'fa-envelope-open';
+          const iconBgClass = 'blue-icon';
+          const appTitle = email.subject || email.sender || 'Email';
+          openWindows[windowId] = {
+            element: emailContentWindow,
+            name: 'email-content',
+            title: appTitle,
+            iconClass: iconClass,
+            iconBgClass: iconBgClass,
+            appTitle: appTitle
+          };
+          makeWindowActive(emailContentWindow);
+          renderPinnedTaskbarIcons();
+        };
+        emailList.appendChild(li);
+      });
+    });
+  }
+
+  function renderEmailContent(email) {
+    const section = windowElement.querySelector('.email-content-section');
+    if (!section) {
+      console.log('No .email-content-section found!');
+      return;
+    }
+    
+    // Clear existing content first
+    section.innerHTML = '';
+    
+    // Create and append toolbar
+    const toolbar = document.createElement('div');
+    toolbar.className = 'window-toolbar';
+    toolbar.innerHTML = `
+      <div class="toolbar-buttons-left">
+        <button class="toolbar-button mailback-btn" title="Back"><i class="fas fa-arrow-left"></i> <span>Back</span></button>
+        <button class="toolbar-button" title="Reply"><i class="fas fa-reply"></i><span>Reply</span></button>
+        <button class="toolbar-button" title="Reply All"><i class="fas fa-reply-all"></i><span>Replay all</span></button>
+        <button class="toolbar-button" title="Forward"><i class="fas fa-share"></i><span>Forward</span></button>
+      </div>
+      <div class="toolbar-buttons-right">
+        <button class="toolbar-button" title="Move"><i class="fas fa-folder-open"></i> <span>Move</span></button>
+        <button class="toolbar-button" title="Spam"><i class="fas fa-shield-virus"></i> <span>Spam</span></button>
+        <button class="toolbar-button" title="Delete"><i class="fas fa-trash"></i> <span>Delete</span></button>
+        <button class="toolbar-button mailmore-btn" title="More"><i class="fas fa-ellipsis-h"></i></button>
+      </div>
+    `;
+    section.appendChild(toolbar);
+    
+    // Create and append content
+    const content = document.createElement('div');
+    content.className = 'email-content';
+    content.innerHTML = `
+      <div class="email-content-header">
+        <div style="display:flex; align-items:center; gap:24px;">
+          <div class="email-content-avatar"><i class="fab ${email.icon}"></i></div>
+          <div>
+            <div class="email-content-sender">${email.sender}</div>
+            <div class="email-content-from">From: <span class='email-content-from-address'>info@yourdomain.ro</span></div>
+            <div class="email-content-to">To: <span class='email-content-to-address'>info@mydomain.ro</span></div>
+          </div>
+        </div>
+        <div class="opened-email-meta">
+          <div class="opened-email-meta-date"><div>${email.bigdate}</div> <i class="fa-regular fa-star"></i></div>
+          <div class="opened-email-meta-size">${email.size}</div>
+        </div>
+      </div>
+      <div class="email-content-subject">${email.subject}</div>
+      <div class="email-content-body">${email.content}</div>
+    `;
+    section.appendChild(content);
+
+    // Re-attach the back button event
+    const mailbackBtn = section.querySelector('.mailback-btn');
+    if (mailbackBtn) {
+      mailbackBtn.addEventListener('click', function(e) {
+        showEmailListPanel();
+      });
+    }
+  }
+
+  // Render search and sort bar
+  const emailListHeader = windowElement.querySelector('.email-list-header');
+  if (emailListHeader) {
+    emailListHeader.innerHTML = `
+    <i class="fas fa-search"></i>
+      <input type="text" class="email-search" placeholder="Search..." >
+      <div class="email-list-sort">Sort <i class='fas fa-chevron-down' style='font-size:12px;'></i></div>
+    `;
+  }
+
+  // Initial render
+  renderEmailList(emails[0].id);
+  renderEmailContent(emails[0]);
+
+  // --- Compose form HTML as a function ---
+  function getComposeFormHTML() {
+    return `
+      <div class="compose-header">
+        <div class="compose-from">
+          <span class='compose-label'>From</span>
+          <span class='compose-from-address'>Argenti - Fresh-Media.ro <span>&lt;info@yourdomain.ro&gt;</span></span>
+          <i class="fas fa-chevron-down"></i>
+        </div>
+       
+      </div>
+      <div class="compose-row">
+        <span class='compose-label'>To</span>
+        <input type="text" class="compose-input" placeholder="Add email or start typing to search contacts">
+        <span class='compose-ccbcc'>Cc Bcc</span>
+      </div>
+      <div class="compose-row">
+        <span class='compose-label'>Subject</span>
+        <input type="text" class="compose-input" placeholder="">
+      </div>
+      <div class="compose-body">
+        <textarea class="compose-textarea" placeholder=""></textarea>
+      </div>
+      <div class="compose-toolbar-bottom">
+        <div style="display:flex; align-items:center; gap:5px;">
+        <button class="composer-attach-btn" title="Attach"><i class="fas fa-paperclip"></i><span>Attach files</span></button>
+            <button class="compose-toolbar-btn link" title="Link"><i class="fas fa-link"></i></button>
+          <button class="compose-toolbar-btn" title="Emoji"><i class="fas fa-smile"></i></button>
+          <button class="compose-toolbar-btn bold" title="Bold"><b>B</b></button>
+          <button class="compose-toolbar-btn italic" title="Italic"><i class="fas fa-italic"></i></button>
+          <button class="compose-toolbar-btn palette" title="Color"><i class="fas fa-palette"></i></button>
+          <button class="compose-toolbar-btn font" title="Font"><i class="fas fa-font"></i></button>
+          <button class="compose-toolbar-btn more" title="More"><i class="fas fa-ellipsis-h"></i></button>
+        </div>
+        <button class="compose-send-btn">Send</button>
+      </div>
+    `;
+  }
+
+  // --- Compose logic ---
+  const composeBtn = windowElement.querySelector('.compose-btn');
+  // Remove old inline compose logic
+
+  if (composeBtn) {
+    composeBtn.onclick = function() {
+      // Generate a unique window ID for each compose window
+      let composeWindowCount = 1;
+      while (openWindows[`compose-window-${composeWindowCount}`]) {
+        composeWindowCount++;
+      }
+      const windowId = `compose-window-${composeWindowCount}`;
+      // Create the window from template
+      const composeWindow = createWindowFromTemplate('compose-window', windowId, false);
+      if (!composeWindow) return;
+      // Inject the compose form HTML
+      const content = composeWindow.querySelector('.compose-window-content');
+      if (content) {
+        content.innerHTML = getComposeFormHTML();
+        // Attach close logic to the close button in the compose form
+        const closeBtn = content.querySelector('.close-compose-btn');
+        if (closeBtn) {
+          closeBtn.onclick = function() {
+            if (composeWindow.parentNode) composeWindow.parentNode.removeChild(composeWindow);
+            if (openWindows[windowId]) delete openWindows[windowId];
+          };
+        }
+        // Add: Compose toolbar 'more' button panel logic
+        const moreBtn = content.querySelector('.compose-toolbar-btn.more');
+        let morePanel = null;
+        if (moreBtn) {
+          moreBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            // Close any open panel
+            if (morePanel) {
+              morePanel.remove();
+              morePanel = null;
+              return;
+            }
+            // Create panel
+            morePanel = document.createElement('div');
+            morePanel.className = 'compose-more-panel';
+            morePanel.style.position = 'absolute';
+            morePanel.style.zIndex = 10000;
+            // Panel HTML (use your image as reference for content)
+            morePanel.innerHTML = `
+              <div class="compose-more-panel-inner" style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
+                <div class="row" style="display: contents;">
+                  <span><i class='fas fa-link'></i> Link</span>
+                  <span><b>B</b> Bold</span>
+                  <span><i class='fas fa-italic'></i> Italic</span>
+                  <span><i class='fas fa-strikethrough'></i> Strikethrough</span>
+                  <span><i class='fas fa-font'></i> Font</span>
+                  <span><i class='fas fa-palette'></i> Color</span>
+                </div>
+                <hr style="grid-column: 1 / span 2; margin: 8px 0;" />
+                <div class="row" style="display: contents;">
+                  <span><i class='fas fa-align-left'></i> Left align</span>
+                  <span><i class='fa-solid fa-list-ul'></i> Bulleted List</span>
+                  <span><i class='fas fa-align-center'></i> Center align</span>
+                  <span><i class='fas fa-list-ol'></i> Numbered list</span>
+                  <span><i class='fas fa-align-right'></i> Right align</span>
+                  <span><i class='fas fa-outdent'></i> Decrease indent</span>
+                </div>
+              </div>
+            `;
+            // Append panel to the compose window (or content) first to measure height
+            document.body.appendChild(morePanel);
+            // Position panel above the button
+            const rect = moreBtn.getBoundingClientRect();
+            const panelHeight = morePanel.offsetHeight;
+            morePanel.style.left = rect.left + 'px';
+            morePanel.style.top = (rect.top - panelHeight - 4) + 'px';
+            // Hide panel on outside click
+            setTimeout(() => {
+              document.addEventListener('mousedown', hidePanel, { once: true });
+            }, 0);
+            function hidePanel(ev) {
+              if (morePanel && !morePanel.contains(ev.target)) {
+                morePanel.remove();
+                morePanel = null;
+              }
+            }
+          });
+        }
+      }
+      // Register the window in openWindows (with a pen icon and "New Message" title)
+      const iconClass = 'fa-pen';
+      const iconBgClass = 'blue-icon';
+      const appTitle = 'New Message';
+      openWindows[windowId] = {
+        element: composeWindow,
+        name: 'compose',
+        title: appTitle,
+        iconClass: iconClass,
+        iconBgClass: iconBgClass,
+        appTitle: appTitle
+      };
+      makeWindowActive(composeWindow);
+      // Call renderPinnedTaskbarIcons to immediately update the taskbar
+      renderPinnedTaskbarIcons();
+    };
+  }
+
+  // ... mobile logic ...
+  function isMobileEmailApp() {
+    return window.innerWidth <= 767;
+  }
+
+  // --- Mobile panel logic ---
+  const windowMainContent = windowElement.querySelector('.window-main-content');
+  const mailbackBtn = windowElement.querySelector('.mailback-btn');
+
+  function showEmailContentPanel() {
+    if (isMobileEmailApp() && windowMainContent) {
+      console.log('Adding show-email-content to', windowMainContent);
+      // Force a reflow before adding the class to ensure smooth transition
+      windowMainContent.offsetHeight;
+      windowMainContent.classList.add('show-email-content');
+    }
+  }
+
+  function showEmailListPanel() {
+    if (isMobileEmailApp() && windowMainContent) {
+      // Force a reflow before removing the class to ensure smooth transition
+      windowMainContent.offsetHeight;
+      windowMainContent.classList.remove('show-email-content');
+    }
+  }
+
+  // Attach mailback-btn event
+  if (mailbackBtn) {
+    mailbackBtn.addEventListener('click', function(e) {
+      showEmailListPanel();
+    });
+  }
+
+  // Patch renderEmailList to handle mobile view properly
+  const origRenderEmailList = renderEmailList;
+  renderEmailList = function(selectedId) {
+    origRenderEmailList(selectedId);
+    const selectedEmail = emails.find(e => e.id === selectedId);
+    
+    if (isMobileEmailApp() && typeof selectedId === 'number' && selectedEmail) {
+      // Render content first, then show panel
+      renderEmailContent(selectedEmail);
+      // Use requestAnimationFrame to ensure content is rendered before transition
+      requestAnimationFrame(() => {
+        showEmailContentPanel();
+      });
+    } else if (selectedEmail) {
+      // On desktop, just render content
+      renderEmailContent(selectedEmail);
+    }
+  };
+
+  // On resize, if on mobile and not viewing content, ensure correct panel
+  window.addEventListener('resize', function() {
+    if (!isMobileEmailApp() && windowMainContent) {
+      windowMainContent.classList.remove('show-email-content');
+    }
+  });
+
+  
+}
 
 
 //appstore
 // Example data (replace with API or JSON fetch)
 const featured = [
   {
-    section: "HOW TO",
-    image: "img/featured1.jpg",
-    title: "Create a Stellar Podcast",
-    subtitle: "From scripting to sharing with the world, in five easy steps."
+    section: "SYSTEM",
+    image: "img/featured1.png",
+    title: "OS Apps",
+    subtitle: "Apps that helps you cloud and system"
   },
   {
-    section: "MEET THE DEVELOPER",
-    image: "img/featured2.jpg",
-    title: "The Secret Keeper",
-    subtitle: "How the developer of Day One keeps your journal entries safe."
-  },
-  {
-    section: "EDITORS' CHOICE",
-    image: "img/featured3.jpg",
-    title: "Aurora HDR 2018",
-    subtitle: "Bring the best out of any photo."
+    section: "Website",
+    image: "img/featured2.png",
+    title: "Website Apps",
+    subtitle: "Apps that power up your website"
   }
 ];
 
@@ -48,64 +812,190 @@ const appSections = [
     seeAll: "#",
     apps: [
       {
-        icon: "img/app1.png",
+        iconClass: "fa-image",
+        iconBgClass: "blue-icon",
         name: "Affinity Photo",
         subtitle: "Redefining photo editing",
-        price: "$49.99"
+        price: "$49.99",
+        priceDescription: "One time payment",
+        author: "John Doe"
       },
       {
-        icon: "img/app2.png",
+        iconClass: "fa-magic",
+        iconBgClass: "purple-icon",
         name: "Luminar 2018: Pro photo editor",
         subtitle: "Perfect photos in less time",
-        price: "$49.99"
+        price: "$49.99",
+        priceDescription: "In-app purchases",
+        author: "John Doe"
       },
       {
-        icon: "img/app3.png",
+        iconClass: "fa-robot",
+        iconBgClass: "green-icon",
         name: "Photolemur 2",
         subtitle: "Fully automatic photo editor",
-        price: "$19.99"
+        price: "GET APP",
+        priceDescription: "Free",
+        author: "John Doe"
       },
       {
-        icon: "img/app4.png",
+        iconClass: "fa-adjust",
+        iconBgClass: "orange-icon",
         name: "Polarr Photo Editor",
         subtitle: "Photography",
-        price: "GET"
+        price: "GET APP",
+        priceDescription: "In-app purchases",
+        author: "John Doe"
       },
       {
-        icon: "img/app5.png",
+        iconClass: "fa-video",
+        iconBgClass: "red-icon",
         name: "Anamorphic Pro",
         subtitle: "Photography",
-        price: "$29.99"
+        price: "$29.99",
+        priceDescription: "Monthly subscription",
+        author: "John Doe"
       },
       {
-        icon: "img/app6.png",
+        iconClass: "fa-water",
+        iconBgClass: "teal-icon",
         name: "Hydra - HDR Photo Editor",
         subtitle: "Create beautiful HDR images",
-        price: "$49.99"
+        price: "INSTALLED",
+        priceDescription: "Monthly subscription",
+        author: "John Doe"
       },
       {
-        icon: "img/app7.png",
+        iconClass: "fa-user-edit",
+        iconBgClass: "gray-icon",
         name: "Acorn 6 Image Editor",
         subtitle: "Image editor for humans",
-        price: "$29.99"
+        price: "$29.99",
+        priceDescription: "Monthly subscription",
+        author: "John Doe"
       },
       {
-        icon: "img/app8.png",
+        iconClass: "fa-sun",
+        iconBgClass: "yellow-icon",
         name: "Flare 2",
         subtitle: "Smart photo editing",
-        price: "$9.99"
+        price: "$9.99",
+        priceDescription: "One time payment",
+        author: "John Doe"
       },
       {
-        icon: "img/app9.png",
+        iconClass: "fa-camera-retro",
+        iconBgClass: "pink-icon",
         name: "RAW Power",
         subtitle: "Photography",
-        price: "$13.99"
+        price: "GET APP",
+        priceDescription: "In-app purchases",
+        author: "John Doe"
       },
       {
-        icon: "img/app10.png",
+        iconClass: "fa-paint-brush",
+        iconBgClass: "blue-icon",
         name: "Pictorial",
         subtitle: "Photography",
-        price: "$59.99"
+        price: "$59.99",
+        priceDescription: "One time payment",
+        author: "John Doe"
+      }
+    ]
+  },
+  {
+    title: "Category",
+    seeAll: "#",
+    apps: [
+      {
+        iconClass: "fa-image",
+        iconBgClass: "blue-icon",
+        name: "Affinity Photo",
+        subtitle: "Redefining photo editing",
+        price: "$49.99",
+        priceDescription: "One time payment",
+        author: "John Doe"
+      },
+      {
+        iconClass: "fa-magic",
+        iconBgClass: "purple-icon",
+        name: "Luminar 2018: Pro photo editor",
+        subtitle: "Perfect photos in less time",
+        price: "$49.99",
+        priceDescription: "In-app purchases",
+        author: "John Doe"
+      },
+      {
+        iconClass: "fa-robot",
+        iconBgClass: "green-icon",
+        name: "Photolemur 2",
+        subtitle: "Fully automatic photo editor",
+        price: "GET APP",
+        priceDescription: "Free",
+        author: "John Doe"
+      },
+      {
+        iconClass: "fa-adjust",
+        iconBgClass: "orange-icon",
+        name: "Polarr Photo Editor",
+        subtitle: "Photography",
+        price: "GET APP",
+        priceDescription: "In-app purchases",
+        author: "John Doe"
+      },
+      {
+        iconClass: "fa-video",
+        iconBgClass: "red-icon",
+        name: "Anamorphic Pro",
+        subtitle: "Photography",
+        price: "$29.99",
+        priceDescription: "Monthly subscription",
+        author: "John Doe"
+      },
+      {
+        iconClass: "fa-water",
+        iconBgClass: "teal-icon",
+        name: "Hydra - HDR Photo Editor",
+        subtitle: "Create beautiful HDR images",
+        price: "INSTALLED",
+        priceDescription: "Monthly subscription",
+        author: "John Doe"
+      },
+      {
+        iconClass: "fa-user-edit",
+        iconBgClass: "gray-icon",
+        name: "Acorn 6 Image Editor",
+        subtitle: "Image editor for humans",
+        price: "$29.99",
+        priceDescription: "Monthly subscription",
+        author: "John Doe"
+      },
+      {
+        iconClass: "fa-sun",
+        iconBgClass: "yellow-icon",
+        name: "Flare 2",
+        subtitle: "Smart photo editing",
+        price: "$9.99",
+        priceDescription: "One time payment",
+        author: "John Doe"
+      },
+      {
+        iconClass: "fa-camera-retro",
+        iconBgClass: "pink-icon",
+        name: "RAW Power",
+        subtitle: "Photography",
+        price: "GET APP",
+        priceDescription: "In-app purchases",
+        author: "John Doe"
+      },
+      {
+        iconClass: "fa-paint-brush",
+        iconBgClass: "blue-icon",
+        name: "Pictorial",
+        subtitle: "Photography",
+        price: "$59.99",
+        priceDescription: "One time payment",
+        author: "John Doe"
       }
     ]
   }
@@ -114,19 +1004,45 @@ const appSections = [
 
 
 function setupAppStore(windowElement) {
+  ensureSidebarElements(windowElement);
+  if (typeof window.updateSidebarForWindow === 'function') {
+    window.updateSidebarForWindow(windowElement);
+  }
+  const menuToggle = windowElement.querySelector('.menu-toggle');
   // Find the containers inside this window
   const featuredContainer = windowElement.querySelector('#featured-cards');
   const sectionsContainer = windowElement.querySelector('#appstore-sections');
+  const mainContent = windowElement.querySelector('.window-main-content');
+
+  // Helper: Remove any existing app detail panel
+  let lastAppStoreScroll = 0;
+  function removeAppDetailPanel() {
+    const existingPanel = mainContent.querySelector('.app-detail-panel');
+    if (existingPanel) {
+      existingPanel.classList.remove('slide-in');
+      existingPanel.classList.add('slide-out');
+      existingPanel.addEventListener('animationend', () => {
+        if (existingPanel.parentNode) existingPanel.parentNode.removeChild(existingPanel);
+      }, { once: true });
+    }
+    mainContent.classList.remove('app-detail-open');
+    // Restore scroll position
+    mainContent.scrollTop = lastAppStoreScroll;
+    mainContent.style.overflow = '';
+  }
 
   // Render featured cards
   featuredContainer.innerHTML = '';
   featured.forEach(card => {
     featuredContainer.innerHTML += `
       <div class="featured-card">
+      <div class="featured-card-content">
         <span class="section-link">${card.section}</span>
-        <img src="${card.image}" alt="${card.title}">
+
         <h2>${card.title}</h2>
         <p>${card.subtitle}</p>
+        </div>
+                <img src="${card.image}" alt="${card.title}">
       </div>
     `;
   });
@@ -134,14 +1050,30 @@ function setupAppStore(windowElement) {
   // Render app sections
   sectionsContainer.innerHTML = '';
   appSections.forEach(section => {
-    let appsHTML = section.apps.map(app => `
-      <div class="app-card">
-        <img src="${app.icon}" alt="${app.name}">
-        <h3>${app.name}</h3>
-        <p>${app.subtitle}</p>
-        <button>${app.price}</button>
+    let appsHTML = section.apps.map((app, idx) => {
+      const priceLower = app.price && app.price.toLowerCase();
+      const isFree = priceLower === 'get app';
+      const isInstalled = priceLower === 'installed';
+      const priceClass = isInstalled
+        ? 'app-price-button--installed'
+        : isFree
+          ? 'app-price-button--free'
+          : 'app-price-button--paid';
+      return `
+      <div class="app-card" data-app-section="${section.title}" data-app-index="${idx}">
+        <div class="app-card-content">
+          <div class="icon-container ${app.iconBgClass || 'blue-icon'}">
+            <i class="fas ${app.iconClass || 'fa-cube'}"></i>
+          </div>
+          <h3>${app.name}</h3>
+          <p>${app.subtitle}</p>
+        </div>
+        <div class="app-card-footer">
+        <button class="app-price-button ${priceClass}">${app.price}</button>
+        <p class="app-price-description">${app.priceDescription}</p>
+        </div>
       </div>
-    `).join('');
+    `}).join('');
     sectionsContainer.innerHTML += `
       <div class="appstore-section">
         <div class="section-header">
@@ -154,6 +1086,224 @@ function setupAppStore(windowElement) {
       </div>
     `;
   });
+
+  // Add click event to app cards for sliding panel
+  sectionsContainer.querySelectorAll('.app-card').forEach(card => {
+    card.addEventListener('click', function (e) {
+      // Prevent double opening
+      if (mainContent.querySelector('.app-detail-panel')) return;
+      const sectionTitle = card.getAttribute('data-app-section');
+      const appIdx = parseInt(card.getAttribute('data-app-index'), 10);
+      const section = appSections.find(s => s.title === sectionTitle);
+      if (!section) return;
+      const app = section.apps[appIdx];
+      if (!app) return;
+      // Save scroll position before opening panel
+      lastAppStoreScroll = mainContent.scrollTop;
+      // Create panel
+      const panel = document.createElement('div');
+      panel.className = 'app-detail-panel slide-in';
+      // Set panel position and size to match visible area
+      panel.style.position = 'absolute';
+      panel.style.top = mainContent.scrollTop + 'px';
+      panel.style.left = '0';
+      panel.style.width = '100%';
+      panel.style.height = '100%';
+      const priceLower = app.price && app.price.toLowerCase();
+      const isFree = priceLower === 'get app';
+      const isInstalled = priceLower === 'installed';
+      const priceClass = isInstalled
+        ? 'app-price-button--installed'
+        : isFree
+          ? 'app-price-button--free'
+          : 'app-price-button--paid';
+      panel.innerHTML = `
+        <div class="window-toolbar">
+          <button class="back-btn" title="Back"><i class="fas fa-arrow-left"></i></button>
+          <span class="toolbar-title">${app.name}</span>
+        </div>
+        <div class="app-detail-content">
+        <div class="app-detail-content-container">
+        <div class="app-detail-content-header">
+        <div class="app-detail-content-header-icon-title">
+        <div class="app-detail-content-header-icon">
+          <div class="icon-container ${app.iconBgClass || 'blue-icon'}">
+            <i class="fas ${app.iconClass || 'fa-cube'}"></i>
+          </div>
+          </div>
+          <div class="app-detail-content-header-text">
+          <h2>${app.name}</h2>
+          <p class="appstore-app-author">By ${app.author}</p>
+          </div>
+          </div>
+          <div class="app-detail-price"><button class="app-price-button ${priceClass}">${app.price}</button><p class="app-price-description">${app.priceDescription}</p></div></div>
+
+
+          <div class="app-detail-description">More information about <b>${app.name}</b> will go here. (Add your own details!)
+          Lorem Ipsum is simply dummy text of the printing and typesetting industry. <br><br> Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. <br><br>It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.</div>
+          <div class="app-detail-description-images">
+          <img src="img/appsimg/windows-list.jpg" alt="${app.name}">
+          <img src="img/appsimg/touch.jpg" alt="${app.name}">
+          <img src="img/appsimg/windows-icons.jpg" alt="${app.name}">
+          <img src="img/appsimg/windows-11.jpg" alt="${app.name}">
+          <img src="img/appsimg/windows-classic.jpg" alt="${app.name}">
+          </div>
+          <div class="app-detail-moreinfo">
+          <h3>More information about <b>${app.name}</b> will go here. (Add your own details!)</h3>
+          <p>Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. </p>
+          
+          
+          <div class="app-detail-moreinfo-list">
+          <h4>Features</h4>
+          <div class="app-detail-moreinfo-list-items">
+          <div class="app-detail-moreinfo-list-item">
+          <i class="fas fa-wallet"></i>
+          <div class="app-detail-moreinfo-list-item-text"><h5>Feature 1</h5><p>Lorem Ipsum has been the industry's standard dummy</p></div>
+          </div>
+          <div class="app-detail-moreinfo-list-item">
+          <i class="fas fa-earth-asia"></i>
+          <div class="app-detail-moreinfo-list-item-text"><h5>Feature 2</h5><p>Lorem Ipsum has been the industry's standard dummy </p></div>
+          </div>
+          <div class="app-detail-moreinfo-list-item">
+          <i class="fas fa-earth-asia"></i>
+          <div class="app-detail-moreinfo-list-item-text"><h5>Feature 2</h5><p>Lorem Ipsum has been the industry's standard dummy </p></div>
+          </div>
+            <div class="app-detail-moreinfo-list-item">
+          <i class="fas fa-earth-asia"></i>
+          <div class="app-detail-moreinfo-list-item-text"><h5>Feature 2</h5><p>Lorem Ipsum has been the industry's standard dummy </p></div>
+          </div>
+            <div class="app-detail-moreinfo-list-item">
+          <i class="fas fa-earth-asia"></i>
+          <div class="app-detail-moreinfo-list-item-text"><h5>Feature 2</h5><p>Lorem Ipsum has been the industry's standard dummy </p></div>
+          </div>
+          </div>
+          
+          </div>
+
+
+
+                    <div class="app-detail-needsinstall">
+          <h3>Requirements</h3>
+          <p>This apps will also be installed as they need to be installed. </p>
+          </div>
+
+                              <div class="app-detail-whatisnew">
+          <h3>What's new</h3>
+          <p>This apps will also be installed as they need to be installed. </p>
+          </div>
+
+          <div class="app-reviews">
+          <div class="app-detail-reviews-header">
+          <div class="app-detail-reviews-details">
+          <h3>Reviews for <b>${app.name}</b> </h3>
+          <p>Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. </p>
+          </div>
+              <div class="app-detail-reviews-number-container">
+                  <div class="app-detail-reviews-number">
+                      <span> 4.5 </span> 
+                      <div class="app-detail-reviews-number-stars">
+                      <i class="fas fa-star"></i>
+                      <span class="app-detail-reviews-number-text">/ 5</span>
+                      </div>
+                  </div>
+                  <div class="app-reviews-number-text">
+                    <p>123 reviews</p>
+                  </div>
+              </div>
+          </div>
+          <div class="app-detail-reviews-list">
+            <div class="app-detail-reviews-list-item">
+              <div class="app-detail-reviews-list-item-header">
+                <div class="app-detail-reviews-list-item-stars">
+                  <i class="fas fa-star"></i>
+                  <i class="fas fa-star"></i>
+                  <i class="fas fa-star-half-stroke"></i>
+                  <i class="fa-regular fa-star start-no-review"></i>
+                  <i class="fa-regular fa-star start-no-review"></i>
+                </div>
+                                  <div class="app-detail-reviews-user-info">
+                  <h4>John Doe</h4>
+                  <div class="app-detail-reviews-user-date">12/06/2025</div>
+                  </div>
+              </div>
+              <p>Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. </p>
+            </div>
+          
+              <div class="app-detail-reviews-list-item">
+                <div class="app-detail-reviews-list-item-header">
+                  <div class="app-detail-reviews-list-item-stars">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star-half-stroke"></i>
+                    <i class="fa-regular fa-star start-no-review"></i>
+                    <i class="fa-regular fa-star start-no-review"></i>
+                  </div>
+                  <div class="app-detail-reviews-user-info">
+                  <h4>John Doe</h4>
+                  <div class="app-detail-reviews-user-date">12/06/2025</div>
+                  </div>
+                </div>
+                <p>Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. </p>
+              </div>
+           
+
+              <div class="app-detail-reviews-list-item">
+                <div class="app-detail-reviews-list-item-header">
+                  <div class="app-detail-reviews-list-item-stars">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star-half-stroke"></i>
+                    <i class="fa-regular fa-star start-no-review"></i>
+                    <i class="fa-regular fa-star start-no-review"></i>
+                  </div>
+                                    <div class="app-detail-reviews-user-info">
+                  <h4>John Doe</h4>
+                  <div class="app-detail-reviews-user-date">12/06/2025</div>
+                  </div>
+                </div>
+                <p>Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. </p>
+              </div>
+
+              <div class="app-detail-reviews-list-item">
+                <div class="app-detail-reviews-list-item-header">
+                  <div class="app-detail-reviews-list-item-stars">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star-half-stroke"></i>
+                    <i class="fa-regular fa-star start-no-review"></i>
+                    <i class="fa-regular fa-star start-no-review"></i>
+                  </div>
+                                    <div class="app-detail-reviews-user-info">
+                  <h4>John Doe</h4>
+                  <div class="app-detail-reviews-user-date">12/06/2025</div>
+                  </div>
+                </div>
+                <p>Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. </p>
+              </div>
+
+          </div>
+
+
+         </div>
+        </div>
+
+                            <div class="appstore-author-info">
+          <h3>About the author: ${app.author}</h3>
+          <p>Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. </p>
+          </div>
+      `;
+      // Back button closes panel
+      panel.querySelector('.back-btn').addEventListener('click', removeAppDetailPanel);
+      mainContent.appendChild(panel);
+      mainContent.classList.add('app-detail-open');
+      // Ensure detail panel is scrolled to top
+      panel.scrollTop = 0;
+      // Prevent background scroll
+      mainContent.style.overflow = 'hidden';
+    });
+  });
+
+ 
 }
 
 
@@ -337,7 +1487,7 @@ function addNotification({
               card.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)';
               card.style.transform = '';
             });
-            card.addEventListener('transitionend', function handler() {
+            card.addEventListener('transitionend', function handler(e) {
               card.style.transition = '';
               card.removeEventListener('transitionend', handler);
             });
@@ -536,7 +1686,7 @@ document.addEventListener('DOMContentLoaded', function () {
     desktopArea.appendChild(taskbar);
 
     // Attach robust listeners to right-side icons (wallet, volume, etc.)
-    taskbarRight.querySelectorAll('.taskbar-icon, .taskbar-time, .taskbar-ai').forEach(function(el) {
+    taskbarRight.querySelectorAll('.taskbar-icon, .taskbar-time, .taskbar-ai').forEach(function (el) {
       if (typeof attachTaskbarIconListeners === 'function') attachTaskbarIconListeners(el);
     });
   }
@@ -550,7 +1700,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const taskbarTime = document.querySelector('.taskbar-time');
   let calendarPanelVisible = false;
   let todayPanel = null;
-  
+
   function positionTodayPanel() {
     if (!todayPanel || !calendarPanel) return;
     const rect = calendarPanel.getBoundingClientRect();
@@ -559,33 +1709,33 @@ document.addEventListener('DOMContentLoaded', function () {
     todayPanel.style.width = rect.width + 'px';
     todayPanel.style.zIndex = 5000;
   }
-  
-// Centralized close function for today panel
-function closeTodayPanel() {
-  if (!todayPanel) return;
-  todayPanel.classList.remove('active');
-  window.removeEventListener('resize', positionTodayPanel);
-  setTimeout(() => {
-    if (todayPanel && todayPanel.parentNode) {
-      todayPanel.parentNode.removeChild(todayPanel);
-    }
-    todayPanel = null;
-  }, 350);
-}
 
-// Prevent outside click handler when pressing the today button
-calendarTodayBtn.addEventListener('pointerdown', function(e) {
-  e.stopPropagation();
-});
+  // Centralized close function for today panel
+  function closeTodayPanel() {
+    if (!todayPanel) return;
+    todayPanel.classList.remove('active');
+    window.removeEventListener('resize', positionTodayPanel);
+    setTimeout(() => {
+      if (todayPanel && todayPanel.parentNode) {
+        todayPanel.parentNode.removeChild(todayPanel);
+      }
+      todayPanel = null;
+    }, 350);
+  }
+
+  // Prevent outside click handler when pressing the today button
+  calendarTodayBtn.addEventListener('pointerdown', function (e) {
+    e.stopPropagation();
+  });
 
 
-// Toggle today panel on button click
-calendarTodayBtn.addEventListener('click', function() {
-  if (!todayPanel) {
-    // Open today panel
-        todayPanel = document.createElement('div');
-        todayPanel.className = 'calendar-today-panel-slide';
-        todayPanel.innerHTML = `
+  // Toggle today panel on button click
+  calendarTodayBtn.addEventListener('click', function () {
+    if (!todayPanel) {
+      // Open today panel
+      todayPanel = document.createElement('div');
+      todayPanel.className = 'calendar-today-panel-slide';
+      todayPanel.innerHTML = `
           <div style="padding: 18px 18px 10px 18px; color: #fff; font-size: 16px; font-weight: 600; display: flex; align-items: center; justify-content: space-between;">
             <span>Today Panel (placeholder)</span>
             <button class="panel-close-btn" id="calendar-today-panel-close" aria-label="Close today panel"><i class="fas fa-times"></i></button>
@@ -594,41 +1744,41 @@ calendarTodayBtn.addEventListener('click', function() {
             <span>No events today</span>
           </div>
         `;
-        calendarPanel.parentNode.appendChild(todayPanel);
-        positionTodayPanel();
-        window.addEventListener('resize', positionTodayPanel);
-        setTimeout(() => {
-          todayPanel.classList.add('active');
-        }, 10);
-    
-        todayPanel.querySelector('#calendar-today-panel-close').onclick = function(ev) {
-          ev.stopPropagation();
-          closeTodayPanel();
-        };
-      } else {
-        // Close today panel
+      calendarPanel.parentNode.appendChild(todayPanel);
+      positionTodayPanel();
+      window.addEventListener('resize', positionTodayPanel);
+      setTimeout(() => {
+        todayPanel.classList.add('active');
+      }, 10);
+
+      todayPanel.querySelector('#calendar-today-panel-close').onclick = function (ev) {
+        ev.stopPropagation();
         closeTodayPanel();
-      }
-    });
-    
-    // Outside click handler: always closes both panels if open
-document.addEventListener('mousedown', function(e) {
-  const clickedInsideCalendar = calendarPanel && calendarPanel.contains(e.target);
-  const clickedInsideTodayPanel = todayPanel && todayPanel.contains(e.target);
-  const clickedTaskbarTime = taskbarTime && taskbarTime.contains(e.target);
-  const clickedTodayBtn = calendarTodayBtn && calendarTodayBtn.contains(e.target);
+      };
+    } else {
+      // Close today panel
+      closeTodayPanel();
+    }
+  });
 
-  // If click is on the today button, do nothing
-  if (clickedTodayBtn) return;
+  // Outside click handler: always closes both panels if open
+  document.addEventListener('mousedown', function (e) {
+    const clickedInsideCalendar = calendarPanel && calendarPanel.contains(e.target);
+    const clickedInsideTodayPanel = todayPanel && todayPanel.contains(e.target);
+    const clickedTaskbarTime = taskbarTime && taskbarTime.contains(e.target);
+    const clickedTodayBtn = calendarTodayBtn && calendarTodayBtn.contains(e.target);
 
-  // If click is outside both panels and taskbar time, close both panels if open
-  if (!clickedInsideCalendar && !clickedInsideTodayPanel && !clickedTaskbarTime) {
-    if (calendarPanelVisible) hideCalendarPanel();
-    if (todayPanel) closeTodayPanel();
-  }
-});
+    // If click is on the today button, do nothing
+    if (clickedTodayBtn) return;
 
-  
+    // If click is outside both panels and taskbar time, close both panels if open
+    if (!clickedInsideCalendar && !clickedInsideTodayPanel && !clickedTaskbarTime) {
+      if (calendarPanelVisible) hideCalendarPanel();
+      if (todayPanel) closeTodayPanel();
+    }
+  });
+
+
 
 
 
@@ -680,10 +1830,10 @@ document.addEventListener('mousedown', function(e) {
       const clickedInsideTodayPanel = todayPanel && todayPanel.contains(e.target);
       const clickedTaskbarTime = taskbarTime && taskbarTime.contains(e.target);
       const clickedTodayBtn = calendarTodayBtn && calendarTodayBtn.contains(e.target);
-    
+
       // If click is on the today button, do nothing (let its handler run)
       if (clickedTodayBtn) return;
-    
+
       // If click is outside both panels and taskbar time, close both panels if open
       if (!clickedInsideCalendar && !clickedInsideTodayPanel && !clickedTaskbarTime) {
         if (calendarPanelVisible) hideCalendarPanel();
@@ -691,8 +1841,8 @@ document.addEventListener('mousedown', function(e) {
           todayPanel.classList.remove('active');
           setTimeout(() => {
             if (todayPanel.parentNode) todayPanel.parentNode.removeChild(todayPanel);
-          
-        }, 350);
+
+          }, 350);
         }
       }
     });
@@ -863,7 +2013,7 @@ document.addEventListener('mousedown', function(e) {
     const widgetsScreen = document.getElementById('widgets-screen');
     if (!widgetsScreen) return;
     widgetsScreen.innerHTML = '';
-    
+
     // Widget templates for each app (customize as needed)
     const widgetTemplates = {
       'my-files': app => `<div class="widget"><div class="widget-header"><span>${app.name}</span></div><div class="widget-content notification-widget"><div class="big-number">23</div><div class="widget-subtitle">No more events today</div></div></div>`,
@@ -882,10 +2032,11 @@ document.addEventListener('mousedown', function(e) {
       'calculator-sm': app => `<div class="widget"><div class="widget-header"><span>${app.name}</span></div><div class="widget-content"><div class="big-number">Calc</div><div class="widget-subtitle">Calculator</div></div></div>`,
       'photoshop-sm': app => `<div class="widget"><div class="widget-header"><span>${app.name}</span></div><div class="widget-content"><div class="big-number">Photo</div><div class="widget-subtitle">Edit images</div></div></div>`,
       'calendar-sm': app => `<div class="widget"><div class="widget-header"><span>${app.name}</span></div><div class="widget-content"><div class="big-number">Calendar</div><div class="widget-subtitle">Your events</div></div></div>`,
-      'notes': app => `<div class="widget"><div class="widget-header"><span>${app.name}</span></div><div class="widget-content"><div class="big-number">Notes</div><div class="widget-subtitle">Sticky notes</div></div></div>`
+      'notes': app => `<div class="widget"><div class="widget-header"><span>${app.name}</span></div><div class="widget-content"><div class="big-number">Notes</div><div class="widget-subtitle">Sticky notes</div></div></div>`,
+      'email-app': app => `<div class="widget"><div class="widget-header"><span>${app.name}</span></div><div class="widget-content"><div class="big-number">Notes</div><div class="widget-subtitle">Sticky notes</div></div></div>`
       // Add more mappings as needed
     };
-    
+
     startMenuApps.forEach(app => {
       // Skip app-launcher itself
       if (app.id === 'app-launcher') return;
@@ -908,8 +2059,11 @@ document.addEventListener('mousedown', function(e) {
   generateWidgets();
 
 
+  
+
+
 });
-// ... existing code ...
+  
 
 
 
@@ -935,123 +2089,123 @@ function updateVolumeUI(value) {
   }
 }
 
-// ... existing code ...
 
 
 
-// Volume Panel: Live percentage and volume control
-function setupVolumePanelListeners() {
-  const volumeSlider = document.getElementById('browser-volume-slider');
-  const volumePercent = document.getElementById('volume-percentage');
-  // Try to find a global <audio> element (if you have one)
-  const audio = document.querySelector('audio');
 
-  if (volumeSlider && volumePercent) {
-    const updateVolume = () => {
-      const value = parseInt(volumeSlider.value, 10);
-      volumePercent.textContent = value + '%';
-      updateVolumeUI(value);
-      if (audio) {
-        audio.volume = value / 100;
+  // Volume Panel: Live percentage and volume control
+  function setupVolumePanelListeners() {
+    const volumeSlider = document.getElementById('browser-volume-slider');
+    const volumePercent = document.getElementById('volume-percentage');
+    // Try to find a global <audio> element (if you have one)
+    const audio = document.querySelector('audio');
+
+    if (volumeSlider && volumePercent) {
+      const updateVolume = () => {
+        const value = parseInt(volumeSlider.value, 10);
+        volumePercent.textContent = value + '%';
+        updateVolumeUI(value);
+        if (audio) {
+          audio.volume = value / 100;
+        }
+      };
+      volumeSlider.addEventListener('input', updateVolume);
+      // Set initial value
+      updateVolume();
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    
+
+    // Define the populateContextMenu function globally
+    window.populateContextMenu = function (menuItems, x, y) {
+      const contextMenu = document.getElementById('context-menu');
+      if (!contextMenu) {
+        console.error('Context menu element not found.');
+        return;
       }
+
+      // Clear existing menu items
+      contextMenu.innerHTML = '';
+
+      // Populate menu items
+      menuItems.forEach(item => {
+        if (item.type === 'separator') {
+          const separator = document.createElement('div');
+          separator.className = 'context-menu-separator';
+          contextMenu.appendChild(separator);
+        } else {
+          const menuItem = document.createElement('div');
+          menuItem.className = 'context-menu-item';
+          menuItem.innerHTML = `<i class="fas ${item.icon}"></i><span>${item.label}</span>`;
+          menuItem.addEventListener('click', () => {
+            if (typeof window.executeContextMenuAction === 'function') {
+              window.executeContextMenuAction(item.action);
+            }
+          });
+          contextMenu.appendChild(menuItem);
+        }
+      });
+
+      // Position and display the context menu
+      contextMenu.style.left = `${x}px`;
+      contextMenu.style.top = `${y}px`;
+      contextMenu.classList.remove('hidden');
     };
-    volumeSlider.addEventListener('input', updateVolume);
-    // Set initial value
-    updateVolume();
-  }
-}
 
-document.addEventListener('DOMContentLoaded', function () {
-  // ... existing code ...
-
-  // Define the populateContextMenu function globally
-  window.populateContextMenu = function (menuItems, x, y) {
-    const contextMenu = document.getElementById('context-menu');
-    if (!contextMenu) {
-      console.error('Context menu element not found.');
-      return;
-    }
-
-    // Clear existing menu items
-    contextMenu.innerHTML = '';
-
-    // Populate menu items
-    menuItems.forEach(item => {
-      if (item.type === 'separator') {
-        const separator = document.createElement('div');
-        separator.className = 'context-menu-separator';
-        contextMenu.appendChild(separator);
-      } else {
-        const menuItem = document.createElement('div');
-        menuItem.className = 'context-menu-item';
-        menuItem.innerHTML = `<i class="fas ${item.icon}"></i><span>${item.label}</span>`;
-        menuItem.addEventListener('click', () => {
-          if (typeof window.executeContextMenuAction === 'function') {
-            window.executeContextMenuAction(item.action);
-          }
-        });
-        contextMenu.appendChild(menuItem);
+    // Ensure the context menu is hidden when clicking outside
+    document.addEventListener('click', (e) => {
+      const contextMenu = document.getElementById('context-menu');
+      if (contextMenu && !contextMenu.contains(e.target)) {
+        contextMenu.classList.add('hidden');
       }
     });
 
-    // Position and display the context menu
-    contextMenu.style.left = `${x}px`;
-    contextMenu.style.top = `${y}px`;
-    contextMenu.classList.remove('hidden');
-  };
+    
+    setupVolumePanelListeners();
+    setNotificationsBtnOpacity();
 
-  // Ensure the context menu is hidden when clicking outside
-  document.addEventListener('click', (e) => {
-    const contextMenu = document.getElementById('context-menu');
-    if (contextMenu && !contextMenu.contains(e.target)) {
-      contextMenu.classList.add('hidden');
+    // Fix: Always attach close button event after DOM is ready
+    const volumePanel = document.getElementById('volume-panel');
+    const closeBtn = document.getElementById('close-volume-panel');
+    const volumeBtn = document.getElementById('volume-btn');
+    if (closeBtn && volumePanel) {
+      closeBtn.addEventListener('click', () => {
+        volumePanel.classList.remove('visible');
+        setTimeout(() => {
+          volumePanel.style.display = 'none';
+        }, 350);
+      });
     }
-  });
 
-  // ... existing code ...
-  setupVolumePanelListeners();
-  setNotificationsBtnOpacity();
+    // --- Mute/unmute logic for BOTH icons in the panel ---
+    const browserVolumeSlider = document.getElementById('browser-volume-slider');
+    // Icon in the slider panel
+    const panelIcon = volumePanel ? volumePanel.querySelector('.volume-slider-panel i') : null;
+    // Icon in the volume-panel-box (music section)
+    const boxIcon = volumePanel ? volumePanel.querySelector('.music-panel-box i.fas.fa-volume-up, .music-panel-box i.fas.fa-volume-mute') : null;
 
-  // Fix: Always attach close button event after DOM is ready
-  const volumePanel = document.getElementById('volume-panel');
-  const closeBtn = document.getElementById('close-volume-panel');
-  const volumeBtn = document.getElementById('volume-btn');
-  if (closeBtn && volumePanel) {
-    closeBtn.addEventListener('click', () => {
-      volumePanel.classList.remove('visible');
-      setTimeout(() => {
-        volumePanel.style.display = 'none';
-      }, 350);
-    });
-  }
-
-  // --- Mute/unmute logic for BOTH icons in the panel ---
-  const browserVolumeSlider = document.getElementById('browser-volume-slider');
-  // Icon in the slider panel
-  const panelIcon = volumePanel ? volumePanel.querySelector('.volume-slider-panel i') : null;
-  // Icon in the volume-panel-box (music section)
-  const boxIcon = volumePanel ? volumePanel.querySelector('.music-panel-box i.fas.fa-volume-up, .music-panel-box i.fas.fa-volume-mute') : null;
-
-  function handleMuteUnmuteClick() {
-    if (!browserVolumeSlider) return;
-    if (!isMuted) {
-      previousVolume = browserVolumeSlider.value;
-      browserVolumeSlider.value = 0;
-      browserVolumeSlider.dispatchEvent(new Event('input', { bubbles: true }));
-    } else {
-      browserVolumeSlider.value = previousVolume;
-      browserVolumeSlider.dispatchEvent(new Event('input', { bubbles: true }));
+    function handleMuteUnmuteClick() {
+      if (!browserVolumeSlider) return;
+      if (!isMuted) {
+        previousVolume = browserVolumeSlider.value;
+        browserVolumeSlider.value = 0;
+        browserVolumeSlider.dispatchEvent(new Event('input', { bubbles: true }));
+      } else {
+        browserVolumeSlider.value = previousVolume;
+        browserVolumeSlider.dispatchEvent(new Event('input', { bubbles: true }));
+      }
     }
-  }
 
-  if (panelIcon) {
-    panelIcon.style.cursor = 'pointer';
-    panelIcon.addEventListener('click', handleMuteUnmuteClick);
-  }
-  if (boxIcon) {
-    boxIcon.style.cursor = 'pointer';
-    boxIcon.addEventListener('click', handleMuteUnmuteClick);
-  }
+    if (panelIcon) {
+      panelIcon.style.cursor = 'pointer';
+      panelIcon.addEventListener('click', handleMuteUnmuteClick);
+    }
+    if (boxIcon) {
+      boxIcon.style.cursor = 'pointer';
+      boxIcon.addEventListener('click', handleMuteUnmuteClick);
+    }
 
   // --- Playlist button logic: always attach after DOMContentLoaded ---
   const musicPanel = volumePanel ? volumePanel.querySelector('.music-panel-box') : null;
@@ -1093,7 +2247,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   // --- Always close volume panel when clicking outside ---
-  document.addEventListener('mousedown', function(e) {
+  document.addEventListener('mousedown', function (e) {
     const panel = document.getElementById('volume-panel');
     const btn = document.getElementById('volume-btn');
     if (
@@ -1137,7 +2291,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
   attachVolumeBtnHandler();
 });
-// ... existing code ...
+
 
 
 //logout function
@@ -1177,6 +2331,10 @@ if (logOutButton) {
 
 
 function getAppIconDetails(appName) {
+  // Special case for compose window
+  if (appName === 'compose') {
+    return { iconClass: 'fa-pen', iconBgClass: 'blue-icon' };
+  }
   let iconClass = 'fa-window-maximize';
   let iconBgClass = 'gray-icon';
   // First, try to get from startMenuApps
@@ -1415,7 +2573,7 @@ function attachTaskbarIconListeners(cloneBtn) {
   // Remove ID to avoid duplicate IDs in DOM, but do NOT remove id from widgets-toggle-btn, wallet-btn, notifications-btn, volume-btn, fullscreen-btn, global-search-btn, app-launcher-btn, ai-chat-btn
   if (
     cloneBtn.id &&
-    !['widgets-toggle-btn','wallet-btn','notifications-btn','volume-btn','fullscreen-btn','global-search-btn','app-launcher-btn','ai-chat-btn'].includes(cloneBtn.id)
+    !['widgets-toggle-btn', 'wallet-btn', 'notifications-btn', 'volume-btn', 'fullscreen-btn', 'global-search-btn', 'app-launcher-btn', 'ai-chat-btn'].includes(cloneBtn.id)
   ) cloneBtn.removeAttribute('id');
   // Only attach to buttons or clickable divs
   if (
@@ -1440,7 +2598,7 @@ function attachTaskbarIconListeners(cloneBtn) {
       }
       // AI Chat
       if (iconContainer.classList.contains('taskbar-icon') && iconContainer.querySelector('.fa-comment-dots')) {
-        if (typeof openApp === 'function') openApp('ai-chat', 'AI Chat', 'fa-comment-dots', 'blue-icon');
+        if (typeof openApp === 'function') openApp('ai-chat', 'AI Chat', 'fa-comment-dots', 'blue');
       }
       // Notifications (use the same function as the original button)
       else if (iconContainer.classList.contains('taskbar-icon') && iconContainer.querySelector('.fa-bell, .fa-bell-slash')) {
@@ -1568,7 +2726,7 @@ function attachWalletBtnToggleHandler() {
 document.addEventListener('DOMContentLoaded', function () {
   attachWalletBtnToggleHandler();
 });
-// ... existing code ...
+
 
 (function () {
   window.attachWalletBtnToggleHandler = attachWalletBtnToggleHandler;
@@ -1665,7 +2823,7 @@ function createAppLauncherTaskbarRightIcons() {
   }
   window.hideWalletSidebar = hideWalletSidebar;
 
-document.addEventListener('DOMContentLoaded', function () {
+  document.addEventListener('DOMContentLoaded', function () {
     updateWalletBtnDisplay();
     if (walletBtn && walletSidebar) {
       walletBtn.addEventListener('click', function () {
@@ -1699,7 +2857,7 @@ document.addEventListener('DOMContentLoaded', function () {
   window.updateWalletBtnDisplay = updateWalletBtnDisplay;
 })();
 
-// ... existing code ...
+
 
 
 
@@ -1722,46 +2880,7 @@ function fadeOutSectionLabel(sectionLabel) {
 }
 
 
-// In setupFileExplorerInteraction or after creating the File Explorer window:
-function setupSidebarToggleForFileExplorer(fileExplorerWindow) {
-  const sidebar = fileExplorerWindow.querySelector('.window-sidebar');
-  const toggleLabel = fileExplorerWindow.querySelector('#window-sidebar-toggle-label');
-  const toggle = fileExplorerWindow.querySelector('#window-sidebar-toggle');
-  if (!sidebar || !toggle) return;
-  // Only show toggle on desktop
-  function updateToggleVisibility() {
-    if (window.innerWidth > 500) {
-      toggleLabel.style.display = '';
-      // Set initial state: ON = collapsed, OFF = expanded
-      if (toggle.checked) {
-        sidebar.classList.add('sidebar-collapsed');
-        sidebar.setAttribute('data-user-collapsed', 'true');
-      } else {
-        sidebar.classList.remove('sidebar-collapsed');
-        sidebar.setAttribute('data-user-collapsed', 'false');
-      }
-    } else {
-      toggleLabel.style.display = 'none';
-      sidebar.classList.remove('sidebar-collapsed');
-      toggle.checked = false;
-      sidebar.removeAttribute('data-user-collapsed');
-    }
-  }
-  updateToggleVisibility();
-  window.addEventListener('resize', updateToggleVisibility);
-  toggle.addEventListener('change', function () {
-    if (window.innerWidth > 500) {
-      if (toggle.checked) {
-        sidebar.classList.add('sidebar-collapsed');
-        sidebar.setAttribute('data-user-collapsed', 'true');
-      } else {
-        sidebar.classList.remove('sidebar-collapsed');
-        sidebar.setAttribute('data-user-collapsed', 'false');
-      }
-      if (typeof updateSidebarForWindow === 'function') updateSidebarForWindow(fileExplorerWindow);
-    }
-  });
-}
+
 
 //Press N to open trigger notifications
 document.addEventListener('keydown', function (e) {
@@ -1803,6 +2922,14 @@ window.addEventListener(
 );
 
 document.addEventListener('contextmenu', function (event) {
+  // Allow context menu in email content areas, all inputs, textareas, and contenteditables
+  if (
+    event.target.closest('.email-content') ||
+    event.target.closest('.email-content-section') ||
+    event.target.tagName === 'INPUT' ||
+    event.target.tagName === 'TEXTAREA' ||
+    event.target.isContentEditable
+  ) return;
   event.preventDefault(); // This disables the browser's context menu elsewhere
 });
 
@@ -1868,31 +2995,32 @@ let startButton = null;
 
 // --- START MENU LOGIC (top-level for widgets) ---
 // Define the app list before any function that uses it
-  const startMenuApps = [
-    { id: 'my-files', name: 'My Files', iconClass: 'fa-folder', iconBgClass: 'pink-icon', category: 'SYSTEM APPS' },
-    { id: 'this-pc', name: 'This PC', iconClass: 'fa-desktop', iconBgClass: 'pink-icon', category: 'SYSTEM APPS' },
-    { id: 'web-files', name: 'Web Files', iconClass: 'fa-folder-open', iconBgClass: 'green-icon', category: 'SYSTEM APPS' },
-    { id: 'trash-sm', name: 'Trash', iconClass: 'fa-trash', iconBgClass: 'purple-icon', category: 'SYSTEM APPS' },
-    { id: 'settings-sm', name: 'Settings', iconClass: 'fa-cog', iconBgClass: 'pink-icon', category: 'SYSTEM APPS' },
-    { id: 'site-builder-sm', name: 'Site Builder', iconClass: 'fa-globe', iconBgClass: 'pink-icon', category: 'CUSTOMISE' },
-    { id: 'app-store-sm', name: 'AppStore', iconClass: 'fa-store', iconBgClass: 'green-icon', category: 'CUSTOMISE' },
-    { id: 'social-master', name: 'Social Master', iconClass: 'fa-users', iconBgClass: 'purple-icon', category: 'CUSTOMISE' },
-    { id: 'personalize', name: 'Personalize', iconClass: 'fa-cog', iconBgClass: 'pink-icon', category: 'CUSTOMISE' },
-    { id: 'word-doc', name: 'Word doc', iconClass: 'fa-file-word', iconBgClass: 'pink-icon', category: 'DOCS' },
-    { id: 'excel-numbers', name: 'Excel Numbers', iconClass: 'fa-file-excel', iconBgClass: 'green-icon', category: 'DOCS' },
-    { id: 'notepad', name: 'Notepad', iconClass: 'fa-sticky-note', iconBgClass: 'purple-icon', category: 'DOCS' },
-    { id: 'wordpad', name: 'Wordpad', iconClass: 'fa-file-alt', iconBgClass: 'pink-icon', category: 'DOCS' },
-    { id: 'calculator-sm', name: 'Calculator', iconClass: 'fa-calculator', iconBgClass: 'gray-icon', category: 'PRODUCTIVITY' },
-    { id: 'photoshop-sm', name: 'Photoshop', iconClass: 'fa-palette', iconBgClass: 'blue-icon', category: 'PRODUCTIVITY' },
-    { id: 'calendar-sm', name: 'Calendar', iconClass: 'fa-calendar-alt', iconBgClass: 'purple-icon', category: 'PRODUCTIVITY' },
-    { id: 'notes', name: 'Notes', iconClass: 'far fa-clipboard', iconBgClass: 'pink-icon', category: 'PRODUCTIVITY' },
-    { id: 'app-launcher', name: 'App launcher', iconClass: 'fa-th', iconBgClass: 'blue-icon', category: 'SYSTEM APPS' },
-    { id: 'wallet', name: 'Wallet', iconClass: 'fa-wallet', iconBgClass: 'pink-icon', category: 'SYSTEM APPS' }
-  ];
+const startMenuApps = [
+  { id: 'my-files', name: 'My Files', iconClass: 'fa-folder', iconBgClass: 'pink-icon', category: 'SYSTEM APPS' },
+  { id: 'this-pc', name: 'This PC', iconClass: 'fa-desktop', iconBgClass: 'pink-icon', category: 'SYSTEM APPS' },
+  { id: 'web-files', name: 'Web Files', iconClass: 'fa-folder-open', iconBgClass: 'green-icon', category: 'SYSTEM APPS' },
+  { id: 'trash-sm', name: 'Trash', iconClass: 'fa-trash', iconBgClass: 'purple-icon', category: 'SYSTEM APPS' },
+  { id: 'settings-sm', name: 'Settings', iconClass: 'fa-cog', iconBgClass: 'blue-icon', category: 'SYSTEM APPS' },
+  { id: 'site-builder-sm', name: 'Site Builder', iconClass: 'fa-globe', iconBgClass: 'pink-icon', category: 'CUSTOMISE' },
+  { id: 'app-store-sm', name: 'AppStore', iconClass: 'fa-store', iconBgClass: 'green-icon', category: 'CUSTOMISE' },
+  { id: 'social-master', name: 'Social Master', iconClass: 'fa-users', iconBgClass: 'purple-icon', category: 'CUSTOMISE' },
+  { id: 'personalize', name: 'Personalize', iconClass: 'fa-cog', iconBgClass: 'pink-icon', category: 'CUSTOMISE' },
+  { id: 'word-doc', name: 'Word doc', iconClass: 'fa-file-word', iconBgClass: 'pink-icon', category: 'DOCS' },
+  { id: 'excel-numbers', name: 'Excel Numbers', iconClass: 'fa-file-excel', iconBgClass: 'green-icon', category: 'DOCS' },
+  { id: 'notepad', name: 'Notepad', iconClass: 'fa-sticky-note', iconBgClass: 'purple-icon', category: 'DOCS' },
+  { id: 'wordpad', name: 'Wordpad', iconClass: 'fa-file-alt', iconBgClass: 'pink-icon', category: 'DOCS' },
+  { id: 'calculator-sm', name: 'Calculator', iconClass: 'fa-calculator', iconBgClass: 'gray-icon', category: 'PRODUCTIVITY' },
+  { id: 'photoshop-sm', name: 'Photoshop', iconClass: 'fa-palette', iconBgClass: 'blue-icon', category: 'PRODUCTIVITY' },
+  { id: 'calendar-sm', name: 'Calendar', iconClass: 'fa-calendar-alt', iconBgClass: 'purple-icon', category: 'PRODUCTIVITY' },
+  { id: 'notes', name: 'Notes', iconClass: 'far fa-clipboard', iconBgClass: 'pink-icon', category: 'PRODUCTIVITY' },
+  { id: 'app-launcher', name: 'App launcher', iconClass: 'fa-th', iconBgClass: 'teal-icon', category: 'SYSTEM APPS' },
+  { id: 'wallet', name: 'Wallet', iconClass: 'fa-wallet', iconBgClass: 'pink-icon', category: 'SYSTEM APPS' },
+  { id: 'email-app', name: 'Email', iconClass: 'fa-envelope', iconBgClass: 'orange-icon', category: 'SYSTEM APPS' }
+];
 
-  let startMenuAppSortMode = 'category'; // 'category' or 'alphabet'
+let startMenuAppSortMode = 'category'; // 'category' or 'alphabet'
 
-// ... existing code ...
+
 
 // --- DYNAMIC DESKTOP ICON GENERATION ---
 // List of app IDs to show on desktop by default
@@ -1925,7 +3053,7 @@ function generateDesktopIcons() {
 
 document.addEventListener('DOMContentLoaded', function () {
   generateDesktopIcons();
-  // ... existing code ...
+  
 
   // DOM Elements
   startButton = document.getElementById('start-button');
@@ -2037,7 +3165,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Clear all icons and separators
     taskbarAppIconsContainer.innerHTML = '';
     const pins = getPinnedTaskbarApps();
-  
+
     // Render all pinned icons (open or not), in pin order
     pins.forEach(appName => {
       const details = getAppIconDetails(appName);
@@ -2080,7 +3208,7 @@ document.addEventListener('DOMContentLoaded', function () {
       // Do NOT animate in for pinned icons
       // Never animate in/out here (old comment, now handled above)
     });
-  
+
     // Add separator if there are open (unpinned) apps AND there is at least one pinned app
     const openUnpinned = Object.values(openWindows).filter(w => w.element && !isAppPinned(w.name));
     if (pins.length > 0 && openUnpinned.length > 0) {
@@ -2088,7 +3216,7 @@ document.addEventListener('DOMContentLoaded', function () {
       separator.className = 'taskbar-separator';
       taskbarAppIconsContainer.appendChild(separator);
     }
-  
+
     // Render open (unpinned) app icons
     openUnpinned.forEach(winObj => {
       if (!winObj.element) return;
@@ -2131,11 +3259,11 @@ document.addEventListener('DOMContentLoaded', function () {
         animateTaskbarIconIn(iconEl);
       }
     });
-  
+
     // After rendering, update the active state
     updateTaskbarActiveState();
   }
-
+window.renderPinnedTaskbarIcons = renderPinnedTaskbarIcons;
   // On load, render pinned icons
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', renderPinnedTaskbarIcons);
@@ -2428,7 +3556,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  // ... existing code ...
+  
 
 
   // --- Desktop Icon Order Persistence ---
@@ -2623,7 +3751,14 @@ document.addEventListener('DOMContentLoaded', function () {
       // Attach desktop context menu to app-launcher-desktop
       if (launcherDesktop) {
         launcherDesktop.addEventListener('contextmenu', function (e) {
-          // Prevent right-click context menu in app launcher mode
+          // Allow context menu for input, textarea, contenteditable, or selected text
+          const sel = window.getSelection();
+          if (
+            e.target.tagName === 'INPUT' ||
+            e.target.tagName === 'TEXTAREA' ||
+            e.target.isContentEditable ||
+            (sel && sel.rangeCount > 0 && !sel.getRangeAt(0).collapsed && sel.toString().trim().length > 0)
+          ) return;
           e.preventDefault();
           return false;
         });
@@ -2926,7 +4061,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // --- START MENU LOGIC (moved to bottom for robustness) ---
 
-  
+
 
   function categoryLinkClickHandler(e) {
     e.preventDefault();
@@ -3040,7 +4175,7 @@ document.addEventListener('DOMContentLoaded', function () {
           appItem.getAttribute('data-app'),
           appItem.querySelector('span').textContent,
           appItem.querySelector('i').className.split(' ').find(cls => cls.startsWith('fa-')),
-          appItem.className.split(' ').find(cls => cls.endsWith('-icon'))
+          appItem.className.split(' ').find(cls => cls.endsWith('-icon') || ['orange', 'blue', 'red', 'teal', 'purple', 'gray'].includes(cls))
         );
         closeLauncher();
       }
@@ -3259,10 +4394,7 @@ document.addEventListener('DOMContentLoaded', function () {
         windowElement = createWindowFromTemplate('file-explorer', windowId, true); // true = delay content
         appTitle = 'File Explorer';
         isFileExplorer = true;
-        delayedContentLoader = () => {
-          setupFileExplorerInteraction(windowElement);
-          setupSidebarToggleForFileExplorer(windowElement);
-        };
+
         break;
       case 'settings':
       case 'settings-sm':
@@ -3270,12 +4402,17 @@ document.addEventListener('DOMContentLoaded', function () {
         appTitle = 'Settings';
         delayedContentLoader = () => setupSettingsApp(windowElement);
         break;
-        case 'app-store':
-          case 'app-store-sm':
-            windowElement = createWindowFromTemplate('app-store', windowId, true);
-            appTitle = 'AppStore';
-            delayedContentLoader = () => setupAppStore(windowElement); // <-- FIXED
-            break;
+      case 'app-store':
+      case 'app-store-sm':
+        windowElement = createWindowFromTemplate('app-store', windowId, true);
+        appTitle = 'AppStore';
+        delayedContentLoader = () => setupAppStore(windowElement); // <-- FIXED
+        break;
+      case 'site-builder-sm':
+        windowElement = createWindowFromTemplate('sitebuilder', windowId, true);
+        appTitle = 'Sitebuilder';
+        // Optionally add a delayedContentLoader if needed for sitebuilder
+        break;
       case 'calculator':
       case 'calculator-sm':
         windowElement = createWindowFromTemplate('calculator-app', windowId, true);
@@ -3292,6 +4429,11 @@ document.addEventListener('DOMContentLoaded', function () {
           if (iframe && iframe.dataset.src) iframe.src = iframe.dataset.src;
         };
         break;
+      case 'email-app':
+        windowElement = createWindowFromTemplate('email-app', windowId, true);
+        appTitle = 'Email';
+        delayedContentLoader = () => setupEmailApp(windowElement);
+        break;
       default:
         const title = appTitle || appName.charAt(0).toUpperCase() + appName.slice(1).replace(/-/g, ' ');
         windowElement = createGenericWindow(title, finalIconClass, finalIconBgClass, windowId, true);
@@ -3301,38 +4443,38 @@ document.addEventListener('DOMContentLoaded', function () {
       // --- iOS-like open from icon effect ---
       let contentInjected = false;
       if (iconRect) {
-        // Instantly place window at icon's position/scale, then animate to center
+      // Instantly place window at icon's position/scale, then animate to center
+      requestAnimationFrame(() => {
+        // Get window's final rect (after centering)
+        const winRect = windowElement.getBoundingClientRect();
+        const scaleX = iconRect.width / winRect.width;
+        const scaleY = iconRect.height / winRect.height;
+        const iconCenterX = iconRect.left + iconRect.width / 2;
+        const iconCenterY = iconRect.top + iconRect.height / 2;
+        const winCenterX = winRect.left + winRect.width / 2;
+        const winCenterY = winRect.top + winRect.height / 2;
+        const translateX = iconCenterX - winCenterX;
+        const translateY = iconCenterY - winCenterY;
+        // Set initial transform (window appears at icon)
+        windowElement.style.transformOrigin = 'center center';
+        windowElement.style.transition = 'none';
+        windowElement.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scaleX}, ${scaleY})`;
+        // Next frame, animate to normal
         requestAnimationFrame(() => {
-          // Get window's final rect (after centering)
-          const winRect = windowElement.getBoundingClientRect();
-          const scaleX = iconRect.width / winRect.width;
-          const scaleY = iconRect.height / winRect.height;
-          const iconCenterX = iconRect.left + iconRect.width / 2;
-          const iconCenterY = iconRect.top + iconRect.height / 2;
-          const winCenterX = winRect.left + winRect.width / 2;
-          const winCenterY = winRect.top + winRect.height / 2;
-          const translateX = iconCenterX - winCenterX;
-          const translateY = iconCenterY - winCenterY;
-          // Set initial transform (window appears at icon)
-          windowElement.style.transformOrigin = 'center center';
-          windowElement.style.transition = 'none';
-          windowElement.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scaleX}, ${scaleY})`;
-          // Next frame, animate to normal
-          requestAnimationFrame(() => {
-            windowElement.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)';
-            windowElement.style.transform = 'translate(0,0) scale(1,1)';
-            // Inject/load content for all apps now (before animation ends)
-            if (delayedContentLoader && !contentInjected) {
-              delayedContentLoader();
-              contentInjected = true;
-            }
-            // Clean up after animation
-            setTimeout(() => {
-              windowElement.style.transition = '';
-              windowElement.style.transform = '';
-            }, 370);
-          });
+          windowElement.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)';
+          windowElement.style.transform = 'translate(0,0) scale(1,1)';
+          // Inject/load content for all apps now (before animation ends)
+          if (delayedContentLoader && !contentInjected) {
+            delayedContentLoader();
+            contentInjected = true;
+          }
+          // Clean up after animation
+          setTimeout(() => {
+            windowElement.style.transition = '';
+            windowElement.style.transform = '';
+          }, 370);
         });
+      });
       } else {
         // Fallback: use the normal open animation
         windowElement.classList.add('window-anim-open');
@@ -3385,7 +4527,7 @@ document.addEventListener('DOMContentLoaded', function () {
           windowTitle.classList.add('easy-mode-window-title');
           // Remove margin/padding if any
           windowTitle.style.margin = '0';
-          windowTitle.style.padding = '0 10px 2px 10px';
+          windowTitle.style.padding = '0 5px 2px 5px';
           windowTitle.style.display = 'flex';
           windowTitle.style.alignItems = 'center';
           windowTitle.style.gap = '4px';
@@ -3394,6 +4536,73 @@ document.addEventListener('DOMContentLoaded', function () {
           windowTitle.style.background = 'none';
           windowTitle.style.border = 'none';
           windowTitle.style.whiteSpace = 'nowrap';
+          // --- Add X (close) button next to title ---
+          const closeBtn = document.createElement('button');
+          closeBtn.className = 'easy-mode-close-btn';
+          closeBtn.title = 'Close';
+          closeBtn.innerHTML = '<i class="fas fa-times"></i>';
+          closeBtn.style.background = 'none';
+          closeBtn.style.border = 'none';
+          closeBtn.style.color = '#fff';
+          closeBtn.style.fontSize = '18px';
+          closeBtn.style.cursor = 'pointer';
+          closeBtn.style.opacity = '0.7';
+          closeBtn.style.transition = 'opacity 0.18s';
+          closeBtn.style.marginLeft = 'auto';
+          closeBtn.style.display = 'flex';
+          closeBtn.style.alignItems = 'center';
+          closeBtn.style.justifyContent = 'flex-end';
+          closeBtn.style.minWidth = '48px';
+          // Hover: show text 'Close' instead of icon
+          closeBtn.addEventListener('mouseenter', () => {
+            closeBtn.style.opacity = '1';
+            closeBtn.innerHTML = 'Close';
+            closeBtn.style.fontSize = '11px';
+            closeBtn.style.fontWeight = 'bold';
+            closeBtn.style.borderRadius = '6px';
+            closeBtn.style.padding = '4px 8px';
+            closeBtn.style.backgroundColor = 'rgba(255,255,255,0.10)';
+          });
+          closeBtn.addEventListener('mouseleave', () => {
+            closeBtn.style.opacity = '0.7';
+            closeBtn.innerHTML = '<i class="fas fa-times"></i>';
+            closeBtn.style.fontSize = '18px';
+            closeBtn.style.fontWeight = '';
+            closeBtn.style.backgroundColor = 'transparent';
+            closeBtn.style.padding = '';
+
+          });
+          closeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            // Find the parent .window element
+            let win = windowTitle.closest('.window');
+            if (!win) {
+              // If not found, try to find any .window.active (should only be one in easy mode)
+              win = document.querySelector('.window.active') || document.querySelector('.window');
+            }
+            if (win) {
+              // Try to click the close button if present
+              const closeButton = win.querySelector('.window-close');
+              if (closeButton) {
+                closeButton.click();
+              } else {
+                // Fallback: remove window directly and cleanup
+                const winId = win.id;
+                if (win.parentNode) win.parentNode.removeChild(win);
+                if (window.openWindows && window.openWindows[winId]) {
+                  if (window.openWindows[winId].taskbarIcon) window.openWindows[winId].taskbarIcon.remove();
+                  delete window.openWindows[winId];
+                }
+                if (window.activeWindow === win) window.activeWindow = null;
+                if (typeof window.updateTaskbarActiveState === 'function') window.updateTaskbarActiveState();
+              }
+            }
+          });
+          // Make windowTitle flex to align closeBtn right
+          windowTitle.style.display = 'flex';
+          windowTitle.style.alignItems = 'center';
+          windowTitle.style.gap = '4px';
+          windowTitle.appendChild(closeBtn);
           // Insert at top of sidebar
           sidebar.insertBefore(windowTitle, sidebar.firstChild);
           // Add a separator after the title
@@ -3432,8 +4641,21 @@ document.addEventListener('DOMContentLoaded', function () {
       }
       // Optionally, hide content area if needed (not strictly necessary)
     }
+    // --- PATCH: Ensure sidebar overlay and menu toggle exist ---
+    ensureSidebarElements(windowElement);
+    // --- PATCH: Call global sidebar logic ---
+    if (typeof setupMobileSidebarForWindow === 'function') {
+      setupMobileSidebarForWindow(windowElement);
+    }
+    if (typeof window.updateSidebarForWindow === 'function') {
+      window.updateSidebarForWindow(windowElement);
+    }
+    if (typeof attachSidebarResizeObserver === 'function') {
+      attachSidebarResizeObserver(windowElement);
+    }
     return windowElement;
   }
+  window.createWindowFromTemplate = createWindowFromTemplate;
   function createGenericWindow(title, iconClass, iconBgClass, windowId, delayContent) {
     const windowElement = document.createElement('div');
     windowElement.className = 'window';
@@ -3443,6 +4665,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // If delayContent, leave content area empty for now
     windowElement.innerHTML = `
       <div class="window-header">
+        <button class="menu-toggle"><i class="fas fa-bars"></i></button>
         <div class="window-title">
           <div class="window-icon ${iconBgClass}">
             <i class="fas ${iconClass}"></i>
@@ -3457,12 +4680,25 @@ document.addEventListener('DOMContentLoaded', function () {
         </div>
       </div>
       <div class="window-content" style="display: flex; align-items: center; justify-content: center; padding: 20px;">
+        <div class="sidebar-overlay"></div>
         ${delayContent ? '' : `<p>Content for ${title} goes here.</p>`}
       </div>
     `;
     setupWindowControls(windowElement);
     windowsContainer.appendChild(windowElement);
     positionWindowCenter(windowElement);
+    // --- PATCH: Ensure sidebar overlay and menu toggle exist ---
+    ensureSidebarElements(windowElement);
+    // --- PATCH: Call global sidebar logic ---
+    if (typeof setupMobileSidebarForWindow === 'function') {
+      setupMobileSidebarForWindow(windowElement);
+    }
+    if (typeof window.updateSidebarForWindow === 'function') {
+      window.updateSidebarForWindow(windowElement);
+    }
+    if (typeof attachSidebarResizeObserver === 'function') {
+      attachSidebarResizeObserver(windowElement);
+    }
     return windowElement;
   }
 
@@ -3626,8 +4862,8 @@ document.addEventListener('DOMContentLoaded', function () {
           windowElement.dataset.prevLeft = windowElement.style.left || windowElement.offsetLeft + 'px';
           windowElement.dataset.prevTop = windowElement.style.top || windowElement.offsetTop + 'px';
           windowElement.style.transition = 'width 0.32s cubic-bezier(0.4,0,0.2,1), height 0.32s cubic-bezier(0.4,0,0.2,1), left 0.32s cubic-bezier(0.4,0,0.2,1), top 0.32s cubic-bezier(0.4,0,0.2,1)';
-          windowElement.style.width = `${maxWidth}px`;
-          windowElement.style.height = `${maxHeight}px`;
+          windowElement.style.width = `100%`;
+          windowElement.style.height = `100%`;
           windowElement.style.left = '0px';
           windowElement.style.top = '0px';
           windowElement.style.resize = 'none';
@@ -3759,13 +4995,13 @@ document.addEventListener('DOMContentLoaded', function () {
             }
           }, 500);
         }
-        // ... existing code ...
+        
         // At the top of the file, after other globals:
         window._allPopoutWindows = window._allPopoutWindows || [];
-        // ... existing code ...
+        
         // In the popoutButton click handler, after 'if (!popoutWin) return;':
         window._allPopoutWindows.push(popoutWin);
-        // ... existing code ...
+        
         // In the logout button event handler:
         const logOutButton = document.querySelector('.start-menu-logout-button') || document.querySelector('.logout-button');
         if (logOutButton) {
@@ -3774,7 +5010,7 @@ document.addEventListener('DOMContentLoaded', function () {
             handleLogout();
           });
         }
-        // ... existing code ...
+        
       });
     }
     windowElement.addEventListener('mousedown', function (e) {
@@ -3943,6 +5179,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     updateTaskbarActiveState();
   }
+  window.makeWindowActive = makeWindowActive;
 
   function updateTaskbarActiveState() {
     document.querySelectorAll('.taskbar-app-icon').forEach(icon => icon.classList.remove('active'));
@@ -4204,6 +5441,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
     return iconEl;
   }
+  window.createTaskbarIcon = createTaskbarIcon;
 
   function filterStartMenuApps(searchTerm) {
     if (!startMenuLeftPanel) return;
@@ -4225,7 +5463,7 @@ document.addEventListener('DOMContentLoaded', function () {
           appItem.getAttribute('data-app'),
           appItem.querySelector('span').textContent,
           appItem.querySelector('i').className.split(' ').find(cls => cls.startsWith('fa-')),
-          appItem.className.split(' ').find(cls => cls.endsWith('-icon'))
+          appItem.className.split(' ').find(cls => cls.endsWith('-icon') || ['orange', 'blue', 'red', 'teal', 'purple', 'gray'].includes(cls))
         );
         closeLauncher();
       }
@@ -4286,7 +5524,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // Patch maximize/restore/minimize logic to call updateAppLauncherTaskbarPosition
   // 1. After maximize/restore in setupWindowControls
   // 2. After minimize/restore in toggleMinimizeWindow
-  // ... existing code ...
+  
 
 
 
@@ -5021,6 +6259,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
   if (desktopArea && dragSelector) {
     desktopArea.addEventListener('mousedown', (e) => {
+      // --- FIX: Allow text selection/copy in email-content ---
+      if (e.target.closest('.email-content') || e.target.closest('.email-content-section')) return;
       // Prevent drag selector in app-launcher-mode or easy-mode
       if (
         desktopArea.classList.contains('app-launcher-mode') ||
@@ -5092,209 +6332,52 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 
-  function setupFileExplorerInteraction(fileExplorerWindow) {
-    // Prevent drag selector logic in Settings app
-    if (fileExplorerWindow.classList.contains('settings-app-window') || fileExplorerWindow.querySelector('.settings-content')) {
-      return;
-    }
-    const contentArea = fileExplorerWindow.querySelector('.window-main-content');
-    fileExplorerContentArea = contentArea;
-    currentSelectedFileItems = new Set();
-    if (!contentArea) return; // Prevent error if contentArea is missing
-    const fileItems = contentArea.querySelectorAll('.file-item');
-
-    fileItems.forEach(item => {
-      item.addEventListener('dblclick', function () { /* ... */ });
-      item.addEventListener('mousedown', function (e) {
-        if (e.button !== 0 && e.button !== 2) return;
-        if (isDraggingFileSelector) return;
-        if (!e.ctrlKey && !e.shiftKey) {
-          currentSelectedFileItems.forEach(fi => fi.classList.remove('selected'));
-          currentSelectedFileItems.clear();
-          this.classList.add('selected');
-          currentSelectedFileItems.add(this);
-        }
-        e.stopPropagation();
-      });
-    });
-    contentArea.addEventListener('mousedown', (e) => {
-      if (e.button !== 0 && e.button !== 2) return;
-      isDraggingFileSelector = true;
-      contentArea.appendChild(dragSelector);
-      dragSelector.classList.remove('hidden');
-      const contentRect = contentArea.getBoundingClientRect();
-      fileSelectorStartX = e.clientX - contentRect.left + contentArea.scrollLeft;
-      fileSelectorStartY = e.clientY - contentRect.top + contentArea.scrollTop;
-      dragSelector.style.left = `${fileSelectorStartX}px`;
-      dragSelector.style.top = `${fileSelectorStartY}px`;
-      dragSelector.style.width = '0px';
-      dragSelector.style.height = '0px';
-      currentSelectedFileItems.forEach(fi => fi.classList.remove('selected'));
-      currentSelectedFileItems.clear();
-      // If right click, prevent context menu
-      if (e.button === 2) {
-        e.preventDefault();
-        hideContextMenu && hideContextMenu();
-      }
-      e.preventDefault();
-    });
-    document.addEventListener('mousemove', (e) => {
-      if (!isDraggingFileSelector) return;
-      if (!fileExplorerContentArea || dragSelector.parentElement !== fileExplorerContentArea) return;
-      const contentRect = fileExplorerContentArea.getBoundingClientRect();
-      // Get toolbar and statusbar bounds
-      const fileExplorerWindow = fileExplorerContentArea.closest('.window');
-      let toolbarBottom = 0;
-      let statusbarTop = fileExplorerContentArea.clientHeight;
-      if (fileExplorerWindow) {
-        const toolbar = fileExplorerWindow.querySelector('.window-toolbar');
-        const statusbar = fileExplorerWindow.querySelector('.window-statusbar');
-        if (toolbar) {
-          const toolbarRect = toolbar.getBoundingClientRect();
-          toolbarBottom = toolbarRect.bottom - contentRect.top;
-          if (toolbarBottom < 0) toolbarBottom = 0;
-        }
-        if (statusbar) {
-          const statusbarRect = statusbar.getBoundingClientRect();
-          statusbarTop = statusbarRect.top - contentRect.top;
-          if (statusbarTop > fileExplorerContentArea.clientHeight) statusbarTop = fileExplorerContentArea.clientHeight;
-        }
-      }
-      let currentX = e.clientX - contentRect.left + fileExplorerContentArea.scrollLeft;
-      let currentY = e.clientY - contentRect.top + fileExplorerContentArea.scrollTop;
-      // Clamp X and Y so drag selector does not go outside fileExplorerContentArea
-      currentX = Math.max(0, Math.min(currentX, fileExplorerContentArea.clientWidth));
-      currentY = Math.max(toolbarBottom, Math.min(currentY, statusbarTop));
-      // Clamp startX/startY as well
-      fileSelectorStartX = Math.max(0, Math.min(fileSelectorStartX, fileExplorerContentArea.clientWidth));
-      fileSelectorStartY = Math.max(toolbarBottom, Math.min(fileSelectorStartY, statusbarTop));
-      const newLeft = Math.min(currentX, fileSelectorStartX);
-      const newTop = Math.min(currentY, fileSelectorStartY);
-      const newWidth = Math.abs(currentX - fileSelectorStartX);
-      const newHeight = Math.abs(currentY - fileSelectorStartY);
-      dragSelector.style.left = `${newLeft}px`;
-      dragSelector.style.top = `${newTop}px`;
-      dragSelector.style.width = `${newWidth}px`;
-      dragSelector.style.height = `${newHeight}px`;
-      updateSelectedFileItems(fileExplorerContentArea, dragSelector, fileItems, currentSelectedFileItems);
-    });
-    fileExplorerWindow.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        if (isDraggingFileSelector) {
-          isDraggingFileSelector = false;
-          if (fileExplorerContentArea && fileExplorerContentArea.contains(dragSelector)) {
-            dragSelector.classList.add('hidden');
-            if (desktopArea) desktopArea.appendChild(dragSelector);
-          }
-        }
-        currentSelectedFileItems.forEach(fi => fi.classList.remove('selected'));
-        currentSelectedFileItems.clear();
-      }
-    });
-    contentArea.addEventListener('click', (e) => {
-      if (!e.target.closest('.file-item') && !isDraggingFileSelector) {
-        currentSelectedFileItems.forEach(fi => fi.classList.remove('selected'));
-        currentSelectedFileItems.clear();
-      }
-    });
-
-    // Add mobile menu toggle functionality
-    const menuToggle = fileExplorerWindow.querySelector('.menu-toggle');
-    const sidebar = fileExplorerWindow.querySelector('.window-sidebar');
-    const overlay = fileExplorerWindow.querySelector('.sidebar-overlay');
-
-    if (menuToggle && sidebar && overlay) {
-      menuToggle.addEventListener('click', () => {
-        const isShowing = !sidebar.classList.contains('show');
-        sidebar.classList.toggle('show');
-        overlay.classList.toggle('show');
-        if (window.innerWidth <= 767) {
-          if (isShowing) {
-            contentArea.classList.add('sidebar-push-active');
-          } else {
-            contentArea.classList.remove('sidebar-push-active');
-          }
-        }
-      });
-
-      overlay.addEventListener('click', () => {
-        sidebar.classList.remove('show');
-        overlay.classList.remove('show');
-        if (window.innerWidth <= 767) {
-          contentArea.classList.remove('sidebar-push-active');
-        }
-      });
-
-      // Close sidebar on item click for mobile
-      const sidebarItems = sidebar.querySelectorAll('.sidebar-item');
-      sidebarItems.forEach(item => {
-        item.addEventListener('click', () => {
-          if (window.innerWidth <= 767) {
-            sidebar.classList.remove('show');
-            overlay.classList.remove('show');
-            contentArea.classList.remove('sidebar-push-active');
-          }
-        });
-      });
-    }
-
-    // Handle window resize
-    window.addEventListener('resize', () => {
-      if (window.innerWidth > 767) {
-        sidebar.classList.remove('show');
-        overlay.classList.remove('show');
-        contentArea.classList.remove('sidebar-push-active');
-      }
-    });
-
-
-    // After creating the File Explorer window, call:
-    // setupSidebarToggleForFileExplorer(fileExplorerWindow);
-  }
 
   function hideContextMenu() {
     if (contextMenu) contextMenu.classList.add('hidden');
   }
-
   //Arg Right Click menu for desktop, file explorer, and taskbar and icons
-  // --- Global Context Menu for Text Selection (works everywhere except desktop, file explorer, taskbar) ---
+  // --- Global Context Menu for Text Selection (works everywhere, including all inputs, textareas, compose, and email-content) ---
   (function () {
     // Save original executeContextMenuAction
     const _originalExecuteContextMenuAction = executeContextMenuAction;
     // Patch global contextmenu
     document.addEventListener('contextmenu', function (e) {
-
       const target = e.target;
-      if (
-        (target.tagName === 'INPUT' && !target.readOnly && !target.disabled) ||
-        (target.tagName === 'TEXTAREA' && !target.readOnly && !target.disabled) ||
-        (target.isContentEditable && !target.readOnly && !target.disabled)
-      ) {
-        // If inside .desktop-area, .window-main-content, .taskbar, let those handlers run
-        if (target.closest && (
-          target.closest('.desktop-area') ||
-          target.closest('.window-main-content') ||
-          target.closest('.widget-content') ||
-          target.closest('.notification-widget') ||
-          (target.closest('.taskbar') && !target.closest('.search-input'))
-        )) return;
+      let hasSelection = false;
+      let isTextInput = false;
+      // Check for text selection in input, textarea, contenteditable, or normal text
+      if ((target.tagName === 'INPUT' && !target.readOnly && !target.disabled) ||
+          (target.tagName === 'TEXTAREA' && !target.readOnly && !target.disabled)) {
+        isTextInput = true;
+        hasSelection = target.selectionStart !== target.selectionEnd;
+      } else if (target.isContentEditable && !target.readOnly && !target.disabled) {
+        isTextInput = true;
+        const sel = window.getSelection();
+        hasSelection = sel && sel.rangeCount > 0 && !sel.getRangeAt(0).collapsed && target.contains(sel.anchorNode);
+      } else {
+        // Check for normal text selection
+        const sel = window.getSelection();
+        hasSelection = sel && sel.rangeCount > 0 && !sel.getRangeAt(0).collapsed && sel.toString().trim().length > 0;
+      }
+      if (hasSelection || isTextInput) {
         e.preventDefault();
         hideContextMenu && hideContextMenu();
         currentContextMenuTarget = target;
-        let hasSelection = false;
-        if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
-          hasSelection = target.selectionStart !== target.selectionEnd;
-        } else if (target.isContentEditable) {
-          const sel = window.getSelection();
-          hasSelection = sel && sel.rangeCount > 0 && !sel.getRangeAt(0).collapsed && target.contains(sel.anchorNode);
-        }
         const menuItems = [];
-        menuItems.push({ label: 'Cut', action: 'text-cut', icon: 'fa-scissors', disabled: !hasSelection });
-        menuItems.push({ label: 'Copy', action: 'text-copy', icon: 'fa-copy', disabled: !hasSelection });
-        menuItems.push({ label: 'Paste', action: 'text-paste', icon: 'fa-clipboard' });
-        menuItems.push({ label: 'Delete', action: 'text-delete', icon: 'fa-trash', disabled: !hasSelection });
+        // Only enable Cut/Delete for editable fields
+        const hasTextSelection = (
+          (isTextInput && target.selectionStart !== target.selectionEnd) ||
+          (target.isContentEditable && window.getSelection && !window.getSelection().isCollapsed) ||
+          (!isTextInput && !target.isContentEditable && window.getSelection && window.getSelection().toString().length > 0)
+        );
+        
+        menuItems.push({ label: 'Cut', action: 'text-cut', icon: 'fa-scissors', disabled: !isTextInput || !hasTextSelection });
+        menuItems.push({ label: 'Copy', action: 'text-copy', icon: 'fa-copy', disabled: !hasTextSelection });
+        menuItems.push({ label: 'Paste', action: 'text-paste', icon: 'fa-clipboard', disabled: false });
+        menuItems.push({ label: 'Delete', action: 'text-delete', icon: 'fa-trash', disabled: !isTextInput || !hasTextSelection });
         menuItems.push({ type: 'separator' });
-        menuItems.push({ label: 'Select All', action: 'text-select-all', icon: 'fa-i-cursor' });
+        menuItems.push({ label: 'Select All', action: 'text-select-all', icon: 'fa-i-cursor', disabled: false });
         populateContextMenu(menuItems, e.clientX, e.clientY);
       }
     }, true);
@@ -5488,6 +6571,8 @@ document.addEventListener('DOMContentLoaded', function () {
                   showShortTopNotification('Cutted');
                 } else alert('Cut failed: Clipboard could not be updated.');
               }
+            } else {
+              showShortTopNotification('Cannot cut/delete non-editable text');
             }
             break;
           }
@@ -5501,7 +6586,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 const selectedText = target.value.slice(start, end);
                 console.log('About to call tryClipboardWrite with:', selectedText, target, 'copy');
                 const ok = await tryClipboardWrite(selectedText, target, 'copy');
-                if (ok) showShortTopNotification('Copiated');
+                if (ok) showShortTopNotification('Copied');
                 else alert('Copy failed: Clipboard could not be updated.');
               }
             } else if (target.isContentEditable) {
@@ -5510,8 +6595,19 @@ document.addEventListener('DOMContentLoaded', function () {
                 const selectedText = sel.toString();
                 console.log('About to call tryClipboardWrite with:', selectedText, target, 'copy');
                 const ok = await tryClipboardWrite(selectedText, target, 'copy');
-                if (ok) showShortTopNotification('Copiated');
+                if (ok) showShortTopNotification('Copied');
                 else alert('Copy failed: Clipboard could not be updated.');
+              }
+            } else {
+              // Generic selection
+              const sel = window.getSelection();
+              if (sel && !sel.isCollapsed && sel.toString().trim().length > 0) {
+                try {
+                  await navigator.clipboard.writeText(sel.toString());
+                  showShortTopNotification('Copied');
+                } catch (err) {
+                  alert('Copy failed: Clipboard could not be updated.');
+                }
               }
             }
             break;
@@ -5530,6 +6626,8 @@ document.addEventListener('DOMContentLoaded', function () {
                   target.setSelectionRange(start + text.length, start + text.length);
                 } else if (target.isContentEditable) {
                   document.execCommand('insertText', false, text);
+                } else {
+                  showShortTopNotification('Cannot paste into non-editable text');
                 }
               } catch (err) {
                 console.error('Paste failed:', err);
@@ -5554,6 +6652,8 @@ document.addEventListener('DOMContentLoaded', function () {
             } else if (target.isContentEditable) {
               const sel = window.getSelection();
               if (sel && !sel.isCollapsed) sel.deleteFromDocument();
+            } else {
+              showShortTopNotification('Cannot cut/delete non-editable text');
             }
             break;
           }
@@ -5570,6 +6670,16 @@ document.addEventListener('DOMContentLoaded', function () {
               sel.removeAllRanges();
               sel.addRange(range);
               console.log('After selectNodeContents:', sel.toString());
+            } else {
+              const sel = window.getSelection();
+              sel.removeAllRanges();
+              const range = document.createRange();
+              // Try to select all text in the parent element, fallback to body
+              let container = target.closest('.email-content, .email-content-section, .window-main-content, .window-app-content, body');
+              if (!container) container = document.body;
+              range.selectNodeContents(container);
+              sel.addRange(range);
+              showShortTopNotification('All text selected');
             }
             break;
           }
@@ -5727,50 +6837,50 @@ document.addEventListener('DOMContentLoaded', function () {
           case 'open-settings':
             openApp('settings', 'Settings', 'fa-cog', 'green');
             break;
-            case 'uninstall-app': {
-              if (
-                currentContextMenuTarget &&
-                (currentContextMenuTarget.classList.contains('app-grid-item') ||
-                 currentContextMenuTarget.classList.contains('app-launcher-app'))
-              ) {
-                const appName = currentContextMenuTarget.getAttribute('data-app');
-                const appTitle = currentContextMenuTarget.getAttribute('data-app-title') || currentContextMenuTarget.querySelector('span')?.textContent || appName;
-                showConfirmDialog({
-                  title: 'Uninstall App',
-                  message: `Are you sure you want to uninstall <b>${appTitle}</b>? This cannot be undone!`,
-                  iconClass: 'fa-trash',
-                  okText: 'Uninstall',
-                  cancelText: 'Cancel',
-                  style: 'desktop'
-                }).then(confirmed => {
-                  if (confirmed) {
-                    // Remove from startMenuApps array
-                    if (typeof startMenuApps !== 'undefined') {
-                      const idx = startMenuApps.findIndex(a => a.id === appName || a.name === appName || (a.name && a.name.toLowerCase().replace(/\\s+/g, '-') === appName));
-                      if (idx !== -1) {
-                        startMenuApps.splice(idx, 1);
-                      }
+          case 'uninstall-app': {
+            if (
+              currentContextMenuTarget &&
+              (currentContextMenuTarget.classList.contains('app-grid-item') ||
+                currentContextMenuTarget.classList.contains('app-launcher-app'))
+            ) {
+              const appName = currentContextMenuTarget.getAttribute('data-app');
+              const appTitle = currentContextMenuTarget.getAttribute('data-app-title') || currentContextMenuTarget.querySelector('span')?.textContent || appName;
+              showConfirmDialog({
+                title: 'Uninstall App',
+                message: `Are you sure you want to uninstall <b>${appTitle}</b>? This cannot be undone!`,
+                iconClass: 'fa-trash',
+                okText: 'Uninstall',
+                cancelText: 'Cancel',
+                style: 'desktop'
+              }).then(confirmed => {
+                if (confirmed) {
+                  // Remove from startMenuApps array
+                  if (typeof startMenuApps !== 'undefined') {
+                    const idx = startMenuApps.findIndex(a => a.id === appName || a.name === appName || (a.name && a.name.toLowerCase().replace(/\\s+/g, '-') === appName));
+                    if (idx !== -1) {
+                      startMenuApps.splice(idx, 1);
                     }
-                    // Remove from DOM if present
-                    if (currentContextMenuTarget && currentContextMenuTarget.parentElement) {
-                      currentContextMenuTarget.parentElement.removeChild(currentContextMenuTarget);
-                    }
-                    // Remove from desktop if present
-                    const desktopIcon = document.querySelector('.desktop-icon[data-app=\"' + appName + '\"]');
-                    if (desktopIcon && desktopIcon.parentElement) {
-                      desktopIcon.parentElement.removeChild(desktopIcon);
-                    }
-                    // Remove from taskbar if pinned
-                    unpinAppFromTaskbar(appName);
-                    // Refresh start menu UI
-                    if (typeof populateStartMenuApps === 'function') populateStartMenuApps();
-                    if (typeof showShortTopNotification === 'function') showShortTopNotification('App uninstalled');
                   }
-                  if (typeof hideContextMenu === 'function') hideContextMenu();
-                });
-              }
-              break;
+                  // Remove from DOM if present
+                  if (currentContextMenuTarget && currentContextMenuTarget.parentElement) {
+                    currentContextMenuTarget.parentElement.removeChild(currentContextMenuTarget);
+                  }
+                  // Remove from desktop if present
+                  const desktopIcon = document.querySelector('.desktop-icon[data-app=\"' + appName + '\"]');
+                  if (desktopIcon && desktopIcon.parentElement) {
+                    desktopIcon.parentElement.removeChild(desktopIcon);
+                  }
+                  // Remove from taskbar if pinned
+                  unpinAppFromTaskbar(appName);
+                  // Refresh start menu UI
+                  if (typeof populateStartMenuApps === 'function') populateStartMenuApps();
+                  if (typeof showShortTopNotification === 'function') showShortTopNotification('App uninstalled');
+                }
+                if (typeof hideContextMenu === 'function') hideContextMenu();
+              });
             }
+            break;
+          }
           case 'sort-name': {
             // Only handle if desktop area is context
             const desktopIconsContainer = document.querySelector('.desktop-icons');
@@ -6078,6 +7188,12 @@ document.addEventListener('DOMContentLoaded', function () {
               document.body.classList.add('easy-mode');
               if (launcherDesktop) {
                 launcherDesktop.addEventListener('contextmenu', function (e) {
+                  // Allow context menu for input, textarea, or contenteditable
+                  if (
+                    e.target.tagName === 'INPUT' ||
+                    e.target.tagName === 'TEXTAREA' ||
+                    e.target.isContentEditable
+                  ) return;
                   e.preventDefault();
                   return false;
                 });
@@ -6099,7 +7215,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }
             break;
           }
-
           case 'close-app': {
             // Close the window associated with the taskbar icon
             if (currentContextMenuTarget && currentContextMenuTarget.classList.contains('taskbar-app-icon')) {
@@ -6293,6 +7408,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
   if (desktopArea) {
     desktopArea.addEventListener('contextmenu', function (e) {
+      // Allow context menu for input, textarea, contenteditable, or selected text
+      const sel = window.getSelection();
+      if (
+        e.target.tagName === 'INPUT' ||
+        e.target.tagName === 'TEXTAREA' ||
+        e.target.isContentEditable ||
+        (sel && sel.rangeCount > 0 && !sel.getRangeAt(0).collapsed && sel.toString().trim().length > 0)
+      ) return;
+
       // Custom context menu for pinned-only taskbar icons
       if (e.target.closest('.taskbar-app-icon.pinned-only')) {
         currentContextMenuTarget = e.target.closest('.taskbar-app-icon.pinned-only');
@@ -6330,7 +7454,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
-      
+
 
       // Skip if right-clicking the search input
       if (e.target.classList && e.target.classList.contains('search-input')) return;
@@ -6531,6 +7655,12 @@ document.addEventListener('DOMContentLoaded', function () {
         menuItems.push({ type: 'separator' });
         menuItems.push({ label: 'Add to Favorites', action: 'add-folder-to-favorites', icon: 'fa-share-square' });
         menuItems.push({ label: 'Get info', action: 'get-info', icon: 'fa-info-circle' });
+      } else if (e.target.closest('.app-store-window .sidebar-item ')) {
+        currentContextMenuTarget = e.target.closest('.sidebar-item');
+        menuItems.push({ label: 'Open', action: 'open-file', icon: 'fa-folder-open' });
+        menuItems.push({ label: 'Add new app', action: 'add-new-app', icon: 'fa-plus' });
+        menuItems.push({ type: 'separator' });
+        menuItems.push({ label: 'Report problem', action: 'report-problem', icon: 'fa-info-circle' });
       } else if (e.target.closest('.window-sidebar .sidebar-section.drives-section .sidebar-item ')) {
         currentContextMenuTarget = e.target.closest('.sidebar-item');
         menuItems.push({ label: 'Open', action: 'open-file', icon: 'fa-folder-open' });
@@ -6543,6 +7673,65 @@ document.addEventListener('DOMContentLoaded', function () {
         menuItems.push({ label: 'Open in new window', action: 'open-in-new-window', icon: 'fa-window-restore' });
         menuItems.push({ type: 'separator' });
         menuItems.push({ label: 'Get info', action: 'get-info', icon: 'fa-info-circle' });
+      } else if (e.target.closest('.email-app-window .sidebar-item ')) {
+        currentContextMenuTarget = e.target.closest('.sidebar-item');
+        menuItems.push({ label: 'Open', action: 'open-folder-mail', icon: 'fa-folder-open' });
+        menuItems.push({ label: 'Mark all as read', action: 'mark-all-as-read', icon: 'fa-envelope-open' });
+        menuItems.push({ type: 'separator' });
+        menuItems.push({ label: 'Rename folder', action: 'rename-folder', icon: 'fa-i-cursor' });
+        menuItems.push({ label: 'Create new folder', action: 'create-new-folder', icon: 'fa-folder-plus' });
+        menuItems.push({ type: 'separator' });
+        menuItems.push({ label: 'Empty folder', action: 'empty-folder', icon: 'fa-trash' });
+        menuItems.push({ label: 'Delete folder', action: 'delete-folder', icon: 'fa-trash' });
+      } else if (e.target.closest('.email-app-window .email-content-from ')) {
+        currentContextMenuTarget = e.target.closest('.email-content-from');
+        menuItems.push({ label: 'Reply', action: 'reply', icon: 'fa-reply' });
+        menuItems.push({ label: 'Compose new email', action: 'compose-new-email', icon: 'fa-plus' });
+        menuItems.push({ type: 'separator' });
+        menuItems.push({ label: 'More emails from sender', action: 'more-emails-from-sender', icon: 'fa-at' });
+        menuItems.push({ label: 'Copy email address', action: 'copy-email-address', icon: 'fa-copy' });
+      } else if (e.target.closest('.email-app-window .email-list-item ')) {
+        currentContextMenuTarget = e.target.closest('.email-list-item');
+        menuItems.push({ label: 'Reply', action: 'reply', icon: 'fa-reply' });
+        menuItems.push({ label: 'Reply All', action: 'reply-all', icon: 'fa-reply-all' });
+        menuItems.push({ label: 'Forward', action: 'forward', icon: 'fa-forward' });
+        menuItems.push({ label: 'Compose new email', action: 'compose-new-email', icon: 'fa-plus' });
+
+        menuItems.push({ type: 'separator' });
+        menuItems.push({ label: 'Open in new window', action: 'email-open-in-new-window', icon: 'fa-window-restore' });
+        menuItems.push({ label: 'More emails from sender', action: 'more-emails-from-sender', icon: 'fa-at' });
+        menuItems.push({ label: 'Copy email address', action: 'copy-email-address', icon: 'fa-copy' });
+        menuItems.push({ label: 'Add sender to contacts', action: 'add-sender-to-contacts', icon: 'fa-user-plus' });
+        menuItems.push({ type: 'separator' });
+        menuItems.push({ label: 'Mark as read', action: 'mark-as-read', icon: 'fa-envelope-open' });
+        menuItems.push({ label: 'Mark as unread', action: 'mark-as-unread', icon: 'fa-envelope' });
+        menuItems.push({ type: 'separator' });
+        menuItems.push({ label: 'Add to favorites', action: 'add-to-favorites', icon: 'fa-star' });
+        menuItems.push({ label: 'Convert to task', action: 'convert-to-task', icon: 'fa-tasks' });
+        menuItems.push({ label: 'Move to folder', action: 'move-to-folder', icon: 'fa-folder-open', subItems: [
+          { label: 'Folder name', action: 'move-to-folder-name', icon: 'fa-folder-open' },
+          { label: 'Another folder', action: 'move-to-another-folder', icon: 'fa-folder-open' },
+          { type: 'separator' },
+          { label: 'Create new folder', action: 'create-new-folder', icon: 'fa-folder-plus' },
+        ] });
+        menuItems.push({ label: 'Add a label', action: 'add-a-label', icon: 'fa-tag', subItems: [
+          { label: 'To Do', action: 'add-a-label-to-do', icon: 'fa-tag' },
+          { label: 'Important', action: 'add-a-label-important', icon: 'fa-tag' },
+          { label: 'Work', action: 'add-a-label-work', icon: 'fa-tag' },
+          { label: 'Personal', action: 'add-a-label-personal', icon: 'fa-tag' },
+          { type: 'separator' },
+          { label: 'Create new label', action: 'create-new-label', icon: 'fa-tag' },
+        ] });
+        menuItems.push({ type: 'separator' });
+        menuItems.push({ label: 'Block sender', action: 'block-sender', icon: 'fa-shield-virus' });
+        menuItems.push({ label: 'Mark as SPAM', action: 'mark-as-spam', icon: 'fa-shield-virus' });
+        menuItems.push({ type: 'separator' });
+        menuItems.push({ label: 'Delete', action: 'delete', icon: 'fa-trash' });
+
+
+
+
+        
       } else if (e.target.closest('.window-sidebar .sidebar-section .sidebar-item ')) {
         currentContextMenuTarget = e.target.closest('.sidebar-item');
         menuItems.push({ label: 'Open', action: 'open-file', icon: 'fa-folder-open' });
@@ -6733,7 +7922,6 @@ document.addEventListener('DOMContentLoaded', function () {
       if (menuItems.length > 0) populateContextMenu(menuItems, e.clientX, e.clientY);
     });
   }
-
 
 
   function populateContextMenu(menuItems, x, y) {
@@ -7292,7 +8480,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Add App launcher desktop icon if not present
   document.addEventListener('DOMContentLoaded', function () {
-    // ... existing code ...
+    
     // Add App launcher icon to desktop
     if (desktopIconsContainer && !document.querySelector('.desktop-icon[data-app="app-launcher"]')) {
       const appLauncherIcon = document.createElement('div');
@@ -7304,7 +8492,7 @@ document.addEventListener('DOMContentLoaded', function () {
       `;
       desktopIconsContainer.appendChild(appLauncherIcon);
     }
-    // ... existing code ...
+    
   });
   // --- App launcher window logic and event listener ---
   function openAppLauncherWindow(iconElementForAnim) {
@@ -7518,7 +8706,7 @@ document.addEventListener('DOMContentLoaded', function () {
     footer.appendChild(logoutBtn);
     overlay.appendChild(footer);
 
-  // ... existing code ...
+    
     // Keyboard navigation state
     let selectedAppIndex = 0;
 
@@ -7543,7 +8731,7 @@ document.addEventListener('DOMContentLoaded', function () {
         appItem.getAttribute('data-app'),
         appItem.querySelector('span').textContent,
         appItem.querySelector('i').className.split(' ').find(cls => cls.startsWith('fa-')),
-        appItem.className.split(' ').find(cls => cls.endsWith('-icon'))
+        appItem.className.split(' ').find(cls => cls.endsWith('-icon') || ['orange', 'blue', 'red', 'teal', 'purple', 'gray'].includes(cls))
       );
       closeLauncher();
     }
@@ -7703,18 +8891,19 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-// ... existing code ...
+  
+
 
   // --- Bulletproof: Attach ResizeObserver to all .window elements ---
   function attachSidebarResizeObserver(win) {
     if (!win || win._sidebarResizeObserver) return;
     const ro = new ResizeObserver(() => {
-      updateSidebarForWindow(win);
+      window.updateSidebarForWindow(win);
     });
     ro.observe(win);
     win._sidebarResizeObserver = ro;
     // Initial call
-    updateSidebarForWindow(win);
+    window.updateSidebarForWindow(win);
   }
   // Attach to all current windows
   document.querySelectorAll('.window').forEach(attachSidebarResizeObserver);
@@ -7737,7 +8926,7 @@ document.addEventListener('DOMContentLoaded', function () {
     };
   }
 });
-// ... existing code ...
+
 
 // --- Global keyboard shortcut for App Launcher: Ctrl + Alt + Space ---
 document.addEventListener('keydown', function (e) {
@@ -7756,7 +8945,7 @@ document.addEventListener('keydown', function (e) {
   }
 });
 
-// ... existing code ...
+
 // --- DESKTOP WIDGETS TOGGLE BUTTON ---
 function attachWidgetsToggleBtnListener() {
   const widgetsToggleBtn = document.getElementById('widgets-toggle-btn');
@@ -7802,12 +8991,14 @@ function attachWidgetsToggleBtnListener() {
 
 document.addEventListener('DOMContentLoaded', function () {
   attachWidgetsToggleBtnListener();
-  // ... existing code ...
+  
 });
-// ... existing code ...
+
+
+
 
 document.addEventListener('DOMContentLoaded', function () {
-  // ... existing code ...
+  
   const aiChatBtn = document.getElementById('ai-chat-btn');
   const aiChatWindow = document.getElementById('ai-chat-window');
   let aiChatVisible = false;
@@ -7841,12 +9032,12 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 });
-// ... existing code ...
+
 
 
 
 document.addEventListener('DOMContentLoaded', function () {
-  // ... existing code ...
+  
   // GLOBAL SEARCH OVERLAY LOGIC
   const globalSearchBtn = document.getElementById('global-search-btn');
   const globalSearchOverlay = document.getElementById('global-search-overlay');
@@ -7972,11 +9163,11 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 });
-// ... existing code ...
+
 
 
 document.addEventListener('DOMContentLoaded', function () {
-  // ... existing code ...
+  
   const notificationsBtn = document.getElementById('notifications-btn');
   const notificationsPanel = document.getElementById('notifications-panel');
   let notificationsVisible = false;
@@ -8084,13 +9275,18 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     notificationsBtn.addEventListener('click', function (e) {
+      console.log('[NOTIF] Button clicked');
       notificationsVisible = !notificationsVisible;
+      console.log('[NOTIF] notificationsVisible:', notificationsVisible);
       if (notificationsVisible) {
+        renderNotificationsPanel();
+
         // Hide wallet sidebar if visible
         if (typeof window.hideWalletSidebar === 'function') {
           const walletSidebar = document.getElementById('wallet-sidebar');
           if (walletSidebar && walletSidebar.classList.contains('wallet-sidebar-visible')) {
             window.hideWalletSidebar();
+            console.log('[NOTIF] Hiding wallet sidebar');
           }
         }
         // Hide ai-chat panel if visible
@@ -8101,15 +9297,24 @@ document.addEventListener('DOMContentLoaded', function () {
             if (e.propertyName === 'transform') {
               aiChatWindow.style.display = 'none';
               aiChatWindow.removeEventListener('transitionend', handler);
+              console.log('[NOTIF] AI chat panel hidden');
             }
           });
         }
         notificationsPanel.style.display = 'flex';
-        setTimeout(() => notificationsPanel.classList.add('notifications-visible'), 10);
+        console.log('[NOTIF] Set notificationsPanel display to flex');
+        setTimeout(() => {
+          notificationsPanel.classList.add('notifications-visible');
+          console.log('[NOTIF] Added notifications-visible class');
+        }, 10);
       } else {
         notificationsPanel.classList.remove('notifications-visible');
+        console.log('[NOTIF] Removed notifications-visible class, waiting for transitionend');
         notificationsPanel.addEventListener('transitionend', function handler() {
-          if (!notificationsVisible) notificationsPanel.style.display = 'none';
+          if (!notificationsVisible) {
+            notificationsPanel.style.display = 'none';
+            console.log('[NOTIF] Set notificationsPanel display to none after transition');
+          }
           notificationsPanel.removeEventListener('transitionend', handler);
         });
       }
@@ -8129,14 +9334,14 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     });
   }
-  // ... existing code ...
+  
 });
 
 
-// ... existing code ...
+
 
 document.addEventListener('DOMContentLoaded', function () {
-  // ... existing code ...
+  
   const fullscreenBtn = document.getElementById('fullscreen-btn');
   if (fullscreenBtn) {
     const fullscreenIcon = fullscreenBtn.querySelector('i');
@@ -8188,10 +9393,10 @@ document.addEventListener('DOMContentLoaded', function () {
     updateFullscreenIcon();
   }
 });
-// ... existing code ...
+
 
 document.addEventListener('DOMContentLoaded', function () {
-  // ... existing code ...
+  
   const widgetsScreen = document.getElementById('widgets-screen');
   function enableWidgetsScreenScroll() {
     if (!widgetsScreen) return;
@@ -8204,12 +9409,12 @@ document.addEventListener('DOMContentLoaded', function () {
   }
   enableWidgetsScreenScroll();
   window.addEventListener('resize', enableWidgetsScreenScroll);
-  // ... existing code ...
+  
 });
-// ... existing code ...
 
 
-// ... existing code ...
+
+
 
 
 
@@ -8224,6 +9429,11 @@ function saveDesktopIconPositions() {
   }));
   localStorage.setItem('desktopIconPositions', JSON.stringify(positions));
 }
+
+
+
+
+
 
 function restoreDesktopIconPositions() {
   if (window.innerWidth <= 1023) return false; // Only on desktop
@@ -8261,7 +9471,7 @@ function restoreDesktopIconPositions() {
 
 // Patch initializeDesktopIconPositions to restore positions if available, otherwise use grid
 const _originalInitDesktopIconPositions = window.initializeDesktopIconPositions;
-window.initializeDesktopIconPositions = function() {
+window.initializeDesktopIconPositions = function () {
   const desktopIconsContainer = document.querySelector('.desktop-icons');
   const icons = document.querySelectorAll('.desktop-icon');
   if (window.innerWidth > 1023) {
@@ -8297,126 +9507,12 @@ window.addEventListener('resize', function () {
     }
   }
 });
-// ... existing code ...
+
 
 
 // --- WINDOW POPOUT ---
-function setupWindowPopout(windowElement, windowId) {
-  const popoutButton = windowElement.querySelector('.window-popout');
-  if (popoutButton) {
-    popoutButton.addEventListener('click', function (e) {
-    e.stopPropagation();
-    // Get original window position and size
-    const rect = windowElement.getBoundingClientRect();
-    const screenLeft = window.screenX || window.screenLeft || 0;
-    const screenTop = window.screenY || window.screenTop || 0;
-    const chromeHeight = (window.outerHeight - window.innerHeight) || 0;
-    const left = Math.round(screenLeft + rect.left);
-    const top = Math.round(screenTop + rect.top + chromeHeight);
-    const width = Math.round(rect.width);
-    const height = Math.round(rect.height);
-    // Open a new window with matching position and size
-    const popoutWin = window.open('', '_blank', `width=${width},height=${height},left=${left},top=${top},menubar=no,toolbar=no,location=no,status=no`);
-    if (!popoutWin) return;
-    // --- Cross-browser: Write HTML immediately after open ---
-    const doc = popoutWin.document;
-    doc.open();
-    doc.write(`<!DOCTYPE html><html><head><title>${windowElement.querySelector('.window-title span')?.textContent || 'App Popout'}</title>`);
-    // Copy stylesheets
-    Array.from(document.styleSheets).forEach(sheet => {
-      if (sheet.href) doc.write(`<link rel="stylesheet" href="${sheet.href}">`);
-    });
-    // Inject main JS file for popout functionality
-    doc.write('<script src="js/app.js"></script>');
-    doc.write('</head><body style="background: var(--primary-bg); margin:0;">');
-    // Write the entire window element, not just .window-content
-    if (windowElement) {
-      // Remove any existing inline styles that would conflict
-      windowElement.style.position = '';
-      windowElement.style.left = '';
-      windowElement.style.top = '';
-      windowElement.style.width = '';
-      windowElement.style.height = '';
-      // Write the .window element
-      doc.write(windowElement.outerHTML);
-      // Add style to make .window fill the viewport in the popout and hide the window header
-      doc.write('<style>.window{position:fixed!important;top:0!important;left:0!important;width:100vw!important;height:100vh!important;max-width:none!important;max-height:none!important;min-width:0!important;min-height:0!important;z-index:1!important;} .window-header{display:none!important;}</style>');
-    }
-    doc.write('</body></html>');
-    doc.close();
-    // --- End cross-browser popout logic ---
-    // Remove window from desktop and taskbar
-    const currentTaskbarIcon = openWindows[windowId] ? openWindows[windowId].taskbarIcon : null;
-    // --- Save icon and bg class for restore ---
-    let iconClass = null, iconBgClass = null;
-    const iconElem = windowElement.querySelector('.window-title .window-icon i');
-    const iconBgElem = windowElement.querySelector('.window-title .window-icon');
-    if (iconElem) iconClass = Array.from(iconElem.classList).find(cls => cls.startsWith('fa-'));
-    if (iconBgElem) iconBgClass = Array.from(iconBgElem.classList).find(cls => cls.endsWith('-icon'));
-    // --- Save appName and appTitle BEFORE removing window and openWindows ---
-    let restoreAppName = (openWindows[windowId]?.name || windowElement.getAttribute('data-app') || '').trim();
-    let restoreAppTitle = (openWindows[windowId]?.title || windowElement.querySelector('.window-title span')?.textContent || '').trim();
-    windowElement.remove();
-    if (currentTaskbarIcon) currentTaskbarIcon.remove();
-    if (openWindows[windowId]) delete openWindows[windowId];
-    if (activeWindow === windowElement) {
-      activeWindow = null;
-      updateTaskbarActiveState();
-    }
-    // --- Popout close behavior: restore if needed ---
-    const popoutBehavior = localStorage.getItem('popoutCloseBehavior') || 'close';
-    if (popoutBehavior === 'restore') {
-      // Fallback to getAppIconDetails if iconClass or iconBgClass missing
-      if (!iconClass || !iconBgClass) {
-        const details = getAppIconDetails(restoreAppName);
-        if (!iconClass) iconClass = details.iconClass;
-        if (!iconBgClass) iconBgClass = details.iconBgClass;
-      }
-      // Pass info to the popout window so it can notify us on close
-      try {
-        popoutWin._poppedOutAppInfo = {
-          appName: restoreAppName,
-          appTitle: restoreAppTitle,
-          iconClass: iconClass,
-          iconBgClass: iconBgClass
-        };
-      } catch (e) { }
-      // Listen for popout window close
-      const restoreApp = () => {
-        // Use appName and appTitle to reopen
-        const info = popoutWin._poppedOutAppInfo;
-        if (!window._loggingOut && info && info.appName) {
-          openApp(info.appName, info.appTitle, info.iconClass, info.iconBgClass);
-        }
-      };
-      // Use polling to detect close (since onbeforeunload in popout is unreliable cross-origin)
-      const pollInterval = setInterval(() => {
-        if (popoutWin.closed) {
-          clearInterval(pollInterval);
-          restoreApp();
-        }
-      }, 500);
-    }
-    // ... existing code ...
-    // At the top of the file, after other globals:
-    window._allPopoutWindows = window._allPopoutWindows || [];
-    // ... existing code ...
-    // In the popoutButton click handler, after 'if (!popoutWin) return;':
-    window._allPopoutWindows.push(popoutWin);
-    // ... existing code ...
-    // In the logout button event handler:
-    const logOutButton = document.querySelector('.start-menu-logout-button') || document.querySelector('.logout-button');
-    if (logOutButton) {
-      logOutButton.addEventListener('click', (e) => {
-        e.preventDefault();
-        handleLogout();
-      });
-    }
-    // ... existing code ...
-  });
-}
-}
-// ... existing code ...
+
+
 
 
 // --- SWIPE TO DELETE FOR NOTIFICATIONS ---
@@ -8486,7 +9582,7 @@ function enableNotificationSwipeToDelete() {
     });
   });
 }
-// ... existing code ...
+
 
 // --- WINDOWS 11 STYLE TOAST NOTIFICATION ---
 function showToastNotification(opts = {}) {
@@ -8605,7 +9701,7 @@ function updateToastStackPositions() {
   // Adjust container height
   container.style.height = (container.children.length * (toastHeight + margin) - margin) + 'px';
 }
-// ... existing code ...
+
 
 
 // --- Shared Mobile Sidebar Logic for All Windows with Sidebar ---
@@ -8630,7 +9726,10 @@ function setupMobileSidebarForWindow(windowElement) {
   // Debug log for diagnosis
 
 
-  if (!sidebar || !overlay || !menuToggle || !contentArea) return;
+  if (!sidebar || !overlay || !menuToggle || !contentArea) {
+    console.warn('setupMobileSidebarForWindow: Missing required elements', { sidebar, overlay, menuToggle, contentArea });
+    return;
+  }
 
   // Remove previous listeners to avoid duplicates
   menuToggle.onclick = null;
@@ -8645,7 +9744,9 @@ function setupMobileSidebarForWindow(windowElement) {
     }
   }
 
-  menuToggle.addEventListener('click', () => {
+  // Only attach sidebar handler if menuToggle is in menu mode
+  menuToggle.onclick = function() {
+    if (menuToggle.getAttribute('data-mode') !== 'menu') return;
     const isShowing = !sidebar.classList.contains('show');
     sidebar.classList.toggle('show');
     overlay.classList.toggle('show');
@@ -8657,28 +9758,28 @@ function setupMobileSidebarForWindow(windowElement) {
         contentArea.classList.remove('sidebar-push-active');
       }
     }
-  });
+  };
 
-  overlay.addEventListener('click', () => {
+  overlay.onclick = function() {
     sidebar.classList.remove('show');
     overlay.classList.remove('show');
     setBlockInteraction(false);
     if (window.innerWidth <= 767) {
       contentArea.classList.remove('sidebar-push-active');
     }
-  });
+  };
 
   // Close sidebar on item click for mobile
   const sidebarItems = sidebar.querySelectorAll('.sidebar-item');
   sidebarItems.forEach(item => {
-    item.addEventListener('click', () => {
+    item.onclick = function() {
       if (window.innerWidth <= 767) {
         sidebar.classList.remove('show');
         overlay.classList.remove('show');
         setBlockInteraction(false);
         contentArea.classList.remove('sidebar-push-active');
       }
-    });
+    };
   });
 
   // Handle window resize
@@ -8691,264 +9792,9 @@ function setupMobileSidebarForWindow(windowElement) {
     }
   });
 }
-// ... existing code ...
 
-// Patch updateSidebarForWindow to respect data-user-collapsed
-const _originalUpdateSidebarForWindow = updateSidebarForWindow;
-window.updateSidebarForWindow = function (windowEl) {
-  if (!windowEl) return;
-  if (windowEl._isClosing) return;
-  const sidebars = windowEl.querySelectorAll('.window-sidebar, .settings-sidebar, .app-store-sidebar, .start-menu-right-sidebar');
-  const width = windowEl.offsetWidth;
-  const isMobile = window.innerWidth <= 767;
-  sidebars.forEach(sb => {
-    // On mobile, do NOT touch sidebar classes/styles; let CSS and .show handle everything
-    if (isMobile) {
-      sb.removeAttribute('data-user-collapsed');
-      return;
-    }
-    // User override
-    if (sb.hasAttribute('data-user-collapsed')) {
-      if (sb.getAttribute('data-user-collapsed') === 'true') {
-        sb.classList.add('sidebar-collapsed');
-      } else {
-        sb.classList.remove('sidebar-collapsed');
-      }
-      // If window is very small or very large, remove user override
-      if (width < 200 || width > 700) {
-        sb.removeAttribute('data-user-collapsed');
-      }
-      return;
-    }
-    // Otherwise, original logic
-    const content = sb.parentElement && sb.parentElement.querySelector('.window-main-content, .settings-content, .app-store-main-content');
-    if (content) {
-      content.style.transform = '';
-      content.style.width = '';
-    }
-    if (width >= 200 && width < 500) {
-      sb.classList.add('sidebar-collapsed');
-      sb._hoverEnter = function () {
-        const originalWidth = content ? content.offsetWidth : null;
-        sb.classList.add('sidebar-hovered');
-        sb.style.position = 'absolute';
-        sb.style.left = '0';
-        sb.style.top = '0';
-        sb.style.height = '100vh'; // PATCH: always full viewport height
-        sb.style.zIndex = '20';
-        sb.style.width = '220px';
-        sb.style.overflowY = 'hidden';
-        if (content && originalWidth) {
-          content.style.width = originalWidth + 'px';
-          content.style.transition = 'transform 0.25s cubic-bezier(0.4,0,0.2,1)';
-          content.style.transform = 'translateX(220px)';
-        }
-      };
-      sb._hoverLeave = function () {
-        sb.classList.remove('sidebar-hovered');
-        sb.style.position = '';
-        sb.style.left = '';
-        sb.style.top = '';
-        sb.style.height = '';
-        sb.style.overflowY = '';
-        sb.style.zIndex = '';
-        sb.style.width = '';
-        if (content) {
-          content.style.transition = 'transform 0.25s cubic-bezier(0.4,0,0.2,1)';
-          content.style.transform = '';
-          content.addEventListener('transitionend', function handler(e) {
-            if (e.propertyName === 'transform') {
-              content.style.transition = '';
-              content.style.width = '';
-              content.removeEventListener('transitionend', handler);
-            }
-          });
-        }
-      };
-      sb.addEventListener('mouseenter', sb._hoverEnter);
-      sb.addEventListener('mouseleave', sb._hoverLeave);
-    } else {
-      sb.classList.remove('sidebar-collapsed', 'sidebar-hovered', 'sidebar-mobile');
-    }
-  });
-}
-  // ... existing code ...
 
-  (function () {
-    console.log('[Swipe] Swipe logic running');
-    // --- SWIPE CONTAINER LOGIC (universal: desktop + mobile) ---
-    if (!document.getElementById('swipe-container')) {
-      const swipeContainer = document.createElement('div');
-      swipeContainer.id = 'swipe-container';
-      swipeContainer.style.position = 'fixed';
-      swipeContainer.style.left = '0';
-      swipeContainer.style.top = '0';
-      swipeContainer.style.width = '100vw';
-      swipeContainer.style.height = '100vh';
-      swipeContainer.style.overflow = 'hidden';
-      swipeContainer.style.zIndex = '2147483647';
-      swipeContainer.style.display = 'flex';
-      swipeContainer.style.flexDirection = 'row';
-      swipeContainer.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)';
-      swipeContainer.style.background = '#111';
 
-      // --- DO NOT HIDE ALL BODY CHILDREN ---
-      // Instead, move the real app content into the swipe screens
-
-      // Left screen (Notifications)
-      const leftScreen = document.createElement('div');
-      leftScreen.className = 'swipe-screen-left';
-      leftScreen.style.width = '100vw';
-      leftScreen.style.height = '100vh';
-      leftScreen.style.flexShrink = '0';
-      leftScreen.style.display = 'flex';
-      leftScreen.style.flexDirection = 'column';
-      leftScreen.style.overflow = 'auto';
-      // Move notifications panel if it exists
-      const notificationsPanel = document.getElementById('notifications-panel');
-      if (notificationsPanel) {
-        leftScreen.appendChild(notificationsPanel);
-        notificationsPanel.style.display = 'flex';
-        notificationsPanel.style.position = 'static';
-        notificationsPanel.style.height = '100%';
-        notificationsPanel.style.width = '100%';
-        console.log('[Swipe] Forced notifications panel visible:', notificationsPanel, getComputedStyle(notificationsPanel).display);
-      } else {
-        leftScreen.innerHTML = '<div style="color:#fff;font-size:2rem;">Notifications</div>';
-      }
-
-      // Home screen (middle, Desktop only - CLONE)
-      const homeScreen = document.createElement('div');
-      homeScreen.className = 'swipe-screen-home';
-      homeScreen.style.width = '100vw';
-      homeScreen.style.height = '100vh';
-      homeScreen.style.flexShrink = '0';
-      homeScreen.style.display = 'flex';
-      homeScreen.style.flexDirection = 'column';
-      homeScreen.style.overflow = 'auto';
-      // Clone the desktop area
-      const desktopArea = document.querySelector('.desktop-area');
-      if (desktopArea) {
-        const desktopClone = desktopArea.cloneNode(true);
-        desktopClone.classList.add('in-swipe');
-        desktopClone.removeAttribute('id'); // Remove duplicate ID
-        homeScreen.appendChild(desktopClone);
-        desktopClone.style.display = 'flex';
-        desktopClone.style.height = '100%';
-        desktopClone.style.width = '100%';
-      } else {
-        homeScreen.innerHTML = '<div style="color:#fff;font-size:2rem;margin-bottom:80px;">Home Screen</div>';
-      }
-
-      // Right screen (Widgets only - CLONE)
-      const rightScreen = document.createElement('div');
-      rightScreen.className = 'swipe-screen-right';
-      rightScreen.style.width = '100vw';
-      rightScreen.style.height = '100vh';
-      rightScreen.style.flexShrink = '0';
-      rightScreen.style.display = 'flex';
-      rightScreen.style.flexDirection = 'column';
-      rightScreen.style.overflow = 'auto';
-      // Clone the widgets screen
-      const widgetsScreen = document.getElementById('widgets-screen');
-      if (widgetsScreen) {
-        const widgetsClone = widgetsScreen.cloneNode(true);
-        widgetsClone.classList.add('in-swipe');
-        widgetsClone.removeAttribute('id'); // Remove duplicate ID
-        rightScreen.appendChild(widgetsClone);
-        widgetsClone.style.display = 'flex';
-        widgetsClone.style.position = 'static';
-        widgetsClone.style.height = '100%';
-        widgetsClone.style.width = '100%';
-      } else {
-        rightScreen.innerHTML = '<div style="color:#fff;font-size:2rem;">Widgets</div>';
-      }
-
-      swipeContainer.appendChild(leftScreen);
-      swipeContainer.appendChild(homeScreen);
-      swipeContainer.appendChild(rightScreen);
-      document.body.appendChild(swipeContainer);
-      console.log('[Swipe] Swipe container appended to body');
-    }
-
-    // --- 2. SWIPE/DRAG LOGIC ---
-    const swipeContainer = document.getElementById('swipe-container');
-    let currentScreen = 1; // 0 = left, 1 = home, 2 = right
-    let isDragging = false;
-    let dragStartX = 0;
-    let dragCurrentX = 0;
-    let dragStartTransform = 0;
-
-    function setScreen(index, animate = true) {
-      currentScreen = Math.max(0, Math.min(2, index));
-      if (!animate) swipeContainer.style.transition = 'none';
-      swipeContainer.style.transform = `translateX(${-100 * currentScreen}vw)`;
-      if (!animate) setTimeout(() => { swipeContainer.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)'; }, 30);
-    }
-
-    // Touch events (mobile)
-    swipeContainer.addEventListener('touchstart', function (e) {
-      if (e.touches.length !== 1) return;
-      isDragging = true;
-      dragStartX = e.touches[0].clientX;
-      dragCurrentX = dragStartX;
-      dragStartTransform = -100 * currentScreen;
-      swipeContainer.style.transition = 'none';
-    }, { passive: true });
-    swipeContainer.addEventListener('touchmove', function (e) {
-      if (!isDragging) return;
-      dragCurrentX = e.touches[0].clientX;
-      const dx = dragCurrentX - dragStartX;
-      swipeContainer.style.transform = `translateX(${dragStartTransform + (dx / window.innerWidth) * 100}vw)`;
-      e.preventDefault();
-    }, { passive: false });
-    swipeContainer.addEventListener('touchend', function (e) {
-      if (!isDragging) return;
-      isDragging = false;
-      const dx = dragCurrentX - dragStartX;
-      if (Math.abs(dx) > 60) {
-        if (dx < 0 && currentScreen < 2) setScreen(currentScreen + 1);
-        else if (dx > 0 && currentScreen > 0) setScreen(currentScreen - 1);
-        else setScreen(currentScreen);
-      } else {
-        setScreen(currentScreen);
-      }
-    }, { passive: true });
-
-    // Mouse events (desktop)
-    swipeContainer.addEventListener('mousedown', function (e) {
-      if (e.button !== 0) return;
-      isDragging = true;
-      dragStartX = e.clientX;
-      dragCurrentX = dragStartX;
-      dragStartTransform = -100 * currentScreen;
-      swipeContainer.style.transition = 'none';
-      document.body.style.userSelect = 'none';
-    });
-    window.addEventListener('mousemove', function (e) {
-      if (!isDragging) return;
-      dragCurrentX = e.clientX;
-      const dx = dragCurrentX - dragStartX;
-      swipeContainer.style.transform = `translateX(${dragStartTransform + (dx / window.innerWidth) * 100}vw)`;
-    });
-    window.addEventListener('mouseup', function (e) {
-      if (!isDragging) return;
-      isDragging = false;
-      document.body.style.userSelect = '';
-      const dx = dragCurrentX - dragStartX;
-      if (Math.abs(dx) > 60) {
-        if (dx < 0 && currentScreen < 2) setScreen(currentScreen + 1);
-        else if (dx > 0 && currentScreen > 0) setScreen(currentScreen - 1);
-        else setScreen(currentScreen);
-      } else {
-        setScreen(currentScreen);
-      }
-    });
-    // --- 3. Initial state ---
-    setScreen(1, false); // Home by default
-
-  })();
-// ... existing code ...
 
 // Show a short notification in the top middle of the screen
 function showShortTopNotification(message) {
@@ -8995,10 +9841,10 @@ function setNotificationsBtnOpacity() {
 
 // Also call setNotificationsBtnOpacity on DOMContentLoaded to initialize.
 document.addEventListener('DOMContentLoaded', function () {
-  // ... existing code ...
+  
   setNotificationsBtnOpacity();
 });
-// ... existing code ...
+
 
 function updateNotificationsBadge() {
   const notificationsBtn = document.getElementById('notifications-btn');
@@ -9024,7 +9870,7 @@ function updateNotificationsBadge() {
     badge.style.display = 'none';
   }
 }
-// ... existing code ...
+
 // After every setNotificationsBtnOpacity(); add:
 setNotificationsBtnOpacity();
 updateNotificationsBadge();
@@ -9037,164 +9883,15 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 // ...
 // After adding a notification card:
-todayList.appendChild(card);
+
 updateNotificationsBadge();
 // ...
 // After removing a notification card or clearing notifications, also call updateNotificationsBadge() after setNotificationsBtnOpacity().
 
 
-// --- In-app Window-aware Sidebar Adaptation ---
-function updateSidebarForWindow(windowEl) {
-  if (!windowEl) return;
-  if (windowEl._isClosing) return;
-  const sidebars = windowEl.querySelectorAll('.window-sidebar, .settings-sidebar, .app-store-sidebar, .start-menu-right-sidebar');
-  const width = windowEl.offsetWidth;
-  const isMobile = window.innerWidth <= 767;
-  sidebars.forEach(sb => {
-    if (isMobile) return;
-    // Remove previous listeners
-    if (sb._hoverEnter) sb.removeEventListener('mouseenter', sb._hoverEnter);
-    if (sb._hoverLeave) sb.removeEventListener('mouseleave', sb._hoverLeave);
-    delete sb._hoverEnter;
-    delete sb._hoverLeave;
-    sb.classList.remove('sidebar-hovered', 'sidebar-mobile');
-    sb.style.position = '';
-    sb.style.left = '';
-    sb.style.top = '';
-    sb.style.height = '';
-    sb.style.zIndex = '';
-    sb.style.width = '';
-    const content = sb.parentElement && sb.parentElement.querySelector('.window-main-content, .settings-content, .app-store-main-content');
-    if (content) {
-      content.style.transform = '';
-      content.style.width = '';
-    }
-    // Only allow hover-to-expand if sidebar is collapsed and user wants it (toggle ON)
-    const userCollapsed = sb.getAttribute('data-user-collapsed') === 'true';
-    if (width >= 200 && width < 510) {
-      sb.classList.add('sidebar-collapsed');
-      if (userCollapsed) {
-        sb._hoverEnter = function () {
-          const originalWidth = content ? content.offsetWidth : null;
-          sb.classList.add('sidebar-hovered');
-          sb.style.position = 'absolute';
-          sb.style.left = '0';
-          sb.style.top = '0';
-          sb.style.height = '100%';
-          sb.style.zIndex = '20';
-          sb.style.width = '220px';
-          sb.style.overflowY = 'hidden';
-          if (content && originalWidth) {
-            content.style.width = originalWidth + 'px';
-            content.style.transition = 'transform 0.25s cubic-bezier(0.4,0,0.2,1)';
-            content.style.transform = 'translateX(220px)';
-          }
-        };
-        sb._hoverLeave = function () {
-          sb.classList.remove('sidebar-hovered');
-          sb.style.position = '';
-          sb.style.left = '';
-          sb.style.top = '';
-          sb.style.height = '';
-          sb.style.zIndex = '';
-          sb.style.width = '';
-          if (content) {
-            content.style.transition = 'transform 0.25s cubic-bezier(0.4,0,0.2,1)';
-            content.style.transform = '';
-            content.addEventListener('transitionend', function handler(e) {
-              if (e.propertyName === 'transform') {
-                content.style.transition = '';
-                content.style.width = '';
-                content.removeEventListener('transitionend', handler);
-              }
-            });
-          }
-        };
-        sb.addEventListener('mouseenter', sb._hoverEnter);
-        sb.addEventListener('mouseleave', sb._hoverLeave);
-      }
-    } else {
-      // For width >= 500, only collapse if user wants it
-      if (userCollapsed) {
-        sb.classList.add('sidebar-collapsed');
-        sb._hoverEnter = function () {
-          const originalWidth = content ? content.offsetWidth : null;
-          sb.classList.add('sidebar-hovered');
-          sb.style.position = 'absolute';
-          sb.style.left = '0';
-          sb.style.top = '0';
-          sb.style.height = '100%';
-          sb.style.zIndex = '20';
-          sb.style.width = '220px';
-          sb.style.overflowY = 'auto';
-          if (content && originalWidth) {
-            content.style.width = originalWidth + 'px';
-            content.style.transition = 'transform 0.25s cubic-bezier(0.4,0,0.2,1)';
-            content.style.transform = 'translateX(220px)';
-          }
-        };
-        sb._hoverLeave = function () {
-          sb.classList.remove('sidebar-hovered');
-          sb.style.position = '';
-          sb.style.left = '';
-          sb.style.top = '';
-          sb.style.height = '';
-          sb.style.zIndex = '';
-          sb.style.width = '';
-          if (content) {
-            content.style.transition = 'transform 0.25s cubic-bezier(0.4,0,0.2,1)';
-            content.style.transform = '';
-            content.addEventListener('transitionend', function handler(e) {
-              if (e.propertyName === 'transform') {
-                content.style.transition = '';
-                content.style.width = '';
-                content.removeEventListener('transitionend', handler);
-              }
-            });
-          }
-        };
-        sb.addEventListener('mouseenter', sb._hoverEnter);
-        sb.addEventListener('mouseleave', sb._hoverLeave);
-      } else {
-        sb.classList.remove('sidebar-collapsed', 'sidebar-hovered', 'sidebar-mobile');
-      }
-    }
-  });
-}
-// Remove all other sidebar hover/push logic and listeners below this point
 
-// --- Bulletproof: Attach ResizeObserver to all .window elements (guaranteed) ---
-(function () {
-  function attachSidebarResizeObserver(win) {
-    if (!win || win._sidebarResizeObserver) return;
-    const ro = new ResizeObserver(() => {
-      updateSidebarForWindow(win);
-    });
-    ro.observe(win);
-    win._sidebarResizeObserver = ro;
-    // Initial call
-    updateSidebarForWindow(win);
-  }
-  if (typeof document !== 'undefined') {
-    document.querySelectorAll('.window').forEach(attachSidebarResizeObserver);
-  }
-  if (typeof createWindowFromTemplate === 'function') {
-    const _originalCreateWindowFromTemplate = createWindowFromTemplate;
-    createWindowFromTemplate = function () {
-      const win = _originalCreateWindowFromTemplate.apply(this, arguments);
-      attachSidebarResizeObserver(win);
-      return win;
-    };
-  }
-  if (typeof createGenericWindow === 'function') {
-    const _originalCreateGenericWindow = createGenericWindow;
-    createGenericWindow = function () {
-      const win = _originalCreateGenericWindow.apply(this, arguments);
-      attachSidebarResizeObserver(win);
-      return win;
-    };
-  }
-})();
+
+
 
 
 // --- Alert Confirmation Dialog ---
@@ -9247,6 +9944,40 @@ function showConfirmDialog({ title, message, iconClass, okText = "OK", cancelTex
 }
 
 
+//add display none delay to sidebar spans menu items
+document.addEventListener('DOMContentLoaded', function() {
+  // Select all collapsed sidebars (if any)
+  var sidebars = document.querySelectorAll('.window-sidebar.sidebar-collapsed');
+  if (!sidebars.length) return; // No sidebar found, exit safely
+
+  sidebars.forEach(function(sidebar) {
+    // Defensive: only proceed if sidebar is not null
+    if (!sidebar) return;
+    var sidebarSpans =  sidebar.querySelectorAll(
+      '.sidebar-item span, .sidebar-section h4, .email-app-window .compose-btn span, .mailbox-email, .mailbox-name'
+    );
+
+    // On mouse enter, show spans (for transition)
+    sidebar.addEventListener('mouseenter', function() {
+      sb._hoverEnter();
+    });
+
+    // On mouse leave, hide spans (for transition)
+    sidebar.addEventListener('mouseleave', function() {
+      sb._hoverLeave();
+    });
+
+    // Initialize collapsed state (if not hovered)
+    if (!sidebar.classList.contains('sidebar-hovered')) {
+      sidebarSpans.forEach(span => {
+        span.style.opacity = '0';
+        span.style.width = '0';
+        span.style.marginLeft = '0';
+        span.style.pointerEvents = 'none';
+      });
+    }
+  });
+});
 
 
 

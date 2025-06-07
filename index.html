@@ -56,6 +56,18 @@
       <div class="main-content-area">
         <!-- Desktop area -->
         <div class="desktop-area" id="desktop-area">
+           <!-- Mobile profile -->
+           <div class="mobile-profile-top-bar">
+            <div class="mobile-profile-top-bar-header">
+              <div class="mobile-profile-top-bar-header-left">
+                <img src="img/avatar.png" alt="Site Logo" class="site-logo-round">
+                <span>Andrei</span>
+              </div>
+              <div class="mobile-profile-header-right">
+                <button class="toolbar-search-btn" title="Search"><i class="fas fa-search"></i></button>
+              </div>
+            </div>
+           </div>
           <!-- Desktop icons -->
           <div class="desktop-icons">
           </div>
@@ -165,75 +177,101 @@
           </div>
         </div>
         
-        <div class="window-content">
+        <div class="window-content" style="display: flex; height: 100%;">
           <!-- Add overlay for mobile sidebar -->
           <div class="sidebar-overlay"></div>
           
           <div class="window-sidebar">
             <div class="sidebar-section">
               <div class="sidebar-item active">
-                <i class="fas fa-hdd"></i>
-                <span>My files</span>
+                <div class="sidebar-item-menu">
+                  <i class="fas fa-hdd"></i>
+                  <span>My files</span>
+                </div>
               </div>
               <div class="sidebar-item">
-                <i class="fas fa-desktop"></i>
-                <span>Desktop</span>
+                <div class="sidebar-item-menu">
+                  <i class="fas fa-desktop"></i>
+                  <span>Desktop</span>
+                </div>
               </div>
               <div class="sidebar-item">
-                <i class="fas fa-file-alt"></i>
-                <span>Documents</span>
+                <div class="sidebar-item-menu">
+                  <i class="fas fa-file-alt"></i>
+                  <span>Documents</span>
+                </div>
               </div>
               <div class="sidebar-item">
-                <i class="fas fa-image"></i>
-                <span>Media</span>
+                <div class="sidebar-item-menu">
+                  <i class="fas fa-image"></i>
+                  <span>Media</span>
+                </div>
               </div>
               <div class="sidebar-item">
-                <i class="fas fa-share-alt"></i>
-                <span>Shared files</span>
+                <div class="sidebar-item-menu">
+                  <i class="fas fa-share-alt"></i>
+                  <span>Shared files</span>
+                </div>
               </div>
               <div class="sidebar-item">
-                <i class="fas fa-globe"></i>
-                <span>Website</span>
+                <div class="sidebar-item-menu">
+                  <i class="fas fa-globe"></i>
+                  <span>Website</span>
+                </div>
               </div>
               <div class="sidebar-item trash-item">
-                <i class="fas fa-trash"></i>
-                <span>Trash</span>
+                <div class="sidebar-item-menu">
+                  <i class="fas fa-trash"></i>
+                  <span>Trash</span>
+                </div>
               </div>
             </div>
             
             <div class="sidebar-section drives-section">
-              <h4>Drives</h4>
+              <div class="sidebar-section-header"><h4>Drives</h4></div>
               <div class="sidebar-item">
-                <i class="fab fa-google-drive"></i>
-                <span>Google Drive</span>
+                  <div class="sidebar-item-menu">
+                  <i class="fab fa-google-drive"></i>
+                  <span>Google Drive</span>
+                </div>
               </div>
               <div class="sidebar-item">
-                <i class="fab fa-dropbox"></i>
-                <span>Dropbox</span>
+                <div class="sidebar-item-menu">
+                  <i class="fab fa-dropbox"></i>
+                  <span>Dropbox</span>
+                </div>
               </div>
               <div class="sidebar-item">
-                <i class="fas fa-box"></i>
-                <span>Box</span>
+                <div class="sidebar-item-menu">
+                  <i class="fas fa-box"></i>
+                  <span>Box</span>
+                </div>
               </div>
               <div class="sidebar-item">
-                <i class="fab fa-microsoft"></i>
-                <span>One Drive</span>
+                <div class="sidebar-item-menu">
+                  <i class="fab fa-microsoft"></i>
+                  <span>One Drive</span>
+                </div>
               </div>
             </div>
             
             <div class="sidebar-section shared-section">
-              <h4>Shared with me</h4>
+              <div class="sidebar-section-header"><h4>Shared with me</h4></div>
               <div class="sidebar-item">
-                <i class="fas fa-globe"></i>
-                <span>website.ro</span>
+                <div class="sidebar-item-menu">
+                  <i class="fas fa-globe"></i>
+                  <span>website.ro</span>
+                </div>
               </div>
             </div>
             
             <div class="sidebar-section local-folders-section">
-              <h4>PC local files</h4>
+              <div class="sidebar-section-header"><h4>PC local files</h4></div>
               <div class="sidebar-item">
-                <i class="fas fa-folder-open"></i>
-                <span>Mapped folder</span>
+                <div class="sidebar-item-menu">
+                  <i class="fas fa-folder-open"></i>
+                  <span>Mapped folder</span>
+                </div>
               </div>
             </div>
             
@@ -426,7 +464,7 @@
 
     <!-- Settings App Template START -->
     <template id="settings-app-template">
-      <div class="window file-explorer-window" id="settings-app-window">
+      <div class="window" id="settings-app-window">
         <div class="window-header">
           <button class="back-btn" style="display:none;"><i class="fas fa-chevron-left"></i></button>
           <div class="window-title">
@@ -456,17 +494,12 @@
                 <span class="profile-id">My Profile</span>
               </div>
             </div>
-            <nav class="settings-nav">
-              <ul>
-                <li><a href="#" data-section="appearance" class="active"><i class="fas fa-palette"></i> <span>Appearance</span></a></li>
-                <li><a href="#" data-section="admin-access"><i class="fas fa-users"></i><span> Admin access</span></a></li>
-                <li><a href="#" data-section="integrations" class="has-badge"><i class="fas fa-lightbulb"></i> <span>Integrations </span><span class="badge">2</span></a></li>
-                <li><a href="#" data-section="privacy-security"><i class="fas fa-globe"></i> <span>Privacy & Security</span></a></li>
-                <li><a href="#" data-section="notifications"><i class="fas fa-bell"></i> <span>Notifications</span></a></li>
-                <li><a href="#" data-section="active-services"><i class="fas fa-cog"></i> <span>Active Services</span></a></li>
-
-              </ul>
-            </nav>
+            <div class="sidebar-item active" data-section="appearance"><div class="sidebar-item-menu"><i class="fas fa-palette"></i> <span>Appearance</span></div></div>
+            <div class="sidebar-item" data-section="admin-access"><div class="sidebar-item-menu"><i class="fas fa-users"></i><span> Admin access</span></div></div>
+            <div class="sidebar-item has-badge" data-section="integrations"><div class="sidebar-item-menu"><i class="fas fa-lightbulb"></i> <span>Integrations </span></div><span class="badge">2</span></div>
+            <div class="sidebar-item" data-section="privacy-security"><div class="sidebar-item-menu"><i class="fas fa-globe"></i> <span>Privacy & Security</span></div></div>
+            <div class="sidebar-item" data-section="notifications"><div class="sidebar-item-menu"><i class="fas fa-bell"></i> <span>Notifications</span></div></div>
+            <div class="sidebar-item" data-section="active-services"><div class="sidebar-item-menu"><i class="fas fa-cog"></i> <span>Active Services</span></div></div>
             <div class="settings-website-profile">
               <img src="img/avatar.png" alt="User" class="website-avatar">
               <div class="profile-info">
@@ -474,17 +507,12 @@
                 <span class="profile-id">Website settings</span>
               </div>
             </div>
-            <nav class="settings-nav">
-              <ul>
-                <li><a href="#" data-section="products-settings"><i class="fas fa-users"></i><span> Products</span></a></li>
-                <li><a href="#" data-section="payments-settings" class="has-badge"><i class="fas fa-lightbulb"></i> <span>Payments</span><span class="badge">2</span></a></li>
-                <li><a href="#" data-section="shipping-settings"><i class="fas fa-globe"></i> <span>Shipping</span></a></li>
-                <li><a href="#" data-section="customers-privacy-settings"><i class="fas fa-bell"></i> <span>Customers & Privacy</span></a></li>
-                <li><a href="#" data-section="emails-settings"><i class="fas fa-cog"></i> <span>Emails</span></a></li>
-                <li><a href="#" data-section="billing-settings"><i class="fas fa-cog"></i> <span>Billing</span></a></li>
-
-              </ul>
-            </nav>
+            <div class="sidebar-item" data-section="products-settings"><div class="sidebar-item-menu"><i class="fas fa-users"></i><span> Products</span></div></div>
+            <div class="sidebar-item has-badge" data-section="payments-settings"><div class="sidebar-item-menu"><i class="fas fa-lightbulb"></i> <span>Payments</span></div><span class="badge">2</span></div>
+            <div class="sidebar-item" data-section="shipping-settings"><div class="sidebar-item-menu"><i class="fas fa-globe"></i> <span>Shipping</span></div></div>
+            <div class="sidebar-item" data-section="customers-privacy-settings"><div class="sidebar-item-menu"><i class="fas fa-bell"></i> <span>Customers & Privacy</span></div></div>
+            <div class="sidebar-item" data-section="emails-settings"><div class="sidebar-item-menu"><i class="fas fa-cog"></i> <span>Emails</span></div></div>
+            <div class="sidebar-item" data-section="billing-settings"><div class="sidebar-item-menu"><i class="fas fa-cog"></i> <span>Billing</span></div></div>
           </div>
           <div class="window-main-content">
             <div class="settings-content-header">
@@ -678,12 +706,104 @@
             <button class="window-close"><i class="fas fa-times"></i></button>
           </div>
         </div>
-        <div class="window-content">
+        <div class="window-content app-store-body">
           <div class="sidebar-overlay"></div>
-          <div class="file-explorer-body app-store-body">
-            <aside class="window-sidebar app-store-sidebar">
-              <!-- App Store categories go here -->
-            </aside>
+           <div class="window-sidebar">
+            <div class="sidebar-section">
+              <div class="settings-sidebar-search">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Search">
+              </div>
+              <div class="sidebar-item active">
+                <div class="sidebar-item-menu">
+                  <i class="fas fa-hdd"></i>
+                  <span>My files</span>
+                </div>
+              </div>
+              <div class="sidebar-item">
+                <div class="sidebar-item-menu">
+                  <i class="fas fa-desktop"></i>
+                  <span>Desktop</span>
+                </div>
+              </div>
+              <div class="sidebar-item">
+                <div class="sidebar-item-menu">
+                  <i class="fas fa-file-alt"></i>
+                  <span>Documents</span>
+                </div>
+              </div>
+              <div class="sidebar-item">
+                <div class="sidebar-item-menu">
+                  <i class="fas fa-image"></i>
+                  <span>Media</span>
+                </div>
+              </div>
+              <div class="sidebar-item">
+                <div class="sidebar-item-menu">
+                  <i class="fas fa-share-alt"></i>
+                  <span>Shared files</span>
+                </div>
+              </div>
+              <div class="sidebar-item">
+                <div class="sidebar-item-menu">
+                  <i class="fas fa-globe"></i>
+                  <span>Website</span>
+                </div>
+              </div>
+              <div class="sidebar-item trash-item">
+                <div class="sidebar-item-menu">
+                  <i class="fas fa-trash"></i>
+                  <span>Trash</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="sidebar-section drives-section">
+              <div class="sidebar-section-header"><h4>Website Apps</h4></div>
+              <div class="sidebar-item">
+                  <div class="sidebar-item-menu">
+                  <i class="fas fa-code"></i>
+                  <span>Website modules</span>
+                </div>
+              </div>
+              <div class="sidebar-item">
+                <div class="sidebar-item-menu">
+                  <i class="fas fa-credit-card"></i>
+                  <span>Payment processors</span>
+                </div>
+              </div>
+              <div class="sidebar-item">
+                <div class="sidebar-item-menu">
+                  <i class="fas fa-truck"></i>
+                  <span>Shipping Providers</span>
+                </div>
+              </div>
+              <div class="sidebar-item">
+                <div class="sidebar-item-menu">
+                  <i class="fas fa-file-invoice"></i>
+                  <span>Billing & Invoices</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="sidebar-section drives-section">
+              <div class="sidebar-section-header"><h4>My Apps</h4></div>
+              <div class="sidebar-item">
+                <div class="sidebar-item-menu">
+                  <i class="fas fa-desktop"></i>
+                  <span>OS apps</span>
+                </div>
+              </div>
+              <div class="sidebar-item">
+                <div class="sidebar-item-menu">
+                  <i class="fas fa-globe"></i>
+                  <span>Website apps</span>
+                </div>
+              </div>
+            </div>
+            
+          </div>
+         
             <main class="window-main-content app-store-content">
               <!-- App Store main content goes here -->
                 <div id="featured-cards"></div>
@@ -694,6 +814,167 @@
       </div>
     </template>
     <!-- End of AppStore App Template -->
+
+
+
+
+
+    <!-- Sitebuilder  App Template -->
+    <template id="sitebuilder-template">
+      <div class="window sitebuilder-window">
+        <div class="window-header">
+          <!-- Use same structure as file explorer header -->
+          <button class="menu-toggle"><i class="fas fa-bars"></i></button>
+          <div class="window-title">
+            <div class="window-icon blue-app-icon">
+              <i class="fas fa-code"></i>
+            </div>
+            <span>Sitebuilder</span>
+          </div>
+          <div class="window-controls">
+            <button class="window-minimize"><i class="fas fa-minus"></i></button>
+            <button class="window-popout" title="Pop out"><i class="fas fa-up-right-from-square"></i></button>
+            <button class="window-maximize"><i class="fas fa-expand"></i></button>
+            <button class="window-close"><i class="fas fa-times"></i></button>
+          </div>
+        </div>
+        <div class="window-content">
+          <div class="sidebar-overlay"></div>
+          
+          <div class="window-sidebar">
+            <div class="sidebar-section">
+              <div class="settings-sidebar-search">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Search">
+              </div>
+              <div class="sidebar-item active">
+                <div class="sidebar-item-menu">
+                  <i class="fas fa-code"></i>
+                  <span>Page builder</span>
+                </div>
+              </div>
+              <div class="sidebar-item">
+                <div class="sidebar-item-menu">
+                  <i class="fas fa-code"></i>
+                  <span>Apps pages</span>
+                </div>
+              </div>
+              <div class="sidebar-item">
+                <div class="sidebar-item-menu">
+                  <i class="fas fa-cart-shopping"></i>
+                  <span>eCommerce</span>
+                </div>
+              </div>
+              <div class="sidebar-item">
+                <div class="sidebar-item-menu">
+                  <i class="fas fa-file-contract"></i>
+                  <span>Legal Pages</span>
+                </div>
+              </div>
+              <div class="sidebar-item">
+                <div class="sidebar-item-menu">
+                  <i class="fas fa-file-pen"></i>
+                  <span>Blog Posts</span>
+                </div>
+              </div>
+              <div class="sidebar-item">
+                <div class="sidebar-item-menu">
+                  <i class="fas fa-globe"></i>
+                  <span>Website</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="sidebar-section drives-section">
+              <div class="sidebar-section-header"><h4>Global Settings</h4></div>
+              <div class="sidebar-item">
+                <div class="sidebar-item-menu">
+                  <i class="fas fa-bars"></i>
+                  <span>Menu builder</span>
+                </div>
+              </div>
+              <div class="sidebar-item">
+                  <div class="sidebar-item-menu">
+                  <i class="fas fa-credit-card"></i>
+                  <span>Header & Footer</span>
+                </div>
+              </div>
+              <div class="sidebar-item">
+                <div class="sidebar-item-menu">
+                  <i class="fas fa-truck"></i>
+                  <span>Fonts & Colors</span>
+                </div>
+              </div>
+              <div class="sidebar-item">
+                <div class="sidebar-item-menu">
+                  <i class="fas fa-file-invoice"></i>
+                  <span>Billing & Invoices</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="sidebar-section drives-section">
+              <div class="sidebar-section-header"><h4>Plugins</h4></div>
+              <div class="sidebar-item">
+                <div class="sidebar-item-menu">
+                  <i class="fas fa-sliders"></i>
+                  <span>Slider</span>
+                </div>
+              </div>
+              <div class="sidebar-item">
+                <div class="sidebar-item-menu">
+                  <i class="fas fa-globe"></i>
+                  <span>Contact Form</span>
+                </div>
+              
+            </div>
+
+            <div class="sidebar-item">
+              <div class="sidebar-item-menu">
+                <i class="fas fa-globe"></i>
+                <span>Popups & Modals</span>
+              </div>
+            
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu">
+              <i class="fas fa-globe"></i>
+              <span>Ads & Banners</span>
+            </div>
+          
+        </div>
+        <div class="sidebar-item">
+          <div class="sidebar-item-menu">
+            <i class="fas fa-globe"></i>
+            <span>Newsletter</span>
+          </div>
+        
+      </div>
+
+      <div class="sidebar-item">
+          <div class="sidebar-item-menu">
+          <i class="fas fa-globe"></i>
+          <span>Blocks</span>
+        </div>
+      </div>
+    </div>
+            
+          </div>
+            
+            <main class="window-main-content sitebuilder-content">
+              <div class="sitebuilder-main-content">
+
+                <!-- Sitebuilder main content goes here -->
+                dsadas
+                <section id="sitebuilder-sections"></section>
+              </div>
+            </main>
+          </div>
+        
+      </div>
+    </template>
+    <!-- End of Sitebuilder Template -->
+
 
     <!-- Calculator App Template -->
     <template id="calculator-app-template">
@@ -818,6 +1099,190 @@
       </div>
     </template>
     <!-- End of Photoshop App Template -->
+
+
+
+<!-- Email App Template -->
+<template id="email-app-template">
+  <div class="window email-app-window">
+    <div class="window-header">
+      <button class="menu-toggle"><i class="fas fa-bars"></i></button>
+      <div class="window-title">
+        <div class="window-icon pink-icon">
+          <i class="fas fa-envelope"></i>
+        </div>
+        <span>Email</span>
+      </div>
+      <div class="window-controls">
+        <button class="window-minimize" title="Minimize"><i class="fas fa-minus"></i></button>
+        <button class="window-popout" title="Pop out"><i class="fas fa-up-right-from-square"></i></button>
+        <button class="window-maximize" title="Maximize"><i class="fas fa-expand"></i></button>
+        <button class="window-close" title="Close"><i class="fas fa-times"></i></button>
+      </div>
+    </div>
+    <div class="window-content email-app-content" style="display: flex; height: 100%;">
+      <!-- Sidebar -->
+      <div class="sidebar-overlay"></div>
+      <div class="window-sidebar">
+        <div class="sidebar-section">
+          <div class="email-sidebar-header">
+            <div class="mailbox-name-chevrone"><div class="mailbox-name">Andrei Antoniadis </div><i class='fas fa-chevron-down'></i></div>
+            <div class="mailbox-email">contact@mydomain.com</div>
+          </div>
+          <button class="compose-btn"><i class="fas fa-plus"></i><span>Compose</span></button>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-section-header"><h4>Inbox </h4> <i class="fas fa-redo"></i></div>
+          <div class="sidebar-item active">
+            <div class="sidebar-item-menu"><i class="fas fa-inbox"></i><span>Inbox</span></div>
+            <span class="sidebar-badge">4,851</span>
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-star"></i><span>Starred</span></div>
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-file-alt"></i><span>Drafts</span></div>
+            <span class="sidebar-badge">3</span>
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-paper-plane"></i><span>Sent</span></div>
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-thumbs-down"></i><span>Junk</span></div>
+            <span class="sidebar-badge">3</span>
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-trash"></i><span>Trash</span></div>
+          </div>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-section-header"><h4>Folders </h4> <i class="fas fa-folder-plus"></i></div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-folder"></i><span>Folder name</span></div>
+            <span class="sidebar-badge">851</span>
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-folder"></i><span>Another folder</span></div>
+            <span class="sidebar-badge">3</span>
+          </div>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-section-header"><h4>Labels </h4> <i class="fas fa-tag"></i></div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-tag"></i><span>To Do</span></div>
+            <span class="sidebar-badge">74</span>
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-tag"></i><span>Important</span></div>
+            <span class="sidebar-badge">12</span>
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-tag"></i><span>Work</span></div>
+            <span class="sidebar-badge">6</span>
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-tag"></i><span>Personal</span></div>
+            <span class="sidebar-badge">8</span>
+          </div>
+        </div>
+        <div class="sidebar-section meta-info-section">
+          <div class="meta-info-section-text">Create more email accounts in <a href="#" style="color:#FF6B6B;">settings</a> app.</div>
+
+        </div>
+      </div>
+      <!-- Main Content Split -->
+      <div class="window-main-content" style="display: flex; flex: 1; height: 100%;">
+        <!-- Email List -->
+        <section class="email-list-section ">
+          <div class="window-toolbar">
+            <label class="toggle-switch" id="window-sidebar-toggle-label" style="margin-right: 14px;">
+              <input type="checkbox" id="window-sidebar-toggle">
+              <span class="slider"></span>
+            </label>
+            <div class="email-list-header">
+              <i class="fas fa-search"></i>
+              <input type="text" class="email-search" placeholder="Search..." style="width: 100%; padding: 6px 12px; border-radius: 6px; border: none; color: #fff; font-size: 14px;">
+            </div>
+          </div>
+          <ul class="email-list" style="flex: 1 1 auto; overflow-y: auto; min-height: 0; list-style: none; margin: 0; padding: 0;">
+            <!-- Email items will be injected here by JS -->
+          </ul>
+        </section>
+        <!-- Email Content -->
+        <section class="email-content-section" >
+          <div class="window-toolbar" >
+            <div class="toolbar-buttons-left" >
+              <button class="toolbar-button" title="Reply"><i class="fas fa-reply"></i><span>Reply</span></button>
+              <button class="toolbar-button" title="Reply All"><i class="fas fa-reply-all"></i><span>Replay all</span></button>
+              <button class="toolbar-button" title="Forward"><i class="fas fa-share"></i><span>Forward</span></button>
+
+            </div>
+            <div class="toolbar-buttons-right">
+              <button class="toolbar-button" title="Move"><i class="fas fa-folder-open"></i> <span>Move</span></button>
+              <button class="toolbar-button" title="Spam"><i class="fas fa-shield-virus"></i> <span>Spam</span></button>
+              <button class="toolbar-button" title="Delete"><i class="fas fa-trash"></i> <span>Delete</span></button>
+              <button class="toolbar-button mailmore-btn" title="More"><i class="fas fa-ellipsis-h"></i></button>
+            </div>
+          </div>
+          <div class="email-content" >
+            <!-- Opened email content will be injected here by JS -->
+            <div style="color: #8A8A9E; text-align: center; margin-top: 80px;">Select an email to read</div>
+          </div>
+        </section>
+      </div>
+ 
+    </div>
+  </div>
+</template>
+
+<!-- Compose Window Template -->
+<template id="compose-window-template">
+  <div class="window compose-window">
+    <div class="window-header">
+      <div class="window-title">
+        <div class="window-icon blue-icon">
+          <i class="fas fa-pen"></i>
+        </div>
+        <span>Compose email</span>
+      </div>
+      <div class="window-controls">
+        <button class="window-minimize" title="Minimize"><i class="fas fa-minus"></i></button>
+        <button class="window-popout" title="Pop out"><i class="fas fa-up-right-from-square"></i></button>
+        <button class="window-maximize" title="Maximize"><i class="fas fa-expand"></i></button>
+        <button class="window-close" title="Close"><i class="fas fa-times"></i></button>
+      </div>
+    </div>
+    <div class="window-content compose-window-content" style="display: flex; flex-direction: column; height: 100%;">
+      <!-- Compose form will be injected here by JS -->
+    </div>
+  </div>
+</template>
+
+<!-- Email Content Popout Window Template -->
+<template id="email-content-window-template">
+  <div class="window email-app-window email-content-window">
+    <div class="window-header">
+      <div class="window-title">
+        <div class="window-icon blue-icon">
+          <i class="fas fa-envelope-open"></i>
+        </div>
+        <span>Email from ${email.sender}</span>
+      </div>
+      <div class="window-controls">
+        <button class="window-minimize" title="Minimize"><i class="fas fa-minus"></i></button>
+        <button class="window-popout" title="Pop out"><i class="fas fa-up-right-from-square"></i></button>
+        <button class="window-maximize" title="Maximize"><i class="fas fa-expand"></i></button>
+        <button class="window-close" title="Close"><i class="fas fa-times"></i></button>
+      </div>
+    </div>
+    <div class="window-content email-content-body" style="height:100%;width:100%;overflow:auto;">
+      <!-- Email content will be injected here -->
+    </div>
+  </div>
+</template>
+
+
+
 
     <!-- Generic Window Template for All Standard Apps -->
     <template id="window-template">
