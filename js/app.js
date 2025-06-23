@@ -17,6 +17,3074 @@ let desktopNotificationMode = 'three'; // Default to 3 notifications stacked
 const volumeBtn = document.querySelector('#volume-btn');
 const volumePanel = document.querySelector('#volume-panel');
 
+// Setup SiteBuilder App
+function setupSiteBuilderApp(windowElement) {
+  // Hide page-actions-row by default
+  const pageActionsRows = windowElement.querySelectorAll('.page-actions-row');
+  pageActionsRows.forEach(row => {
+    row.style.display = 'none';
+    row.style.height = '0';
+    row.style.overflow = 'hidden';
+    row.style.transition = 'height 0.3s ease-in-out';
+  });
+
+
+
+  // Helper function to toggle page actions row
+  function togglePageActionsRow(button) {
+    const parentItem = button.closest('.sitebuilder-iteam-content');
+    const actionsRow = parentItem.querySelector('.page-actions-row');
+    const settingsSection = parentItem.querySelector('.page-settings-section');
+    const chevronIcon = button.querySelector('i.fa-chevron-down, i.fa-chevron-up');
+    
+    // If settings section is open, close it first
+    if (settingsSection && settingsSection.style.display === 'block') {
+      // Find the settings button and its icon
+      const settingsButton = parentItem.querySelector('.action-btn.settings-btn');
+      const settingsIcon = settingsButton ? settingsButton.querySelector('i') : null;
+      
+      // Close the settings section
+      settingsSection.style.height = '0';
+      setTimeout(() => {
+        settingsSection.style.display = 'none';
+      }, 300);
+      
+      // Change icon from X mark back to gear
+      if (settingsIcon && settingsIcon.classList.contains('fa-xmark')) {
+        settingsIcon.classList.remove('fa-xmark');
+        settingsIcon.classList.add('fa-gear');
+      }
+    }
+    
+    // Toggle actions row
+    if (actionsRow) {
+      if (actionsRow.style.display === 'none' || actionsRow.style.height === '0px') {
+        // Show actions row
+        actionsRow.style.display = 'flex';
+        setTimeout(() => {
+          actionsRow.style.height = actionsRow.scrollHeight + 'px';
+        }, 10);
+        
+        // Change chevron icon to up
+        if (chevronIcon) {
+          chevronIcon.classList.remove('fa-chevron-down');
+          chevronIcon.classList.add('fa-chevron-up');
+        }
+      } else {
+        // Hide actions row
+        actionsRow.style.height = '0';
+        setTimeout(() => {
+          actionsRow.style.display = 'none';
+        }, 300);
+        
+        // Change chevron icon to down
+        if (chevronIcon) {
+          chevronIcon.classList.remove('fa-chevron-up');
+          chevronIcon.classList.add('fa-chevron-down');
+        }
+      }
+    }
+  }
+
+  // Create settings section template
+  const settingsSectionTemplate = `
+
+    <div class="page-settings-row">
+      <div class="page-settings-row-left">
+        <div class="settings-group">
+          <h3>General</h3>
+          <div class="settings-item">
+            <label>Page Title</label>
+            <input type="text" class="settings-input" value="Portfolio">
+          </div>
+          <div class="settings-item">
+            <label>URL Slug</label>
+            <div class="settings-url-input">
+              <span class="settings-url-prefix">mywebsite.com/</span>
+              <input type="text" class="settings-input url-slug" value="portfolio">
+            </div>
+          </div>
+        </div>
+        <div class="settings-group">
+          <div class="settings-group-header">
+        <h3>Search Engine Optimization</h3> 
+
+        <div class="toggle-switch">
+                <input type="checkbox" class="section-toggle">
+                <span class="toggle-slider"></span>
+              </div>
+        </div>
+
+        <div class="publishing-options-section">
+          <div class="settings-item">
+            <label>Meta Title</label>
+            <input type="text" class="settings-input" value="Portfolio - My Website">
+          </div>
+          <div class="settings-item">
+            <label>Meta Description</label>
+            <textarea class="settings-textarea">Check out my portfolio of recent projects and work.</textarea>
+          </div>
+<div class="publish-section">  
+ <div class="form-row-top-input">
+             <label class="publish-label">SEO Exclusion</label>
+             </div>
+<div class="checkbox-option">
+                  <input type="checkbox" id="no-index-page">
+                  <label for="no-index-page">No index (exclude from search engines)</label>
+                </div>
+                <div class="checkbox-option" style="margin-top: 10px;">
+                  <input type="checkbox" id="no-follow-page">
+                  <label for="no-follow-page">No follow (do not follow links)</label>
+                </div>
+                                <div class="checkbox-option" style="margin-top: 10px;">
+                  <input type="checkbox" id="exclude-page-from-sitemap">
+                  <label for="exclude-page-from-sitemap">Exclude page from sitemap</label>
+                </div>
+            </div>
+        </div>
+        </div>
+<div class="settings-group">
+          <h3>Social Sharing</h3>
+          <div class="settings-item">
+            
+          </div>
+          <div class="settings-item">
+            <label>Social Image</label>
+            <div class="settings-image-upload">
+              <i class="fas fa-upload"></i>
+              <span>Upload Image</span>
+
+              </div>
+                            <div class="upload-image-description">
+                <span>When a Recomandat image or an OpenGraph Image is not set for individual posts/pages/CPTs, this image will be used as a fallback thumbnail when your post is shared on Facebook. The recommended image size is 1200 x 630 pixels.
+</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+
+      <div class="page-settings-row-right">
+        <div class="settings-group">
+          <h3>Publishing Options</h3>
+
+<div class="publishing-options-section">
+          
+          <div class="publish-section">
+          <div class="form-row-top-input">
+            <label class="publish-label">Status</label>
+            <div class="schedule-publish-btn">Schedule</div>
+            </div>
+            <div class="select-container">
+              <select class="form-control">
+                <option value="active" selected="" style="color: #333 !important;">Published</option>
+                <option value="draft" style="color: #333 !important;">Draft</option>
+                <option value="archived" style="color: #333 !important;">Staff Review</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="publish-section">
+            <label class="publish-label">Schedule publishing</label>
+            <div class="date-picker-container">
+              <input type="text" class="form-control date-input" value="05-01-2025">
+              <button class="calendar-button">
+                <i class="fas fa-calendar-alt"></i>
+              </button>
+            </div>
+          </div>
+</div>
+
+</div>
+
+
+
+
+        <div class="settings-group">
+        <div class="settings-group-header">
+        <h3>Visibility</h3> 
+
+        <div class="toggle-switch">
+                <input type="checkbox" class="section-toggle">
+                <span class="toggle-slider"></span>
+              </div>
+        </div>
+<div class="publishing-options-section">
+
+
+<div class="publish-section">  
+ <div class="form-row-top-input">
+            <label class="publish-label">Language</label>
+            </div>
+            <div class="select-container">
+              <select class="form-control">
+                <option value="active" selected="" style="color: #333 !important;">English</option>
+                                <option value="draft" style="color: #333 !important;">Spanish</option>
+                <option value="draft" style="color: #333 !important;">French</option>
+                <option value="archived" style="color: #333 !important;">German</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="publish-section">
+          <div class="form-row-top-input">
+            <label class="publish-label">Parent Page</label>
+            </div>
+            <div class="select-container">
+              <select class="form-control">
+                <option value="active" selected="" style="color: #333 !important;">Main page (no parent)</option>
+                <option value="Homepage" style="color: #333 !important;">Home</option>
+                <option value="draft" style="color: #333 !important;">About</option>
+                <option value="archived" style="color: #333 !important;">Contact</option>
+              </select>
+            </div>
+          </div>
+        
+</div>
+</div>
+
+        <div class="settings-group">
+        <div class="settings-group-header">
+        <h3>Custom Style</h3> 
+
+        <div class="toggle-switch">
+                <input type="checkbox" class="section-toggle">
+                <span class="toggle-slider"></span>
+              </div>
+        </div>
+
+<div class="publishing-options-section">
+          
+          <div class="publish-section">
+          <div class="form-row-top-input">
+            <label class="publish-label">Header</label>
+            <div class="schedule-publish-btn">New header</div>
+            </div>
+            <div class="select-container">
+              <select class="form-control">
+                <option value="active" selected="" style="color: #333 !important;">Default</option>
+                <option value="Homepage" style="color: #333 !important;">Header design 1</option>
+                <option value="draft" style="color: #333 !important;">Header design 2</option>
+                <option value="archived" style="color: #333 !important;">Header design 3</option>
+                <option value="separator" style="color: #333 !important;" disabled>────────────────────────</option>
+                                <option value="archived" style="color: #333 !important; margin-bottom: 10px;">! Without Header</option>
+              </select>
+            </div>
+          </div>
+
+                  <div class="settings-group">
+        <div class="publish-section">  
+ <div class="form-row-top-input">
+            <label class="publish-label">Template</label>
+            </div>
+            <div class="select-container">
+              <select class="form-control">
+                <option value="active" selected="" style="color: #333 !important;">Default</option>
+                                <option value="draft" style="color: #333 !important;">Boxed</option>
+                <option value="draft" style="color: #333 !important;">Sidebar</option>
+                <option value="archived" style="color: #333 !important;">Full Width</option>
+              </select>
+            </div>
+          </div>
+
+                  <div class="publish-section">  
+ <div class="form-row-top-input">
+            <label class="publish-label">Footer</label>
+            <div class="schedule-publish-btn">New footer</div>
+            </div>
+            <div class="select-container">
+              <select class="form-control">
+                <option value="active" selected="" style="color: #333 !important;">Default</option>
+                <option value="draft" style="color: #333 !important;">Footer design 1</option>
+                <option value="draft" style="color: #333 !important;">Footer design 2</option>
+                <option value="archived" style="color: #333 !important;">Footer design 3</option>
+                                <option value="separator" style="color: #333 !important;" disabled>────────────────────────</option>
+                                <option value="nofoooter" style="color: #333 !important;">Without Footer</option>
+              </select>
+            </div>
+          </div>
+        <div class="settings-group">
+                  <div class="publish-section">  
+ <div class="form-row-top-input">
+            <label class="publish-label">Override Logo</label>
+            <div class="schedule-publish-btn">Other formats</div>
+            </div>
+            <div class="upload-container">
+<input type="file" id="avatar" name="avatar" accept="image/png, image/jpeg" />
+            </div>
+          </div>
+
+                            <div class="publish-section">  
+ <div class="form-row-top-input">
+             <label class="publish-label">Breadcrumbs</label>
+             </div>
+<div class="checkbox-option">
+                  <input type="checkbox" id="enable-breadcrumbs" checked="">
+                  <label for="enable-breadcrumbs">Enable breadcrumbs for this page</label>
+                </div>
+            </div>
+          </div>
+
+
+
+
+          
+</div></div>
+
+
+
+</div>
+
+
+
+          
+        <div class="settings-group">
+<div class="settings-group-header">
+        <h3>Privacy</h3> 
+
+        <div class="toggle-switch">
+                <input type="checkbox" class="section-toggle">
+                <span class="toggle-slider"></span>
+              </div>
+        </div>
+<div class="publishing-options-section">
+          
+          <div class="publish-section">
+          <div class="form-row-top-input">
+            <label class="publish-label">Password protected</label>
+            <div class="schedule-publish-btn">Schedule</div>
+            </div>
+<div class="date-picker-container">
+              <input type="text" class="form-control date-input" value=" ">
+              <button class="calendar-button">
+                <i class="fas fa-lock"></i>
+              </button>
+            </div>
+          </div>
+        <div class="publish-section">  
+ <div class="form-row-top-input">
+            <label class="publish-label">Private</label>
+            </div>
+            <div class="checkbox-option">
+                  <input type="checkbox" id="private-page" checked="">
+                  <label for="private-page">Private (exclude from sitemap)</label>
+                </div>
+          </div>
+</div>
+</div>
+
+
+
+</div> 
+      </div>
+    </div>
+
+      
+
+<div class="page-settings-footer">
+
+
+
+    <div class="settings-actions">
+      <div class="page-settings-footer-left">
+            <div class="page-settings-header-right">
+<span>Page ID: #25690-EN</span>
+      </div>
+      <div class="page-settings-header-left">
+      <span class="published">Published 2022/01/19 at 4:27 pm</span>
+      <span class="published">Last edited 2022/01/19 at 4:27 pm</span>
+      </div>
+
+      </div>
+      <div class="page-settings-footer-right">
+      <button class="settings-cancel-btn">Cancel</button>
+      <button class="settings-save-btn">Save Changes</button>
+      </div>
+    </div>
+
+
+    
+    </div>
+  `;
+
+  // Add settings section to each sitebuilder-iteam-content
+  const sitebuilderItemContents = windowElement.querySelectorAll('.sitebuilder-iteam-content');
+  sitebuilderItemContents.forEach(item => {
+    const settingsSection = document.createElement('div');
+    settingsSection.className = 'page-settings-section';
+    settingsSection.innerHTML = settingsSectionTemplate;
+    settingsSection.style.display = 'none';
+    settingsSection.style.height = '0';
+    settingsSection.style.overflow = 'hidden';
+    settingsSection.style.transition = 'height 0.3s ease-in-out';
+    item.appendChild(settingsSection);
+    
+    // Initialize publishing options sections - hide by default
+    setTimeout(() => {
+      const toggles = settingsSection.querySelectorAll('.settings-group-header .toggle-switch input');
+      toggles.forEach(toggle => {
+        // Set toggle to unchecked by default
+        toggle.checked = false;
+        
+        const publishingSection = toggle.closest('.settings-group-header').nextElementSibling;
+        if (publishingSection && publishingSection.classList.contains('publishing-options-section')) {
+          publishingSection.style.display = 'none';
+          publishingSection.style.height = '0';
+        }
+      });
+    }, 0);
+  });
+
+  // Add event listeners to edit buttons
+  const editButtons = windowElement.querySelectorAll('.action-btn.edit-btn');
+  editButtons.forEach(button => {
+    button.addEventListener('click', function(e) {
+      e.stopPropagation(); // Prevent event from bubbling up to parent
+      togglePageActionsRow(this);
+    });
+  });
+
+  // Add event listeners to settings buttons
+  const settingsButtons = windowElement.querySelectorAll('.action-btn.settings-btn');
+  settingsButtons.forEach(button => {
+    button.addEventListener('click', function() {
+      const parentItem = this.closest('.sitebuilder-iteam-content');
+      const actionsRow = parentItem.querySelector('.page-actions-row');
+      const settingsSection = parentItem.querySelector('.page-settings-section');
+      const editButton = parentItem.querySelector('.action-btn.edit-btn');
+      const chevronIcon = editButton ? editButton.querySelector('i.fa-chevron-down, i.fa-chevron-up') : null;
+      
+      // Get the icon element in the settings button
+      const settingsIcon = this.querySelector('i');
+      
+      // If actions row is open, close it first
+      if (actionsRow && (actionsRow.style.display === 'flex' || actionsRow.style.height !== '0px')) {
+        actionsRow.style.height = '0';
+        setTimeout(() => {
+          actionsRow.style.display = 'none';
+        }, 300);
+        
+        // Change chevron icon to down
+        if (chevronIcon) {
+          chevronIcon.classList.remove('fa-chevron-up');
+          chevronIcon.classList.add('fa-chevron-down');
+        }
+      }
+      
+      // Toggle settings section
+      if (settingsSection) {
+        if (settingsSection.style.display === 'none' || settingsSection.style.height === '0px') {
+          // Show settings section
+          settingsSection.style.display = 'block';
+          setTimeout(() => {
+            settingsSection.style.height = 'auto';
+          }, 10);
+          
+          // Change icon from gear to X mark
+          if (settingsIcon && settingsIcon.classList.contains('fa-gear')) {
+            settingsIcon.classList.remove('fa-gear');
+            settingsIcon.classList.add('fa-xmark');
+          }
+        } else {
+          // Hide settings section
+          settingsSection.style.height = '0';
+          setTimeout(() => {
+            settingsSection.style.display = 'none';
+          }, 300);
+          
+          // Change icon from X mark back to gear
+          if (settingsIcon && settingsIcon.classList.contains('fa-xmark')) {
+            settingsIcon.classList.remove('fa-xmark');
+            settingsIcon.classList.add('fa-gear');
+          }
+        }
+      }
+    });
+  });
+
+  // Add event listeners to settings cancel buttons
+  const cancelButtons = windowElement.querySelectorAll('.settings-cancel-btn');
+  cancelButtons.forEach(button => {
+    button.addEventListener('click', function() {
+      const settingsSection = this.closest('.page-settings-section');
+      if (settingsSection) {
+        // Find the parent item and the settings button
+        const parentItem = settingsSection.closest('.sitebuilder-iteam-content');
+        const settingsButton = parentItem ? parentItem.querySelector('.action-btn.settings-btn') : null;
+        const settingsIcon = settingsButton ? settingsButton.querySelector('i') : null;
+        
+        // Close the settings section
+        settingsSection.style.height = '0';
+        setTimeout(() => {
+          settingsSection.style.display = 'none';
+        }, 300);
+        
+        // Change icon from X mark back to gear
+        if (settingsIcon && settingsIcon.classList.contains('fa-xmark')) {
+          settingsIcon.classList.remove('fa-xmark');
+          settingsIcon.classList.add('fa-gear');
+        }
+      }
+    });
+  });
+  
+  // Add toggle switch functionality for publishing options sections
+  const toggleSwitches = windowElement.querySelectorAll('.settings-group-header .toggle-switch input');
+  toggleSwitches.forEach(toggle => {
+    // Get the corresponding publishing-options-section
+    const settingsGroupHeader = toggle.closest('.settings-group-header');
+    const settingsGroup = settingsGroupHeader.nextElementSibling;
+    
+    if (settingsGroup && settingsGroup.classList.contains('publishing-options-section')) {
+      // Set initial state based on toggle - default to unchecked/hidden
+      toggle.checked = false;
+      settingsGroup.style.display = 'none';
+      settingsGroup.style.height = '0';
+      
+      // Make the entire header clickable
+      settingsGroupHeader.addEventListener('click', function(e) {
+        // Don't toggle if clicking directly on the checkbox (it handles its own state)
+        if (e.target !== toggle) {
+          toggle.checked = !toggle.checked;
+          
+          // Trigger the change event
+          const changeEvent = new Event('change');
+          toggle.dispatchEvent(changeEvent);
+        }
+      });
+      
+      // Add event listener for toggle changes
+      toggle.addEventListener('change', function() {
+        if (this.checked) {
+          settingsGroup.style.display = 'block';
+          settingsGroup.style.height = '0';
+          setTimeout(() => {
+            settingsGroup.style.height = settingsGroup.scrollHeight + 'px';
+          }, 10);
+        } else {
+          settingsGroup.style.height = '0';
+          setTimeout(() => {
+            settingsGroup.style.display = 'none';
+          }, 300);
+        }
+      });
+    }
+  });
+  
+
+  
+  // Add click handlers to published-url elements
+  const publishedUrlElements = windowElement.querySelectorAll('.published-url');
+  publishedUrlElements.forEach(urlElement => {
+    // Make the URL visually appear as a link
+
+    
+    urlElement.addEventListener('click', function(e) {
+      e.stopPropagation(); // Prevent event bubbling
+      
+      // Get the URL from the element
+      const url = this.textContent || this.innerText;
+      
+      // Generate a unique window ID
+      const windowId = `url-window-${Date.now()}`;
+      
+      // Create a window from the generic window template
+      const urlWindow = createWindowFromTemplate('window', windowId, false);
+      
+      if (!urlWindow) return;
+      
+      // Set window title and icon, and add window controls
+      const windowHeader = urlWindow.querySelector('.window-header');
+      if (windowHeader) {
+        windowHeader.innerHTML = `
+          <button class="menu-toggle">
+            <i class="fas fa-bars"></i>
+          </button>
+          <div class="window-title">
+            <div class="window-icon blue-icon">
+              <i class="fas fa-globe"></i>
+            </div>
+            <span>${url}</span>
+          </div>
+          <div class="window-controls">
+            <button class="window-minimize" title="Minimize"><i class="fas fa-minus"></i></button>
+            <button class="window-popout" title="Pop out"><i class="fas fa-up-right-from-square"></i></button>
+            <button class="window-maximize" title="Maximize"><i class="fas fa-expand"></i></button>
+            <button class="window-close" title="Close"><i class="fas fa-times"></i></button>
+          </div>
+        `;
+      }
+      
+          // Add browser class to the window for specific styling
+          urlWindow.classList.add('browser-window');
+      // Add iframe content with proper window structure
+      const windowContent = urlWindow.querySelector('.window-content');
+      if (windowContent) {
+        // Set proper flex layout on window-content
+        windowContent.style.display = 'flex';
+        windowContent.style.flexDirection = 'column';
+        windowContent.style.height = '100%';
+        
+        windowContent.innerHTML = `
+          <div class="sidebar-overlay"></div>
+          <div class="window-main-content" style="width: 100%; height: 100%; display: flex; flex-direction: column; flex: 1;">
+            <div class="window-toolbar" style="display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-bottom: 1px solid var(--border-color); flex-shrink: 0;">
+              <button disabled class="toolbar-button" style="opacity: 0.5;"><i class="fas fa-arrow-left"></i></button>
+              <button class="toolbar-button refresh-btn" title="Refresh"><i class="fas fa-redo"></i></button>
+              <div class="browser-url-address" style="flex: 1; background: var(--input-bg); border-radius: 20px; padding: 8px 12px; display: flex; align-items: center; border: 1px solid var(--border-color);">
+                <i class="fas fa-lock" style="margin-right: 8px; color: var(--os-gray);"></i>
+                <span style="color: var(--text-color); font-size: 13px;">${url}</span>
+              </div>
+            </div>
+            <div class="window-app-content" style="flex: 1; position: relative; overflow: hidden; min-height: 0;">
+              <iframe src="https://${url}" style="width: 100%; height: 100%; border: none; background: white; display: block;" frameborder="0" allowfullscreen sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-top-navigation"></iframe>
+            </div>
+          </div>
+        `;
+        
+        // Add event handler for refresh button
+        const refreshBtn = windowContent.querySelector('.refresh-btn');
+        if (refreshBtn) {
+          refreshBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const iframe = windowContent.querySelector('iframe');
+            if (iframe) {
+              iframe.src = iframe.src; // Reload the iframe
+            }
+          });
+        }
+        
+      }
+      
+      // Add event handlers for window controls
+      const windowControls = urlWindow.querySelector('.window-controls');
+      if (windowControls) {
+        // Minimize button
+        const minimizeBtn = windowControls.querySelector('.window-minimize');
+        if (minimizeBtn) {
+          minimizeBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const currentTaskbarIcon = openWindows[windowId] ? openWindows[windowId].taskbarIcon : null;
+            toggleMinimizeWindow(urlWindow, currentTaskbarIcon);
+          });
+        }
+        
+        // Maximize button
+        const maximizeBtn = windowControls.querySelector('.window-maximize');
+        if (maximizeBtn) {
+          maximizeBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (window.innerWidth <= 767) return; // MOBILE_BREAKPOINT
+            
+            const isMaximized = urlWindow.classList.contains('maximized');
+            if (isMaximized) {
+              // Restore
+              urlWindow.classList.remove('maximized');
+              maximizeBtn.innerHTML = '<i class="fas fa-expand"></i>';
+              maximizeBtn.title = 'Maximize';
+              
+              // Restore to previous size
+              urlWindow.style.width = urlWindow.dataset.prevWidth || '800px';
+              urlWindow.style.height = urlWindow.dataset.prevHeight || '600px';
+              urlWindow.style.left = urlWindow.dataset.prevLeft || '100px';
+              urlWindow.style.top = urlWindow.dataset.prevTop || '100px';
+              urlWindow.style.resize = '';
+            } else {
+              // Maximize
+              urlWindow.dataset.prevWidth = urlWindow.style.width || urlWindow.offsetWidth + 'px';
+              urlWindow.dataset.prevHeight = urlWindow.style.height || urlWindow.offsetHeight + 'px';
+              urlWindow.dataset.prevLeft = urlWindow.style.left || urlWindow.offsetLeft + 'px';
+              urlWindow.dataset.prevTop = urlWindow.style.top || urlWindow.offsetTop + 'px';
+              
+              urlWindow.style.width = '100%';
+              urlWindow.style.height = '100%';
+              urlWindow.style.left = '0px';
+              urlWindow.style.top = '0px';
+              urlWindow.style.resize = 'none';
+              urlWindow.classList.add('maximized');
+              
+              maximizeBtn.innerHTML = '<i class="fas fa-compress"></i>';
+              maximizeBtn.title = 'Restore';
+            }
+            makeWindowActive(urlWindow);
+          });
+        }
+        
+        // Popout button
+        const popoutBtn = windowControls.querySelector('.window-popout');
+        if (popoutBtn) {
+          popoutBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            // Get window position and size
+            const rect = urlWindow.getBoundingClientRect();
+            const screenLeft = window.screenX || window.screenLeft || 0;
+            const screenTop = window.screenY || window.screenTop || 0;
+            const chromeHeight = (window.outerHeight - window.innerHeight) || 0;
+            const left = Math.round(screenLeft + rect.left);
+            const top = Math.round(screenTop + rect.top + chromeHeight);
+            const width = Math.round(rect.width);
+            const height = Math.round(rect.height);
+            
+            // Open popout window
+            const popoutWin = window.open(`https://${url}`, '_blank', `width=${width},height=${height},left=${left},top=${top},menubar=no,toolbar=yes,location=yes,status=no,scrollbars=yes,resizable=yes`);
+            
+            if (popoutWin) {
+              // Close the original browser window
+              closeBtn.click();
+            }
+          });
+        }
+        
+        // Close button
+        const closeBtn = windowControls.querySelector('.window-close');
+        if (closeBtn) {
+          closeBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const currentTaskbarIcon = openWindows[windowId] ? openWindows[windowId].taskbarIcon : null;
+            
+            // Close window with animation
+            urlWindow._isClosing = true;
+            urlWindow.classList.add('window-anim-close');
+            
+            urlWindow.addEventListener('animationend', function handler(ev) {
+              if (ev.animationName === 'windowClose') {
+                // Clean up taskbar icon
+                if (currentTaskbarIcon && currentTaskbarIcon.parentNode) {
+                  if (!currentTaskbarIcon.classList.contains('pinned-only')) {
+                    currentTaskbarIcon.remove();
+                  } else {
+                    currentTaskbarIcon.classList.remove('opened-app', 'active');
+                  }
+                }
+                
+                // Clean up window
+                delete openWindows[windowId];
+                urlWindow.remove();
+                if (activeWindow === urlWindow) activeWindow = null;
+                if (typeof renderPinnedTaskbarIcons === 'function') renderPinnedTaskbarIcons();
+                if (typeof updateTaskbarActiveState === 'function') updateTaskbarActiveState();
+              }
+            }, { once: true });
+          });
+        }
+      }
+      
+      // Register the window in openWindows
+      openWindows[windowId] = {
+        element: urlWindow,
+        name: 'browser',
+        title: url,
+        iconClass: 'fa-globe',
+        iconBgClass: 'blue-icon',
+        appTitle: url
+      };
+      
+      makeWindowActive(urlWindow);
+      if (typeof renderPinnedTaskbarIcons === 'function') renderPinnedTaskbarIcons();
+    });
+  });
+
+  // Add event listeners to settings save buttons
+  const saveButtons = windowElement.querySelectorAll('.settings-save-btn');
+  saveButtons.forEach(button => {
+    button.addEventListener('click', function() {
+      const settingsSection = this.closest('.page-settings-section');
+      if (settingsSection) {
+        // Here you would normally save the settings to a database
+        // For this demo, we'll just show a success message
+        
+        // Create a notification element
+        const notification = document.createElement('div');
+        notification.className = 'settings-notification';
+        notification.innerHTML = '<i class="fas fa-check-circle"></i> Settings saved successfully';
+        notification.style.position = 'fixed';
+        notification.style.bottom = '20px';
+        notification.style.right = '20px';
+        notification.style.backgroundColor = '#10B981';
+        notification.style.color = 'white';
+        notification.style.padding = '12px 20px';
+        notification.style.borderRadius = '6px';
+        notification.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
+        notification.style.zIndex = '10000';
+        notification.style.display = 'flex';
+        notification.style.alignItems = 'center';
+        notification.style.gap = '8px';
+        notification.style.opacity = '0';
+        notification.style.transform = 'translateY(20px)';
+        notification.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+        
+        // Add to document
+        document.body.appendChild(notification);
+        
+        // Show with animation
+        setTimeout(() => {
+          notification.style.opacity = '1';
+          notification.style.transform = 'translateY(0)';
+        }, 10);
+        
+        // Hide after 3 seconds
+        setTimeout(() => {
+          notification.style.opacity = '0';
+          notification.style.transform = 'translateY(20px)';
+          
+          // Remove from DOM after animation
+          setTimeout(() => {
+            notification.remove();
+          }, 300);
+        }, 3000);
+        
+        // Find the parent item and the settings button
+        const parentItem = settingsSection.closest('.sitebuilder-iteam-content');
+        const settingsButton = parentItem ? parentItem.querySelector('.action-btn.settings-btn') : null;
+        const settingsIcon = settingsButton ? settingsButton.querySelector('i') : null;
+        
+        // Close the settings section
+        settingsSection.style.height = '0';
+        setTimeout(() => {
+          settingsSection.style.display = 'none';
+        }, 300);
+        
+        // Change icon from X mark back to gear
+        if (settingsIcon && settingsIcon.classList.contains('fa-xmark')) {
+          settingsIcon.classList.remove('fa-xmark');
+          settingsIcon.classList.add('fa-gear');
+        }
+      }
+    });
+  });
+
+  // Add event listener for add-new-page-btn dropdown
+  const addNewPageBtn = windowElement.querySelector('.add-new-page-btn');
+  if (addNewPageBtn) {
+    addNewPageBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      
+      // Find the window-toolbar and sitebuilder-main-content
+      const windowToolbar = windowElement.querySelector('.window-toolbar');
+      const mainContent = windowElement.querySelector('.sitebuilder-main-content');
+      
+      if (!windowToolbar || !mainContent) return;
+      
+      // Check if dropdown already exists
+      let addPageDropdown = windowElement.querySelector('.add-page-dropdown');
+      
+      if (addPageDropdown) {
+        // Toggle existing dropdown
+        if (addPageDropdown.style.display === 'none' || addPageDropdown.style.height === '0px') {
+          // Show dropdown and scroll to top
+          addPageDropdown.style.display = 'block';
+          setTimeout(() => {
+            addPageDropdown.style.height = addPageDropdown.scrollHeight + 'px';
+          }, 10);
+          
+          // Scroll to top of main content to show the dropdown
+          if (mainContent) {
+            mainContent.scrollTo({
+              top: 0,
+              behavior: 'smooth'
+            });
+          }
+        } else {
+          // Hide dropdown
+          addPageDropdown.style.height = '0';
+          setTimeout(() => {
+            addPageDropdown.style.display = 'none';
+          }, 300);
+        }
+      } else {
+        // Create new dropdown
+        addPageDropdown = document.createElement('div');
+        addPageDropdown.className = 'add-page-dropdown page-settings-section';
+        addPageDropdown.style.display = 'none';
+        addPageDropdown.style.height = '0';
+        addPageDropdown.style.overflow = 'hidden';
+        addPageDropdown.style.transition = 'height 0.3s ease-in-out';
+        
+        // Create dropdown content using the same template as page settings
+        addPageDropdown.innerHTML = `
+          <div class="page-settings-row-header" style="margin-bottom: 30px;">
+          <h2>Add New Page</h2>
+          </div>
+        <div class="page-settings-row">
+      <div class="page-settings-row-left">
+        <div class="settings-group">
+          <h3>General</h3>
+          <div class="settings-item">
+            <label>Page Title</label>
+            <input type="text" class="settings-input" value="Portfolio">
+          </div>
+          <div class="settings-item">
+            <label>URL Slug</label>
+            <div class="settings-url-input">
+              <span class="settings-url-prefix">mywebsite.com/</span>
+              <input type="text" class="settings-input url-slug" value="portfolio">
+            </div>
+          </div>
+        </div>
+        <div class="settings-group">
+          <div class="settings-group-header">
+        <h3>Search Engine Optimization</h3> 
+
+        <div class="toggle-switch">
+                <input type="checkbox" class="section-toggle">
+                <span class="toggle-slider"></span>
+              </div>
+        </div>
+
+        <div class="publishing-options-section">
+          <div class="settings-item">
+            <label>Meta Title</label>
+            <input type="text" class="settings-input" value="Portfolio - My Website">
+          </div>
+          <div class="settings-item">
+            <label>Meta Description</label>
+            <textarea class="settings-textarea">Check out my portfolio of recent projects and work.</textarea>
+          </div>
+<div class="publish-section">  
+ <div class="form-row-top-input">
+             <label class="publish-label">SEO Exclusion</label>
+             </div>
+<div class="checkbox-option">
+                  <input type="checkbox" id="no-index-page">
+                  <label for="no-index-page">No index (exclude from search engines)</label>
+                </div>
+                <div class="checkbox-option" style="margin-top: 10px;">
+                  <input type="checkbox" id="no-follow-page">
+                  <label for="no-follow-page">No follow (do not follow links)</label>
+                </div>
+                                <div class="checkbox-option" style="margin-top: 10px;">
+                  <input type="checkbox" id="exclude-page-from-sitemap">
+                  <label for="exclude-page-from-sitemap">Exclude page from sitemap</label>
+                </div>
+            </div>
+        </div>
+        </div>
+<div class="settings-group">
+          <h3>Social Sharing</h3>
+          <div class="settings-item">
+            
+          </div>
+          <div class="settings-item">
+            <label>Social Image</label>
+            <div class="settings-image-upload">
+              <i class="fas fa-upload"></i>
+              <span>Upload Image</span>
+
+              </div>
+                            <div class="upload-image-description">
+                <span>When a Recomandat image or an OpenGraph Image is not set for individual posts/pages/CPTs, this image will be used as a fallback thumbnail when your post is shared on Facebook. The recommended image size is 1200 x 630 pixels.
+</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+
+      <div class="page-settings-row-right">
+        <div class="settings-group">
+          <h3>Publishing Options</h3>
+
+<div class="publishing-options-section">
+          
+          <div class="publish-section">
+          <div class="form-row-top-input">
+            <label class="publish-label">Status</label>
+            <div class="schedule-publish-btn">Schedule</div>
+            </div>
+            <div class="select-container">
+              <select class="form-control">
+                <option value="active" selected="" style="color: #333 !important;">Published</option>
+                <option value="draft" style="color: #333 !important;">Draft</option>
+                <option value="archived" style="color: #333 !important;">Staff Review</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="publish-section">
+            <label class="publish-label">Schedule publishing</label>
+            <div class="date-picker-container">
+              <input type="text" class="form-control date-input" value="05-01-2025">
+              <button class="calendar-button">
+                <i class="fas fa-calendar-alt"></i>
+              </button>
+            </div>
+          </div>
+</div>
+
+</div>
+
+
+
+
+        <div class="settings-group">
+        <div class="settings-group-header">
+        <h3>Visibility</h3> 
+
+        <div class="toggle-switch">
+                <input type="checkbox" class="section-toggle">
+                <span class="toggle-slider"></span>
+              </div>
+        </div>
+<div class="publishing-options-section">
+
+
+<div class="publish-section">  
+ <div class="form-row-top-input">
+            <label class="publish-label">Language</label>
+            </div>
+            <div class="select-container">
+              <select class="form-control">
+                <option value="active" selected="" style="color: #333 !important;">English</option>
+                                <option value="draft" style="color: #333 !important;">Spanish</option>
+                <option value="draft" style="color: #333 !important;">French</option>
+                <option value="archived" style="color: #333 !important;">German</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="publish-section">
+          <div class="form-row-top-input">
+            <label class="publish-label">Parent Page</label>
+            </div>
+            <div class="select-container">
+              <select class="form-control">
+                <option value="active" selected="" style="color: #333 !important;">Main page (no parent)</option>
+                <option value="Homepage" style="color: #333 !important;">Home</option>
+                <option value="draft" style="color: #333 !important;">About</option>
+                <option value="archived" style="color: #333 !important;">Contact</option>
+              </select>
+            </div>
+          </div>
+        
+</div>
+</div>
+
+        <div class="settings-group">
+        <div class="settings-group-header">
+        <h3>Custom Style</h3> 
+
+        <div class="toggle-switch">
+                <input type="checkbox" class="section-toggle">
+                <span class="toggle-slider"></span>
+              </div>
+        </div>
+
+<div class="publishing-options-section">
+          
+          <div class="publish-section">
+          <div class="form-row-top-input">
+            <label class="publish-label">Header</label>
+            <div class="schedule-publish-btn">New header</div>
+            </div>
+            <div class="select-container">
+              <select class="form-control">
+                <option value="active" selected="" style="color: #333 !important;">Default</option>
+                <option value="Homepage" style="color: #333 !important;">Header design 1</option>
+                <option value="draft" style="color: #333 !important;">Header design 2</option>
+                <option value="archived" style="color: #333 !important;">Header design 3</option>
+                <option value="separator" style="color: #333 !important;" disabled>────────────────────────</option>
+                                <option value="archived" style="color: #333 !important; margin-bottom: 10px;">! Without Header</option>
+              </select>
+            </div>
+          </div>
+
+                  <div class="settings-group">
+        <div class="publish-section">  
+ <div class="form-row-top-input">
+            <label class="publish-label">Template</label>
+            </div>
+            <div class="select-container">
+              <select class="form-control">
+                <option value="active" selected="" style="color: #333 !important;">Default</option>
+                                <option value="draft" style="color: #333 !important;">Boxed</option>
+                <option value="draft" style="color: #333 !important;">Sidebar</option>
+                <option value="archived" style="color: #333 !important;">Full Width</option>
+              </select>
+            </div>
+          </div>
+
+                  <div class="publish-section">  
+ <div class="form-row-top-input">
+            <label class="publish-label">Footer</label>
+            <div class="schedule-publish-btn">New footer</div>
+            </div>
+            <div class="select-container">
+              <select class="form-control">
+                <option value="active" selected="" style="color: #333 !important;">Default</option>
+                <option value="draft" style="color: #333 !important;">Footer design 1</option>
+                <option value="draft" style="color: #333 !important;">Footer design 2</option>
+                <option value="archived" style="color: #333 !important;">Footer design 3</option>
+                                <option value="separator" style="color: #333 !important;" disabled>────────────────────────</option>
+                                <option value="nofoooter" style="color: #333 !important;">Without Footer</option>
+              </select>
+            </div>
+          </div>
+        <div class="settings-group">
+                  <div class="publish-section">  
+ <div class="form-row-top-input">
+            <label class="publish-label">Override Logo</label>
+            <div class="schedule-publish-btn">Other formats</div>
+            </div>
+            <div class="upload-container">
+<input type="file" id="avatar" name="avatar" accept="image/png, image/jpeg" />
+            </div>
+          </div>
+
+                            <div class="publish-section">  
+ <div class="form-row-top-input">
+             <label class="publish-label">Breadcrumbs</label>
+             </div>
+<div class="checkbox-option">
+                  <input type="checkbox" id="enable-breadcrumbs" checked="">
+                  <label for="enable-breadcrumbs">Enable breadcrumbs for this page</label>
+                </div>
+            </div>
+          </div>
+
+
+
+
+          
+</div></div>
+
+
+
+</div>
+
+
+
+          
+        <div class="settings-group">
+<div class="settings-group-header">
+        <h3>Privacy</h3> 
+
+        <div class="toggle-switch">
+                <input type="checkbox" class="section-toggle">
+                <span class="toggle-slider"></span>
+              </div>
+        </div>
+<div class="publishing-options-section">
+          
+          <div class="publish-section">
+          <div class="form-row-top-input">
+            <label class="publish-label">Password protected</label>
+            <div class="schedule-publish-btn">Schedule</div>
+            </div>
+<div class="date-picker-container">
+              <input type="text" class="form-control date-input" value=" ">
+              <button class="calendar-button">
+                <i class="fas fa-lock"></i>
+              </button>
+            </div>
+          </div>
+        <div class="publish-section">  
+ <div class="form-row-top-input">
+            <label class="publish-label">Private</label>
+            </div>
+            <div class="checkbox-option">
+                  <input type="checkbox" id="private-page" checked="">
+                  <label for="private-page">Private (exclude from sitemap)</label>
+                </div>
+          </div>
+</div>
+</div>
+
+
+
+</div> 
+      </div>
+    </div>
+
+      
+
+<div class="page-settings-footer">
+
+
+
+    <div class="settings-actions">
+      <div class="page-settings-footer-left">
+            <div class="page-settings-header-right">
+<span>Page ID: #25690-EN</span>
+      </div>
+      <div class="page-settings-header-left">
+      <span class="published">Published 2022/01/19 at 4:27 pm</span>
+      <span class="published">Last edited 2022/01/19 at 4:27 pm</span>
+      </div>
+
+      </div>
+      <div class="page-settings-footer-right">
+      <button class="settings-cancel-btn">Cancel</button>
+      <button class="settings-save-btn">Save Changes</button>
+      </div>
+    </div>
+
+
+    
+    </div>
+        `;
+        
+        // Insert dropdown at the beginning of sitebuilder-main-content
+        mainContent.insertAdjacentElement('afterbegin', addPageDropdown);
+        
+        // Show dropdown with animation
+        addPageDropdown.style.display = 'block';
+        setTimeout(() => {
+          addPageDropdown.style.height = addPageDropdown.scrollHeight + 'px';
+        }, 10);
+        
+        // Scroll to top of main content to show the dropdown
+        if (mainContent) {
+          mainContent.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        }
+        
+        // Setup toggle switches for the dropdown content
+        setupDropdownToggles(addPageDropdown);
+        
+        // Add event listeners for cancel and save buttons
+        const cancelBtn = addPageDropdown.querySelector('.settings-cancel-btn');
+        const saveBtn = addPageDropdown.querySelector('.settings-save-btn');
+        
+        if (cancelBtn) {
+          cancelBtn.addEventListener('click', function() {
+            addPageDropdown.style.height = '0';
+            setTimeout(() => {
+              addPageDropdown.style.display = 'none';
+            }, 300);
+          });
+        }
+        
+        if (saveBtn) {
+          saveBtn.addEventListener('click', function() {
+            // Get form values
+            const titleInput = addPageDropdown.querySelector('.settings-input');
+            const slugInput = addPageDropdown.querySelector('.url-slug');
+            const pageTypeSelect = addPageDropdown.querySelector('select');
+            
+            const title = titleInput ? titleInput.value.trim() : '';
+            const slug = slugInput ? slugInput.value.trim() : '';
+            const pageType = pageTypeSelect ? pageTypeSelect.value : 'page';
+            
+            if (!title) {
+              alert('Please enter a page title');
+              return;
+            }
+            
+            // Auto-generate slug if empty
+            let finalSlug = slug;
+            if (!finalSlug && title) {
+              finalSlug = title.toLowerCase()
+                .replace(/[^a-z0-9\s-]/g, '')
+                .replace(/\s+/g, '-')
+                .replace(/-+/g, '-')
+                .trim('-');
+            }
+            
+            // Create success notification
+            const notification = document.createElement('div');
+            notification.className = 'settings-notification';
+            notification.innerHTML = '<i class="fas fa-check-circle"></i> Page "' + title + '" created successfully';
+            notification.style.position = 'fixed';
+            notification.style.bottom = '20px';
+            notification.style.right = '20px';
+            notification.style.backgroundColor = '#10B981';
+            notification.style.color = 'white';
+            notification.style.padding = '12px 20px';
+            notification.style.borderRadius = '6px';
+            notification.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
+            notification.style.zIndex = '10000';
+            notification.style.display = 'flex';
+            notification.style.alignItems = 'center';
+            notification.style.gap = '8px';
+            notification.style.opacity = '0';
+            notification.style.transform = 'translateY(20px)';
+            notification.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+              notification.style.opacity = '1';
+              notification.style.transform = 'translateY(0)';
+            }, 10);
+            
+            setTimeout(() => {
+              notification.style.opacity = '0';
+              notification.style.transform = 'translateY(20px)';
+              setTimeout(() => notification.remove(), 300);
+            }, 3000);
+            
+            // Hide dropdown
+            addPageDropdown.style.height = '0';
+            setTimeout(() => {
+              addPageDropdown.style.display = 'none';
+            }, 300);
+          });
+        }
+        
+        // Auto-generate slug when title changes
+        const titleInput = addPageDropdown.querySelector('.settings-input');
+        const slugInput = addPageDropdown.querySelector('.url-slug');
+        
+        if (titleInput && slugInput) {
+          titleInput.addEventListener('input', function() {
+            if (!slugInput.value.trim()) {
+              const autoSlug = this.value.toLowerCase()
+                .replace(/[^a-z0-9\s-]/g, '')
+                .replace(/\s+/g, '-')
+                .replace(/-+/g, '-')
+                .trim('-');
+              slugInput.value = autoSlug;
+            }
+          });
+        }
+      }
+    });
+  }
+
+  // Add global click handler to close add-page-dropdown when clicking outside
+  document.addEventListener('click', function(e) {
+    const addPageDropdown = windowElement.querySelector('.add-page-dropdown');
+    const addNewPageBtn = windowElement.querySelector('.add-new-page-btn');
+    
+    if (addPageDropdown && addPageDropdown.style.display !== 'none') {
+      // Check if click is outside both the dropdown and the button
+      if (!addPageDropdown.contains(e.target) && !addNewPageBtn.contains(e.target)) {
+        addPageDropdown.style.height = '0';
+        setTimeout(() => {
+          addPageDropdown.style.display = 'none';
+        }, 300);
+      }
+    }
+  });
+
+  // Function to setup toggle switches for dropdown content
+  function setupDropdownToggles(dropdownElement) {
+    // Add toggle switch functionality for publishing options sections
+    const toggleSwitches = dropdownElement.querySelectorAll('.settings-group-header .toggle-switch input');
+    toggleSwitches.forEach(toggle => {
+      // Get the corresponding publishing-options-section
+      const settingsGroupHeader = toggle.closest('.settings-group-header');
+      const settingsGroup = settingsGroupHeader.nextElementSibling;
+      
+      if (settingsGroup && settingsGroup.classList.contains('publishing-options-section')) {
+        // Set initial state based on toggle - default to unchecked/hidden
+        toggle.checked = false;
+        settingsGroup.style.display = 'none';
+        settingsGroup.style.height = '0';
+        
+        // Make the entire header clickable
+        settingsGroupHeader.addEventListener('click', function(e) {
+          // Don't toggle if clicking directly on the checkbox (it handles its own state)
+          if (e.target !== toggle) {
+            toggle.checked = !toggle.checked;
+            
+            // Trigger the change event
+            const changeEvent = new Event('change');
+            toggle.dispatchEvent(changeEvent);
+          }
+        });
+        
+        // Add event listener for toggle changes
+        toggle.addEventListener('change', function() {
+          if (this.checked) {
+            settingsGroup.style.display = 'block';
+            settingsGroup.style.height = '0';
+            setTimeout(() => {
+              settingsGroup.style.height = settingsGroup.scrollHeight + 'px';
+              // Update the main dropdown height to accommodate the expanded content
+              setTimeout(() => {
+                const mainDropdown = dropdownElement;
+                if (mainDropdown && mainDropdown.style.display !== 'none') {
+                  mainDropdown.style.height = mainDropdown.scrollHeight + 'px';
+                }
+              }, 50);
+            }, 10);
+          } else {
+            settingsGroup.style.height = '0';
+            setTimeout(() => {
+              settingsGroup.style.display = 'none';
+              // Update the main dropdown height after content is hidden
+              setTimeout(() => {
+                const mainDropdown = dropdownElement;
+                if (mainDropdown && mainDropdown.style.display !== 'none') {
+                  mainDropdown.style.height = mainDropdown.scrollHeight + 'px';
+                }
+              }, 50);
+            }, 300);
+          }
+        });
+      }
+    });
+  }
+
+  // Add click event listeners to each sitebuilder-iteam-content
+  sitebuilderItemContents.forEach(item => {
+    item.addEventListener('click', function(e) {
+      // Check if the clicked element is or is inside a published-url element
+      const isPublishedUrl = e.target.classList.contains('published-url') || 
+                             e.target.closest('.published-url');
+      
+      // Check if the clicked element is or is inside an action button
+      const isActionButton = e.target.classList.contains('action-btn') || 
+                             e.target.closest('.action-btn') ||
+                             e.target.classList.contains('page-action-btn') ||
+                             e.target.closest('.page-action-btn');
+      
+      // Check if the clicked element is inside a page-settings-section
+      const isInsideSettings = e.target.classList.contains('page-settings-section') ||
+                               e.target.closest('.page-settings-section');
+      
+      // If the clicked element is a published-url, let the direct click handler handle it
+      if (isPublishedUrl) {
+        return;
+      }
+      
+      // If the clicked element is inside settings section, don't toggle
+      if (isInsideSettings) {
+        return;
+      }
+      
+      // Handle edit button clicks specifically
+      if (isActionButton) {
+        const editButton = e.target.closest('.page-action-btn');
+        if (editButton && editButton.textContent.includes('Edit')) {
+          e.preventDefault();
+          e.stopPropagation();
+          openSiteBuilderEditor(editButton);
+          return;
+        }
+      }
+      
+      // If the clicked element is not an action button and not a published-url,
+      // toggle the page actions row (like clicking the edit button)
+      if (!isActionButton) {
+        const editButton = this.querySelector('.action-btn.edit-btn');
+        if (editButton) {
+          togglePageActionsRow(editButton);
+        }
+      }
+    });
+  });
+
+  // Function to open the site builder editor window
+  function openSiteBuilderEditor(editButton) {
+    // Get page information from the clicked item
+    const pageItem = editButton.closest('.sitebuilder-iteam-content');
+    const pageTitle = pageItem ? pageItem.querySelector('.page-title')?.textContent || 'Untitled Page' : 'Untitled Page';
+    const pageUrl = pageItem ? pageItem.querySelector('.published-url')?.textContent || '' : '';
+    
+    // Create a new window for the site builder editor (full screen)
+    const editorWindow = document.createElement('div');
+    editorWindow.className = 'window sitebuilder-editor-window';
+    editorWindow.id = 'sitebuilder-editor-' + Date.now(); // Unique ID for window management
+    
+    editorWindow.innerHTML = `
+      <div class="elementor-header window-header">
+        <div class="header-left">
+          <div class="elementor-logo">
+            <i class="fas fa-cube"></i>
+            Builder
+          </div>
+
+          <div class="header-panel-buttons">
+            <button class="header-panel-btn active" data-panel="elements">
+              <i class="fas fa-cube"></i>
+            </button>
+            <button class="header-panel-btn" data-panel="style">
+              <i class="fas fa-sliders"></i>
+            </button>
+            <button class="header-panel-btn" data-panel="layers">
+              <i class="fas fa-layer-group"></i>
+            </button>
+                        <button class="header-panel-btn" data-panel="page-settings-section">
+              <i class="fas fa-gear"></i>
+            </button>
+          </div>
+        </div>
+        
+        <div class="header-center">
+          <button class="header-btn responsive-btn desktop-view active" data-view="desktop">
+            <i class="fas fa-desktop"></i>
+          </button>
+          <button class="header-btn responsive-btn tablet-view" data-view="tablet">
+            <i class="fas fa-tablet-alt"></i>
+          </button>
+          <button class="header-btn responsive-btn mobile-view" data-view="mobile">
+            <i class="fas fa-mobile-alt"></i>
+          </button>
+        </div>
+        
+        <div class="header-right">
+                  <div class="header-panel-buttons">
+            <button class="header-btn" data-panel="undoo">
+              <i class="fas fa-rotate-left"></i>
+            </button>
+            <button class="header-btn" data-panel="redoo">
+              <i class="fas fa-rotate-right"></i>
+            </button>
+            <button class="header-btn" data-panel="show-split-lines">
+              <i class="fas fa-border-none"></i>
+            </button>
+                        <button class="header-btn" data-panel="show-code">
+              <i class="fas fa-code"></i>
+            </button>
+                      <button class="header-btn">
+            <i class="fas fa-eye"></i>
+          </button>
+          </div>
+
+          <div class="publish-button-group">
+            <button class="header-btn publish-btn">
+              <i class="fas fa-paper-plane" style="margin-right: 10px;"></i> Publish
+            </button>
+            <button class="header-btn publish-dropdown-btn">
+              <i class="fas fa-chevron-down"></i>
+            </button>
+            <div class="publish-dropdown-menu">
+              <div class="publish-dropdown-item" data-action="save-draft">
+                <i class="fas fa-save"></i>
+                Save as Draft
+              </div>
+              <div class="publish-dropdown-item" data-action="save-template">
+                <i class="fas fa-sheet-plastic"></i>
+                Save as Template
+              </div>
+              <div class="publish-dropdown-item" data-action="publish-private">
+                <i class="fas fa-lock"></i>
+                Publish Privately
+              </div>
+            </div>
+          </div>
+          <button class="header-btn close-btn window-close">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      </div>
+      
+      <div class="window-content">
+        <!-- Left Sidebar - Panel Container -->
+        <div class="editor-sidebar">
+          <!-- Elements Panel - Widget Library (No tabs, just search and widgets) -->
+          <div class="sidebar-panel elements-panel active">
+            <!-- Search Bar -->
+            <div class="sidebar-search">
+              <input type="text" placeholder="Search Widget...">
+            </div>
+            
+            <!-- Widget Library Content -->
+            <div class="elements-content">
+              <!-- Basic Elements -->
+              <div class="widget-category">
+                <h4>Basic</h4>
+                <div class="widget-grid">
+                  <div class="widget-item" draggable="true" data-widget="inner-section">
+                    <i class="fas fa-th-large"></i>
+                    <div>Inner Section</div>
+                  </div>
+                  <div class="widget-item" draggable="true" data-widget="heading">
+                    <i class="fas fa-heading"></i>
+                    <div>Heading</div>
+                  </div>
+                  <div class="widget-item" draggable="true" data-widget="image">
+                    <i class="fas fa-image"></i>
+                    <div>Image</div>
+                  </div>
+                  <div class="widget-item" draggable="true" data-widget="text">
+                    <i class="fas fa-font"></i>
+                    <div>Text Editor</div>
+                  </div>
+                  <div class="widget-item" draggable="true" data-widget="video">
+                    <i class="fas fa-play-circle"></i>
+                    <div>Video</div>
+                  </div>
+                  <div class="widget-item" draggable="true" data-widget="button">
+                    <i class="fas fa-mouse-pointer"></i>
+                    <div>Button</div>
+                  </div>
+                  <div class="widget-item" draggable="true" data-widget="divider">
+                    <i class="fas fa-minus"></i>
+                    <div>Divider</div>
+                  </div>
+                  <div class="widget-item" draggable="true" data-widget="spacer">
+                    <i class="fas fa-arrows-alt-v"></i>
+                    <div>Spacer</div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- General Elements -->
+              <div class="widget-category">
+                <h4>General</h4>
+                <div class="widget-grid">
+                  <div class="widget-item" draggable="true" data-widget="icon-box">
+                    <i class="fas fa-cube"></i>
+                    <div>Image Box</div>
+                  </div>
+                  <div class="widget-item" draggable="true" data-widget="icon">
+                    <i class="fas fa-star"></i>
+                    <div>Icon Box</div>
+                  </div>
+                  <div class="widget-item" draggable="true" data-widget="gallery">
+                    <i class="fas fa-images"></i>
+                    <div>Image Carousel</div>
+                  </div>
+                  <div class="widget-item" draggable="true" data-widget="gallery">
+                    <i class="fas fa-th"></i>
+                    <div>Basic Gallery</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Style Panel - Element Styling (Has tabs) -->
+          <div class="sidebar-panel style-panel">
+            <div class="sidebar-tabs">
+              <button class="sidebar-tab active" data-tab="content">
+                Content
+              </button>
+              <button class="sidebar-tab" data-tab="style">
+                Style
+              </button>
+              <button class="sidebar-tab" data-tab="advanced">
+                Advanced
+              </button>
+            </div>
+            
+            <div class="tab-content content-tab active">
+              <div class="properties-panel-inline">
+                <div class="properties-content">
+                  <div class="properties-header">
+                    <h3>Content Settings</h3>
+                  </div>
+                  <div class="properties-body">
+                    <p>Select an element to edit its content properties</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="tab-content style-tab">
+              <div class="properties-panel-inline">
+                <div class="properties-content">
+                  <div class="properties-header">
+                    <h3>Style Settings</h3>
+                  </div>
+                  <div class="properties-body">
+                    <p>Select an element to edit its style properties</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="tab-content advanced-tab">
+              <div class="properties-panel-inline">
+                <div class="properties-content">
+                  <div class="properties-header">
+                    <h3>Advanced Style Settings</h3>
+                  </div>
+                  <div class="properties-body">
+                    <p>Select an element to edit its advanced style properties</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Advanced Panel - Advanced Settings (Has tabs) -->
+          <div class="sidebar-panel advanced-panel">
+            <div class="sidebar-tabs">
+              <button class="sidebar-tab active" data-tab="content">
+                Content
+              </button>
+              <button class="sidebar-tab" data-tab="style">
+                Style
+              </button>
+              <button class="sidebar-tab" data-tab="advanced">
+                Advanced
+              </button>
+            </div>
+            
+            <div class="tab-content content-tab active">
+              <div class="properties-panel-inline">
+                <div class="properties-content">
+                  <div class="properties-header">
+                    <h3>Advanced Content Settings</h3>
+                  </div>
+                  <div class="properties-body">
+                    <p>Select an element to edit its advanced content properties</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="tab-content style-tab">
+              <div class="properties-panel-inline">
+                <div class="properties-content">
+                  <div class="properties-header">
+                    <h3>Advanced Style Settings</h3>
+                  </div>
+                  <div class="properties-body">
+                    <p>Select an element to edit its advanced style properties</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="tab-content advanced-tab">
+              <div class="properties-panel-inline">
+                <div class="properties-content">
+                  <div class="properties-header">
+                    <h3>Advanced Configuration</h3>
+                  </div>
+                  <div class="properties-body">
+                    <p>Select an element to edit its advanced configuration</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Page Settings Panel - Page Configuration -->
+          <div class="sidebar-panel page-settings-section-panel">
+            <div class="page-settings-panel-content">
+              <div class="page-settings-header">
+                <h3>Page Settings</h3>
+              </div>
+              <div class="page-settings-body">
+                <div class="page-settings-row">
+                  <div class="page-settings-row-left">
+                    <div class="settings-group">
+                      <h3>General</h3>
+                      <div class="settings-item">
+                        <label>Page Title</label>
+                        <input type="text" class="settings-input" value="Portfolio">
+                      </div>
+                      <div class="settings-item">
+                        <label>URL Slug</label>
+                        <div class="settings-url-input">
+                          <span class="settings-url-prefix">mywebsite.com/</span>
+                          <input type="text" class="settings-input url-slug" value="portfolio">
+                        </div>
+                      </div>
+                    </div>
+
+<div class="settings-group">
+                      <h3>Publishing Options</h3>
+                      <div class="publishing-options-section">
+                        <div class="publish-section">
+                          <div class="form-row-top-input">
+                            <label class="publish-label">Status</label>
+                            <div class="schedule-publish-btn">Schedule</div>
+                          </div>
+                          <div class="select-container">
+                            <select class="form-control">
+                              <option value="active" selected="" style="color: #333 !important;">Published</option>
+                              <option value="draft" style="color: #333 !important;">Draft</option>
+                              <option value="archived" style="color: #333 !important;">Staff Review</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div class="publish-section">
+                          <label class="publish-label">Schedule publishing</label>
+                          <div class="date-picker-container">
+                            <input type="text" class="form-control date-input" value="05-01-2025">
+                            <button class="calendar-button">
+                              <i class="fas fa-calendar-alt"></i>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+
+                    <div class="settings-group">
+                      <div class="settings-group-header">
+                        <h3>Search Engine Optimization</h3> 
+                        <div class="toggle-switch">
+                          <input type="checkbox" class="section-toggle">
+                          <span class="toggle-slider"></span>
+                        </div>
+                      </div>
+                      <div class="publishing-options-section">
+                        <div class="settings-item">
+                          <label>Meta Title</label>
+                          <input type="text" class="settings-input" value="Portfolio - My Website">
+                        </div>
+                        <div class="settings-item">
+                          <label>Meta Description</label>
+                          <textarea class="settings-textarea">Check out my portfolio of recent projects and work.</textarea>
+                        </div>
+                        <div class="publish-section">  
+                          <div class="form-row-top-input">
+                            <label class="publish-label">SEO Exclusion</label>
+                          </div>
+                          <div class="checkbox-option">
+                            <input type="checkbox" id="no-index-page">
+                            <label for="no-index-page">No index (exclude from search engines)</label>
+                          </div>
+                          <div class="checkbox-option" style="margin-top: 10px;">
+                            <input type="checkbox" id="no-follow-page">
+                            <label for="no-follow-page">No follow (do not follow links)</label>
+                          </div>
+                          <div class="checkbox-option" style="margin-top: 10px;">
+                            <input type="checkbox" id="exclude-page-from-sitemap">
+                            <label for="exclude-page-from-sitemap">Exclude page from sitemap</label>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="settings-group">
+                      <h3>Social Sharing</h3>
+                      <div class="settings-item">
+                        <label>Social Image</label>
+                        <div class="settings-image-upload">
+                          <i class="fas fa-upload"></i>
+                          <span>Upload Image</span>
+                        </div>
+                        <div class="upload-image-description">
+                          <span>When a Recommended image or an OpenGraph Image is not set for individual posts/pages/CPTs, this image will be used as a fallback thumbnail when your post is shared on Facebook. The recommended image size is 1200 x 630 pixels.</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="page-settings-row-right">
+                                        <div class="settings-group">
+                      <div class="settings-group-header">
+                        <h3>Visibility</h3> 
+                        <div class="toggle-switch">
+                          <input type="checkbox" class="section-toggle">
+                          <span class="toggle-slider"></span>
+                        </div>
+                      </div>
+                      <div class="publishing-options-section">
+                        <div class="publish-section">  
+                          <div class="form-row-top-input">
+                            <label class="publish-label">Language</label>
+                          </div>
+                          <div class="select-container">
+                            <select class="form-control">
+                              <option value="active" selected="" style="color: #333 !important;">English</option>
+                              <option value="draft" style="color: #333 !important;">Spanish</option>
+                              <option value="draft" style="color: #333 !important;">French</option>
+                              <option value="archived" style="color: #333 !important;">German</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div class="publish-section">
+                          <div class="form-row-top-input">
+                            <label class="publish-label">Parent Page</label>
+                          </div>
+                          <div class="select-container">
+                            <select class="form-control">
+                              <option value="active" selected="" style="color: #333 !important;">Main page (no parent)</option>
+                              <option value="Homepage" style="color: #333 !important;">Home</option>
+                              <option value="draft" style="color: #333 !important;">About</option>
+                              <option value="archived" style="color: #333 !important;">Contact</option>
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="settings-group">
+                      <div class="settings-group-header">
+                        <h3>Custom Style</h3> 
+                        <div class="toggle-switch">
+                          <input type="checkbox" class="section-toggle">
+                          <span class="toggle-slider"></span>
+                        </div>
+                      </div>
+                      <div class="publishing-options-section">
+                        <div class="publish-section">
+                          <div class="form-row-top-input">
+                            <label class="publish-label">Header</label>
+                            <div class="schedule-publish-btn">New header</div>
+                          </div>
+                          <div class="select-container">
+                            <select class="form-control">
+                              <option value="active" selected="" style="color: #333 !important;">Default</option>
+                              <option value="Homepage" style="color: #333 !important;">Header design 1</option>
+                              <option value="draft" style="color: #333 !important;">Header design 2</option>
+                              <option value="archived" style="color: #333 !important;">Header design 3</option>
+                              <option value="separator" style="color: #333 !important;" disabled>────────────────────────</option>
+                              <option value="archived" style="color: #333 !important; margin-bottom: 10px;">! Without Header</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div class="settings-group">
+                          <div class="publish-section">  
+                            <div class="form-row-top-input">
+                              <label class="publish-label">Template</label>
+                            </div>
+                            <div class="select-container">
+                              <select class="form-control">
+                                <option value="active" selected="" style="color: #333 !important;">Default</option>
+                                <option value="draft" style="color: #333 !important;">Boxed</option>
+                                <option value="draft" style="color: #333 !important;">Sidebar</option>
+                                <option value="archived" style="color: #333 !important;">Full Width</option>
+                              </select>
+                            </div>
+                          </div>
+                          <div class="publish-section">  
+                            <div class="form-row-top-input">
+                              <label class="publish-label">Footer</label>
+                              <div class="schedule-publish-btn">New footer</div>
+                            </div>
+                            <div class="select-container">
+                              <select class="form-control">
+                                <option value="active" selected="" style="color: #333 !important;">Default</option>
+                                <option value="draft" style="color: #333 !important;">Footer design 1</option>
+                                <option value="draft" style="color: #333 !important;">Footer design 2</option>
+                                <option value="archived" style="color: #333 !important;">Footer design 3</option>
+                                <option value="separator" style="color: #333 !important;" disabled>────────────────────────</option>
+                                <option value="archived" style="color: #333 !important;">! Without Footer</option>
+                              </select>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Sidebar Toggle Button -->
+        <div class="sidebar-toggle-container">
+          <button class="sidebar-toggle-btn" title="Toggle Panels">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+        </div>
+        
+        <!-- Layers Panel - Slides in from left -->
+        <div class="layers-panel">
+          <div class="layers-header">
+            <h3>Layers</h3>
+            <button class="layers-close-btn">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div class="layers-content">
+            <div class="layer-item" data-element-id="canvas">
+              <div class="layer-info">
+                <i class="fas fa-eye layer-visibility"></i>
+                <i class="fas fa-file-alt layer-icon"></i>
+                <span class="layer-name">Canvas</span>
+              </div>
+              <div class="layer-actions">
+                <i class="fas fa-lock layer-lock"></i>
+              </div>
+            </div>
+            <div class="layers-empty">
+              <p>Add elements to see them in layers</p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Main Editor Area -->
+        <div class="editor-main">
+          <!-- Canvas Area -->
+          <div class="editor-canvas">
+            <div class="canvas-container">
+              <!-- Drop Zone -->
+              <div class="drop-zone">
+                <div class="empty-state">
+                  <i class="fas fa-plus-circle"></i>
+                  <h3>Start Building Your Page</h3>
+                  <p>Drag elements from the left panel to begin</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    `;
+    
+    // Add the window to the body
+    document.body.appendChild(editorWindow);
+    
+    // Apply standard window opening animation
+    editorWindow.classList.add('window-anim-open');
+    
+    // Initialize the editor functionality
+    initializeSiteBuilderEditor(editorWindow);
+    
+    // Setup standard window controls (handles dragging, minimizing, maximizing, closing with animations)
+    if (typeof setupWindowControls === 'function') {
+      setupWindowControls(editorWindow);
+    } else {
+      // Fallback: setup close button manually with standard animation
+      const closeButton = editorWindow.querySelector('.window-close');
+      if (closeButton) {
+        closeButton.addEventListener('click', function (e) {
+          e.stopPropagation();
+          // Use standard window close animation
+          editorWindow.classList.remove('window-anim-open', 'window-anim-maximize', 'window-anim-close');
+          editorWindow.classList.add('window-anim-close');
+          
+          editorWindow.addEventListener('animationend', function handler(ev) {
+            if (ev.animationName === 'windowClose') {
+              editorWindow.remove();
+            }
+          }, { once: true });
+        });
+      }
+    }
+  }
+
+  // Function to initialize the site builder editor functionality
+  function initializeSiteBuilderEditor(editorWindow) {
+    const canvas = editorWindow.querySelector('.drop-zone');
+
+    const emptyState = editorWindow.querySelector('.empty-state');
+    let selectedElement = null;
+    let draggedWidget = null;
+    
+    // Widget drag and drop functionality
+    const dragWidgets = editorWindow.querySelectorAll('.widget-item');
+    dragWidgets.forEach(widget => {
+      widget.addEventListener('dragstart', function(e) {
+        draggedWidget = this.dataset.widget;
+        this.classList.add('dragging');
+      });
+      
+      widget.addEventListener('dragend', function(e) {
+        this.classList.remove('dragging');
+      });
+    });
+    
+    // Canvas drop functionality
+    canvas.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      this.classList.add('drag-over');
+    });
+    
+    canvas.addEventListener('dragleave', function(e) {
+      this.classList.remove('drag-over');
+    });
+    
+    canvas.addEventListener('drop', function(e) {
+      e.preventDefault();
+      this.classList.remove('drag-over');
+      
+      if (draggedWidget) {
+        // Hide empty state when first element is added
+        if (emptyState) {
+          emptyState.style.display = 'none';
+        }
+        
+        // Create the element based on widget type
+        const element = createWidgetElement(draggedWidget);
+        this.appendChild(element);
+        
+        // Select the newly created element
+        selectElement(element);
+        
+        // Update layers panel
+        updateLayersPanel();
+        
+        draggedWidget = null;
+      }
+    });
+    
+    // Header panel button functionality
+    const headerPanelButtons = editorWindow.querySelectorAll('.header-panel-btn');
+    const sidebarPanels = editorWindow.querySelectorAll('.sidebar-panel');
+    const layersPanel = editorWindow.querySelector('.layers-panel');
+    const editorMain = editorWindow.querySelector('.editor-main');
+    
+    headerPanelButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const panelName = button.getAttribute('data-panel');
+        
+        if (panelName === 'layers') {
+          // Handle layers panel (slides in from right)
+          const isOpen = layersPanel.classList.contains('open');
+          
+          if (isOpen) {
+            // Close layers panel
+            layersPanel.classList.remove('open');
+            editorMain.classList.remove('layers-open');
+            button.classList.remove('active');
+          } else {
+            // Open layers panel
+            layersPanel.classList.add('open');
+            editorMain.classList.add('layers-open');
+            button.classList.add('active');
+            
+            // Update layers content
+            updateLayersPanel();
+          }
+        } else {
+          // Handle regular sidebar panels
+          // Keep layers panel open if it was open - don't close it
+          
+          // Remove active class from all header buttons except layers (if open)
+          headerPanelButtons.forEach(btn => {
+            if (btn.getAttribute('data-panel') !== 'layers' || !layersPanel.classList.contains('open')) {
+              btn.classList.remove('active');
+            }
+          });
+          sidebarPanels.forEach(panel => panel.classList.remove('active'));
+          
+          // Add active class to clicked button
+          button.classList.add('active');
+          
+          // Show corresponding panel
+          const targetPanel = editorWindow.querySelector(`.${panelName}-panel`);
+          if (targetPanel) {
+            targetPanel.classList.add('active');
+          }
+        }
+      });
+    });
+
+    // Layers panel close button functionality
+    const layersCloseBtn = editorWindow.querySelector('.layers-close-btn');
+    if (layersCloseBtn) {
+      layersCloseBtn.addEventListener('click', () => {
+        layersPanel.classList.remove('open');
+        editorMain.classList.remove('layers-open');
+        // Remove active state from layers button
+        const layersBtn = editorWindow.querySelector('.header-panel-btn[data-panel="layers"]');
+        if (layersBtn) {
+          layersBtn.classList.remove('active');
+        }
+      });
+    }
+
+    // Close button will be handled by setupWindowControls() - no custom handler needed
+
+    // Layers panel drag functionality
+    const layersHeader = editorWindow.querySelector('.layers-header');
+    if (layersHeader && layersPanel) {
+      let isDragging = false;
+      let isResizing = false;
+      let dragHandlers = null;
+      let resizeHandlers = null;
+      
+      // Global cleanup function
+      function cleanupAllListeners() {
+        cleanupDragListeners();
+        cleanupResizeListeners();
+        isDragging = false;
+        isResizing = false;
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+      }
+      
+      // Create resize handles
+      function createResizeHandles() {
+        if (layersPanel.querySelector('.resize-handle')) return; // Already created
+        
+        const handles = ['n', 'e', 's', 'w', 'ne', 'nw', 'se', 'sw'];
+        handles.forEach(direction => {
+          const handle = document.createElement('div');
+          handle.className = `resize-handle resize-${direction}`;
+          handle.dataset.direction = direction;
+          layersPanel.appendChild(handle);
+        });
+      }
+      
+      // Remove resize handles
+      function removeResizeHandles() {
+        const resizeHandles = layersPanel.querySelectorAll('.resize-handle');
+        resizeHandles.forEach(handle => handle.remove());
+      }
+      
+      // Clean up drag event listeners
+      function cleanupDragListeners() {
+        if (dragHandlers) {
+          document.removeEventListener('mousemove', dragHandlers.move);
+          document.removeEventListener('mouseup', dragHandlers.up);
+          dragHandlers = null;
+        }
+        layersPanel.classList.remove('dragging');
+        editorMain.classList.remove('layers-snap-preview');
+        layersPanel.classList.remove('snap-preview');
+      }
+      
+      // Clean up resize event listeners
+      function cleanupResizeListeners() {
+        if (resizeHandlers) {
+          document.removeEventListener('mousemove', resizeHandlers.move);
+          document.removeEventListener('mouseup', resizeHandlers.up);
+          resizeHandlers = null;
+        }
+      }
+      
+      // Drag functionality
+      layersHeader.addEventListener('mousedown', (e) => {
+        // Only start dragging if clicking on the header itself, not buttons or resize handles
+        if (e.target.closest('.layers-close-btn') || e.target.classList.contains('resize-handle') || isResizing) return;
+        
+        // Don't start dragging if already dragging
+        if (isDragging) return;
+        
+        // Clean up any existing listeners
+        cleanupDragListeners();
+        cleanupResizeListeners();
+        
+        isDragging = true;
+        const wasDocked = !layersPanel.classList.contains('floating');
+        const wasOpen = layersPanel.classList.contains('open'); // Track if panel was open before dragging
+        
+        console.log('Starting drag - wasOpen:', wasOpen, 'wasDocked:', wasDocked);
+        
+        // Get initial positions
+        const startX = e.clientX;
+        const startY = e.clientY;
+        const rect = layersPanel.getBoundingClientRect();
+        const initialRight = window.innerWidth - rect.right;
+        const initialTop = rect.top;
+        
+        // Convert to floating mode - set explicit dimensions first
+        const panelWidth = 250; // Fixed width
+        const panelHeight = Math.floor(window.innerHeight * 0.4); // Fixed height
+        
+        layersPanel.classList.add('floating');
+        layersPanel.classList.remove('open'); // Remove open class when floating
+        createResizeHandles();
+        
+        // Set explicit dimensions and position with !important override
+        layersPanel.style.cssText = `
+          position: fixed !important;
+          right: ${initialRight}px !important;
+          top: ${initialTop}px !important;
+          width: ${panelWidth}px !important;
+          height: ${panelHeight}px !important;
+          z-index: 1002 !important;
+          transition: none !important;
+        `;
+        
+        // Remove layers-open class from editor-main when floating
+        editorMain.classList.remove('layers-open');
+        layersPanel.classList.add('dragging');
+        document.body.style.userSelect = 'none';
+        
+        // Create drag event handlers
+        dragHandlers = {
+          move: (e) => {
+            if (!isDragging) return;
+            
+            const deltaX = e.clientX - startX;
+            const deltaY = e.clientY - startY;
+            const newRight = initialRight - deltaX;
+            const newTop = initialTop + deltaY;
+            
+            // Constrain to viewport using fixed dimensions
+            const maxRight = window.innerWidth - panelWidth;
+            const maxTop = window.innerHeight - panelHeight;
+            
+            const constrainedRight = Math.max(0, Math.min(maxRight, newRight));
+            const constrainedTop = Math.max(0, Math.min(maxTop, newTop));
+            
+            // Update position while maintaining fixed size with !important
+            layersPanel.style.cssText = `
+              position: fixed !important;
+              right: ${constrainedRight}px !important;
+              top: ${constrainedTop}px !important;
+              width: ${panelWidth}px !important;
+              height: ${panelHeight}px !important;
+              z-index: 1002 !important;
+              transition: none !important;
+            `;
+            
+            // Check for snap preview
+            const rect = layersPanel.getBoundingClientRect();
+            const distanceFromRightEdge = window.innerWidth - rect.right;
+            const snapThreshold = 100;
+            
+            if (distanceFromRightEdge <= snapThreshold) {
+              editorMain.classList.add('layers-snap-preview');
+              layersPanel.classList.add('snap-preview');
+            } else {
+              editorMain.classList.remove('layers-snap-preview');
+              layersPanel.classList.remove('snap-preview');
+            }
+          },
+          
+          up: (e) => {
+            if (!isDragging) return;
+            
+            isDragging = false;
+            layersPanel.classList.remove('dragging');
+            document.body.style.userSelect = '';
+            editorMain.classList.remove('layers-snap-preview');
+            layersPanel.classList.remove('snap-preview');
+            
+            // Check for snap back
+            const rect = layersPanel.getBoundingClientRect();
+            const panelRight = rect.right;
+            const windowWidth = window.innerWidth;
+            const distanceFromRightEdge = windowWidth - panelRight;
+            const snapThreshold = 100;
+            
+            console.log('Snap check - Panel rect:', rect);
+            console.log('Snap check - Panel right:', panelRight, 'Window width:', windowWidth);
+            console.log('Snap check - Distance from right edge:', distanceFromRightEdge, 'Threshold:', snapThreshold);
+            console.log('Should snap:', distanceFromRightEdge <= snapThreshold);
+            
+            if (distanceFromRightEdge <= snapThreshold) {
+              console.log('Snapping back to docked position - was originally open:', wasOpen);
+              
+              // Remove floating state and reset styles
+              layersPanel.classList.remove('floating');
+              layersPanel.style.cssText = ''; // Clear all inline styles
+              removeResizeHandles();
+              
+              // Get the layers button reference
+              const layersBtn = editorWindow.querySelector('.header-panel-btn[data-panel="layers"]');
+              
+              // Always restore to open state when snapping back
+              console.log('Restoring to open state after snap-back...');
+              
+              // Add classes for open state
+              layersPanel.classList.add('open');
+              editorMain.classList.add('layers-open');
+              
+              if (layersBtn) {
+                layersBtn.classList.add('active');
+              }
+              
+              // Verify the state was applied
+              setTimeout(() => {
+                console.log('Final state check after snap-back:');
+                console.log('- layersPanel has open class:', layersPanel.classList.contains('open'));
+                console.log('- editorMain has layers-open class:', editorMain.classList.contains('layers-open'));
+                console.log('- layersBtn has active class:', layersBtn ? layersBtn.classList.contains('active') : 'no button');
+                console.log('- layersPanel computed right:', window.getComputedStyle(layersPanel).right);
+                console.log('- editorMain computed margin-right:', window.getComputedStyle(editorMain).marginRight);
+              }, 100);
+            }
+            
+            // Clean up listeners
+            cleanupDragListeners();
+          }
+        };
+        
+        // Add drag event listeners
+        document.addEventListener('mousemove', dragHandlers.move);
+        document.addEventListener('mouseup', dragHandlers.up);
+        
+        e.preventDefault();
+      });
+      
+      // Resize functionality
+      layersPanel.addEventListener('mousedown', (e) => {
+        if (!e.target.classList.contains('resize-handle') || isDragging || !layersPanel.classList.contains('floating')) return;
+        
+        // Clean up any existing listeners
+        cleanupDragListeners();
+        cleanupResizeListeners();
+        
+        isResizing = true;
+        const direction = e.target.dataset.direction;
+        
+        const rect = layersPanel.getBoundingClientRect();
+        const startX = e.clientX;
+        const startY = e.clientY;
+        const startWidth = rect.width;
+        const startHeight = rect.height;
+        const startRight = window.innerWidth - rect.right;
+        const startTop = rect.top;
+        
+        // Set cursor based on resize direction
+        const cursorMap = {
+          'n': 'n-resize',
+          's': 's-resize',
+          'e': 'e-resize',
+          'w': 'w-resize',
+          'ne': 'ne-resize',
+          'nw': 'nw-resize',
+          'se': 'se-resize',
+          'sw': 'sw-resize'
+        };
+        document.body.style.cursor = cursorMap[direction] || 'default';
+        
+        // Create resize event handlers
+        resizeHandlers = {
+          move: (e) => {
+            if (!isResizing) return;
+            
+            const deltaX = e.clientX - startX;
+            const deltaY = e.clientY - startY;
+            
+            let newWidth = startWidth;
+            let newHeight = startHeight;
+            let newRight = startRight;
+            let newTop = startTop;
+            
+            // Handle different resize directions
+            if (direction.includes('e')) {
+              // East: resize right edge - increase width, position stays same
+              newWidth = Math.max(200, startWidth + deltaX);
+            }
+            if (direction.includes('w')) {
+              // West: resize left edge - change width and adjust position
+              newWidth = Math.max(200, startWidth - deltaX);
+              // Adjust right position to keep right edge fixed
+              newRight = startRight + (startWidth - newWidth);
+            }
+            if (direction.includes('s')) {
+              // South: resize bottom edge - increase height, position stays same
+              newHeight = Math.max(150, startHeight + deltaY);
+            }
+            if (direction.includes('n')) {
+              // North: resize top edge - change height and adjust position
+              newHeight = Math.max(150, startHeight - deltaY);
+              // Adjust top position to keep bottom edge fixed
+              newTop = startTop + (startHeight - newHeight);
+            }
+            
+            // Apply viewport constraints
+            newWidth = Math.min(newWidth, window.innerWidth - 50);
+            newHeight = Math.min(newHeight, window.innerHeight - 50);
+            
+            // Constrain position to viewport
+            newRight = Math.max(0, Math.min(window.innerWidth - newWidth, newRight));
+            newTop = Math.max(0, Math.min(window.innerHeight - newHeight, newTop));
+            
+            // Update panel with !important to override any CSS conflicts
+            layersPanel.style.cssText = `
+              position: fixed !important;
+              right: ${newRight}px !important;
+              top: ${newTop}px !important;
+              width: ${newWidth}px !important;
+              height: ${newHeight}px !important;
+              z-index: 1002 !important;
+              transition: none !important;
+            `;
+          },
+          
+          up: () => {
+            isResizing = false;
+            document.body.style.cursor = '';
+            document.body.style.userSelect = '';
+            cleanupResizeListeners();
+          }
+        };
+        
+        // Add resize event listeners
+        document.addEventListener('mousemove', resizeHandlers.move);
+        document.addEventListener('mouseup', resizeHandlers.up);
+        document.body.style.userSelect = 'none';
+        
+        e.preventDefault();
+        e.stopPropagation();
+      });
+      
+      // Clean up on panel close
+      const layersCloseBtn = layersPanel.querySelector('.layers-close-btn');
+      if (layersCloseBtn) {
+        layersCloseBtn.addEventListener('click', () => {
+          cleanupAllListeners();
+          if (layersPanel.classList.contains('floating')) {
+            layersPanel.classList.remove('floating');
+            layersPanel.style.right = '';
+            layersPanel.style.top = '';
+            layersPanel.style.height = '';
+            layersPanel.style.width = '';
+            removeResizeHandles();
+          }
+        });
+      }
+      
+      // Clean up on window unload or if editor is closed
+      window.addEventListener('beforeunload', cleanupAllListeners);
+      
+      // Clean up on escape key
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && (isDragging || isResizing)) {
+          cleanupAllListeners();
+          if (layersPanel.classList.contains('floating')) {
+            // Reset to original position if escape is pressed during drag
+            layersPanel.classList.remove('floating');
+            layersPanel.style.right = '';
+            layersPanel.style.top = '';
+            layersPanel.style.height = '';
+            layersPanel.style.width = '';
+            removeResizeHandles();
+          }
+        }
+      });
+    }
+
+    // Sidebar toggle functionality
+    const sidebarToggleBtn = editorWindow.querySelector('.sidebar-toggle-btn');
+    const sidebarToggleContainer = editorWindow.querySelector('.sidebar-toggle-container');
+    const editorSidebar = editorWindow.querySelector('.editor-sidebar');
+    
+    if (sidebarToggleBtn) {
+      sidebarToggleBtn.addEventListener('click', () => {
+        const isCollapsed = editorSidebar.classList.contains('collapsed');
+        
+        if (isCollapsed) {
+          // Show panels
+          editorSidebar.classList.remove('collapsed');
+          sidebarToggleContainer.classList.remove('collapsed');
+          sidebarToggleBtn.classList.remove('collapsed');
+          
+          // If layers panel was open, show it again
+          if (layersPanel.classList.contains('was-open')) {
+            layersPanel.classList.add('open');
+            layersPanel.classList.remove('was-open');
+            editorMain.classList.add('layers-open');
+            const layersBtn = editorWindow.querySelector('.header-panel-btn[data-panel="layers"]');
+            if (layersBtn) {
+              layersBtn.classList.add('active');
+            }
+          }
+        } else {
+          // Hide panels
+          editorSidebar.classList.add('collapsed');
+          sidebarToggleContainer.classList.add('collapsed');
+          sidebarToggleBtn.classList.add('collapsed');
+          
+          // If layers panel is open, close it but remember it was open
+          if (layersPanel.classList.contains('open')) {
+            layersPanel.classList.add('was-open');
+            layersPanel.classList.remove('open');
+            editorMain.classList.remove('layers-open');
+            const layersBtn = editorWindow.querySelector('.header-panel-btn[data-panel="layers"]');
+            if (layersBtn) {
+              layersBtn.classList.remove('active');
+            }
+          }
+        }
+      });
+    }
+
+    // Tab switching functionality within panels that have tabs (Style and Advanced panels)
+    sidebarPanels.forEach(panel => {
+      // Only add tab switching to panels that have sidebar-tabs
+      const sidebarTabs = panel.querySelector('.sidebar-tabs');
+      if (!sidebarTabs) return; // Skip Elements panel which has no tabs
+      
+      const tabButtons = panel.querySelectorAll('.sidebar-tab');
+      const tabContents = panel.querySelectorAll('.tab-content');
+      
+      tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          // Remove active class from all tabs and contents within this panel
+          tabButtons.forEach(tab => tab.classList.remove('active'));
+          tabContents.forEach(content => content.classList.remove('active'));
+          
+          // Add active class to clicked tab
+          button.classList.add('active');
+          
+          // Show corresponding content within this panel
+          const tabName = button.getAttribute('data-tab');
+          const targetContent = panel.querySelector(`.${tabName}-tab`);
+          if (targetContent) {
+            targetContent.classList.add('active');
+          }
+        });
+      });
+    });
+    
+    // Responsive view buttons
+    const responsiveBtns = editorWindow.querySelectorAll('.responsive-btn');
+    const canvasContainer = editorWindow.querySelector('.canvas-container');
+    
+    responsiveBtns.forEach(btn => {
+      btn.addEventListener('click', function() {
+        // Update button states
+        responsiveBtns.forEach(b => {
+          b.classList.remove('active');
+        });
+        
+        this.classList.add('active');
+        
+        // Update canvas size
+        const view = this.dataset.view;
+        canvasContainer.classList.remove('tablet-view', 'mobile-view');
+        switch(view) {
+          case 'tablet':
+            canvasContainer.classList.add('tablet-view');
+            break;
+          case 'mobile':
+            canvasContainer.classList.add('mobile-view');
+            break;
+          // desktop is default, no class needed
+        }
+      });
+    });
+    
+    // Publish dropdown functionality
+    const publishDropdownBtn = editorWindow.querySelector('.publish-dropdown-btn');
+    const publishDropdownMenu = editorWindow.querySelector('.publish-dropdown-menu');
+    const publishDropdownItems = editorWindow.querySelectorAll('.publish-dropdown-item');
+    
+    if (publishDropdownBtn && publishDropdownMenu) {
+      // Toggle dropdown on button click
+      publishDropdownBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        publishDropdownMenu.classList.toggle('show');
+      });
+      
+      // Handle dropdown item clicks
+      publishDropdownItems.forEach(item => {
+        item.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const action = item.getAttribute('data-action');
+          
+          // Close dropdown
+          publishDropdownMenu.classList.remove('show');
+          
+          // Handle different actions
+          switch(action) {
+            case 'save-draft':
+              console.log('Saving as draft...');
+              // Add your save draft logic here
+              break;
+            case 'schedule':
+              console.log('Scheduling for later...');
+              // Add your schedule logic here
+              break;
+            case 'publish-private':
+              console.log('Publishing privately...');
+              // Add your private publish logic here
+              break;
+          }
+        });
+      });
+      
+      // Close dropdown when clicking outside
+      document.addEventListener('click', (e) => {
+        if (!publishDropdownBtn.contains(e.target) && !publishDropdownMenu.contains(e.target)) {
+          publishDropdownMenu.classList.remove('show');
+        }
+      });
+    }
+    
+    // Hover effects are now handled by CSS, no JavaScript needed
+    
+    // Element selection functionality
+    function selectElement(element) {
+      // Remove previous selection
+      if (selectedElement) {
+        selectedElement.classList.remove('selected-element');
+      }
+      
+      // Add selection to new element
+      selectedElement = element;
+      element.classList.add('selected-element');
+      
+      // Switch to Style panel first
+      const headerPanelButtons = editorWindow.querySelectorAll('.header-panel-btn');
+      const sidebarPanels = editorWindow.querySelectorAll('.sidebar-panel');
+      
+      // Activate Style panel
+      headerPanelButtons.forEach(btn => btn.classList.remove('active'));
+      sidebarPanels.forEach(panel => panel.classList.remove('active'));
+      
+      const styleHeaderBtn = editorWindow.querySelector('.header-panel-btn[data-panel="style"]');
+      const stylePanel = editorWindow.querySelector('.style-panel');
+      
+      if (styleHeaderBtn && stylePanel) {
+        styleHeaderBtn.classList.add('active');
+        stylePanel.classList.add('active');
+        
+        // Then switch to style tab within the Style panel
+        const tabButtons = stylePanel.querySelectorAll('.sidebar-tab');
+        const tabContents = stylePanel.querySelectorAll('.tab-content');
+        
+        tabButtons.forEach(tab => tab.classList.remove('active'));
+        tabContents.forEach(content => content.classList.remove('active'));
+        
+        const styleTab = stylePanel.querySelector('.sidebar-tab[data-tab="style"]');
+        const styleContent = stylePanel.querySelector('.style-tab');
+        
+        if (styleTab && styleContent) {
+          styleTab.classList.add('active');
+          styleContent.classList.add('active');
+        }
+      }
+      
+      // Update properties panel content
+      updatePropertiesPanel(element);
+    }
+    
+    // Update layers panel
+    function updateLayersPanel() {
+      const layersContent = editorWindow.querySelector('.layers-content');
+      const layersEmpty = layersContent.querySelector('.layers-empty');
+      const elements = canvas.querySelectorAll('.editor-element');
+      
+      // Clear existing layers (except canvas and empty state)
+      const existingLayers = layersContent.querySelectorAll('.layer-item:not([data-element-id="canvas"])');
+      existingLayers.forEach(layer => layer.remove());
+      
+      if (elements.length === 0) {
+        layersEmpty.style.display = 'block';
+      } else {
+        layersEmpty.style.display = 'none';
+        
+        // Add layer for each element
+        elements.forEach((element, index) => {
+          const layerItem = document.createElement('div');
+          layerItem.className = 'layer-item';
+          layerItem.dataset.elementId = 'element-' + index;
+          
+          const widgetType = element.dataset.widget || 'element';
+          const layerName = getLayerName(widgetType);
+          const layerIcon = getLayerIcon(widgetType);
+          
+          layerItem.innerHTML = `
+            <div class="layer-info">
+              <i class="fas fa-eye layer-visibility"></i>
+              <i class="${layerIcon} layer-icon"></i>
+              <span class="layer-name">${layerName}</span>
+            </div>
+            <div class="layer-actions">
+              <i class="fas fa-lock layer-lock"></i>
+            </div>
+          `;
+          
+          // Add click handler to select element
+          layerItem.addEventListener('click', () => {
+            selectElement(element);
+            // Update layer selection
+            const allLayers = layersContent.querySelectorAll('.layer-item');
+            allLayers.forEach(layer => layer.classList.remove('selected'));
+            layerItem.classList.add('selected');
+          });
+          
+          // Add visibility toggle
+          const visibilityBtn = layerItem.querySelector('.layer-visibility');
+          visibilityBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isHidden = element.style.display === 'none';
+            if (isHidden) {
+              element.style.display = '';
+              visibilityBtn.classList.remove('hidden');
+            } else {
+              element.style.display = 'none';
+              visibilityBtn.classList.add('hidden');
+            }
+          });
+          
+          // Add lock toggle
+          const lockBtn = layerItem.querySelector('.layer-lock');
+          lockBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isLocked = element.dataset.locked === 'true';
+            if (isLocked) {
+              element.dataset.locked = 'false';
+              element.style.pointerEvents = '';
+              lockBtn.classList.remove('locked');
+            } else {
+              element.dataset.locked = 'true';
+              element.style.pointerEvents = 'none';
+              lockBtn.classList.add('locked');
+            }
+          });
+          
+          layersContent.insertBefore(layerItem, layersEmpty);
+        });
+      }
+    }
+    
+    // Helper functions for layers
+    function getLayerName(widgetType) {
+      const names = {
+        'heading': 'Heading',
+        'text': 'Text',
+        'image': 'Image',
+        'button': 'Button',
+        'spacer': 'Spacer',
+        'divider': 'Divider',
+        'video': 'Video',
+        'icon': 'Icon',
+        'gallery': 'Gallery'
+      };
+      return names[widgetType] || 'Element';
+    }
+    
+    function getLayerIcon(widgetType) {
+      const icons = {
+        'heading': 'fas fa-heading',
+        'text': 'fas fa-font',
+        'image': 'fas fa-image',
+        'button': 'fas fa-mouse-pointer',
+        'spacer': 'fas fa-arrows-alt-v',
+        'divider': 'fas fa-minus',
+        'video': 'fas fa-play-circle',
+        'icon': 'fas fa-star',
+        'gallery': 'fas fa-images'
+      };
+      return icons[widgetType] || 'fas fa-cube';
+    }
+    
+    // Create widget elements
+    function createWidgetElement(widgetType) {
+      const element = document.createElement('div');
+      element.className = 'editor-element';
+      
+      switch(widgetType) {
+        case 'heading':
+          element.innerHTML = '<h2 contenteditable="true">Add Your Heading Text Here</h2>';
+          element.dataset.widget = 'heading';
+          break;
+        case 'text':
+          element.innerHTML = '<p contenteditable="true">Add your text here. Click to edit this text and replace it with your own content.</p>';
+          element.dataset.widget = 'text';
+          break;
+        case 'image':
+          element.innerHTML = `
+            <div class="image-placeholder">
+              <i class="fas fa-image"></i>
+              <p>Click to upload image</p>
+            </div>
+          `;
+          element.dataset.widget = 'image';
+          break;
+        case 'button':
+          element.innerHTML = '<button>Click Me</button>';
+          element.dataset.widget = 'button';
+          break;
+        case 'spacer':
+          element.innerHTML = '<div class="spacer-element"></div>';
+          element.dataset.widget = 'spacer';
+          break;
+        case 'divider':
+          element.innerHTML = '<hr>';
+          element.dataset.widget = 'divider';
+          break;
+        default:
+          element.innerHTML = '<p>Widget: ' + widgetType + '</p>';
+      }
+      
+      // Add click handler for selection
+      element.addEventListener('click', function(e) {
+        e.stopPropagation();
+        selectElement(this);
+      });
+      
+      return element;
+    }
+    
+    // Update properties panel
+    function updatePropertiesPanel(element) {
+      // Find the properties panel in the Style panel's style tab
+      const stylePanel = editorWindow.querySelector('.style-panel');
+      const activeStyleTab = stylePanel ? stylePanel.querySelector('.style-tab.active') : null;
+      const propertiesBody = activeStyleTab ? activeStyleTab.querySelector('.properties-body') : null;
+      
+      if (!propertiesBody) return;
+      
+      const widgetType = element.dataset.widget;
+      
+             let propertiesHTML = `
+         <div class="property-group">
+           <h4>General</h4>
+           <div class="property-item">
+             <label>Element ID</label>
+             <input type="text" class="property-input">
+           </div>
+           <div class="property-item">
+             <label>CSS Classes</label>
+             <input type="text" class="property-input">
+           </div>
+         </div>
+         
+         <div class="property-group">
+           <h4>Layout</h4>
+           <div class="property-item">
+             <label>Margin</label>
+             <input type="text" class="property-input" placeholder="20px 0">
+           </div>
+           <div class="property-item">
+             <label>Padding</label>
+             <input type="text" class="property-input" placeholder="20px">
+           </div>
+         </div>
+       `;
+      
+      // Add widget-specific properties
+      switch(widgetType) {
+                 case 'heading':
+           propertiesHTML += `
+             <div class="property-group">
+               <h4>Typography</h4>
+               <div class="property-item">
+                 <label>Heading Level</label>
+                 <select class="property-input">
+                   <option>H1</option>
+                   <option selected>H2</option>
+                   <option>H3</option>
+                   <option>H4</option>
+                   <option>H5</option>
+                   <option>H6</option>
+                 </select>
+               </div>
+               <div class="property-item">
+                 <label>Text Align</label>
+                 <select class="property-input">
+                   <option>Left</option>
+                   <option>Center</option>
+                   <option>Right</option>
+                 </select>
+               </div>
+             </div>
+           `;
+           break;
+         case 'button':
+           propertiesHTML += `
+             <div class="property-group">
+               <h4>Button</h4>
+               <div class="property-item">
+                 <label>Button Text</label>
+                 <input type="text" class="property-input" value="Click Me">
+               </div>
+               <div class="property-item">
+                 <label>Link URL</label>
+                 <input type="text" class="property-input" placeholder="https://">
+               </div>
+             </div>
+           `;
+           break;
+      }
+      
+             propertiesHTML += `
+         <div class="property-actions">
+           <button class="delete-element-btn">
+             <i class="fas fa-trash"></i> Delete Element
+           </button>
+         </div>
+       `;
+      
+      propertiesBody.innerHTML = propertiesHTML;
+      
+      // Add delete functionality
+      const deleteBtn = propertiesBody.querySelector('.delete-element-btn');
+      deleteBtn.addEventListener('click', function() {
+        element.remove();
+        selectedElement = null;
+        
+        // Update layers panel
+        updateLayersPanel();
+        
+        // Show empty state if no elements left
+        if (canvas.children.length === 0) {
+          emptyState.style.display = 'block';
+        }
+      });
+    }
+    
+    // Click outside to deselect
+    canvas.addEventListener('click', function(e) {
+      if (e.target === this) {
+        if (selectedElement) {
+          selectedElement.classList.remove('selected-element');
+          selectedElement = null;
+        }
+      }
+         });
+   }
+
+   // Function to make windows draggable and resizable
+   function makeWindowInteractive(windowElement) {
+     const header = windowElement.querySelector('.window-header');
+     const windowTitle = windowElement.querySelector('.window-title');
+     let isDragging = false;
+     let dragStartX, dragStartY, windowStartX, windowStartY;
+     
+     // Make window draggable by header
+     if (header && windowTitle) {
+       windowTitle.style.cursor = 'move';
+       
+       windowTitle.addEventListener('mousedown', function(e) {
+         isDragging = true;
+         dragStartX = e.clientX;
+         dragStartY = e.clientY;
+         windowStartX = windowElement.offsetLeft;
+         windowStartY = windowElement.offsetTop;
+         
+         // Prevent text selection
+         e.preventDefault();
+         
+         // Add global mouse move and up listeners
+         document.addEventListener('mousemove', handleDrag);
+         document.addEventListener('mouseup', stopDrag);
+       });
+       
+       function handleDrag(e) {
+         if (!isDragging) return;
+         
+         const deltaX = e.clientX - dragStartX;
+         const deltaY = e.clientY - dragStartY;
+         
+         windowElement.style.left = (windowStartX + deltaX) + 'px';
+         windowElement.style.top = (windowStartY + deltaY) + 'px';
+       }
+       
+       function stopDrag() {
+         isDragging = false;
+         document.removeEventListener('mousemove', handleDrag);
+         document.removeEventListener('mouseup', stopDrag);
+       }
+     }
+     
+     // Window controls functionality
+     const closeBtn = windowElement.querySelector('.close-btn');
+     const minimizeBtn = windowElement.querySelector('.minimize-btn');
+     const maximizeBtn = windowElement.querySelector('.maximize-btn');
+     
+     if (closeBtn) {
+       closeBtn.addEventListener('click', function() {
+         windowElement.remove();
+       });
+     }
+     
+     if (minimizeBtn) {
+       minimizeBtn.addEventListener('click', function() {
+         windowElement.style.display = 'none';
+         // Could add to taskbar here if needed
+       });
+     }
+     
+     if (maximizeBtn) {
+       let isMaximized = false;
+       let originalStyles = {};
+       
+       maximizeBtn.addEventListener('click', function() {
+         if (isMaximized) {
+           // Restore window
+           windowElement.style.top = originalStyles.top;
+           windowElement.style.left = originalStyles.left;
+           windowElement.style.width = originalStyles.width;
+           windowElement.style.height = originalStyles.height;
+           isMaximized = false;
+         } else {
+           // Maximize window
+           originalStyles = {
+             top: windowElement.style.top,
+             left: windowElement.style.left,
+             width: windowElement.style.width,
+             height: windowElement.style.height
+           };
+           
+           windowElement.style.top = '0px';
+           windowElement.style.left = '0px';
+           windowElement.style.width = '100vw';
+           windowElement.style.height = '100vh';
+           isMaximized = true;
+         }
+       });
+     }
+   }
+  }
+
+
 // Utility: Ensure sidebar overlay and menu toggle exist in every window
 function ensureSidebarElements(windowElement) {
   // Ensure sidebar overlay exists as first child of .window-content
@@ -39,9 +3107,9 @@ function ensureSidebarElements(windowElement) {
 
 // Patch updateSidebarForWindow to respect data-user-collapsed and auto-collapse at breakpoints
 if (typeof window.updateSidebarForWindow !== 'function') {
-  window.updateSidebarForWindow = function() {};
+  window.updateSidebarForWindow = function () { };
 }
-window.updateSidebarForWindow = window.updateSidebarForWindow || function() {};
+window.updateSidebarForWindow = window.updateSidebarForWindow || function () { };
 const _originalUpdateSidebarForWindow = window.updateSidebarForWindow;
 window.updateSidebarForWindow = function (windowEl) {
   if (!windowEl) return;
@@ -58,13 +3126,15 @@ window.updateSidebarForWindow = function (windowEl) {
     if (overlay) overlay.onclick = null;
     sb.querySelectorAll('.sidebar-item').forEach(item => { item.onclick = null; });
 
+    // Mobile sidebar handling
     if (isMobile) {
-      // Remove collapsed/hover logic
+      // Remove collapsed/hover logic for mobile
       sb.removeAttribute('data-user-collapsed');
       sb.classList.remove('sidebar-hovered', 'sidebar-collapsed');
+
       // Attach mobile sidebar logic
       if (menuToggle && overlay && contentArea) {
-        menuToggle.onclick = function() {
+        menuToggle.onclick = function () {
           const isShowing = !sb.classList.contains('show');
           sb.classList.toggle('show');
           overlay.classList.toggle('show');
@@ -74,13 +3144,15 @@ window.updateSidebarForWindow = function (windowEl) {
             contentArea.classList.remove('sidebar-push-active');
           }
         };
-        overlay.onclick = function() {
+
+        overlay.onclick = function () {
           sb.classList.remove('show');
           overlay.classList.remove('show');
           contentArea.classList.remove('sidebar-push-active');
         };
+
         sb.querySelectorAll('.sidebar-item').forEach(item => {
-          item.onclick = function() {
+          item.onclick = function () {
             sb.classList.remove('show');
             overlay.classList.remove('show');
             contentArea.classList.remove('sidebar-push-active');
@@ -90,39 +3162,48 @@ window.updateSidebarForWindow = function (windowEl) {
       return;
     }
 
-    // User override
+    // User override - per-app toggle state
     let userOverride = false;
     if (sb.hasAttribute('data-user-collapsed')) {
       userOverride = true;
       if (sb.getAttribute('data-user-collapsed') === 'true') {
+        // When toggle is ON, always keep sidebar collapsed regardless of window size
         sb.classList.add('sidebar-collapsed');
       } else {
+        // When toggle is OFF, respect responsive breakpoints
         sb.classList.remove('sidebar-collapsed');
-      }
-      // If window is very small or very large, remove user override
-      if (width < 200 || width > 700) {
-        sb.removeAttribute('data-user-collapsed');
-        userOverride = false;
+
+        // Auto-collapse only in responsive range (200-900px)
+        if (width >= 200 && width < 600) {
+          sb.classList.add('sidebar-collapsed');
+        }
       }
     }
+
     // Auto-collapse if no user override and width in range
     if (!userOverride) {
-      if (width >= 200 && width < 900) {
+      if (width >= 200 && width < 600) {
         sb.classList.add('sidebar-collapsed');
       } else {
         sb.classList.remove('sidebar-collapsed');
       }
     }
-    // Hover logic
+    
+
+
+    // Reset content styles
     const content = sb.parentElement && sb.parentElement.querySelector('.window-main-content, .settings-content, .app-store-main-content');
     if (content) {
       content.style.transform = '';
     }
-    // Remove previous listeners
+
+    // Remove previous hover listeners
     if (sb._hoverEnter) sb.removeEventListener('mouseenter', sb._hoverEnter);
     if (sb._hoverLeave) sb.removeEventListener('mouseleave', sb._hoverLeave);
     delete sb._hoverEnter;
     delete sb._hoverLeave;
+
+    // Reset sidebar styles
     sb.classList.remove('sidebar-hovered', 'sidebar-mobile');
     sb.style.position = '';
     sb.style.left = '';
@@ -130,7 +3211,11 @@ window.updateSidebarForWindow = function (windowEl) {
     sb.style.height = '';
     sb.style.zIndex = '';
     sb.style.width = '';
+
+    // Add hover behavior if the sidebar is collapsed, regardless of window width
+    // This is the key change - removing the window width condition
     if (sb.classList.contains('sidebar-collapsed')) {
+      // Handle mouse enter
       sb._hoverEnter = function () {
         const mainContent = sb.parentElement.querySelector('.window-main-content');
         // Invalidate any pending cleanup from previous hover-out
@@ -141,7 +3226,10 @@ window.updateSidebarForWindow = function (windowEl) {
             mainContent._sidebarCleanup = null;
           }
         }
+
+        // Add hovered class
         sb.classList.add('sidebar-hovered');
+
         // Only add push class if both collapsed and hovered
         if (sb.classList.contains('sidebar-collapsed') && sb.classList.contains('sidebar-hovered')) {
           if (mainContent) {
@@ -152,8 +3240,12 @@ window.updateSidebarForWindow = function (windowEl) {
             let sidebarWidth = 73;
             // If sb is visible and has offsetWidth, use it (in case of custom themes)
             if (sb.offsetWidth && sb.offsetWidth < 200) sidebarWidth = sb.offsetWidth;
+
+            // Calculate content width
             let contentWidth = parentWidth - sidebarWidth;
             if (contentWidth < 0) contentWidth = 0;
+
+            // Apply width
             let widthPx = contentWidth + 'px';
             mainContent.style.setProperty('width', widthPx);
             mainContent.style.setProperty('min-width', widthPx);
@@ -162,6 +3254,8 @@ window.updateSidebarForWindow = function (windowEl) {
           }
         }
       };
+
+      // Handle mouse leave
       sb._hoverLeave = function () {
         const mainContent = sb.parentElement.querySelector('.window-main-content');
         // Invalidate any previous cleanup
@@ -172,12 +3266,15 @@ window.updateSidebarForWindow = function (windowEl) {
             mainContent._sidebarCleanup = null;
           }
         }
+
+        // Remove hovered class
         sb.classList.remove('sidebar-hovered');
-        // Remove push class and reset width after transition ends
+
+        // Clean up content area
         if (mainContent) {
           // Handler to clean up after transition
           mainContent._sidebarCleanupValid = true;
-          const cleanup = function(e) {
+          const cleanup = function (e) {
             if (!mainContent._sidebarCleanupValid) return;
             if (!e || e.propertyName === 'width' || e.propertyName === 'max-width' || e.propertyName === 'min-width') {
               mainContent.classList.remove('sidebar-push-active');
@@ -189,18 +3286,23 @@ window.updateSidebarForWindow = function (windowEl) {
               mainContent._sidebarCleanupValid = false;
             }
           };
+
+          // Add cleanup handler
           mainContent._sidebarCleanup = cleanup;
           mainContent.addEventListener('transitionend', cleanup);
-          // Fallback: if no transition, clean up after a short delay
-          setTimeout(() => cleanup({propertyName: 'width'}), 250);
+
+          // Fallback: clean up after a short delay if no transition fires
+          setTimeout(() => cleanup({ propertyName: 'width' }), 300);
         }
       };
+
+      // Attach hover event listeners
       sb.addEventListener('mouseenter', sb._hoverEnter);
       sb.addEventListener('mouseleave', sb._hoverLeave);
     }
   });
 }
-  
+
 
 
 //Email App Content
@@ -209,7 +3311,7 @@ function setupEmailApp(windowElement) {
   // Only update dynamic values (like unread counts, user name, etc.) here if needed.
 
   // --- Ensure sidebar toggle and overlay exist (for consistent sidebar behavior) ---
-  ensureSidebarElements(windowElement); 
+  ensureSidebarElements(windowElement);
 
   if (typeof window.updateSidebarForWindow === 'function') {
     window.updateSidebarForWindow(windowElement);
@@ -448,6 +3550,9 @@ function setupEmailApp(windowElement) {
           // Create the window from template
           const emailContentWindow = createWindowFromTemplate('email-content-window', windowId, false);
           if (!emailContentWindow) return;
+          
+          // Add simple opening animation
+          emailContentWindow.classList.add('window-anim-open');
           // Inject the full email-content-section structure
           const content = emailContentWindow.querySelector('.email-content-body');
           if (content) {
@@ -456,7 +3561,7 @@ function setupEmailApp(windowElement) {
                 <div class="window-toolbar">
                   <div class="toolbar-buttons-left">
                                       <button class="toolbar-button" title="Reply"><i class="fas fa-reply"></i><span>Reply</span></button>
-                    <button class="toolbar-button" title="Reply All"><i class="fas fa-reply-all"></i><span>Replay all</span></button>
+                    <button class="toolbar-button" title="Reply All"><i class="fas fa-reply-all"></i><span>Reply all</span></button>
                     <button class="toolbar-button" title="Forward"><i class="fas fa-share"></i><span>Forward</span></button>
                   </div>
                   <div class="toolbar-buttons-right">
@@ -514,29 +3619,46 @@ function setupEmailApp(windowElement) {
       console.log('No .email-content-section found!');
       return;
     }
-    
+
     // Clear existing content first
     section.innerHTML = '';
-    
+
     // Create and append toolbar
     const toolbar = document.createElement('div');
     toolbar.className = 'window-toolbar';
-    toolbar.innerHTML = `
-      <div class="toolbar-buttons-left">
-        <button class="toolbar-button mailback-btn" title="Back"><i class="fas fa-arrow-left"></i> <span>Back</span></button>
-        <button class="toolbar-button" title="Reply"><i class="fas fa-reply"></i><span>Reply</span></button>
-        <button class="toolbar-button" title="Reply All"><i class="fas fa-reply-all"></i><span>Replay all</span></button>
-        <button class="toolbar-button" title="Forward"><i class="fas fa-share"></i><span>Forward</span></button>
-      </div>
-      <div class="toolbar-buttons-right">
-        <button class="toolbar-button" title="Move"><i class="fas fa-folder-open"></i> <span>Move</span></button>
-        <button class="toolbar-button" title="Spam"><i class="fas fa-shield-virus"></i> <span>Spam</span></button>
-        <button class="toolbar-button" title="Delete"><i class="fas fa-trash"></i> <span>Delete</span></button>
-        <button class="toolbar-button mailmore-btn" title="More"><i class="fas fa-ellipsis-h"></i></button>
-      </div>
-    `;
+
+    // Different toolbar content based on mobile or desktop
+    if (isMobileEmailApp()) {
+      toolbar.innerHTML = `
+        <div class="toolbar-buttons-left">
+          <button class="toolbar-button mailback-btn" title="Back"><i class="fas fa-arrow-left"></i> <span>Back</span></button>
+          <button class="toolbar-button" title="Reply"><i class="fas fa-reply"></i><span>Reply</span></button>
+          <button class="toolbar-button" title="Reply All"><i class="fas fa-reply-all"></i><span>Reply all</span></button>
+          <button class="toolbar-button" title="Forward"><i class="fas fa-share"></i><span>Forward</span></button>
+        </div>
+        <div class="toolbar-buttons-right">
+          <button class="toolbar-button" title="Delete"><i class="fas fa-trash"></i> <span>Delete</span></button>
+          <button class="toolbar-button mailmore-btn" title="More"><i class="fas fa-ellipsis-h"></i></button>
+        </div>
+      `;
+    } else {
+      toolbar.innerHTML = `
+        <div class="toolbar-buttons-left">
+          <button class="toolbar-button mailback-btn" title="Back"><i class="fas fa-arrow-left"></i> <span>Back</span></button>
+          <button class="toolbar-button" title="Reply"><i class="fas fa-reply"></i><span>Reply</span></button>
+          <button class="toolbar-button" title="Reply All"><i class="fas fa-reply-all"></i><span>Reply all</span></button>
+          <button class="toolbar-button" title="Forward"><i class="fas fa-share"></i><span>Forward</span></button>
+        </div>
+        <div class="toolbar-buttons-right">
+          <button class="toolbar-button" title="Move"><i class="fas fa-folder-open"></i> <span>Move</span></button>
+          <button class="toolbar-button" title="Spam"><i class="fas fa-shield-virus"></i> <span>Spam</span></button>
+          <button class="toolbar-button" title="Delete"><i class="fas fa-trash"></i> <span>Delete</span></button>
+          <button class="toolbar-button mailmore-btn" title="More"><i class="fas fa-ellipsis-h"></i></button>
+        </div>
+      `;
+    }
     section.appendChild(toolbar);
-    
+
     // Create and append content
     const content = document.createElement('div');
     content.className = 'email-content';
@@ -563,8 +3685,121 @@ function setupEmailApp(windowElement) {
     // Re-attach the back button event
     const mailbackBtn = section.querySelector('.mailback-btn');
     if (mailbackBtn) {
-      mailbackBtn.addEventListener('click', function(e) {
+      mailbackBtn.addEventListener('click', function (e) {
         showEmailListPanel();
+      });
+    }
+
+    // Attach dropdown to the more button
+    const mailmoreBtn = section.querySelector('.mailmore-btn');
+    if (mailmoreBtn) {
+      let morePanel = null;
+
+      mailmoreBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+
+        // Close any open panel
+        if (morePanel) {
+          morePanel.remove();
+          morePanel = null;
+          return;
+        }
+
+        // Create panel
+        morePanel = document.createElement('div');
+        morePanel.className = 'email-more-panel context-menu'; // Add context-menu class to inherit styles
+        morePanel.style.position = 'absolute';
+        morePanel.style.zIndex = 10000;
+        morePanel.style.padding = '4px 0';
+        morePanel.style.minWidth = '200px';
+        morePanel.style.fontSize = '14px';
+        morePanel.style.animationDuration = '0.15s';
+        morePanel.style.transformOrigin = 'top right';
+
+        // Panel HTML - different for mobile and desktop
+        if (isMobileEmailApp()) {
+          let panelContent = '';
+          const mobileOptions = [
+            { icon: 'fa-folder-open', label: 'Move' },
+            { icon: 'fa-shield-virus', label: 'Spam' }
+          ];
+
+          mobileOptions.forEach(item => {
+            panelContent += `<div class="context-menu-item"><i class="fas ${item.icon}"></i><span>${item.label}</span></div>`;
+          });
+
+          morePanel.innerHTML = panelContent;
+        } else {
+          let panelContent = '';
+          const desktopOptions = [
+            { icon: 'fa-tag', label: 'Add a tag' },
+            { icon: 'fa-download', label: 'Download message' },
+            { icon: 'fa-file-archive', label: 'Download message (zip)' },
+            { icon: 'fa-code', label: 'View Message Source' },
+            { icon: 'fa-file-code', label: 'View raw message' },
+            { icon: 'fa-print', label: 'Print' },
+            { type: 'separator' },
+            { icon: 'fa-tasks', label: 'Convert to Task' },
+            { type: 'separator' },
+            { icon: 'fa-address-book', label: 'Open Contact' }
+          ];
+
+          desktopOptions.forEach(item => {
+            if (item.type === 'separator') {
+              panelContent += `<div class="context-menu-separator"></div>`;
+            } else {
+              panelContent += `<div class="context-menu-item"><i class="fas ${item.icon}"></i><span>${item.label}</span></div>`;
+            }
+          });
+
+          morePanel.innerHTML = panelContent;
+        }
+
+        // Append panel to the body first to measure height
+        document.body.appendChild(morePanel);
+
+        // Position panel
+        const rect = mailmoreBtn.getBoundingClientRect();
+        morePanel.style.right = (window.innerWidth - rect.right) + 'px';
+        morePanel.style.top = (rect.bottom + 8) + 'px';
+
+        // Add click handlers to menu items
+        const menuItems = morePanel.querySelectorAll('.context-menu-item');
+        menuItems.forEach(item => {
+          item.addEventListener('click', () => {
+            console.log('Clicked option:', item.textContent.trim());
+            morePanel.remove();
+            morePanel = null;
+          });
+        });
+
+        // Add pop animation like context menu
+        morePanel.classList.remove('context-menu-anim-pop');
+        void morePanel.offsetWidth; // force reflow
+        morePanel.classList.add('context-menu-anim-pop');
+
+        // Hide panel on outside click
+        setTimeout(() => {
+          document.addEventListener('mousedown', hideMorePanel, { once: true });
+        }, 0);
+
+        function hideMorePanel(ev) {
+          if (morePanel && !morePanel.contains(ev.target) && ev.target !== mailmoreBtn) {
+            // Add close animation
+            morePanel.classList.add('context-menu-anim-close');
+            morePanel.addEventListener('animationend', function handler() {
+              morePanel.removeEventListener('animationend', handler);
+              morePanel.remove();
+              morePanel = null;
+            });
+          }
+        }
+
+        // Handle animation end
+        morePanel.addEventListener('animationend', function handler() {
+          morePanel.classList.remove('context-menu-anim-pop');
+          morePanel.removeEventListener('animationend', handler);
+        });
       });
     }
   }
@@ -617,7 +3852,10 @@ function setupEmailApp(windowElement) {
           <button class="compose-toolbar-btn font" title="Font"><i class="fas fa-font"></i></button>
           <button class="compose-toolbar-btn more" title="More"><i class="fas fa-ellipsis-h"></i></button>
         </div>
-        <button class="compose-send-btn">Send</button>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <button class="close-compose-btn" style="background: none; border: 1px solid var(--border-color); color: var(--text-color); padding: 8px 16px; border-radius: 6px; cursor: pointer;">Cancel</button>
+          <button class="compose-send-btn">Send</button>
+        </div>
       </div>
     `;
   }
@@ -627,7 +3865,10 @@ function setupEmailApp(windowElement) {
   // Remove old inline compose logic
 
   if (composeBtn) {
-    composeBtn.onclick = function() {
+    composeBtn.onclick = function () {
+      // Store reference to the button for animation
+      const clickedButton = this;
+      
       // Generate a unique window ID for each compose window
       let composeWindowCount = 1;
       while (openWindows[`compose-window-${composeWindowCount}`]) {
@@ -637,6 +3878,9 @@ function setupEmailApp(windowElement) {
       // Create the window from template
       const composeWindow = createWindowFromTemplate('compose-window', windowId, false);
       if (!composeWindow) return;
+      
+      // Add simple opening animation
+      composeWindow.classList.add('window-anim-open');
       // Inject the compose form HTML
       const content = composeWindow.querySelector('.compose-window-content');
       if (content) {
@@ -644,16 +3888,29 @@ function setupEmailApp(windowElement) {
         // Attach close logic to the close button in the compose form
         const closeBtn = content.querySelector('.close-compose-btn');
         if (closeBtn) {
-          closeBtn.onclick = function() {
-            if (composeWindow.parentNode) composeWindow.parentNode.removeChild(composeWindow);
-            if (openWindows[windowId]) delete openWindows[windowId];
+          closeBtn.onclick = function () {
+            // Use standard window close animation
+            const standardCloseBtn = composeWindow.querySelector('.window-close');
+            if (standardCloseBtn) {
+              standardCloseBtn.click();
+            } else {
+              // Fallback: manual close with animation
+              composeWindow.classList.remove('window-anim-open', 'window-anim-maximize', 'window-anim-close');
+              composeWindow.classList.add('window-anim-close');
+              composeWindow.addEventListener('animationend', function handler(ev) {
+                if (ev.animationName === 'windowClose') {
+                  if (composeWindow.parentNode) composeWindow.parentNode.removeChild(composeWindow);
+                  if (openWindows[windowId]) delete openWindows[windowId];
+                }
+              }, { once: true });
+            }
           };
         }
         // Add: Compose toolbar 'more' button panel logic
         const moreBtn = content.querySelector('.compose-toolbar-btn.more');
         let morePanel = null;
         if (moreBtn) {
-          moreBtn.addEventListener('click', function(e) {
+          moreBtn.addEventListener('click', function (e) {
             e.stopPropagation();
             // Close any open panel
             if (morePanel) {
@@ -741,6 +3998,13 @@ function setupEmailApp(windowElement) {
       // Force a reflow before adding the class to ensure smooth transition
       windowMainContent.offsetHeight;
       windowMainContent.classList.add('show-email-content');
+
+      // Make sure content is visible and on top
+      const contentSection = windowMainContent.querySelector('.email-content-section');
+      if (contentSection) {
+        contentSection.style.zIndex = '2';
+        contentSection.style.visibility = 'visible';
+      }
     }
   }
 
@@ -749,22 +4013,34 @@ function setupEmailApp(windowElement) {
       // Force a reflow before removing the class to ensure smooth transition
       windowMainContent.offsetHeight;
       windowMainContent.classList.remove('show-email-content');
+
+      // Reset z-index
+      const contentSection = windowMainContent.querySelector('.email-content-section');
+      if (contentSection) {
+        contentSection.style.zIndex = '';
+        // Delay hiding for animation
+        setTimeout(() => {
+          if (!windowMainContent.classList.contains('show-email-content')) {
+            contentSection.style.visibility = '';
+          }
+        }, 350);
+      }
     }
   }
 
   // Attach mailback-btn event
   if (mailbackBtn) {
-    mailbackBtn.addEventListener('click', function(e) {
+    mailbackBtn.addEventListener('click', function (e) {
       showEmailListPanel();
     });
   }
 
   // Patch renderEmailList to handle mobile view properly
   const origRenderEmailList = renderEmailList;
-  renderEmailList = function(selectedId) {
+  renderEmailList = function (selectedId) {
     origRenderEmailList(selectedId);
     const selectedEmail = emails.find(e => e.id === selectedId);
-    
+
     if (isMobileEmailApp() && typeof selectedId === 'number' && selectedEmail) {
       // Render content first, then show panel
       renderEmailContent(selectedEmail);
@@ -779,13 +4055,10959 @@ function setupEmailApp(windowElement) {
   };
 
   // On resize, if on mobile and not viewing content, ensure correct panel
-  window.addEventListener('resize', function() {
+  window.addEventListener('resize', function () {
     if (!isMobileEmailApp() && windowMainContent) {
       windowMainContent.classList.remove('show-email-content');
     }
   });
 
+
+}
+
+//Point of Sale App Content
+function setupPointOfSaleApp(windowElement) {
+  // Sidebar: do NOT set content here. Sidebar content is defined in index.html template using the generic sidebar structure.
+  // Only update dynamic values (like unread counts, user name, etc.) here if needed.
+
+  // --- Ensure sidebar toggle and overlay exist (for consistent sidebar behavior) ---
+  ensureSidebarElements(windowElement);
+
+  if (typeof window.updateSidebarForWindow === 'function') {
+    window.updateSidebarForWindow(windowElement);
+  }
+  if (typeof attachSidebarResizeObserver === 'function') {
+    attachSidebarResizeObserver(windowElement);
+  }
+
+  // Setup sidebar item click handlers
+  const sidebarItems = windowElement.querySelectorAll('.sidebar-item');
+  sidebarItems.forEach(item => {
+    const menuText = item.querySelector('span');
+    if (menuText) {
+      const menuName = menuText.textContent.trim();
+      
+      item.addEventListener('click', function() {
+        // Remove active class from all sidebar items
+        sidebarItems.forEach(si => si.classList.remove('active'));
+        // Add active class to clicked item
+        this.classList.add('active');
+        
+        // Handle different menu items
+        switch(menuName) {
+          case 'Products':
+            showProductsSection();
+            break;
+          case 'Bookings':
+            showBookingsSection();
+            break;
+          case 'Groups (Tables)':
+            showTablesSection();
+            break;
+          case 'Appointments':
+            showAppointmentsSection();
+            break;
+          case 'Tickets':
+            showTicketsSection();
+            break;
+          default:
+            showProductsSection(); // Default fallback
+        }
+      });
+    }
+  });
+
+  function showProductsSection() {
+    console.log('showProductsSection called');
+    const contentSection = windowElement.querySelector('.point-of-sale-content-section');
+    const bookingSection = windowElement.querySelector('.point-of-sale-booking-content-section');
+    const currentOrderSection = windowElement.querySelector('.point-of-sale-current-order-section');
+    const bookingOrderSection = windowElement.querySelector('.booking-pos-order-section');
+    const activeBookingSection = windowElement.querySelector('.active-booking-pos-section');
+    
+    console.log('Found elements:', {
+      contentSection: !!contentSection,
+      bookingSection: !!bookingSection,
+      currentOrderSection: !!currentOrderSection,
+      bookingOrderSection: !!bookingOrderSection,
+      activeBookingSection: !!activeBookingSection
+    });
+    
+    // Remove selected class from all booking bars when switching to products
+    const allBookingBars = document.querySelectorAll('.booking-bar');
+    allBookingBars.forEach(bar => bar.classList.remove('booking-bar-selected'));
+    
+    if (contentSection) {
+      contentSection.style.display = 'flex';
+    }
+    if (bookingSection) {
+      bookingSection.style.display = 'none';
+    }
+    
+    // Determine which section is currently active and slide it out
+    let activeSectionToSlideOut = null;
+    
+    // Check if active booking section is visible
+    if (activeBookingSection && activeBookingSection.style.display !== 'none') {
+      activeSectionToSlideOut = activeBookingSection;
+    }
+    // Otherwise check if booking order section is visible
+    else if (bookingOrderSection && bookingOrderSection.style.display !== 'none') {
+      activeSectionToSlideOut = bookingOrderSection;
+    }
+    
+    // Slide out the active section and slide in current order section
+    if (activeSectionToSlideOut && currentOrderSection) {
+      slideOrderSections(activeSectionToSlideOut, currentOrderSection);
+    } else {
+      console.log('Cannot slide - missing order sections or no active section to slide out');
+      if (currentOrderSection) {
+        currentOrderSection.style.display = 'flex';
+        currentOrderSection.style.transform = 'translateX(0)';
+      }
+    }
+  }
+
+  function showBookingsSection() {
+    console.log('showBookingsSection called');
+    const contentSection = windowElement.querySelector('.point-of-sale-content-section');
+    let bookingSection = windowElement.querySelector('.point-of-sale-booking-content-section');
+    const currentOrderSection = windowElement.querySelector('.point-of-sale-current-order-section');
+    let bookingOrderSection = windowElement.querySelector('.booking-pos-order-section');
+    
+    console.log('Initial elements:', {
+      contentSection: !!contentSection,
+      bookingSection: !!bookingSection,
+      currentOrderSection: !!currentOrderSection,
+      bookingOrderSection: !!bookingOrderSection
+    });
+    
+    // Hide the products section
+    if (contentSection) {
+      contentSection.style.display = 'none';
+    }
+    
+    // Create booking section if it doesn't exist
+    if (!bookingSection) {
+      console.log('Creating booking section');
+      bookingSection = createBookingSection();
+      const mainContent = windowElement.querySelector('.window-main-content');
+      if (mainContent) {
+        mainContent.appendChild(bookingSection);
+      }
+    }
+    
+    // Create booking order section if it doesn't exist
+    if (!bookingOrderSection) {
+      console.log('Creating booking order section');
+      bookingOrderSection = createBookingOrderSection();
+      const mainContent = windowElement.querySelector('.window-main-content');
+      if (mainContent) {
+        mainContent.appendChild(bookingOrderSection);
+      }
+    }
+    
+    // Show booking section
+    if (bookingSection) {
+      bookingSection.style.display = 'flex';
+    }
+    
+    // Slide out current order section and slide in booking order section
+    if (currentOrderSection && bookingOrderSection) {
+      slideOrderSections(currentOrderSection, bookingOrderSection);
+    } else {
+      console.log('Cannot slide - missing order sections');
+      if (bookingOrderSection) {
+        bookingOrderSection.style.display = 'flex';
+        bookingOrderSection.style.transform = 'translateX(0)';
+      }
+    }
+  }
+
+  function showTablesSection() {
+    // Placeholder for tables functionality
+    console.log('Tables section clicked');
+  }
+
+  function showAppointmentsSection() {
+    // Placeholder for appointments functionality
+    console.log('Appointments section clicked');
+  }
+
+  function showTicketsSection() {
+    // Placeholder for tickets functionality
+    console.log('Tickets section clicked');
+  }
+
+  function createBookingSection() {
+    const section = document.createElement('section');
+    section.className = 'point-of-sale-booking-content-section';
+    section.style.display = 'none';
+    section.style.flex = '1';
+    section.style.minWidth = '650px';
+    section.style.height = '100%';
+    section.style.flexDirection = 'column';
+    
+    // Create toolbar - matching the structure of point-of-sale-content-section
+    const toolbar = document.createElement('div');
+    toolbar.className = 'window-toolbar';
+    toolbar.innerHTML = `
+
+      <div class="booking-toolbar-content">
+        <div class="booking-toolbar-left">
+              <label class="toggle-switch" id="booking-sidebar-toggle-label" style="margin-right: 14px;">
+        <input type="checkbox" class="window-sidebar-toggle" id="booking-sidebar-toggle">
+        <span class="slider"></span>
+      </label>
+         <div class="point-of-sale-list-header-left">
+                <i class="fas fa-search"></i>
+                <input type="text" class="point-of-sale-search" placeholder="Search...">
+          </div>
+   
+        </div>
+        <div class="booking-toolbar-center">
+          <div class="view-mode-selector">
+            <button class="view-mode-btn active" data-months="1">1 Month</button>
+            <button class="view-mode-btn" data-months="2">2 Months</button>
+            <button class="view-mode-btn" data-months="3">3 Months</button>
+          </div>
+          <div class="period-selector">
+            <button class="period-nav-btn" id="prev-period"><i class="fas fa-chevron-left"></i></button>
+            <span class="current-period">February 2025</span>
+            <button class="period-nav-btn" id="next-period"><i class="fas fa-chevron-right"></i></button>
+          </div>
+        </div>
+        <div class="booking-toolbar-right">
+          <div class="booking-sort">Sort <i class="fas fa-chevron-down" style="font-size:12px;"></i></div>
+          <div class="booking-view">View <i class="fas fa-chevron-down" style="font-size:12px;"></i></div>
+        </div>
+      </div>
+    `;
+    
+    // Create booking content - matching the structure of point-of-sale-content
+    const content = document.createElement('div');
+    content.className = 'booking-content';
+    content.innerHTML = createBookingCalendarHTML();
+    
+    section.appendChild(toolbar);
+    section.appendChild(content);
+    
+    // Attach event handlers
+    setTimeout(() => {
+      attachBookingEventHandlers(section);
+      
+      // Set initial room selection (first room)
+      const firstRoomItem = section.querySelector('.room-item');
+      if (firstRoomItem) {
+        const roomId = firstRoomItem.getAttribute('data-room-id');
+        firstRoomItem.classList.add('selected');
+        
+        // Highlight corresponding room row
+        const correspondingRow = document.querySelector(`.room-row[data-room-id="${roomId}"]`);
+        if (correspondingRow) {
+          correspondingRow.classList.add('selected');
+          console.log('Initial room row highlighted for room:', roomId);
+        }
+      }
+    }, 0);
+    
+    return section;
+  }
+
+  function createBookingOrderSection() {
+    const section = document.createElement('section');
+    section.className = 'booking-pos-order-section';
+    section.style.display = 'none';
+    section.style.transform = 'translateX(100%)';
+    section.style.transition = 'transform 0.3s ease-in-out';
+    section.style.width = '350px';
+    section.style.minWidth = '350px';
+    section.style.maxWidth = '350px';
+    section.style.height = '100%';
+    section.style.flexShrink = '0';
+    
+    // Duplicate the exact HTML structure from point-of-sale-current-order-section
+    section.innerHTML = `
+      <div class="window-toolbar">
+        <div class="toolbar-buttons-left">
+          <div class="point-of-sale-current-order-header-item"><h3>New Booking</h3> <i class="fas fa-chevron-down"></i></div>
+        </div>
+        <div class="toolbar-buttons-right">
+          <button class="toolbar-button" title="Save"><i class="fas fa-save"></i> </button>
+          <button class="toolbar-button" title="Delete"><i class="fas fa-trash"></i> </button>
+          <button class="toolbar-button mailmore-btn" title="More"><i class="fas fa-ellipsis-h"></i></button>
+        </div>
+        
+      </div>
+
+
+
+      <div class="point-of-sale-current-order-content">
+
+        <!-- Order Items Section (Scrollable) -->
+        <div class="booking-order-items-container">
+
+        <div class="booking-check-availability-header">
+<h3 style="margin: 10px;">Check availability</h3> <i class="fas fa-xmark"></i>
+</div>
+                <div class="booking-checkin-checkout-header">
+            <div class="booking-order-checkin">
+            <label class="publish-label">Check in</label>
+            <div class="date-picker-container">
+              <input type="text" class="form-control date-input" value="Today 25 Feb">
+              <button class="calendar-button">
+                <i class="fas fa-calendar-alt"></i>
+              </button>
+            </div>
+                     </div>
+            <div class="booking-order-checkout">
+            <label class="publish-label">Check out</label>
+            <div class="date-picker-container">
+              <input type="text" class="form-control date-input" value="05-01-2025">
+              <button class="calendar-button">
+                <i class="fas fa-calendar-alt"></i>
+              </button>
+            </div>
+         
+            </div>
+            <button class="pos-action-btn pos-checkin-checkout-btn">
+              <i class="fas fa-magnifying-glass"></i>
+            </button>
+          </div>
+
+          <div class="booking-search-container">
+<h3>Search booking</h3>
+
+    <div class="booking-search-input">
+              <input type="text" class="form-control search-input" value="Search by name, phone, id">
+            <button class="pos-action-btn pos-search-btn">
+              <i class="fas fa-magnifying-glass"></i>
+            </button>
+            </div>
+            </div>
+         
+
+
+
+
+          <div class="pos-order-item">
+            <div class="pos-item-main-row">
+              <div class="pos-item-image">
+                <img src="img/appsimg/camera.png" alt="Product" class="item-image">
+              </div>
+              <div class="pos-item-details">
+                <div class="pos-item-name">Deluxe <div class="pos-item-rooms-no">3</div></div>
+                <div class="pos-item-price">490 lei (129/day)</div>
+              </div>
+              <div class="pos-item-quantity">
+                <button class="qty-btn qty-decrease" title="Decrease"><i class="fas fa-minus"></i></button>
+                <span class="qty-value">1</span>
+                <button class="qty-btn qty-increase" title="Increase"><i class="fas fa-plus"></i></button>
+              </div>
+            </div>
+            
+            <!-- Expanded Content -->
+            <div class="pos-item-expanded-content">
+              <div class="pos-item-options-row">
+
+  <!-- Room No. Section -->
+                <div class="pos-item-quantity-section">
+                  <div class="pos-item-quantity-label">Room No. (7)</div>
+                  <div class="pos-item-quantity-controls">
+                    <button class="qty-btn qty-decrease" title="Decrease"><i class="fas fa-chevron-left"></i></button>
+                    <span class="qty-value">157</span>
+                    <button class="qty-btn qty-increase" title="Increase"><i class="fas fa-chevron-right"></i></button>
+                  </div>
+                </div>
+
+                <!-- Adults Section -->
+                <div class="pos-item-quantity-section">
+                  <div class="pos-item-quantity-label">Adults</div>
+                  <div class="pos-item-quantity-controls">
+                    <button class="qty-btn qty-decrease" title="Decrease"><i class="fas fa-minus"></i></button>
+                    <span class="qty-value">1</span>
+                    <button class="qty-btn qty-increase" title="Increase"><i class="fas fa-plus"></i></button>
+                  </div>
+                </div>
+                <!-- Children Section -->
+                <div class="pos-item-quantity-section">
+                  <div class="pos-item-quantity-label">Children</div>
+                  <div class="pos-item-quantity-controls">
+                    <button class="qty-btn qty-decrease" title="Decrease"><i class="fas fa-minus"></i></button>
+                    <span class="qty-value">1</span>
+                    <button class="qty-btn qty-increase" title="Increase"><i class="fas fa-plus"></i></button>
+                  </div>
+                </div>
+                
+
+              </div>
+              
+              <!-- Action Buttons -->
+              <div class="pos-item-actions">
+                <button class="pos-item-action-btn">Note</button>
+                <button class="pos-item-action-btn">Extra</button>
+                <button class="pos-item-action-btn danger">Remove</button>
+              </div>
+                            <!-- Action Buttons -->
+              <div class="pos-item-actions">
+xxx
+              </div>
+            </div>
+     
+
+          </div>
+
+
+<div class="pos-order-item">
+            <div class="pos-item-main-row">
+              <div class="pos-item-image">
+                <img src="img/appsimg/camera.png" alt="Product" class="item-image">
+              </div>
+              <div class="pos-item-details">
+                <div class="pos-item-name">Deluxe <div class="pos-item-rooms-no">73</div></div>
+                <div class="pos-item-price">490 lei (129/day)</div>
+              </div>
+              <div class="pos-item-quantity">
+                <button class="qty-btn qty-decrease" title="Decrease"><i class="fas fa-minus"></i></button>
+                <span class="qty-value">1</span>
+                <button class="qty-btn qty-increase" title="Increase"><i class="fas fa-plus"></i></button>
+              </div>
+            </div>
+            
+            <!-- Expanded Content -->
+            <div class="pos-item-expanded-content">
+              <div class="pos-item-options-row">
+
+  <!-- Room No. Section -->
+                <div class="pos-item-quantity-section">
+                  <div class="pos-item-quantity-label">Room No. (7)</div>
+                  <div class="pos-item-quantity-controls">
+                    <button class="qty-btn qty-decrease" title="Decrease"><i class="fas fa-chevron-left"></i></button>
+                    <span class="qty-value">157</span>
+                    <button class="qty-btn qty-increase" title="Increase"><i class="fas fa-chevron-right"></i></button>
+                  </div>
+                </div>
+
+                <!-- Adults Section -->
+                <div class="pos-item-quantity-section">
+                  <div class="pos-item-quantity-label">Adults</div>
+                  <div class="pos-item-quantity-controls">
+                    <button class="qty-btn qty-decrease" title="Decrease"><i class="fas fa-minus"></i></button>
+                    <span class="qty-value">1</span>
+                    <button class="qty-btn qty-increase" title="Increase"><i class="fas fa-plus"></i></button>
+                  </div>
+                </div>
+                <!-- Children Section -->
+                <div class="pos-item-quantity-section">
+                  <div class="pos-item-quantity-label">Children</div>
+                  <div class="pos-item-quantity-controls">
+                    <button class="qty-btn qty-decrease" title="Decrease"><i class="fas fa-minus"></i></button>
+                    <span class="qty-value">1</span>
+                    <button class="qty-btn qty-increase" title="Increase"><i class="fas fa-plus"></i></button>
+                  </div>
+                </div>
+                
+           
+                </div>
+              
+              <!-- Action Buttons -->
+              <div class="pos-item-actions">
+                <button class="pos-item-action-btn">Note</button>
+                <button class="pos-item-action-btn">Extra</button>
+                <button class="pos-item-action-btn danger">Remove</button>
+              </div>
+                            <!-- Action Buttons -->
+              <div class="pos-item-actions">
+xxxx
+              </div>
+            </div>
+     
+
+          </div>
+
+
+
+          
+          
+        </div>
+
+        <!-- Order Summary Footer -->
+        <div class="pos-order-footer">
+          <!-- Discount Section -->
+          <div class="pos-discount-section">
+            <div class="pos-discount-label">Discount fix</div>
+            <div class="pos-discount-value">500 lei</div>
+          </div>
+
+          <!-- Total Section -->
+          <div class="pos-total-section">
+            <div class="pos-total-row">
+              <span class="pos-total-label">Total</span>
+              <span class="pos-total-amount">5525 lei</span>
+            </div>
+            <div class="pos-subtotal-row">
+            </div>
+          </div>
+
+<!-- Payment Methods -->
+
+          <!-- Action Buttons -->
+          <div class="pos-action-buttons">
+            <button class="pos-action-btn pos-add-booking-btn">
+              <i class="fas fa-plus"></i>
+              <span>Add Booking</span>
+            </button>
+          </div>
+
+          <!-- Bottom Action Buttons -->
+          <div class="pos-bottom-actions">
+            <button class="pos-bottom-btn">Vezi ultimul bon</button>
+            <button class="pos-bottom-btn">Storno</button>
+            <button class="pos-bottom-btn">Discount</button>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    // Attach event handlers for the booking order section
+    setTimeout(() => {
+      attachBookingOrderEventHandlers(section);
+    }, 0);
+    
+    return section;
+  }
+
+  function createBookingCustomerInfoSection() {
+    const section = document.createElement('section');
+    section.className = 'point-of-sale-customer-info-content';
+    section.style.display = 'none';
+    section.style.transform = 'translateX(100%)';
+    section.style.transition = 'transform 0.3s ease-in-out';
+    section.style.width = '350px';
+    section.style.minWidth = '350px';
+    section.style.maxWidth = '350px';
+    section.style.height = '100%';
+    section.style.flexShrink = '0';
+    
+    section.innerHTML = `
+      <div class="window-toolbar">
+        <div class="toolbar-buttons-left">
+          <div class="point-of-sale-current-order-header-item"><h3>Contact Info</h3> <i class="fas fa-chevron-down"></i></div>
+        </div>
+        <div class="toolbar-buttons-right">
+          <button class="toolbar-button" title="Save"><i class="fas fa-address-card"></i> </button>
+          <button class="toolbar-button" title="Delete"><i class="fas fa-magnifying-glass"></i> </button>
+          <button class="toolbar-button mailmore-btn" title="More"><i class="fas fa-ellipsis-h"></i></button>
+        </div>
+      </div>
+
+      
+
+
+
+      <div class="point-of-sale-current-order-content">
+
+      
+        <!-- Customer Details Section (Scrollable) -->
+        <div class="booking-contact-details-container">
+          
+
+
+
+        
+
+          <!-- Customer Information Form -->
+          <div class="customer-info-form">
+          <h3 style="margin-bottom: 20px;">Order Info</h3>
+
+<div class="pos-item-main-row">
+              <div class="pos-item-image">
+                <img src="img/appsimg/camera.png" alt="Room" class="item-image">
+              </div>
+              <div class="pos-item-details">
+                <div class="pos-item-name">Room 101</div>
+<div class="pos-item-members">
+                  <div class="pos-item-members-adults">
+                    <div class="pos-item-members-adults-label">Adults</div>
+                    <div class="pos-item-members-adults-value">2</div>
+                    </div>
+                                      <div class="pos-item-members-kids">
+                      <div class="pos-item-members-kids-label">Kids</div>
+                      <div class="pos-item-members-kids-value">0</div>
+                    </div>
+
+                  </div>              </div>
+              <div class="pos-item-booking-info">
+                <div class="pos-item-name">Deluxe</div>
+                 <div class="pos-item-members">
+                  <div class="pos-item-members-adults">
+                    <div class="pos-item-members-adults-label">Adults</div>
+                    <div class="pos-item-members-adults-value">2</div>
+                    </div>
+                                      <div class="pos-item-members-kids">
+                      <div class="pos-item-members-kids-label">Kids</div>
+                      <div class="pos-item-members-kids-value">0</div>
+                    </div>
+
+                  </div>
+              </div>
+            </div>
+
+            <div class="pos-item-main-row">
+              <div class="pos-item-image">
+                <img src="img/appsimg/camera.png" alt="Room" class="item-image">
+              </div>
+              <div class="pos-item-details">
+                <div class="pos-item-name">Room 101</div>
+<div class="pos-item-members">
+                  <div class="pos-item-members-adults">
+                    <div class="pos-item-members-adults-label">Adults</div>
+                    <div class="pos-item-members-adults-value">2</div>
+                    </div>
+                                      <div class="pos-item-members-kids">
+                      <div class="pos-item-members-kids-label">Kids</div>
+                      <div class="pos-item-members-kids-value">0</div>
+                    </div>
+
+                  </div>              </div>
+              <div class="pos-item-booking-info">
+                <div class="pos-item-name">Deluxe</div>
+                 <div class="pos-item-members">
+                  <div class="pos-item-members-adults">
+                    <div class="pos-item-members-adults-label">Adults</div>
+                    <div class="pos-item-members-adults-value">2</div>
+                    </div>
+                                      <div class="pos-item-members-kids">
+                      <div class="pos-item-members-kids-label">Kids</div>
+                      <div class="pos-item-members-kids-value">0</div>
+                    </div>
+
+                  </div>
+              </div>
+            </div>
+
+
+
+          <h3 style="margin-bottom: 20px; margin-top: 40px;">Contact Info</h3>
+            <div class="customer-form-group">
+              <label class="customer-form-label">First Name</label>
+              <input type="text" class="customer-form-input" placeholder="Enter first name">
+            </div>
+            
+            <div class="customer-form-group">
+              <label class="customer-form-label">Last Name</label>
+              <input type="text" class="customer-form-input" placeholder="Enter last name">
+            </div>
+            
+            <div class="customer-form-group">
+              <label class="customer-form-label">Email</label>
+              <input type="email" class="customer-form-input" placeholder="Enter email address">
+            </div>
+            
+            <div class="customer-form-group">
+              <label class="customer-form-label">Phone</label>
+              <input type="tel" class="customer-form-input" placeholder="Enter phone number">
+            </div>
+            
+            <div class="customer-form-group">
+              <label class="customer-form-label">Address</label>
+              <textarea class="customer-form-textarea" placeholder="Enter address" rows="3"></textarea>
+            </div>
+            
+            <div class="customer-form-group">
+              <label class="customer-form-label">City</label>
+              <input type="text" class="customer-form-input" placeholder="Enter city">
+            </div>
+            
+            <div class="customer-form-group">
+              <label class="customer-form-label">Country</label>
+              <select class="customer-form-select">
+                <option value="">Select country</option>
+                <option value="RO">Romania</option>
+                <option value="US">United States</option>
+                <option value="UK">United Kingdom</option>
+                <option value="DE">Germany</option>
+                <option value="FR">France</option>
+              </select>
+            </div>
+            
+            <div class="customer-form-group">
+              <label class="customer-form-label">Special Requests</label>
+              <textarea class="customer-form-textarea" placeholder="Any special requests or notes" rows="4"></textarea>
+            </div>
+
+
+<div class="settings-group">
+          <div class="settings-group-header">
+        <h3>Billing to company?</h3> 
+
+        <div class="toggle-switch">
+                <input type="checkbox" class="section-toggle">
+                <span class="toggle-slider"></span>
+              </div>
+        </div>
+
+        <div class="publishing-options-section" style="display: block; height: 359px;">
+          <div class="settings-item">
+            <label>Company Name</label>
+            <input type="text" class="settings-input" value="Company Name SRL">
+          </div>
+                    <div class="settings-item">
+            <label>VAT / CUI</label>
+            <input type="text" class="settings-input" value="RO1234567890">
+          </div>
+                    <div class="settings-item">
+            <label>Registration Number</label>
+            <input type="text" class="settings-input" value="J13/1994/20232">
+          </div>
+                    <div class="settings-item">
+            <label>Address</label>
+            <textarea class="settings-textarea">Address</textarea>
+          </div>
+                    <div class="settings-item">
+            <label>City</label>
+            <input type="text" class="settings-input" value="Bucuresti">
+          </div>
+                    <div class="settings-item">
+            <label>Country</label>
+<select class="customer-form-select">
+                <option value="">Select country</option>
+                <option value="RO">Romania</option>
+                <option value="US">United States</option>
+                <option value="UK">United Kingdom</option>
+                <option value="DE">Germany</option>
+                <option value="FR">France</option>
+              </select>          </div>
+          <div class="settings-item">
+            <label>Meta Description</label>
+            <textarea class="settings-textarea">Check out my portfolio of recent projects and work.</textarea>
+          </div>
+<div class="publish-section">  
+ <div class="form-row-top-input">
+             <label class="publish-label">SEO Exclusion</label>
+             </div>
+<div class="checkbox-option">
+                  <input type="checkbox" id="no-index-page">
+                  <label for="no-index-page">No index (exclude from search engines)</label>
+                </div>
+                <div class="checkbox-option" style="margin-top: 10px;">
+                  <input type="checkbox" id="no-follow-page">
+                  <label for="no-follow-page">No follow (do not follow links)</label>
+                </div>
+                                <div class="checkbox-option" style="margin-top: 10px;">
+                  <input type="checkbox" id="exclude-page-from-sitemap">
+                  <label for="exclude-page-from-sitemap">Exclude page from sitemap</label>
+                </div>
+            </div>
+        </div>
+        </div>
+
+
+
+
+
+        <div class="settings-item" style="margin-top: 40px;">
+        <label>ID or Passport</label>
+        <div class="settings-image-upload">
+          <i class="fas fa-camera"></i>
+          <span>Take photo of ID or Passport</span>
+
+          </div>
+                        <div class="upload-image-description">
+            <span> Take photo of ID or Passport without text input</span>
+</span>
+        </div>
+      </div>
+
+
+
+
+          </div>
+        </div>
+
+        <!-- Order Summary Footer -->
+        <div class="pos-order-footer">
+          <!-- Discount Section -->
+          <div class="pos-discount-section">
+            <div class="pos-discount-label">Discount fix</div>
+            <div class="pos-discount-value">500 lei</div>
+          </div>
+
+          <!-- Total Section -->
+          <div class="pos-total-section">
+            <div class="pos-total-row">
+              <span class="pos-total-label">Total</span>
+              <span class="pos-total-amount">5525 lei</span>
+            </div>
+            <div class="pos-subtotal-row">
+            </div>
+          </div>
+
+          <!-- Payment Methods -->
+          <div class="pos-payment-methods">
+            <button class="pos-payment-btn pos-payment-cash">
+              <i class="fas fa-money-bill"></i>
+              <span>Cash</span>
+            </button>
+            <button class="pos-payment-btn pos-payment-card">
+              <i class="fas fa-credit-card"></i>
+              <span>Card</span>
+            </button>
+            <button class="pos-payment-btn pos-payment-ticket">
+              <i class="fas fa-ticket-alt"></i>
+              <span>Ticket</span>
+            </button>
+
+            
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="pos-action-buttons">
+            <button class="pos-action-btn pos-checkout-btn">
+              <i class="fas fa-credit-card"></i>
+              <span>Proceed to Payment</span>
+            </button>
+          </div>
+
+          <!-- Bottom Action Buttons -->
+          <div class="pos-bottom-actions">
+            <button class="pos-bottom-btn">Back to Booking</button>
+            <button class="pos-bottom-btn">Save Customer</button>
+            <button class="pos-bottom-btn">Clear Form</button>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    return section;
+  }
+
+  // Event handlers specifically for booking order section
+  function attachBookingOrderEventHandlers(section) {
+    console.log('Attaching booking order event handlers');
+    
+    // Check availability button handler
+    const checkAvailabilityBtn = section.querySelector('.pos-checkin-checkout-btn');
+    if (checkAvailabilityBtn) {
+      checkAvailabilityBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        console.log('Check availability button clicked');
+        
+        // Show order items
+        const orderItems = section.querySelectorAll('.pos-order-item');
+        orderItems.forEach(item => {
+          item.style.display = 'block';
+        });
+        
+        // Show the order footer
+        const orderFooter = section.querySelector('.pos-order-footer');
+        if (orderFooter) {
+          orderFooter.style.display = 'flex';
+        }
+        
+        // Hide the search container
+        const searchContainer = section.querySelector('.booking-search-container');
+        if (searchContainer) {
+          searchContainer.style.display = 'none';
+        }
+        
+        // Show the xmark icon
+        const xmarkIcon = section.querySelector('.booking-check-availability-header .fa-xmark');
+        if (xmarkIcon) {
+          xmarkIcon.style.display = 'inline';
+        }
+      });
+    }
+    
+    // Xmark icon handler (close results)
+    const xmarkIcon = section.querySelector('.booking-check-availability-header .fa-xmark');
+    if (xmarkIcon) {
+      xmarkIcon.addEventListener('click', function(e) {
+        e.stopPropagation();
+        console.log('Xmark clicked - hiding results');
+        
+        // Hide order items
+        const orderItems = section.querySelectorAll('.pos-order-item');
+        orderItems.forEach(item => {
+          item.style.display = 'none';
+        });
+        
+        // Hide the order footer
+        const orderFooter = section.querySelector('.pos-order-footer');
+        if (orderFooter) {
+          orderFooter.style.display = 'none';
+        }
+        
+        // Show the search container
+        const searchContainer = section.querySelector('.booking-search-container');
+        if (searchContainer) {
+          searchContainer.style.display = 'block';
+        }
+        
+        // Hide the xmark icon
+        this.style.display = 'none';
+      });
+    }
+    
+    // Prevent quantity containers from triggering order item expansion
+    const quantityContainers = section.querySelectorAll('.pos-item-quantity, .pos-item-quantity-controls');
+    quantityContainers.forEach(container => {
+      container.addEventListener('click', function(e) {
+        e.stopPropagation();
+      });
+    });
+
+    // Quantity button handlers for booking order items
+    const quantityButtons = section.querySelectorAll('.qty-btn');
+    quantityButtons.forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        
+        const qtyValueSpan = this.parentElement.querySelector('.qty-value');
+        const currentQty = parseInt(qtyValueSpan.textContent);
+        const isIncrease = this.classList.contains('qty-increase');
+        const isMainQuantity = this.closest('.pos-item-main-row') !== null;
+        
+        // Only handle main quantity changes (not sub-controls like room number, adults, children)
+        if (isMainQuantity) {
+          let newQty = currentQty;
+          
+          if (isIncrease) {
+            newQty = Math.min(currentQty + 1, 10); // Max 10 rooms
+          } else {
+            newQty = Math.max(currentQty - 1, 1); // Min 1 room
+          }
+          
+          qtyValueSpan.textContent = newQty;
+          
+          // Update expanded content sections based on new quantity
+          const orderItem = this.closest('.pos-order-item');
+          updateBookingExpandedContent(orderItem, newQty);
+        } else {
+          // Handle sub-control quantity changes normally
+          let newQty = currentQty;
+          
+          if (isIncrease) {
+            newQty = currentQty + 1;
+          } else {
+            newQty = Math.max(currentQty - 1, 0);
+          }
+          
+          qtyValueSpan.textContent = newQty;
+        }
+      });
+    });
+
+    // Action button handlers
+    const actionButtons = section.querySelectorAll('.pos-item-action-btn');
+    actionButtons.forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        console.log('Action button clicked:', this.textContent);
+      });
+    });
+
+    // Order item expansion/collapse handlers
+    const orderItems = section.querySelectorAll('.pos-order-item');
+    orderItems.forEach(item => {
+      item.addEventListener('click', function(e) {
+        console.log('Order item clicked, target:', e.target);
+        
+        // Only block expansion if clicking directly on quantity buttons or action buttons
+        if (
+          e.target.classList.contains('qty-btn') ||
+          e.target.closest('.qty-btn') ||
+          e.target.classList.contains('pos-item-action-btn') ||
+          e.target.closest('.pos-item-action-btn')
+        ) {
+          console.log('Blocked expansion due to button click');
+          return; // Don't toggle if clicking on buttons
+        }
+        
+        // Close all other expanded items first
+        const allItems = section.querySelectorAll('.pos-order-item');
+        allItems.forEach(otherItem => {
+          if (otherItem !== this && otherItem.classList.contains('expanded')) {
+            otherItem.classList.remove('expanded');
+          }
+        });
+        
+        // Toggle the clicked item
+        this.classList.toggle('expanded');
+        console.log('Order item toggled:', this.classList.contains('expanded') ? 'expanded' : 'collapsed');
+      });
+    });
+
+    // Add booking button handler
+    const addBookingBtn = section.querySelector('.pos-add-booking-btn');
+    if (addBookingBtn) {
+      addBookingBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        console.log('Add Booking button clicked');
+        slideToCustomerInfo();
+      });
+    }
+  }
+
+  // Event handlers for customer info section
+  function attachCustomerInfoEventHandlers(section) {
+    console.log('Attaching customer info event handlers');
+    
+    // Payment method buttons
+    const paymentButtons = section.querySelectorAll('.pos-payment-btn');
+    paymentButtons.forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        // Remove active class from all payment buttons
+        paymentButtons.forEach(b => b.classList.remove('active'));
+        // Add active class to clicked button
+        this.classList.add('active');
+        console.log('Payment method selected:', this.textContent.trim());
+      });
+    });
+
+    // Proceed to payment button handler
+    const proceedBtn = section.querySelector('.pos-checkout-btn');
+    if (proceedBtn) {
+      proceedBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        console.log('Proceed to Payment button clicked');
+        // Add payment processing logic here
+      });
+    }
+
+    // Bottom action buttons
+    const bottomButtons = section.querySelectorAll('.pos-bottom-btn');
+    bottomButtons.forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const buttonText = this.textContent.trim();
+        
+        if (buttonText === 'Back to Booking') {
+          slideBackToBooking();
+        } else {
+          console.log('Bottom button clicked:', buttonText);
+        }
+      });
+    });
+  }
+
+  // Function to slide from booking order to customer info
+  function slideToCustomerInfo() {
+    const bookingOrderSection = document.querySelector('.booking-pos-order-section .point-of-sale-current-order-content');
+    const bookingToolbar = document.querySelector('.booking-pos-order-section .window-toolbar');
+    let customerInfoSection = document.querySelector('.point-of-sale-customer-info-content');
+    
+    // Create customer info section if it doesn't exist
+    if (!customerInfoSection) {
+      customerInfoSection = createBookingCustomerInfoSection();
+      const parentContainer = document.querySelector('.booking-pos-order-section');
+      if (parentContainer) {
+        parentContainer.appendChild(customerInfoSection);
+      }
+      
+      // Attach event handlers for the customer info section
+      setTimeout(() => {
+        attachCustomerInfoEventHandlers(customerInfoSection);
+      }, 0);
+    }
+    
+    // Ensure both elements have proper transition properties
+    if (bookingOrderSection) {
+      bookingOrderSection.style.transition = 'transform 0.3s ease-in-out';
+    }
+    if (bookingToolbar) {
+      bookingToolbar.style.transition = 'transform 0.3s ease-in-out';
+    }
+    
+    // Show customer info section (off-screen right)
+    customerInfoSection.style.display = 'block';
+    customerInfoSection.style.transform = 'translateX(100%)';
+    
+    // Start animation after a brief delay
+    setTimeout(() => {
+      // Slide booking order content to left
+      if (bookingOrderSection) {
+        bookingOrderSection.style.transform = 'translateX(-100%)';
+      }
+      
+      // Slide booking toolbar to left as well
+      if (bookingToolbar) {
+        bookingToolbar.style.transform = 'translateX(-100%)';
+      }
+      
+      // Slide customer info in from right
+      customerInfoSection.style.transform = 'translateX(0)';
+    }, 50);
+    
+    console.log('Sliding to customer info');
+  }
+
+  // Function to create active booking section for existing bookings
+  function createActiveBookingSection(bookingData) {
+    const section = document.createElement('section');
+    section.className = 'active-booking-pos-section';
+    section.style.display = 'none';
+    section.style.transform = 'translateX(100%)';
+    section.style.transition = 'transform 0.3s ease-in-out';
+    section.style.width = '350px';
+    section.style.minWidth = '350px';
+    section.style.maxWidth = '350px';
+    section.style.height = '100%';
+    section.style.flexShrink = '0';
+    
+    // Create the HTML structure similar to booking order section but for existing booking
+    section.innerHTML = `
+      <div class="window-toolbar">
+        <div class="toolbar-buttons-left">
+          <div class="point-of-sale-current-order-header-item"><h3>Booking #${bookingData.id}</h3> <i class="fas fa-chevron-down"></i></div>
+        </div>
+        <div class="toolbar-buttons-right">
+          <button class="toolbar-button" title="Edit"><i class="fas fa-edit"></i></button>
+          <button class="toolbar-button" title="Print"><i class="fas fa-print"></i></button>
+          <button class="toolbar-button mailmore-btn" title="More"><i class="fas fa-ellipsis-h"></i></button>
+        </div>
+      </div>
+
+      <div class="point-of-sale-current-order-content">
+        <!-- Booking Details Container (Scrollable) -->
+        <div class="booking-order-items-container">
+          <!-- Check-in/Check-out Header -->
+          
+
+          <!-- Room Information -->
+          <div class="pos-order-item expanded">
+            <div class="pos-item-main-row">
+              <div class="pos-item-image">
+                <img src="img/appsimg/camera.png" alt="Room" class="item-image">
+              </div>
+              <div class="pos-item-details">
+                <div class="pos-item-name"><div class="pos-item-rooms-no">Room ${bookingData.roomNumber || '101'}</div></div>
+<div class="pos-item-members">
+                  <div class="pos-item-members-adults">
+                    <div class="pos-item-members-adults-label">Adults</div>
+                    <div class="pos-item-members-adults-value">2</div>
+                    </div>
+                                      <div class="pos-item-members-kids">
+                      <div class="pos-item-members-kids-label">Kids</div>
+                      <div class="pos-item-members-kids-value">0</div>
+                    </div>
+
+                  </div>              </div>
+              <div class="pos-item-booking-info">
+                <div class="pos-item-name">${bookingData.roomType || 'Deluxe'}</div>
+                 <div class="pos-item-members">
+                  <div class="pos-item-members-adults">
+                    <div class="pos-item-members-adults-label">Adults</div>
+                    <div class="pos-item-members-adults-value">2</div>
+                    </div>
+                                      <div class="pos-item-members-kids">
+                      <div class="pos-item-members-kids-label">Kids</div>
+                      <div class="pos-item-members-kids-value">0</div>
+                    </div>
+
+                  </div>
+              </div>
+            </div>
+            
+<div class="note-card">
+                <div class="note-header">
+                                    <div class="note-meta">
+                  <div class="note-meta-note-type">
+<i class="fas fa-pencil-alt"></i><span>Note</span>
+
+
+                    </div>
+                    <div class="note-timestamp">21 mai 2025 16:30</div>
+                  </div>
+                </div>
+                
+                <div class="note-content">
+                  M-a sunat acum 2 zile sa ma intrebe de ce si n-am stiut ce sa-i spun. Urmeaza raspunsul.dar mai bine nu ca iar ne da
+                </div>
+                <div class="note-to-who-timestamp">
+                
+                </div>
+              </div>
+
+
+
+
+            <div class="pos-item-expanded-content">
+            
+              <div class="customer-info-section">
+                <h4 style="margin-bottom: 15px; color: var(--text-color);">Check In / Check Out</h4>
+                
+
+
+
+                <div class="customer-checkin-checkout-row">
+                  <div class="customer-info-field">
+                    <label class="customer-form-label">Check In Date</label>
+                    <div class="customer-info-value">${formatDate(bookingData.startDate)} 21:30</div>
+                  </div>
+                                    <div class="customer-info-field">
+                    <label class="customer-form-label">Check In Date</label>
+                    <div class="customer-info-value">${formatDate(bookingData.startDate)} 21:30</div>
+                  </div>
+                </div>
+                 </div>
+                </div>
+
+
+
+
+            <!-- Expanded Content with Customer Info -->
+            <div class="pos-item-expanded-content">
+            
+              <div class="customer-info-section">
+                <h4 style="margin-bottom: 15px; color: var(--text-color);">Guest Information</h4>
+                
+
+
+
+                <div class="customer-info-row">
+                  <div class="customer-info-field">
+                    <label class="customer-form-label">Guest Name</label>
+                    <div class="customer-info-value">${bookingData.guest}</div>
+                  </div>
+                </div>
+                
+                <div class="customer-info-row">
+                  <div class="customer-info-field">
+                    <label class="customer-form-label">Email</label>
+                    <div class="customer-info-value">${bookingData.email || 'guest@example.com'}</div>
+                  </div>
+                </div>
+                
+                <div class="customer-info-row">
+                  <div class="customer-info-field">
+                    <label class="customer-form-label">Phone</label>
+                    <div class="customer-info-value">${bookingData.phone || '+40 123 456 789'}</div>
+                  </div>
+                </div>
+                
+                <div class="customer-info-row">
+                  <div class="customer-info-field">
+                    <label class="customer-form-label">Booking Channel</label>
+                    <div class="customer-info-value">${bookingData.channel}</div>
+                  </div>
+                </div>
+                
+                <div class="customer-info-row">
+                  <div class="customer-info-field">
+                    <label class="customer-form-label">Payment Status</label>
+                    <div class="customer-info-value">
+                      <span class="status-badge status-${bookingData.payStatus.toLowerCase().replace(/\s+/g, '-')}">${bookingData.payStatus}</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="customer-info-row">
+                  <div class="customer-info-field">
+                    <label class="customer-form-label">Special Requests</label>
+                    <div class="customer-info-value">${bookingData.notes || 'No special requests'}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+
+
+            <div class="pos-item-expanded-content">
+            
+              <div class="customer-info-section">
+                <h4 style="margin-bottom: 15px; color: var(--text-color);">Company Information</h4>
+                
+
+
+
+                <div class="customer-info-row">
+                  <div class="customer-info-field">
+                    <label class="customer-form-label">Company Name</label>
+                    <div class="customer-info-value">My Company SRL</div>
+                  </div>
+                                    <div class="customer-info-field">
+                    <label class="customer-form-label">VAT / CUI</label>
+                    <div class="customer-info-value">RO1234567890</div>
+                  </div>
+
+                  <div class="customer-info-field">
+                    <label class="customer-form-label">Address</label>
+                    <div class="customer-info-value">Str. Independentei, nr. 123, Cluj-Napoca, Romania</div>
+                  </div>
+
+                  <div class="customer-info-field">
+                    <label class="customer-form-label">Phone</label>
+                    <div class="customer-info-value">+40 123 456 789</div>
+                  </div>
+
+
+                  
+
+                </div>
+                 </div>
+                </div>
+
+
+
+<div class="pos-item-expanded-content">
+            
+              <div class="customer-info-section">
+                <h4 style="margin-bottom: 15px; color: var(--text-color);">Booking Details</h4>
+                
+
+
+
+                <div class="customer-info-row">
+                  <div class="customer-info-field">
+                    <label class="customer-form-label">Channel</label>
+                    <div class="customer-info-value">Booking.com</div>
+                  </div>
+                                    <div class="customer-info-field">
+                    <label class="customer-form-label">Booking ID</label>
+                    <div class="customer-info-value">1234567890</div>
+                  </div>
+
+                  <div class="customer-info-field">
+                    <label class="customer-form-label">Booking Date</label>
+                    <div class="customer-info-value">21 mai 2025 16:30</div>
+                  </div>
+
+                  <div class="customer-info-field">
+                    <label class="customer-form-label">Booking Status</label>
+                    <div class="customer-info-value">Paid</div>
+                  </div>
+
+
+                  
+
+                </div>
+                 </div>
+                </div>
+
+
+
+
+<div class="settings-item" style="margin-top: 40px;">
+            <label>ID or Passport</label>
+            <div class="settings-image-upload">
+              <i class="fas fa-camera"></i>
+              <span>Take photo of ID or Passport</span>
+
+              </div>
+                            <div class="upload-image-description">
+                <span> Take photo of ID or Passport without text input
+</span>
+            </div>
+          </div>
+
+          </div>
+
+
+
+        </div>
+
+
+        
+
+
+
+        <!-- Order Summary Footer -->
+        <div class="pos-order-footer">
+          <!-- Total Section -->
+          <div class="pos-total-section">
+            <div class="pos-total-row">
+              <span class="pos-total-label">Total 3 Days</span>
+              <span class="pos-total-amount">${bookingData.totalAmount || '490 lei'}</span>
+            </div>
+            <div class="pos-subtotal-row">
+                          <span class="pos-subtotal-label">2 days • 100 lei/day • 1 day = 200 lei/day</span>
+                        </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="pos-action-buttons">
+            <button class="pos-action-btn pos-checkout-btn active-booking-checkout">
+              <i class="fas fa-sign-out-alt"></i>
+              <span>Check Out</span>
+            </button>
+          </div>
+          
+
+<div class="pos-bottom-actions">
+            <button class="pos-back-to-booking-btn">Back to Booking</button>
+            <button class="pos-bottom-btn">Change Room</button>
+            <button class="pos-bottom-btn">Change Date</button>
+          </div>
+
+
+          </div>
+        </div>
+      </div>
+    `;
+    
+    // Attach event handlers for the active booking section
+    setTimeout(() => {
+      attachActiveBookingEventHandlers(section);
+    }, 0);
+    
+    return section;
+  }
+
+  // Function to show active booking section and slide out booking order section
+  function showActiveBookingSection(bookingId) {
+    // Find booking data from the sample bookings
+    const bookingData = findBookingById(bookingId);
+    if (!bookingData) {
+      console.error('Booking not found:', bookingId);
+      return;
+    }
+    
+    // Get the existing booking order section
+    let bookingOrderSection = document.querySelector('.booking-pos-order-section');
+    let activeBookingSection = document.querySelector('.active-booking-pos-section');
+    
+    // Create active booking section if it doesn't exist
+    if (!activeBookingSection) {
+      activeBookingSection = createActiveBookingSection(bookingData);
+      const mainContent = document.querySelector('.point-of-sale-app-window .window-main-content');
+      if (mainContent) {
+        mainContent.appendChild(activeBookingSection);
+      }
+    } else {
+      // Update existing section with new booking data
+      updateActiveBookingSection(activeBookingSection, bookingData);
+    }
+    
+    // Use the same sliding mechanism as the existing system
+    if (bookingOrderSection && activeBookingSection) {
+      slideOrderSections(bookingOrderSection, activeBookingSection);
+    } else {
+      console.error('Cannot slide - missing sections', { bookingOrderSection, activeBookingSection });
+    }
+    
+    console.log('Showing active booking section for booking:', bookingId);
+  }
+
+  // Helper function to find booking by ID
+  function findBookingById(bookingId) {
+    // Sample booking data - in a real app this would come from a database
+    const sampleBookings = [
+      { id: '24765', guest: 'John Smith', roomType: 'Deluxe', roomNumber: '101', startDate: new Date(2025, 1, 20), endDate: new Date(2025, 1, 23), totalAmount: '490 lei', channel: 'Booking.com', payStatus: 'Paid', email: 'john.smith@email.com', phone: '+40 123 456 789', notes: 'Late check-in requested' },
+      { id: '24766', guest: 'Maria Garcia', roomType: 'Deluxe', roomNumber: '101', startDate: new Date(2025, 1, 23), endDate: new Date(2025, 1, 26), totalAmount: '570 lei', channel: 'POS', payStatus: 'Not Paid', email: 'maria.garcia@email.com', phone: '+40 987 654 321', notes: 'Vegetarian meals' },
+      { id: '232475', guest: 'David Wilson', roomType: 'Deluxe', roomNumber: '101', startDate: new Date(2025, 2, 21), endDate: new Date(2025, 2, 25), totalAmount: '680 lei', channel: 'Online', payStatus: 'Paid', email: 'david.wilson@email.com', phone: '+40 555 123 456', notes: 'Business traveler' },
+      // Add more sample bookings as needed
+    ];
+    
+    return sampleBookings.find(booking => booking.id === bookingId);
+  }
+
+  // Helper function to format date
+  function formatDate(date) {
+    const options = { day: '2-digit', month: 'short', year: 'numeric' };
+    return date.toLocaleDateString('en-GB', options);
+  }
+
+  // Helper function to update active booking section with new data
+  function updateActiveBookingSection(section, bookingData) {
+    // Update header
+    const headerTitle = section.querySelector('.point-of-sale-current-order-header-item h3');
+    if (headerTitle) {
+      headerTitle.textContent = `Booking #${bookingData.id}`;
+    }
+    
+    // Update check-in/check-out dates
+    const checkinInput = section.querySelector('.booking-order-checkin .date-input');
+    const checkoutInput = section.querySelector('.booking-order-checkout .date-input');
+    if (checkinInput) checkinInput.value = formatDate(bookingData.startDate);
+    if (checkoutInput) checkoutInput.value = formatDate(bookingData.endDate);
+    
+    // Update room info
+    const roomName = section.querySelector('.pos-item-name');
+    const roomPrice = section.querySelector('.pos-item-price');
+    if (roomName) {
+      roomName.innerHTML = `${bookingData.roomType || 'Deluxe'} <div class="pos-item-rooms-no">${bookingData.roomNumber || '101'}</div>`;
+    }
+    if (roomPrice) {
+      const days = Math.ceil((bookingData.endDate - bookingData.startDate) / (1000 * 60 * 60 * 24));
+      roomPrice.textContent = `${bookingData.totalAmount || '490 lei'} (${days} days)`;
+    }
+    
+    // Update customer information
+    const customerInfoFields = [
+      { selector: '.customer-info-section .customer-info-value', index: 0, value: bookingData.guest },
+      { selector: '.customer-info-section .customer-info-value', index: 1, value: bookingData.email || 'guest@example.com' },
+      { selector: '.customer-info-section .customer-info-value', index: 2, value: bookingData.phone || '+40 123 456 789' },
+      { selector: '.customer-info-section .customer-info-value', index: 3, value: bookingData.channel },
+      { selector: '.customer-info-section .customer-info-value', index: 5, value: bookingData.notes || 'No special requests' }
+    ];
+    
+    customerInfoFields.forEach(field => {
+      const elements = section.querySelectorAll(field.selector);
+      if (elements[field.index]) {
+        if (field.index === 4) { // Payment status with badge
+          elements[field.index].innerHTML = `<span class="status-badge status-${bookingData.payStatus.toLowerCase().replace(/\s+/g, '-')}">${bookingData.payStatus}</span>`;
+        } else {
+          elements[field.index].textContent = field.value;
+        }
+      }
+    });
+    
+    // Update total amount
+    const totalAmount = section.querySelector('.pos-total-amount');
+    if (totalAmount) {
+      totalAmount.textContent = bookingData.totalAmount || '490 lei';
+    }
+  }
+
+  // Event handlers for active booking section
+  function attachActiveBookingEventHandlers(section) {
+    console.log('Attaching active booking event handlers');
+    
+    // Check out button handler
+    const checkoutBtn = section.querySelector('.active-booking-checkout');
+    if (checkoutBtn) {
+      checkoutBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        console.log('Check Out button clicked');
+        // Add checkout logic here
+        alert('Check out functionality would be implemented here');
+      });
+    }
+    
+    // Back to calendar button handler
+    const backBtn = section.querySelector('.pos-back-to-booking-btn');
+    if (backBtn) {
+      backBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        slideBackToCalendar();
+      });
+    }
+  }
+
+  // Function to slide back from active booking to calendar
+  function slideBackToCalendar() {
+    const activeBookingSection = document.querySelector('.active-booking-pos-section');
+    const bookingOrderSection = document.querySelector('.booking-pos-order-section');
+    
+    // Remove selected class from all booking bars when going back to calendar
+    const allBookingBars = document.querySelectorAll('.booking-bar');
+    allBookingBars.forEach(bar => bar.classList.remove('booking-bar-selected'));
+    
+    // Use the same sliding mechanism as the existing system
+    if (activeBookingSection && bookingOrderSection) {
+      slideOrderSections(activeBookingSection, bookingOrderSection);
+    } else {
+      console.error('Cannot slide back - missing sections', { activeBookingSection, bookingOrderSection });
+    }
+    
+    console.log('Sliding back to calendar');
+  }
+
+  // Function to slide back from customer info to booking order
+  function slideBackToBooking() {
+    const bookingOrderSection = document.querySelector('.booking-pos-order-section .point-of-sale-current-order-content');
+    const bookingToolbar = document.querySelector('.booking-pos-order-section .window-toolbar');
+    const customerInfoSection = document.querySelector('.point-of-sale-customer-info-content');
+    
+    // Ensure both elements have proper transition properties
+    if (bookingOrderSection) {
+      bookingOrderSection.style.transition = 'transform 0.3s ease-in-out';
+    }
+    if (bookingToolbar) {
+      bookingToolbar.style.transition = 'transform 0.3s ease-in-out';
+    }
+    
+    // Start animation
+    setTimeout(() => {
+      // Slide customer info to right
+      if (customerInfoSection) {
+        customerInfoSection.style.transform = 'translateX(100%)';
+      }
+      
+      // Slide booking order content back from left
+      if (bookingOrderSection) {
+        bookingOrderSection.style.transform = 'translateX(0)';
+      }
+      
+      // Slide booking toolbar back from left as well
+      if (bookingToolbar) {
+        bookingToolbar.style.transform = 'translateX(0)';
+      }
+    }, 50);
+    
+    // Hide customer info section after animation completes
+    setTimeout(() => {
+      if (customerInfoSection) {
+        customerInfoSection.style.display = 'none';
+      }
+    }, 350);
+    
+    console.log('Sliding back to booking');
+  }
+
+  function slideOrderSections(sectionOut, sectionIn) {
+    if (!sectionOut || !sectionIn) {
+      console.log('slideOrderSections: Missing sections', { sectionOut, sectionIn });
+      return;
+    }
+    
+    console.log('Starting slide animation:', {
+      out: sectionOut.className,
+      in: sectionIn.className
+    });
+    
+    // Ensure both sections have proper transition properties
+    sectionOut.style.transition = 'transform 0.3s ease-in-out';
+    sectionIn.style.transition = 'transform 0.3s ease-in-out';
+    
+    // Step 1: Prepare incoming section (off-screen to the right, but don't show it yet)
+    sectionIn.style.display = 'none';
+    sectionIn.style.transform = 'translateX(100%)';
+    
+    // Step 2: Ensure outgoing section is visible and in position
+    sectionOut.style.display = 'flex';
+    sectionOut.style.transform = 'translateX(0)';
+    
+    // Force a reflow to ensure initial styles are applied
+    sectionOut.offsetHeight;
+    
+    // Step 3: Slide out the current section to the right
+    requestAnimationFrame(() => {
+      sectionOut.style.transform = 'translateX(100%)';
+      
+      console.log('Sliding out section:', sectionOut.className);
+      
+      // Step 4: After the outgoing section is completely out, slide in the new section
+      setTimeout(() => {
+        // Hide the outgoing section
+        sectionOut.style.display = 'none';
+        
+        // Reset outgoing section position for next time
+        sectionOut.style.transform = 'translateX(0)';
+        
+        // Show the incoming section and slide it in from the right
+        sectionIn.style.display = 'flex';
+        
+        // Force a reflow before animating
+        sectionIn.offsetHeight;
+        
+        requestAnimationFrame(() => {
+          sectionIn.style.transform = 'translateX(0)';
+          console.log('Sliding in section:', sectionIn.className);
+          
+          // Mark animation as completed
+          setTimeout(() => {
+            console.log('Animation sequence completed');
+          }, 300);
+        });
+      }, 300); // Wait for outgoing animation to complete
+    });
+  }
+
+  function createBookingCalendarHTML() {
+    // Generate room data
+    const rooms = [
+      { id: 1, name: 'Deluxe Room 101', price: 100, type: 'Deluxe', capacity: 2 },
+      { id: 2, name: 'Standard Room 102', price: 80, type: 'Standard', capacity: 2 },
+      { id: 3, name: 'Suite Room 201', price: 150, type: 'Suite', capacity: 4 },
+      { id: 4, name: 'Deluxe Room 202', price: 120, type: 'Deluxe', capacity: 2 },
+      { id: 5, name: 'Standard Room 203', price: 90, type: 'Standard', capacity: 2 },
+      { id: 6, name: 'Family Room 301', price: 180, type: 'Family', capacity: 6 },
+      { id: 7, name: 'Standard Room 302', price: 100, type: 'Standard', capacity: 2 },
+      { id: 8, name: 'Deluxe Room 303', price: 130, type: 'Deluxe', capacity: 2 },
+      { id: 9, name: 'Deluxe Room 304', price: 110, type: 'Deluxe', capacity: 2 }
+    ];
+
+    // Generate calendar days (February - April 2025)
+    const startDate = new Date(2025, 1, 19); // Feb 19, 2025
+    const endDate = new Date(2025, 3, 24); // Apr 24, 2025
+    const days = [];
+    
+    for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+      days.push(new Date(d));
+    }
+
+    // Generate sample bookings with overlapping checkout/checkin scenarios
+    const bookings = [
+      // Room 1 - Multiple bookings with same-day checkout/checkin
+      { roomId: 1, startDate: new Date(2025, 1, 20), endDate: new Date(2025, 1, 23), guest: 'John Smith', color: '#3B82F620', id: '24765', channel: '<i class="fas fa-bed"></i> Booking.com', payStatus: 'Paid', checkin: '2025-01-20', checkout: '2025-01-23' },
+      { roomId: 1, startDate: new Date(2025, 1, 23), endDate: new Date(2025, 1, 26), guest: 'Maria Garcia', color: '#3B82F6', id: '24766', channel: '<i class="fas fa-cash-register"></i> POS', payStatus: 'Not Paid', checkin: '2025-01-23', checkout: '2025-01-26' },
+      { roomId: 1, startDate: new Date(2025, 2, 21), endDate: new Date(2025, 2, 25), guest: 'David Wilson', color: '#3B82F6', id: '232475', channel: '<i class="fas fa-globe"></i> Online', payStatus: 'Paid', checkin: '2025-02-21', checkout: '2025-02-25' },
+      
+      // Room 2 - Overlapping bookings on same day
+      { roomId: 2, startDate: new Date(2025, 1, 20), endDate: new Date(2025, 1, 22), guest: 'Sarah Johnson', color: '#3B82F620', id: '24755', channel: 'Booking.com', payStatus: 'Paid', checkin: '2025-01-20', checkout: '2025-01-22' },
+      { roomId: 2, startDate: new Date(2025, 1, 22), endDate: new Date(2025, 1, 25), guest: 'Mike Brown', color: '#3B82F6', id: '12475', channel: 'Booking.com', payStatus: 'Paid', checkin: '2025-01-20', checkout: '2025-01-22' },
+      { roomId: 2, startDate: new Date(2025, 1, 25), endDate: new Date(2025, 1, 28), guest: 'Lisa Davis', color: '#3B82F6', id: '12476', channel: 'POS', payStatus: 'Not Paid', checkin: '2025-01-20', checkout: '2025-01-22' },
+      { roomId: 2, startDate: new Date(2025, 2, 20), endDate: new Date(2025, 2, 24), guest: 'Tom Anderson', color: '#3B82F6', id: '2112475', channel: 'Local', payStatus: 'Paid', checkin: '2025-01-20', checkout: '2025-01-22' },
+      
+      // Room 3 - Back-to-back bookings
+      { roomId: 3, startDate: new Date(2025, 1, 21), endDate: new Date(2025, 1, 24), guest: 'Emma Wilson', color: '#10B98120', id: '122475', channel: 'Booking.com', payStatus: 'Paid', checkin: '2025-01-20', checkout: '2025-01-22' },
+      { roomId: 3, startDate: new Date(2025, 1, 24), endDate: new Date(2025, 1, 27), guest: 'James Taylor', color: '#10B981', id: '122476', channel: 'Booking.com', payStatus: 'Paid', checkin: '2025-01-20', checkout: '2025-01-22' },
+      { roomId: 3, startDate: new Date(2025, 2, 20), endDate: new Date(2025, 2, 22), guest: 'Anna Lee', color: '#10B981', id: '322475', channel: 'Booking.com', payStatus: 'NotPaid', checkin: '2025-01-20', checkout: '2025-01-22' },
+      { roomId: 3, startDate: new Date(2025, 2, 22), endDate: new Date(2025, 2, 25), guest: 'Robert Chen', color: '#10B981', id: '322476', channel: 'Booking.com', payStatus: 'Paid', checkin: '2025-01-20', checkout: '2025-01-22' },
+      
+      // Room 4 - Multiple overlapping scenarios
+      { roomId: 4, startDate: new Date(2025, 1, 21), endDate: new Date(2025, 1, 23), guest: 'Sophie Martin', color: '#10B98120', id: '532475', channel: 'Booking.com', payStatus: 'Paid', checkin: '2025-01-20', checkout: '2025-01-22' },
+      { roomId: 4, startDate: new Date(2025, 1, 23), endDate: new Date(2025, 1, 26), guest: 'Alex Rodriguez', color: '#10B981', id: '532476', channel: 'Booking.com', payStatus: 'Paid', checkin: '2025-01-20', checkout: '2025-01-22' },
+      { roomId: 4, startDate: new Date(2025, 2, 19), endDate: new Date(2025, 2, 21), guest: 'Grace Kim', color: '#10B981', id: '122477', channel: 'Booking.com', payStatus: 'Paid', checkin: '2025-01-20', checkout: '2025-01-22' },
+      { roomId: 4, startDate: new Date(2025, 2, 21), endDate: new Date(2025, 2, 24), guest: 'Daniel Park', color: '#10B981', id: '122478', channel: 'Booking.com', payStatus: 'Paid', checkin: '2025-01-20', checkout: '2025-01-22' },
+      
+      // Room 5 - Extended stays with overlaps
+      { roomId: 5, startDate: new Date(2025, 1, 22), endDate: new Date(2025, 1, 25), guest: 'Oliver White', color: '#10B981', id: '432475', channel: 'Booking.com', payStatus: 'Paid', checkin: '2025-01-20', checkout: '2025-01-22' },
+      { roomId: 5, startDate: new Date(2025, 1, 25), endDate: new Date(2025, 1, 29), guest: 'Mia Thompson', color: '#10B98130', id: '432476', channel: 'Booking.com', payStatus: 'Paid', checkin: '2025-01-20', checkout: '2025-01-22' },
+      { roomId: 5, startDate: new Date(2025, 2, 20), endDate: new Date(2025, 2, 22), guest: 'Lucas Green', color: '#10B981', id: '542475', channel: 'Booking.com', payStatus: 'Paid', checkin: '2025-01-20', checkout: '2025-01-22' },
+      { roomId: 5, startDate: new Date(2025, 2, 22), endDate: new Date(2025, 2, 26), guest: 'Zoe Adams', color: '#10B981', id: '542476', channel: 'Booking.com', payStatus: 'Paid', checkin: '2025-01-20', checkout: '2025-01-22' },
+      
+      // Room 6 - Family room with longer stays
+      { roomId: 6, startDate: new Date(2025, 1, 22), endDate: new Date(2025, 1, 26), guest: 'Johnson Family', color: '#ff9500', id: '622475', channel: 'Booking.com', payStatus: 'Paid', checkin: '2025-01-20', checkout: '2025-01-22' },
+      { roomId: 6, startDate: new Date(2025, 1, 26), endDate: new Date(2025, 1, 30), guest: 'Williams Family', color: '#ff950030', id: '622476', channel: 'Booking.com', payStatus: 'NotPaid', checkin: '2025-01-20', checkout: '2025-01-22' },
+      
+      // Room 7 - Quick turnovers
+      { roomId: 7, startDate: new Date(2025, 1, 20), endDate: new Date(2025, 1, 21), guest: 'Chris Evans', color: '#ff950020', id: '722475', channel: 'Booking.com', payStatus: 'Paid', checkin: '2025-01-20', checkout: '2025-01-22' },
+      { roomId: 7, startDate: new Date(2025, 1, 21), endDate: new Date(2025, 1, 23), guest: 'Natalie Stone', color: '#ff950020', id: '722476', channel: 'Booking.com', payStatus: 'Paid', checkin: '2025-01-20', checkout: '2025-01-22' },
+      { roomId: 7, startDate: new Date(2025, 1, 23), endDate: new Date(2025, 1, 25), guest: 'Ryan Cooper', color: '#ff9500', id: '722477', channel: 'Booking.com', payStatus: 'Paid', checkin: '2025-01-20', checkout: '2025-01-22' },
+      
+      // Room 8 - Mixed scenarios
+      { roomId: 8, startDate: new Date(2025, 1, 19), endDate: new Date(2025, 1, 22), guest: 'Isabella Cruz', color: '#ff950020', id: '822475', channel: 'Booking.com', payStatus: 'Paid', checkin: '2025-01-20', checkout: '2025-01-22' },
+      { roomId: 8, startDate: new Date(2025, 1, 22), endDate: new Date(2025, 1, 24), guest: 'Ethan Moore', color: '#ff950020', id: '822476', channel: 'Booking.com', payStatus: 'Paid', checkin: '2025-01-20', checkout: '2025-01-22' },
+      { roomId: 8, startDate: new Date(2025, 2, 20), endDate: new Date(2025, 2, 23), guest: 'Ava Miller', color: '#ff9500', id: '822477', channel: 'Booking.com', payStatus: 'Paid', checkin: '2025-01-20', checkout: '2025-01-22' },
+
+      // Room 9 - Mixed scenarios
+      { roomId: 9, startDate: new Date(2025, 1, 23), endDate: new Date(2025, 1, 28), guest: 'Isabella Cruz', color: '#ff9500', id: '822478', channel: 'Booking.com', payStatus: 'Paid', checkin: '2025-01-20', checkout: '2025-01-22' },
+      { roomId: 9, startDate: new Date(2025, 1, 16), endDate: new Date(2025, 1, 20), guest: 'Ethan Moore', color: '#ff9500', id: '822479', channel: 'Booking.com', payStatus: 'Paid', checkin: '2025-01-20', checkout: '2025-01-22' },
+      { roomId: 9, startDate: new Date(2025, 2, 20), endDate: new Date(2025, 2, 23), guest: 'Ava Miller', color: '#ff9500', id: '822480', channel: 'Booking.com', payStatus: 'Paid', checkin: '2025-01-20', checkout: '2025-01-22' }
+    ];
+
+    let html = `
+      <div class="booking-calendar-container">
+        <div class="booking-rooms-sidebar">
+          <div class="rooms-header">
+            <h3>Rooms no. / Type / Free</h3>
+            <span class="rooms-count">${rooms.length}</span>
+          </div>
+          <div class="rooms-list">
+    `;
+
+    // Generate room items in sidebar
+    rooms.forEach((room, index) => {
+      html += `
+        <div class="room-item ${index === 0 ? 'selected' : ''}" data-room-id="${room.id}">
+          <div class="room-info">
+            <div class="room-name-price">   
+              <div class="room-name">${room.name}</div>
+              <div class="room-price">${room.price} lei</div>
+            </div>
+            <div class="room-details">
+              <span class="room-type">${room.type}</span>
+              <span class="room-capacity"><i class="fas fa-user"></i> ${room.capacity}</span>
+            </div>
+          </div>
+        </div>
+      `;
+    });
+
+   
+    html += `
+            </div>
+          </div>
+          <div class="calendar-scroll-area">
+            <div class="calendar-header">
+              <div class="days-row">
+    `;
+
+    // Generate all days header in a single row
+    days.forEach(day => {
+      const dayNames = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+      const isToday = day.toDateString() === new Date(2025, 1, 25).toDateString();
+      
+      html += `
+        <div class="day-header ${isToday ? 'today' : ''}">
+          <div class="day-name">${dayNames[day.getDay()]}</div>
+          <div class="day-number">${day.getDate()}</div>
+        </div>
+      `;
+    });
+
+    html += `
+              </div>
+            </div>
+            <div class="calendar-body">
+    `;
+
+    // Generate room rows with bookings
+    rooms.forEach(room => {
+      html += `<div class="room-row" data-room-id="${room.id}" style="position: relative;">`;
+      
+      // First pass: create empty cells
+      days.forEach(day => {
+        const dayKey = day.toISOString().split('T')[0];
+        const isToday = day.toDateString() === new Date(2025, 1, 25).toDateString();
+        const todayClass = isToday ? ' today-column' : '';
+        html += `<div class="calendar-cell${todayClass}" data-date="${dayKey}"></div>`;
+      });
+      
+            // Second pass: add booking bars that span multiple days
+      const roomBookings = bookings.filter(b => b.roomId === room.id);
+      
+      // Track vertical positions to handle overlapping bookings on same day
+      let bookingLevel = 0;
+      
+      roomBookings.forEach(booking => {
+        const startIndex = days.findIndex(day => day.toDateString() === booking.startDate.toDateString());
+        const endIndex = days.findIndex(day => day.toDateString() === booking.endDate.toDateString());
+        
+        if (startIndex !== -1 && endIndex !== -1) {
+          const duration = endIndex - startIndex + 1;
+          const leftPosition = (startIndex * 80) + 40 + 5; // Start from center of start day + 5px margin
+          const width = ((duration - 1) * 80) - 10; // Distance between centers minus 10px total margin (5px each side)
+          
+          // Calculate vertical position - alternate between top and bottom half with 10px gap
+          const barHeight = 25; // Height of each booking bar
+          const gap = 10; // Gap between booking bars
+          let topPosition;
+          
+          if (bookingLevel === 0) {
+            // First booking - position in upper half
+            topPosition = 10;
+          } else {
+            // Second booking - position in lower half with gap
+            topPosition = 10 + barHeight + gap;
+          }
+          
+          // Toggle between levels for next booking
+          bookingLevel = (bookingLevel + 1) % 2;
+          
+          // Determine checkout status based on today's date
+          const today = new Date(2025, 1, 25); // February 25, 2025
+          const todayDateString = today.toDateString();
+          const endDateString = booking.endDate.toDateString();
+          
+          let checkoutStatusClass = '';
+          if (booking.endDate < today) {
+            // Booking ended before today - fully checked out
+            checkoutStatusClass = ' checked-out-booking';
+          } else if (endDateString === todayDateString) {
+            // Booking ends today - checking out today
+            checkoutStatusClass = ' checked-out-today-booking';
+          }
+          
+          html += `
+            <div class="booking-bar booking-pay-status-${booking.payStatus} booking-id-${booking.id}${checkoutStatusClass}" style="
+              position: absolute;
+              left: ${leftPosition}px;
+              width: ${width}px;
+              top: 50%;
+              transform: translateY(-50%);
+              height: 80%;
+              background-color: ${booking.color};
+              border-radius: 8px;
+              padding: 4px 8px;
+              display: flex;
+              flex-direction: column;
+              justify-content: center;
+              gap: 2px;
+              color: white;
+              font-size: 11px;
+              overflow: hidden;
+              box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+              z-index: ${10 + bookingLevel};
+              cursor: pointer;
+            " data-booking-id="${booking.id}">
+            <div class="booking-bar-content-name-id">
+              <span class="booking-id">#${booking.id}</span>
+              <span class="booking-guest">${booking.guest}</span>
+
+            </div>
+            <div class="booking-bar-content-duration">
+              <span class="booking-duration">${Math.ceil((booking.endDate - booking.startDate) / (1000 * 60 * 60 * 24))} days - ${booking.endDate.toLocaleDateString('en-GB', {day: '2-digit', month: '2-digit'})}</span>
+                          <span class="booking-channel">${booking.channel}</span>
+              </div>
+            </div>
+          `;
+        }
+      });
+      
+      html += `</div>`;
+    });
+
+    html += `
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    return html;
+  }
+
+  function attachBookingEventHandlers(section) {
+    // View mode buttons
+    const viewModeButtons = section.querySelectorAll('.view-mode-btn');
+    viewModeButtons.forEach(btn => {
+      btn.addEventListener('click', function() {
+        viewModeButtons.forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        // Handle view mode change
+        const months = this.getAttribute('data-months');
+        console.log('View mode changed to:', months, 'months');
+      });
+    });
+
+    // Period navigation and scroll tracking
+    const calendarScrollArea = section.querySelector('.calendar-scroll-area');
+    const currentPeriodSpan = section.querySelector('.current-period');
+    const prevBtn = section.querySelector('#prev-period');
+    const nextBtn = section.querySelector('#next-period');
+    
+    // Track current month positions for scroll detection
+    let monthPositions = [];
+    let currentMonth = 'February 2025'; // Initial month
+    
+    // Function to calculate month positions based on day headers
+    function calculateMonthPositions() {
+      const dayHeaders = section.querySelectorAll('.day-header');
+      monthPositions = [];
+      let currentMonthName = '';
+      let monthStartIndex = 0;
+      
+      dayHeaders.forEach((header, index) => {
+        // Calculate the actual date for this header based on the start date
+        const headerDate = new Date(2025, 1, 19); // Start date: Feb 19, 2025
+        headerDate.setDate(headerDate.getDate() + index);
+        
+        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
+                          'July', 'August', 'September', 'October', 'November', 'December'];
+        const monthName = `${monthNames[headerDate.getMonth()]} ${headerDate.getFullYear()}`;
+        
+        // Check if this is the first header or if the month has changed
+        if (index === 0 || monthName !== currentMonthName) {
+          // Save the previous month if it exists
+          if (currentMonthName && monthStartIndex < index) {
+            monthPositions.push({
+              name: currentMonthName,
+              startIndex: monthStartIndex,
+              endIndex: index - 1,
+              startPosition: monthStartIndex * 80, // 80px per day
+              endPosition: (index - 1) * 80 + 80
+            });
+          }
+          
+          // Start tracking the new month
+          currentMonthName = monthName;
+          monthStartIndex = index;
+        }
+      });
+      
+      // Add the last month
+      if (currentMonthName && monthStartIndex < dayHeaders.length) {
+        monthPositions.push({
+          name: currentMonthName,
+          startIndex: monthStartIndex,
+          endIndex: dayHeaders.length - 1,
+          startPosition: monthStartIndex * 80,
+          endPosition: (dayHeaders.length - 1) * 80 + 80
+        });
+      }
+      
+      console.log('Month positions calculated:', monthPositions);
+    }
+    
+    // Function to update current period based on scroll position
+    function updateCurrentPeriod(scrollLeft) {
+      const scrollAreaWidth = calendarScrollArea.clientWidth;
+      const middlePosition = scrollLeft + (scrollAreaWidth / 2);
+      
+      // Find which month the middle of the viewport is in
+      for (let i = 0; i < monthPositions.length; i++) {
+        const month = monthPositions[i];
+        if (middlePosition >= month.startPosition && middlePosition <= month.endPosition) {
+          if (currentMonth !== month.name) {
+            currentMonth = month.name;
+            currentPeriodSpan.textContent = currentMonth;
+            console.log('Current period updated to:', currentMonth);
+          }
+          break;
+        }
+      }
+    }
+    
+    // Function to scroll to a specific month
+    function scrollToMonth(monthName) {
+      const month = monthPositions.find(m => m.name === monthName);
+      if (month) {
+        const targetPosition = month.startPosition;
+        calendarScrollArea.scrollTo({
+          left: targetPosition,
+          behavior: 'smooth'
+        });
+        console.log('Scrolling to month:', monthName, 'at position:', targetPosition);
+      }
+    }
+    
+    // Function to get next/previous month
+    function getNextMonth(currentMonthName) {
+      const currentIndex = monthPositions.findIndex(m => m.name === currentMonthName);
+      if (currentIndex !== -1 && currentIndex < monthPositions.length - 1) {
+        return monthPositions[currentIndex + 1].name;
+      }
+      return null;
+    }
+    
+    function getPreviousMonth(currentMonthName) {
+      const currentIndex = monthPositions.findIndex(m => m.name === currentMonthName);
+      if (currentIndex > 0) {
+        return monthPositions[currentIndex - 1].name;
+      }
+      return null;
+    }
+    
+    // Initialize month positions after a short delay to ensure DOM is ready
+    setTimeout(() => {
+      calculateMonthPositions();
+      // Set initial period based on current scroll position
+      if (calendarScrollArea) {
+        updateCurrentPeriod(calendarScrollArea.scrollLeft);
+      }
+    }, 100);
+    
+    // Scroll event listener for period tracking
+    if (calendarScrollArea) {
+      calendarScrollArea.addEventListener('scroll', function() {
+        updateCurrentPeriod(this.scrollLeft);
+      });
+    }
+    
+    // Period navigation buttons
+    if (prevBtn) {
+      prevBtn.addEventListener('click', function() {
+        const prevMonth = getPreviousMonth(currentMonth);
+        if (prevMonth) {
+          scrollToMonth(prevMonth);
+        }
+        console.log('Previous period clicked, target:', prevMonth);
+      });
+    }
+    
+    if (nextBtn) {
+      nextBtn.addEventListener('click', function() {
+        const nextMonth = getNextMonth(currentMonth);
+        if (nextMonth) {
+          scrollToMonth(nextMonth);
+        }
+        console.log('Next period clicked, target:', nextMonth);
+      });
+    }
+
+    // Room sidebar items
+    const roomItems = section.querySelectorAll('.room-item');
+    roomItems.forEach(item => {
+      item.addEventListener('click', function() {
+        // Remove selected class from all room items
+        roomItems.forEach(i => i.classList.remove('selected'));
+        this.classList.add('selected');
+        const roomId = this.getAttribute('data-room-id');
+        
+        // Also select corresponding room label in calendar (if exists)
+        const roomLabels = section.querySelectorAll('.calendar-room-label');
+        roomLabels.forEach(l => l.classList.remove('selected'));
+        const correspondingLabel = section.querySelector(`.calendar-room-label[data-room-id="${roomId}"]`);
+        if (correspondingLabel) {
+          correspondingLabel.classList.add('selected');
+        }
+        
+        // Highlight the corresponding room row - search in entire document to ensure we find it
+        const allRoomRows = document.querySelectorAll('.room-row');
+        allRoomRows.forEach(r => r.classList.remove('selected'));
+        const correspondingRow = document.querySelector(`.room-row[data-room-id="${roomId}"]`);
+        if (correspondingRow) {
+          correspondingRow.classList.add('selected');
+          console.log('Room row highlighted for room:', roomId);
+        } else {
+          console.log('Room row not found for room:', roomId);
+        }
+        
+        console.log('Room selected:', roomId);
+      });
+    });
+
+    // Calendar cell clicks
+    const calendarCells = section.querySelectorAll('.calendar-cell');
+    calendarCells.forEach(cell => {
+      cell.addEventListener('click', function() {
+        const date = this.getAttribute('data-date');
+        console.log('Calendar cell clicked:', date);
+      });
+    });
+
+    // Room label clicks (if they exist)
+    const roomLabels = section.querySelectorAll('.calendar-room-label');
+    roomLabels.forEach(label => {
+      label.addEventListener('click', function() {
+        roomLabels.forEach(r => r.classList.remove('selected'));
+        this.classList.add('selected');
+        const roomId = this.getAttribute('data-room-id');
+        
+        // Also select corresponding room item in sidebar
+        const roomItems = section.querySelectorAll('.room-item');
+        roomItems.forEach(i => i.classList.remove('selected'));
+        const correspondingItem = section.querySelector(`.room-item[data-room-id="${roomId}"]`);
+        if (correspondingItem) {
+          correspondingItem.classList.add('selected');
+        }
+        
+        // Highlight the corresponding room row - search in entire document
+        const allRoomRows = document.querySelectorAll('.room-row');
+        allRoomRows.forEach(r => r.classList.remove('selected'));
+        const correspondingRow = document.querySelector(`.room-row[data-room-id="${roomId}"]`);
+        if (correspondingRow) {
+          correspondingRow.classList.add('selected');
+          console.log('Room row highlighted for room:', roomId);
+        }
+        
+        console.log('Room selected:', roomId);
+      });
+    });
+
+    // Booking bar clicks
+    const bookingBars = section.querySelectorAll('.booking-bar');
+    bookingBars.forEach(bar => {
+      bar.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const bookingId = this.getAttribute('data-booking-id');
+        console.log('Booking clicked:', bookingId);
+        
+        // Check if this booking is already displayed in the active booking section
+        const activeBookingSection = document.querySelector('.active-booking-pos-section');
+        if (activeBookingSection && activeBookingSection.style.display !== 'none') {
+          // Get the currently displayed booking ID from the active section
+          const currentBookingTitle = activeBookingSection.querySelector('.point-of-sale-current-order-header-item h3');
+          if (currentBookingTitle) {
+            const currentBookingId = currentBookingTitle.textContent.replace('Booking #', '');
+            if (currentBookingId === bookingId) {
+              console.log('Same booking already displayed, ignoring click');
+              return; // Don't trigger the effect if it's the same booking
+            }
+          }
+        }
+        
+        // Remove selected class from all booking bars
+        const allBookingBars = document.querySelectorAll('.booking-bar');
+        allBookingBars.forEach(b => b.classList.remove('booking-bar-selected'));
+        
+        // Add selected class to clicked booking bar
+        this.classList.add('booking-bar-selected');
+        
+        // Show active booking section using the same mechanism as "add booking"
+        showActiveBookingSection(bookingId);
+      });
+    });
+
+    // Prevent quantity containers from triggering order item expansion
+    const quantityContainers = section.querySelectorAll('.booking-order-items-container .pos-item-quantity, .booking-order-items-container .pos-item-quantity-controls');
+    quantityContainers.forEach(container => {
+      container.addEventListener('click', function(e) {
+        e.stopPropagation();
+      });
+    });
+
+    // Quantity button handlers for booking order items
+    const quantityButtons = section.querySelectorAll('.booking-order-items-container .qty-btn');
+    quantityButtons.forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        
+        const qtyValueSpan = this.parentElement.querySelector('.qty-value');
+        const currentQty = parseInt(qtyValueSpan.textContent);
+        const isIncrease = this.classList.contains('qty-increase');
+        const isMainQuantity = this.closest('.pos-item-main-row') !== null;
+        
+        // Only handle main quantity changes (not sub-controls like room number, adults, children)
+        if (isMainQuantity) {
+          let newQty = currentQty;
+          
+          if (isIncrease) {
+            newQty = Math.min(currentQty + 1, 10); // Max 10 rooms
+          } else {
+            newQty = Math.max(currentQty - 1, 1); // Min 1 room
+          }
+          
+          qtyValueSpan.textContent = newQty;
+          
+          // Update expanded content sections based on new quantity
+          const orderItem = this.closest('.pos-order-item');
+          updateBookingExpandedContent(orderItem, newQty);
+        } else {
+          // Handle sub-control quantity changes normally
+          let newQty = currentQty;
+          
+          if (isIncrease) {
+            newQty = currentQty + 1;
+          } else {
+            newQty = Math.max(currentQty - 1, 0);
+          }
+          
+          qtyValueSpan.textContent = newQty;
+        }
+      });
+    });
+
+    // Also prevent action buttons from triggering expansion
+    const actionButtons = section.querySelectorAll('.booking-order-items-container .pos-item-action-btn');
+    actionButtons.forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        console.log('Action button clicked:', this.textContent);
+      });
+    });
+
+    // Add proper event delegation for order item expansion/collapse
+    const orderItems = section.querySelectorAll('.booking-order-items-container .pos-order-item');
+    orderItems.forEach(item => {
+      item.addEventListener('click', function(e) {
+        // Only block expansion if clicking directly on quantity buttons or action buttons
+        if (
+          e.target.classList.contains('qty-btn') ||
+          e.target.closest('.qty-btn') ||
+          e.target.classList.contains('pos-item-action-btn') ||
+          e.target.closest('.pos-item-action-btn')
+        ) {
+          return; // Don't toggle if clicking on buttons
+        }
+        
+        // Close all other expanded items first
+        const allItems = section.querySelectorAll('.booking-order-items-container .pos-order-item');
+        allItems.forEach(otherItem => {
+          if (otherItem !== this && otherItem.classList.contains('expanded')) {
+            otherItem.classList.remove('expanded');
+          }
+        });
+        
+        // Toggle the clicked item
+        this.classList.toggle('expanded');
+        console.log('Order item toggled:', this.classList.contains('expanded') ? 'expanded' : 'collapsed');
+      });
+    });
+  }
+
+  // Function to update booking expanded content based on quantity
+  function updateBookingExpandedContent(orderItem, quantity) {
+    const originalExpandedContent = orderItem.querySelector('.pos-item-expanded-content');
+    if (!originalExpandedContent) return;
+
+    // Clear existing duplicated containers (keep only the original)
+    const existingDuplicates = orderItem.querySelectorAll('.pos-item-expanded-content-duplicate');
+    existingDuplicates.forEach(duplicate => {
+      duplicate.remove();
+    });
+
+    // Generate exact duplicates of the entire expanded content container for quantities > 1
+    for (let i = 2; i <= quantity; i++) {
+      const duplicateExpandedContent = originalExpandedContent.cloneNode(true);
+      
+      // Add class to identify as duplicate (for removal purposes only)
+      duplicateExpandedContent.classList.add('pos-item-expanded-content-duplicate');
+      
+      // Insert after the original expanded content
+      originalExpandedContent.parentNode.insertBefore(duplicateExpandedContent, originalExpandedContent.nextSibling);
+    }
+
+    // Re-attach event handlers to all quantity controls (original + all duplicates)
+    const allExpandedContents = orderItem.querySelectorAll('.pos-item-expanded-content, .pos-item-expanded-content-duplicate');
+    allExpandedContents.forEach(container => {
+      const allQuantityButtons = container.querySelectorAll('.qty-btn');
+      allQuantityButtons.forEach(btn => {
+        // Remove any existing listeners to avoid duplicates
+        btn.replaceWith(btn.cloneNode(true));
+      });
+      
+      // Re-attach fresh event handlers
+      const freshQuantityButtons = container.querySelectorAll('.qty-btn');
+      freshQuantityButtons.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          
+          const qtyValueSpan = this.parentElement.querySelector('.qty-value');
+          const currentQty = parseInt(qtyValueSpan.textContent);
+          const isIncrease = this.classList.contains('qty-increase');
+          
+          // Handle sub-control quantity changes (these are never main quantity)
+          let newQty = currentQty;
+          
+          if (isIncrease) {
+            newQty = currentQty + 1;
+          } else {
+            newQty = Math.max(currentQty - 1, 0);
+          }
+          
+          qtyValueSpan.textContent = newQty;
+          console.log('Sub-control quantity changed:', newQty);
+        });
+      });
+
+      // Re-attach event handlers to quantity containers
+      const quantityContainers = container.querySelectorAll('.pos-item-quantity-controls');
+      quantityContainers.forEach(qtyContainer => {
+        qtyContainer.addEventListener('click', function(e) {
+          e.stopPropagation();
+        });
+      });
+    });
+
+    console.log(`Updated booking item to ${quantity} complete expanded content container(s)`);
+  }
+
+  // Initialize with products view
+  showProductsSection();
+}
+
+//Contacts App Content
+function setupContactsApp(windowElement) {
+  // Sidebar: do NOT set content here. Sidebar content is defined in index.html template using the generic sidebar structure.
+  // Only update dynamic values (like unread counts, user name, etc.) here if needed.
+
+  // --- Ensure sidebar toggle and overlay exist (for consistent sidebar behavior) ---
+  ensureSidebarElements(windowElement);
+
+  if (typeof window.updateSidebarForWindow === 'function') {
+    window.updateSidebarForWindow(windowElement);
+  }
+  if (typeof attachSidebarResizeObserver === 'function') {
+    attachSidebarResizeObserver(windowElement);
+  }
+
+  // Setup toolbar buttons
+  const toolbarButtons = windowElement.querySelectorAll('.window-toolbar .toolbar-button');
+  toolbarButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      // Add ripple effect
+      const ripple = document.createElement('span');
+      ripple.classList.add('ripple');
+      button.appendChild(ripple);
+      setTimeout(() => {
+        ripple.remove();
+      }, 600);
+    });
+  });
+
+  // Single source of contact data with all fields
+  const contacts = [
+    {
+      id: 1,
+      name: 'Andrei Antoniade',
+      firstName: 'Andrei',
+      lastName: 'Alexandru',
+      avatar: 'fa-user',
+      email: 'andrei@example.com',
+      phone: '0732 425 448',
+      company: 'Tech Solutions Inc.',
+      position: 'Software Developer',
+      notes: 'Main project contact',
+      favorite: true,
+      letter: 'A',
+      icon: 'fa-user',
+      color: '#F6AD55',
+      creationDate: '12:40 AM',
+      lastOrder: '12:40 AM',
+      lastVisit: '<i class="fas fa-circle" style="color: #10B981; font-size: 10px; margin-right: 5px;"></i> Online now',
+      city: 'Constanta',
+      country: 'Romania',
+      ordersNo: 7,
+      totalSpent: '$ 220.2',
+      online: true
+    },
+    {
+      id: 2,
+      name: 'Alexandru Morgan',
+      firstName: 'Alexandru',
+      lastName: 'Ionut',
+      avatar: 'fa-user',
+      email: 'alex@example.com',
+      phone: '0732 425 448',
+      company: 'Sports Analytics',
+      position: 'Data Scientist',
+      notes: 'Met at the conference',
+      favorite: false,
+      letter: 'A',
+      icon: 'fa-user',
+      color: '#4FD1C5',
+      creationDate: '16:30 PM',
+      lastOrder: 'In progress...',
+      lastVisit: '<i class="fas fa-circle" style="color: #10B981; font-size: 10px; margin-right: 5px;"></i> Online now',
+      city: 'Cluj',
+      country: 'Austria',
+      ordersNo: 2,
+      totalSpent: '$ 74',
+      online: true
+    },
+    {
+      id: 3,
+      name: 'Vasile Johnson',
+      firstName: 'Vasile',
+      lastName: 'Gogu',
+      avatar: 'fa-user',
+      email: 'vasile@example.com',
+      phone: '0732 425 448',
+      company: 'Music Productions',
+      position: 'Sound Engineer',
+      notes: 'Referred by Sam',
+      favorite: true,
+      letter: 'V',
+      icon: 'fa-user',
+      color: '#4FD1C5',
+      creationDate: '16 April',
+      lastOrder: '16 April',
+      lastVisit: '16 April',
+      city: 'Ramnicu-Valcea',
+      country: 'Belgia',
+      ordersNo: 1,
+      totalSpent: '$ 12.75',
+      online: false
+    },
+    {
+      id: 4,
+      name: 'Gina Parker',
+      firstName: 'Gina',
+      lastName: 'Alina',
+      avatar: 'fa-user',
+      email: 'gina@example.com',
+      phone: '0732 425 448',
+      company: 'Design Studio',
+      position: 'UX Designer',
+      notes: 'Works remotely',
+      favorite: false,
+      letter: 'G',
+      icon: 'fa-user',
+      color: '#4FD1C5',
+      creationDate: '23 May',
+      lastOrder: '23 May',
+      lastVisit: '<i class="fas fa-circle" style="color: #10B981; font-size: 10px; margin-right: 5px;"></i> Online now',
+      city: 'Cluj',
+      country: 'Bulgaria',
+      ordersNo: 14,
+      totalSpent: '$ 1475.5',
+      online: true
+    },
+    {
+      id: 5,
+      name: 'Gigica Miller',
+      firstName: 'Gigica',
+      lastName: 'Popescu',
+      avatar: 'fa-user',
+      email: 'gigica@example.com',
+      phone: '0732 425 448',
+      company: 'Construction Co.',
+      position: 'Project Manager',
+      notes: 'New client',
+      favorite: false,
+      letter: 'G',
+      icon: 'fa-user',
+      color: '#4FD1C5',
+      creationDate: '25 August',
+      lastOrder: 'In progress...',
+      lastVisit: '25 August',
+      city: 'Constanta',
+      country: 'Romania',
+      ordersNo: 2,
+      totalSpent: '$ 77',
+      online: false
+    },
+    {
+      id: 6,
+      name: 'Alina Wilson',
+      firstName: 'Alina',
+      lastName: 'Eminescu',
+      avatar: 'fa-user',
+      email: 'alina@example.com',
+      phone: '0732 425 448',
+      company: 'Healthcare Services',
+      position: 'Medical Researcher',
+      notes: 'Conference speaker',
+      favorite: true,
+      letter: 'A',
+      icon: 'fa-user',
+      color: '#F6AD55',
+      creationDate: '13 December',
+      lastOrder: '13 December',
+      lastVisit: '13 December',
+      city: 'Bucuresti',
+      country: 'Romania',
+      ordersNo: 1,
+      totalSpent: '$ 18',
+      online: false
+    },
+    {
+      id: 7,
+      name: 'Andrei Antoniade',
+      firstName: 'Andrei',
+      lastName: 'Alexandru',
+      avatar: 'fa-user',
+      email: 'andrei@example.com',
+      phone: '0732 425 448',
+      company: 'Tech Solutions Inc.',
+      position: 'Software Developer',
+      notes: 'Main project contact',
+      favorite: true,
+      letter: 'A',
+      icon: 'fa-user',
+      color: '#F6AD55',
+      creationDate: '12:40 AM',
+      lastOrder: '12:40 AM',
+      lastVisit: '<i class="fas fa-circle" style="color: #10B981; font-size: 10px; margin-right: 5px;"></i> Online now',
+      city: 'Constanta',
+      country: 'Romania',
+      ordersNo: 7,
+      totalSpent: '$ 220.2',
+      online: true
+    },
+    {
+      id: 8,
+      name: 'Alexandru Morgan',
+      firstName: 'Alexandru',
+      lastName: 'Ionut',
+      avatar: 'fa-user',
+      email: 'alex@example.com',
+      phone: '0732 425 448',
+      company: 'Sports Analytics',
+      position: 'Data Scientist',
+      notes: 'Met at the conference',
+      favorite: false,
+      letter: 'A',
+      icon: 'fa-user',
+      color: '#4FD1C5',
+      creationDate: '16:30 PM',
+      lastOrder: 'In progress...',
+      lastVisit: '<i class="fas fa-circle" style="color: #10B981; font-size: 10px; margin-right: 5px;"></i> Online now',
+      city: 'Cluj',
+      country: 'Austria',
+      ordersNo: 2,
+      totalSpent: '$ 74',
+      online: true
+    },
+    {
+      id: 9,
+      name: 'Casile Johnson',
+      firstName: 'Casile',
+      lastName: 'Gogu',
+      avatar: 'fa-user',
+      email: 'vasile@example.com',
+      phone: '0732 425 448',
+      company: 'Music Productions',
+      position: 'Sound Engineer',
+      notes: 'Referred by Sam',
+      favorite: true,
+      letter: 'V',
+      icon: 'fa-user',
+      color: '#4FD1C5',
+      creationDate: '16 April',
+      lastOrder: '16 April',
+      lastVisit: '16 April',
+      city: 'Ramnicu-Valcea',
+      country: 'Belgia',
+      ordersNo: 1,
+      totalSpent: '$ 12.75',
+      online: false
+    },
+    {
+      id: 10,
+      name: 'Bina Parker',
+      firstName: 'Bina',
+      lastName: 'Alina',
+      avatar: 'fa-user',
+      email: 'gina@example.com',
+      phone: '0732 425 448',
+      company: 'Design Studio',
+      position: 'UX Designer',
+      notes: 'Works remotely',
+      favorite: false,
+      letter: 'G',
+      icon: 'fa-user',
+      color: '#4FD1C5',
+      creationDate: '23 May',
+      lastOrder: '23 May',
+      lastVisit: '23 May',
+      city: 'Cluj',
+      country: 'Bulgaria',
+      ordersNo: 14,
+      totalSpent: '$ 1475.5',
+      online: true
+    },
+    {
+      id: 11,
+      name: 'Gigica Miller',
+      firstName: 'Gigica',
+      lastName: 'Popescu',
+      avatar: 'fa-user',
+      email: 'gigica@example.com',
+      phone: '0732 425 448',
+      company: 'Construction Co.',
+      position: 'Project Manager',
+      notes: 'New client',
+      favorite: false,
+      letter: 'G',
+      icon: 'fa-user',
+      color: '#4FD1C5',
+      creationDate: '25 August',
+      lastOrder: 'In progress...',
+      lastVisit: '25 August',
+      city: 'Constanta',
+      country: 'Romania',
+      ordersNo: 2,
+      totalSpent: '$ 77',
+      online: false
+    },
+    {
+      id: 12,
+      name: 'Alina Wilson',
+      firstName: 'Alina',
+      lastName: 'Eminescu',
+      avatar: 'fa-user',
+      email: 'alina@example.com',
+      phone: '0732 425 448',
+      company: 'Healthcare Services',
+      position: 'Medical Researcher',
+      notes: 'Conference speaker',
+      favorite: true,
+      letter: 'A',
+      icon: 'fa-user',
+      color: '#F6AD55',
+      creationDate: '13 December',
+      lastOrder: '13 December',
+      lastVisit: '13 December',
+      city: 'Bucuresti',
+      country: 'Romania',
+      ordersNo: 1,
+      totalSpent: '$ 18',
+      online: false
+    },
+    {
+      id: 13,
+      name: 'Andrei Antoniade',
+      firstName: 'Andrei',
+      lastName: 'Alexandru',
+      avatar: 'fa-user',
+      email: 'andrei@example.com',
+      phone: '0732 425 448',
+      company: 'Tech Solutions Inc.',
+      position: 'Software Developer',
+      notes: 'Main project contact',
+      favorite: true,
+      letter: 'A',
+      icon: 'fa-user',
+      color: '#F6AD55',
+      creationDate: '12:40 AM',
+      lastOrder: '12:40 AM',
+      lastVisit: '<i class="fas fa-circle" style="color: #10B981; font-size: 10px; margin-right: 5px;"></i> Online now',
+      city: 'Constanta',
+      country: 'Romania',
+      ordersNo: 7,
+      totalSpent: '$ 220.2',
+      online: true
+    },
+    {
+      id: 14,
+      name: 'Alexandru Morgan',
+      firstName: 'Alexandru',
+      lastName: 'Ionut',
+      avatar: 'fa-user',
+      email: 'alex@example.com',
+      phone: '0732 425 448',
+      company: 'Sports Analytics',
+      position: 'Data Scientist',
+      notes: 'Met at the conference',
+      favorite: false,
+      letter: 'A',
+      icon: 'fa-user',
+      color: '#4FD1C5',
+      creationDate: '16:30 PM',
+      lastOrder: 'In progress...',
+      lastVisit: '<i class="fas fa-circle" style="color: #10B981; font-size: 10px; margin-right: 5px;"></i> Online now',
+      city: 'Cluj',
+      country: 'Austria',
+      ordersNo: 2,
+      totalSpent: '$ 74',
+      online: true
+    },
+    {
+      id: 15,
+      name: 'Vasile Johnson',
+      firstName: 'Vasile',
+      lastName: 'Gogu',
+      avatar: 'fa-user',
+      email: 'vasile@example.com',
+      phone: '0732 425 448',
+      company: 'Music Productions',
+      position: 'Sound Engineer',
+      notes: 'Referred by Sam',
+      favorite: true,
+      letter: 'V',
+      icon: 'fa-user',
+      color: '#4FD1C5',
+      creationDate: '16 April',
+      lastOrder: '16 April',
+      lastVisit: '16 April',
+      city: 'Ramnicu-Valcea',
+      country: 'Belgia',
+      ordersNo: 1,
+      totalSpent: '$ 12.75',
+      online: false
+    },
+    {
+      id: 16,
+      name: 'Gina Parker',
+      firstName: 'Gina',
+      lastName: 'Alina',
+      avatar: 'fa-user',
+      email: 'gina@example.com',
+      phone: '0732 425 448',
+      company: 'Design Studio',
+      position: 'UX Designer',
+      notes: 'Works remotely',
+      favorite: false,
+      letter: 'G',
+      icon: 'fa-user',
+      color: '#4FD1C5',
+      creationDate: '23 May',
+      lastOrder: '23 May',
+      lastVisit: '<i class="fas fa-circle" style="color: #10B981; font-size: 10px; margin-right: 5px;"></i> Online now',
+      city: 'Cluj',
+      country: 'Bulgaria',
+      ordersNo: 14,
+      totalSpent: '$ 1475.5',
+      online: true
+    },
+    {
+      id: 17,
+      name: 'Gigica Miller',
+      firstName: 'Gigica',
+      lastName: 'Popescu',
+      avatar: 'fa-user',
+      email: 'gigica@example.com',
+      phone: '0732 425 448',
+      company: 'Construction Co.',
+      position: 'Project Manager',
+      notes: 'New client',
+      favorite: false,
+      letter: 'G',
+      icon: 'fa-user',
+      color: '#4FD1C5',
+      creationDate: '25 August',
+      lastOrder: 'In progress...',
+      lastVisit: '25 August',
+      city: 'Constanta',
+      country: 'Romania',
+      ordersNo: 2,
+      totalSpent: '$ 77',
+      online: false
+    },
+    {
+      id: 18,
+      name: 'Alina Wilson',
+      firstName: 'Alina',
+      lastName: 'Eminescu',
+      avatar: 'fa-user',
+      email: 'alina@example.com',
+      phone: '0732 425 448',
+      company: 'Healthcare Services',
+      position: 'Medical Researcher',
+      notes: 'Conference speaker',
+      favorite: true,
+      letter: 'A',
+      icon: 'fa-user',
+      color: '#F6AD55',
+      creationDate: '13 December',
+      lastOrder: '13 December',
+      lastVisit: '13 December',
+      city: 'Bucuresti',
+      country: 'Romania',
+      ordersNo: 1,
+      totalSpent: '$ 18',
+      online: false
+    },
+    {
+      id: 19,
+      name: 'Andrei Antoniade',
+      firstName: 'Andrei',
+      lastName: 'Alexandru',
+      avatar: 'fa-user',
+      email: 'andrei@example.com',
+      phone: '0732 425 448',
+      company: 'Tech Solutions Inc.',
+      position: 'Software Developer',
+      notes: 'Main project contact',
+      favorite: true,
+      letter: 'A',
+      icon: 'fa-user',
+      color: '#F6AD55',
+      creationDate: '12:40 AM',
+      lastOrder: '12:40 AM',
+      lastVisit: '<i class="fas fa-circle" style="color: #10B981; font-size: 10px; margin-right: 5px;"></i> Online now',
+      city: 'Constanta',
+      country: 'Romania',
+      ordersNo: 7,
+      totalSpent: '$ 220.2',
+      online: true
+    },
+    {
+      id: 20,
+      name: 'Alexandru Morgan',
+      firstName: 'Alexandru',
+      lastName: 'Ionut',
+      avatar: 'fa-user',
+      email: 'alex@example.com',
+      phone: '0732 425 448',
+      company: 'Sports Analytics',
+      position: 'Data Scientist',
+      notes: 'Met at the conference',
+      favorite: false,
+      letter: 'A',
+      icon: 'fa-user',
+      color: '#4FD1C5',
+      creationDate: '16:30 PM',
+      lastOrder: 'In progress...',
+      lastVisit: '<i class="fas fa-circle" style="color: #10B981; font-size: 10px; margin-right: 5px;"></i> Online now',
+      city: 'Cluj',
+      country: 'Austria',
+      ordersNo: 2,
+      totalSpent: '$ 74',
+      online: true
+    },
+    {
+      id: 21,
+      name: 'Vasile Johnson',
+      firstName: 'Vasile',
+      lastName: 'Gogu',
+      avatar: 'fa-user',
+      email: 'vasile@example.com',
+      phone: '0732 425 448',
+      company: 'Music Productions',
+      position: 'Sound Engineer',
+      notes: 'Referred by Sam',
+      favorite: true,
+      letter: 'V',
+      icon: 'fa-user',
+      color: '#4FD1C5',
+      creationDate: '16 April',
+      lastOrder: '16 April',
+      lastVisit: '16 April',
+      city: 'Ramnicu-Valcea',
+      country: 'Belgia',
+      ordersNo: 1,
+      totalSpent: '$ 12.75',
+      online: false
+    },
+    {
+      id: 22,
+      name: 'Gina Parker',
+      firstName: 'Gina',
+      lastName: 'Alina',
+      avatar: 'fa-user',
+      email: 'gina@example.com',
+      phone: '0732 425 448',
+      company: 'Design Studio',
+      position: 'UX Designer',
+      notes: 'Works remotely',
+      favorite: false,
+      letter: 'G',
+      icon: 'fa-user',
+      color: '#4FD1C5',
+      creationDate: '23 May',
+      lastOrder: '23 May',
+      lastVisit: '<i class="fas fa-circle" style="color: #10B981; font-size: 10px; margin-right: 5px;"></i> Online now',
+      city: 'Cluj',
+      country: 'Bulgaria',
+      ordersNo: 14,
+      totalSpent: '$ 1475.5',
+      online: true
+    },
+    {
+      id: 23,
+      name: 'Gigica Miller',
+      firstName: 'Gigica',
+      lastName: 'Popescu',
+      avatar: 'fa-user',
+      email: 'gigica@example.com',
+      phone: '0732 425 448',
+      company: 'Construction Co.',
+      position: 'Project Manager',
+      notes: 'New client',
+      favorite: false,
+      letter: 'G',
+      icon: 'fa-user',
+      color: '#4FD1C5',
+      creationDate: '25 August',
+      lastOrder: 'In progress...',
+      lastVisit: '25 August',
+      city: 'Constanta',
+      country: 'Romania',
+      ordersNo: 2,
+      totalSpent: '$ 77',
+      online: false
+    },
+    {
+      id: 24,
+      name: 'Blanca Wilson',
+      firstName: 'Blanca',
+      lastName: 'Eminescu',
+      avatar: 'fa-user',
+      email: 'alina@example.com',
+      phone: '0732 425 448',
+      company: 'Healthcare Services',
+      position: 'Medical Researcher',
+      notes: 'Conference speaker',
+      favorite: true,
+      letter: 'A',
+      icon: 'fa-user',
+      color: '#F6AD55',
+      creationDate: '13 December',
+      lastOrder: '13 December',
+      lastVisit: '13 December',
+      city: 'Bucuresti',
+      country: 'Romania',
+      ordersNo: 1,
+      totalSpent: '$ 18',
+      online: false
+    }
+  ];
+
+  // Group contacts by letter
+  const groupedContacts = contacts.reduce((acc, contact) => {
+    if (!acc[contact.letter]) acc[contact.letter] = [];
+    acc[contact.letter].push(contact);
+    return acc;
+  }, {});
+
+  const contactListSection = windowElement.querySelector('.contact-list-section');
+  const contactList = windowElement.querySelector('.contact-list');
+  const contactContentSection = windowElement.querySelector('.contact-content-section');
+  const contactContent = windowElement.querySelector('.contact-content-section .contact-content');
+  const windowMainContent = windowElement.querySelector('.contact-app-window');
+
+  // Initialize desktop layout (contact list takes full width, content section hidden)
+  function initializeContactAppLayout() {
+    if (!isMobileContactApp()) {
+      // On desktop:
+      // 1. Hide content section initially
+      if (contactContentSection) {
+        contactContentSection.style.visibility = 'hidden';
+        contactContentSection.style.display = 'none';
+      }
+
+      // 2. Make contact list section take 100% width
+      if (contactListSection) {
+        contactListSection.style.width = '100%';
+      }
+
+      // 3. Show table header by default
+      const tableHeader = windowElement.querySelector('.contact-list-table-header');
+      if (tableHeader) {
+        tableHeader.style.display = '';
+      }
+
+      updateContactListToolbar();
+    }
+  }
+
+  function renderContactList(selectedId) {
+    if (!contactList) return;
+    contactList.innerHTML = '';
+
+    // If there's no selected contact and we're not in mobile mode, show a table view
+    if ((typeof selectedId === 'undefined' || selectedId === null) && !isMobileContactApp()) {
+      // Make sure contact content section is hidden
+      if (contactContentSection) {
+        contactContentSection.style.visibility = 'hidden';
+        contactContentSection.style.display = 'none';
+      }
+
+      // Make contact list section take 100% width and add table-mode class
+      if (contactListSection) {
+        contactListSection.style.width = '100%';
+        contactListSection.classList.add('table-mode');
+        contactListSection.classList.remove('contact-selected-mode');
+      }
+
+      // Use the unified contacts data for the table view
+
+      // Create a table row for each contact
+      contacts.forEach(contact => {
+        const li = document.createElement('li');
+        li.className = 'contact-list-item contact-table-row';
+
+        const bgColor = `rgba(${parseInt(contact.color.slice(1, 3), 16)},${parseInt(contact.color.slice(3, 5), 16)},${parseInt(contact.color.slice(5, 7), 16)},0.1)`;
+
+        li.innerHTML = `
+          <div style="display: flex; width: 100%; align-items: center; padding: 10px 14px;">
+            <div style="width: 32px; min-width: 32px; display: flex; justify-content: center; margin-right: 10px;">
+<input type="checkbox" id="contact-select-all-box" name="orders-select-all-box">
+            </div>
+            <div style="flex: 1; display: flex; align-items: center;">
+              <div class="contact-list-avatar" style="color:${contact.color};background-color:${bgColor}">
+                <i class="fas ${contact.icon}"></i>
+              </div>
+              <span class="contact-list-first-name">${contact.firstName}</span>
+            </div>
+            <div style="flex: 1;" class="contact-list-last-name">${contact.lastName}</div>
+            <div style="flex: 1;">${contact.creationDate}</div>
+            <div style="flex: 1;">${contact.lastOrder}</div>
+            <div style="flex: 1;">${contact.lastVisit}</div>
+            <div style="flex: 1;">${contact.city}</div>
+            <div style="flex: 1;">${contact.country}</div>
+            <div style="flex: 1;">${contact.phone}</div>
+            <div class="contact-list-orders-no" >${contact.ordersNo}</div>
+            <div class="contact-list-total-spent" >${contact.totalSpent}</div>
+            <div style="width: 20px; min-width: 20px;"></div>
+          </div>
+        `;
+
+        li.onclick = () => {
+          // When a row is clicked, use the contact's ID to load the detail view
+          renderContactList(contact.id);
+        };
+
+        contactList.appendChild(li);
+      });
+
+      return;
+    }
+
+    // If selectedId is provided, render the regular contact list view
+    Object.keys(groupedContacts).sort().forEach(letter => {
+      // Letter header
+      const letterHeader = document.createElement('li');
+      letterHeader.className = 'contact-list-letter-header';
+      letterHeader.textContent = letter;
+      contactList.appendChild(letterHeader);
+      groupedContacts[letter].forEach(contact => {
+        const li = document.createElement('li');
+        li.className = 'contact-list-item' + (contact.id === selectedId ? ' selected' : '') + (contact.favorite ? ' favorite' : '');
+        li.innerHTML = `
+        <div class="contact-list-avatar" style="color:${contact.color};background-color:rgba(${parseInt(contact.color.slice(1, 3), 16)},${parseInt(contact.color.slice(3, 5), 16)},${parseInt(contact.color.slice(5, 7), 16)},0.1)"><i class="fas ${contact.icon}"></i></div>
+        <div class="contact-list-info">
+          <div class="contact-list-name">               ${contact.online ? '<div style="width: 8px; height: 8px; border-radius: 50%; background-color: #10B981;"></div>' : ''}${contact.firstName} ${contact.lastName}</div>
+          <div class="contact-list-details">${contact.company}</div>
+        </div>
+        <div class="contact-list-meta">
+          ${contact.favorite ? '<div class="contact-list-favorite"><i class="fas fa-star"></i></div>' : ''}
+          ${contact.notes ? '<div class="contact-list-notes-indicator"><i class="fas fa-sticky-note"></i></div>' : ''}
+        </div>
+        `;
+        li.onclick = () => {
+          console.log('Contact clicked:', contact.id, contact.firstName, contact.lastName);
+
+          // On mobile, we need to use the patched renderContactList which will handle
+          // showing the content panel after rendering the content
+          renderContactList(contact.id);
+
+          // On desktop or when the patched renderContactList isn't in effect yet,
+          // we need to render the content directly
+          if (!isMobileContactApp()) {
+            renderContactContent(contact);
+          }
+        };
+        li.ondblclick = () => {
+          // Generate a unique window ID for each contact content popout
+          let contactContentWindowCount = 1;
+          while (openWindows[`contact-content-window-${contactContentWindowCount}`]) {
+            contactContentWindowCount++;
+          }
+          const windowId = `contact-content-window-${contactContentWindowCount}`;
+
+          const contactContentWindow = createWindowFromTemplate('contact-content-window', windowId, false);
+          if (!contactContentWindow) return;
+          
+          // Add simple opening animation
+          contactContentWindow.classList.add('window-anim-open');
+          // Inject the full contact-content-section structure
+          const content = contactContentWindow.querySelector('.contact-content-body');
+          if (!content) return;
+
+          content.innerHTML = `
+          <section class="contact-content-section">
+            <div class="contact-content-header">
+              <button class="contact-back-button"><i class="fas fa-arrow-left"></i></button>
+              <div class="contact-header-actions">
+                <button class="contact-edit-button"><i class="fas fa-edit"></i></button>
+                <button class="contact-delete-button"><i class="fas fa-trash"></i></button>
+                <button class="contact-more-button"><i class="fas fa-ellipsis-h"></i></button>
+              </div>
+            </div>
+            <div class="contact-content">
+              ${getContactContentHTML(contact)}
+            </div>
+          </section>
+          `;
+
+          // Setup back button in the popout window
+          const backButton = content.querySelector('.contact-back-button');
+          if (backButton) {
+            backButton.addEventListener('click', () => {
+              const closeButton = contactContentWindow.querySelector('.window-close');
+              if (closeButton) closeButton.click();
+            });
+          }
+
+          // Setup edit button
+          const editButton = content.querySelector('.contact-edit-button');
+          if (editButton) {
+            editButton.addEventListener('click', () => {
+              showEditContactForm(contact, content);
+            });
+          }
+
+          // Setup more options button
+          const moreButton = content.querySelector('.contact-more-button');
+          if (moreButton) {
+            moreButton.addEventListener('click', (e) => {
+              showContactMoreOptions(e.target, contact);
+            });
+          }
+        };
+        contactList.appendChild(li);
+      });
+    });
+  }
+
+  function renderContactContent(contact) {
+    if (!contactContentSection || !contactContent) return;
+
+    // When a contact is selected, make the content section visible
+    if (!isMobileContactApp()) {
+      if (contactContentSection) {
+        contactContentSection.style.visibility = 'visible';
+        contactContentSection.style.display = '';
+      }
+
+      // Restore contact list section width and update classes
+      if (contactListSection) {
+        contactListSection.style.width = '320px';
+        contactListSection.classList.remove('table-mode');
+        contactListSection.classList.add('contact-selected-mode');
+      }
+
+      // Hide table header
+      const tableHeader = windowElement.querySelector('.contact-list-table-header');
+      if (tableHeader) {
+        tableHeader.style.display = 'none';
+      }
+    }
+
+    contactContent.innerHTML = getContactContentHTML(contact);
+
+    // Setup edit button
+    const editButton = windowElement.querySelector('.contact-edit-button');
+    if (editButton) {
+      editButton.addEventListener('click', () => {
+        showEditContactForm(contact, windowElement);
+      });
+    }
+
+    // Setup delete button
+    const deleteButton = windowElement.querySelector('.contact-delete-button');
+    if (deleteButton) {
+      deleteButton.addEventListener('click', () => {
+        // Show confirmation dialog
+        const confirmMessage = `Are you sure you want to delete ${contact.firstName} ${contact.lastName}?`;
+        if (confirm(confirmMessage)) {
+          // Remove contact from data
+          const index = contacts.findIndex(c => c.id === contact.id);
+          if (index !== -1) {
+            contacts.splice(index, 1);
+
+            // Rebuild grouped contacts
+            const groupedContacts = contacts.reduce((acc, contact) => {
+              if (!acc[contact.letter]) acc[contact.letter] = [];
+              acc[contact.letter].push(contact);
+              return acc;
+            }, {});
+
+            // Render updated list and clear content area
+            renderContactList();
+            if (contactContent) {
+              contactContent.innerHTML = '<div class="no-contact-selected">No contact selected</div>';
+            }
+            // Hide the content section
+            if (contactContentSection) {
+              contactContentSection.style.visibility = 'hidden';
+              contactContentSection.style.display = 'none';
+            }
+          }
+        }
+      });
+    }
+
+    // Setup more options button
+    const moreButton = windowElement.querySelector('.contact-more-button');
+    if (moreButton) {
+      moreButton.addEventListener('click', (e) => {
+        showContactMoreOptions(e.target, contact);
+      });
+    }
+  }
+
+  function getContactContentHTML(contact) {
+    return `
+      <div class="contact-content-wrapper">
+        <div class="client-profile-container">
+
+          
+          <div class="client-info-grid">
+   <div class="detail-section customer-info-with-invoice">
+
+                    <div class="customer-info ">
+                      <div class="customer-avatar">
+                        <img src="img//avatar.png" alt="Customer Avatar">
+                      </div>
+                      <div class="customer-details-first-last-name">
+                      <div class="customer-details">
+                      
+                          <h3>First name</h3>
+                        <div class="customer-name">${contact.firstName}</div>
+                      </div>
+                                       <div class="customer-details">
+                                        <h3>Last Name</h3>
+                        <div class="customer-name">${contact.lastName}</div>
+                      </div>
+</div>
+                    </div>
+
+                         <div class="contact-info-with-id">
+                <div class="client-id-section"><div class="client-id-with-online-status">
+              <h2 class="client-id">Client ID #054</h2>                
+              <div class="client-id-online-status">
+              <span class="online-indicator"></span>
+                <span>Online</span>
+                </div></div>
+              <div class="client-meta">
+                <span>Joined: 12 April 2024</span>
+                <span class="separator">•</span>
+                <span>Last seen 28 April 2025</span>
+
+              </div>
+            </div>
+              </div>
+
+                  </div>
+
+
+
+              <div class="contact-details-container">
+              
+                <div class="order-customer-details">
+                  
+                  
+                  <div class="detail-section">
+                  <div class="detail-section-header">
+                  <i class="fas fa-envelope"></i>
+                    <h3>Email Address</h3></div>
+                    <div class="detail-value email-address">justmearg@yahoo.com</div>
+                  </div>
+                  
+                  <div class="detail-section">
+                  <div class="detail-section-header">
+                  <i class="fas fa-phone"></i>
+                    <h3>Phone number</h3></div>
+                    <div class="detail-value">0732 743 284 <i class="fab fa-whatsapp"></i></div>
+                  </div>
+                  
+   
+
+                </div>
+
+                <div class="order-payment-details">
+                  <div class="detail-section">
+                  <div class="detail-section-header">
+                  <i class="fas fa-credit-card"></i>
+                    <h3>Payment</h3></div>
+                    <div class="detail-value">Credit Card</div>
+                  </div>
+                  
+                  <div class="detail-section">
+                  <div class="detail-section-header">
+                  <i class="fas fa-globe"></i>
+                    <h3>IP Address</h3></div>
+                    <div class="detail-value">5.14.184.112</div>
+                  </div>
+                  
+
+                </div>
+                
+                <div class="order-billing-details">
+                  <div class="detail-section">
+                  <div class="detail-section-header">
+                  <i class="fas fa-globe"></i>
+                    <h3>Channel</h3></div>
+                    <div class="detail-value">Website / eMag etc</div>
+                  </div>
+
+                  <div class="detail-section">
+                  <div class="detail-section-header">
+                  <i class="fas fa-building"></i>
+                    <h3>Billing</h3></div>
+                    <div class="detail-value">Company</div>
+                  </div>
+                </div>
+                
+                <div class="order-shipping-details">
+                
+                                  <div class="detail-section">
+          <div class="detail-section-header">
+          <i class="fas fa-calendar-alt"></i>
+                    <h3>Registered</h3></div>
+                    <div class="detail-value">2 weeks ago</div>
+                  </div>
+
+                  <div class="detail-section">
+                  <div class="detail-section-header">
+                  <i class="fas fa-shopping-cart"></i>
+                    <h3>Total orders</h3></div>
+                    <div class="detail-value">10 orders - $ 2,545.76</div>
+                  </div>
+                 
+                </div>
+                
+                
+              </div>
+</div>
+</div>
+          
+          <div class="client-financial-section">
+            <div class="financial-block">
+              <div class="financial-icon"><i class="fas fa-dollar-sign"></i></div>
+              <div class="financial-details">
+                <div class="financial-amount">$2578,52</div>
+                <div class="financial-label">Total spent</div>
+              </div>
+            </div>
+            
+            <div class="financial-block">
+              <div class="financial-icon"><i class="fas fa-dollar-sign"></i></div>
+              <div class="financial-details">
+                <div class="financial-amount">$2578,52</div>
+                <div class="financial-label">Total spent</div>
+              </div>
+            </div>
+            
+            <div class="financial-block">
+              <div class="financial-icon"><i class="fas fa-heart"></i></div>
+              <div class="financial-details">
+                <div class="financial-amount">$7525</div>
+                <div class="financial-label">Wishlist</div>
+              </div>
+            </div>
+            
+            <div class="financial-block">
+              <div class="financial-icon"><i class="fas fa-cart-plus"></i></div>
+              <div class="financial-details">
+                <div class="financial-amount">$7525</div>
+                <div class="financial-label">Cart right now</div>
+              </div>
+            </div>
+          </div>
+          
+          
+          
+          <div class="client-orders-section">
+            <div class="orders-tabs">
+              <div class="order-tab active">
+                <i class="fas fa-shopping-cart"></i>
+                <span>All orders (6)</span>
+              </div>
+              <div class="order-tab">
+                <i class="fas fa-ticket-alt"></i>
+                <span>Tickets (5)</span>
+              </div>
+              <div class="order-tab">
+                <i class="fas fa-file-alt"></i>
+                <span>Documents (7)</span>
+              </div>
+              <div class="order-tab">
+                <i class="fas fa-envelope"></i>
+                <span>Emails</span>
+              </div>
+              <div class="order-tab">
+                <i class="fas fa-chart-line"></i>
+                <span>Activity</span>
+              </div>
+              <div class="search-orders">
+                <i class="fas fa-search"></i>
+              </div>
+            </div>
+<div class="order-list-header-table">
+                          <div class="contacts-oder-list-header-item">
+                          <input type="checkbox" id="orders-select-all-box" name="orders-select-all-box">
+                <div class="order-icon"></div>
+                <div class="order-id">Order No. <i class="fas fa-chevron-down"></i></div>
+                <div class="order-date">Date</div>
+                <div class="order-type">Type</div>
+                <div class="order-payment">Payment</div>
+                <div class="order-shipping">Shipping</div>
+                <div class="order-status pending">
+                  <span>Status</span>
+                </div>
+                <div class="order-amount">Amount</div>
+                <div class="order-actions"><i class="fas fa-ellipsis-h"></i></div>
+              </div>
+</div>
+            <div class="orders-list">
+              <div class="order-item">
+                <input type="checkbox" id="orders-select-all-box" name="orders-select-all-box">
+                <div class="order-icon"><i class="fas fa-file-alt"></i></div>
+                <div class="order-id">Order #054</div>
+                <div class="order-date">Sun Nov 26 2023</div>
+                <div class="order-type">Order</div>
+                <div class="order-payment">Payment</div>
+                <div class="order-shipping">Shipping</div>
+                <div class="order-status processing">
+<span class="status-badge status-processing"><i class="fas fa-cogs status-icon"></i> <div class="order-status-list-view">Processing</div></span>
+                </div>
+                <div class="order-amount">198.00</div>
+                <div class="order-actions"><i class="fas fa-ellipsis-h"></i></div>
+              </div>
+              
+              <div class="order-item">
+                <input type="checkbox" id="orders-select-all-box" name="orders-select-all-box">
+                <div class="order-icon"><i class="fas fa-file-alt"></i></div>
+                <div class="order-id">Order #054</div>
+                <div class="order-date">Sun Nov 26 2023</div>
+                <div class="order-type">Order</div>
+                <div class="order-payment">Payment</div>
+                <div class="order-shipping">Shipping</div>
+                <div class="order-status pending">
+<span class="status-badge status-pending"><i class="fas fa-clock status-icon"></i> <div class="order-status-list-view">Pending</div></span>
+                </div>
+                <div class="order-amount">674.00</div>
+                <div class="order-actions"><i class="fas fa-ellipsis-h"></i></div>
+              </div>
+              
+              <div class="order-item">
+                <input type="checkbox" id="orders-select-all-box" name="orders-select-all-box">
+                <div class="order-icon"><i class="fas fa-file-alt"></i></div>
+                <div class="order-id">Order #054</div>
+                <div class="order-date">Sun Nov 26 2023</div>
+                <div class="order-type">Order</div>
+                <div class="order-payment">Payment</div>
+                <div class="order-shipping">Shipping</div>
+                <div class="order-status draft">
+<span class="status-badge status-draft"><i class="fas fa-pencil-alt status-icon"></i> <div class="order-status-list-view">Draft</div></span>
+                </div>
+                <div class="order-amount">731.00</div>
+                <div class="order-actions"><i class="fas fa-ellipsis-h"></i></div>
+              </div>
+              
+              <div class="order-item">
+                <input type="checkbox" id="orders-select-all-box" name="orders-select-all-box">
+                <div class="order-icon"><i class="fas fa-file-alt"></i></div>
+                <div class="order-id">Order #054</div>
+                <div class="order-date">Sun Nov 26 2023</div>
+                <div class="order-type">Order</div>
+                <div class="order-payment">Payment</div>
+                <div class="order-shipping">Shipping</div>
+                <div class="order-status pending">
+<span class="status-badge status-pending-payment"><i class="fas fa-money-bill-wave status-icon"></i> <div class="order-status-list-view">Pending Payment</div></span>
+                </div>
+                <div class="order-amount">198.00</div>
+                <div class="order-actions"><i class="fas fa-ellipsis-h"></i></div>
+              </div>
+              
+              <div class="order-item">
+                <input type="checkbox" id="orders-select-all-box" name="orders-select-all-box">
+                <div class="order-icon"><i class="fas fa-file-alt"></i></div>
+                <div class="order-id">Order #054</div>
+                <div class="order-date">Sun Nov 26 2023</div>
+                <div class="order-type">Order</div>
+                <div class="order-payment">Payment</div>
+                <div class="order-shipping">Shipping</div>
+                <div class="order-status completed">
+<span class="status-badge status-completed"><i class="fas fa-check-circle status-icon"></i> <div class="order-status-list-view">Completed</div></span>
+                </div>
+                <div class="order-amount">674.00</div>
+                <div class="order-actions"><i class="fas fa-ellipsis-h"></i></div>
+              </div>
+              
+              <div class="order-item">
+                <input type="checkbox" id="orders-select-all-box" name="orders-select-all-box">
+                <div class="order-icon"><i class="fas fa-file-alt"></i></div>
+                <div class="order-id">Order #054</div>
+                <div class="order-date">Sun Nov 26 2023</div>
+                <div class="order-type">Order</div>
+                <div class="order-payment">Payment</div>
+                <div class="order-shipping">Shipping</div>
+                <div class="order-status draft">
+<span class="status-badge status-pending-payment"><i class="fas fa-money-bill-wave status-icon"></i> <div class="order-status-list-view">Pending Payment</div></span>
+                </div>
+                <div class="order-amount">731.00</div>
+                <div class="order-actions"><i class="fas fa-ellipsis-h"></i></div>
+              </div>
+              
+            
+            </div>
+
+              <div class="order-total footer-pagination">
+                          <div class="pagination">
+              <div class="pagination-item">
+                <i class="fas fa-chevron-left"></i>
+              </div>
+                            <div class="pagination-item">
+                1
+              </div>
+                            <div class="pagination-item">
+                2
+              </div>
+                            <div class="pagination-item">
+                3
+              </div>
+                            <div class="pagination-item">
+                ...
+              </div>
+                                          <div class="pagination-item">
+                8
+              </div>
+              <div class="pagination-item">
+                <i class="fas fa-chevron-right"></i>
+              </div>
+            </div>
+                <div class="total-label"><span>Total earnings</span>
+                <div class="total-amount">$7522.25</div>
+                </div>
+              </div>
+          </div>
+
+
+<div class="client-details-section">
+            <div class="companies-section">
+              <div class="section-header">
+                <i class="fas fa-building"></i>
+                <span>Companies</span>
+              </div>
+              
+              <div class="company-card">
+                <div class="company-details">
+                  <h4>Atelierul de Gravura si Personalizare SRL</h4>
+                  <div class="company-meta">
+                    <div>VAT Number: RO43423898</div>
+                    <div>Reg. Com.: J13/232/2321</div>
+                  </div>
+                </div>
+                <div class="company-actions">
+                  <i class="fas fa-ellipsis-h"></i>
+                </div>
+              </div>
+              
+              <div class="address-section">
+                <div class="section-header">
+                  <i class="fas fa-map-marker-alt"></i>
+                  <span>Address</span>
+                </div>
+                
+                <div class="address-details">
+                  <p>Stefan cel mare 81, Bloc M25, Constanta</p>
+                  <p>Constanta, Romania 400708</p>
+                </div>
+                
+                <div class="map-container">
+                  <div class="map-placeholder">
+                    <button class="view-map-btn">View map</button>
+                  </div>
+                </div>
+                
+                <div class="address-name">
+                  <i class="fas fa-map-marker-alt"></i>
+                  <span>Constanta, Romania</span>
+                  <i class="fas fa-ellipsis-v"></i>
+                </div>
+              </div>
+            </div>
+            
+            <div class="notes-section">
+              <div class="section-header">
+                <i class="fas fa-pen"></i>
+                <span>Notes</span>
+              </div>
+              
+              <div class="note-card">
+                <div class="note-header">
+                  <div class="note-author">
+                    <img src="img/avatar.png" alt="Author" class="author-avatar">
+                    <span>Ioan Mihalache</span>
+                  </div>
+                  <div class="note-meta">
+                  <div class="note-meta-note-type">
+<i class="fas fa-envelope"></i><span>Sent</span>
+
+
+                    </div>
+                    <i class="fas fa-ellipsis-h"></i>
+                  </div>
+                </div>
+                
+                <div class="note-content">
+                  M-a sunat acum 2 zile sa ma intrebe de ce si n-am stiut ce sa-i spun. Urmeaza raspunsul.dar mai bine nu ca iar ne da
+                </div>
+                <div class="note-to-who-timestamp">
+                <div class="note-to-who"> <i class="fas fa-shopping-cart"></i> <span>Order #2456 </span> </div>
+                <div class="note-timestamp">21 mai 2025 16:30</div>
+                </div>
+              </div>
+              
+              <div class="note-card">
+                <div class="note-header">
+                  <div class="note-author">
+                    <img src="img/avatar.png" alt="Author" class="author-avatar">
+                    <span>Ioan Mihalache</span>
+                  </div>
+                  <div class="note-meta">
+                  <div class="note-meta-note-type">                    <i class="fas fa-clipboard-list"></i><span>Internal</span>
+                    
+                    </div>
+                    <i class="fas fa-ellipsis-h"></i>
+                  </div>
+                </div>
+                
+                <div class="note-content">
+                  M-a sunat acum 2 zile sa ma intrebe de ce si n-am stiut ce sa-i spun. Urmeaza raspunsul.dar mai bine nu ca iar ne da
+                </div>
+                <div class="note-to-who-timestamp">
+                <div class="note-to-who"> <i class="fas fa-user"></i> <span>Contact note </span> </div>
+                <div class="note-timestamp">21 mai 2025 16:30</div>
+                </div>
+              </div>
+              
+              <div class="load-more">
+                <button class="load-more-btn">Load 3 more</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    `;
+  }
+
+  function showContactMoreOptions(targetElement, contact) {
+    // Create more options panel
+    const morePanel = document.createElement('div');
+    morePanel.className = 'contact-more-panel';
+    morePanel.innerHTML = `
+      <div class="more-panel-header">
+        <div class="more-panel-title">Options</div>
+        <button class="more-panel-close"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="more-panel-content">
+        <button class="more-panel-option ${contact.favorite ? 'active' : ''}" data-action="favorite">
+          <i class="fas fa-star"></i> ${contact.favorite ? 'Remove from Favorites' : 'Add to Favorites'}
+        </button>
+        <button class="more-panel-option" data-action="share">
+          <i class="fas fa-share-alt"></i> Share Contact
+        </button>
+        <button class="more-panel-option" data-action="export">
+          <i class="fas fa-file-export"></i> Export Contact
+        </button>
+        <button class="more-panel-option" data-action="block">
+          <i class="fas fa-ban"></i> Block Contact
+        </button>
+      </div>
+    `;
+
+    // Position the panel
+    const rect = targetElement.getBoundingClientRect();
+    morePanel.style.position = 'absolute';
+    morePanel.style.top = `${rect.bottom + window.scrollY + 5}px`;
+    morePanel.style.right = `${window.innerWidth - rect.right - window.scrollX}px`;
+    document.body.appendChild(morePanel);
+
+    // Animation
+    morePanel.style.opacity = '0';
+    morePanel.style.transform = 'scale(0.95)';
+    morePanel.classList.add('more-panel-anim-in');
+
+    // Handle close button
+    const closeButton = morePanel.querySelector('.more-panel-close');
+    if (closeButton) {
+      closeButton.addEventListener('click', function hideMorePanel(ev) {
+        morePanel.classList.remove('more-panel-anim-in');
+        morePanel.classList.add('more-panel-anim-out');
+
+        morePanel.addEventListener('animationend', function handler() {
+          morePanel.removeEventListener('animationend', handler);
+          morePanel.remove();
+        });
+      });
+    }
+
+    // Handle click outside
+    const handleOutsideClick = (e) => {
+      if (!morePanel.contains(e.target) && e.target !== targetElement) {
+        morePanel.classList.remove('more-panel-anim-in');
+        morePanel.classList.add('more-panel-anim-out');
+
+        morePanel.addEventListener('animationend', function handler() {
+          morePanel.removeEventListener('animationend', handler);
+          morePanel.remove();
+          document.removeEventListener('click', handleOutsideClick, true);
+        });
+      }
+    };
+
+    // Delay adding the click handler to prevent immediate closing
+    setTimeout(() => {
+      document.addEventListener('click', handleOutsideClick, true);
+    }, 100);
+
+    // Handle options
+    const options = morePanel.querySelectorAll('.more-panel-option');
+    options.forEach(option => {
+      option.addEventListener('click', () => {
+        const action = option.getAttribute('data-action');
+
+        if (action === 'favorite') {
+          // Toggle favorite status
+          contact.favorite = !contact.favorite;
+          renderContactList(contact.id);
+          renderContactContent(contact);
+
+          // Close panel
+          morePanel.classList.remove('more-panel-anim-in');
+          morePanel.classList.add('more-panel-anim-out');
+          morePanel.addEventListener('animationend', function handler() {
+            morePanel.removeEventListener('animationend', handler);
+            morePanel.remove();
+            document.removeEventListener('click', handleOutsideClick, true);
+          });
+        } else {
+          // For other actions, just show a notification
+          alert(`Action: ${action} - This feature is not implemented in the demo`);
+        }
+      });
+    });
+  }
+
+  function getAddContactFormHTML() {
+    return `
+      <div class="add-contact-form">
+        <div class="form-header">
+          <h3>Add New Contact</h3>
+          <button class="form-close"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="form-body">
+          <div class="form-group">
+            <label for="contact-name">Name</label>
+            <input type="text" id="contact-name" placeholder="Full Name">
+          </div>
+          <div class="form-group">
+            <label for="contact-email">Email</label>
+            <input type="email" id="contact-email" placeholder="Email Address">
+          </div>
+          <div class="form-group">
+            <label for="contact-phone">Phone</label>
+            <input type="tel" id="contact-phone" placeholder="Phone Number">
+          </div>
+          <div class="form-group">
+            <label for="contact-company">Company</label>
+            <input type="text" id="contact-company" placeholder="Company Name">
+          </div>
+          <div class="form-group">
+            <label for="contact-position">Position</label>
+            <input type="text" id="contact-position" placeholder="Job Title">
+          </div>
+          <div class="form-group">
+            <label for="contact-notes">Notes</label>
+            <textarea id="contact-notes" placeholder="Additional Notes"></textarea>
+          </div>
+        </div>
+        <div class="form-footer">
+          <button class="cancel-button">Cancel</button>
+          <button class="save-button">Save Contact</button>
+        </div>
+      </div>
+    `;
+  }
+
+  function showEditContactForm(contact, parentElement) {
+    const formContainer = document.createElement('div');
+    formContainer.className = 'add-contact-overlay';
+    formContainer.innerHTML = `
+      <div class="add-contact-form">
+        <div class="form-header">
+          <h3>Edit Contact</h3>
+          <button class="form-close"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="form-body">
+          <div class="form-group">
+            <label for="edit-contact-name">Name</label>
+            <input type="text" id="edit-contact-name" value="${contact.firstName} ${contact.lastName}">
+          </div>
+          <div class="form-group">
+            <label for="edit-contact-email">Email</label>
+            <input type="email" id="edit-contact-email" value="${contact.email}">
+          </div>
+          <div class="form-group">
+            <label for="edit-contact-phone">Phone</label>
+            <input type="tel" id="edit-contact-phone" value="${contact.phone}">
+          </div>
+          <div class="form-group">
+            <label for="edit-contact-company">Company</label>
+            <input type="text" id="edit-contact-company" value="${contact.company}">
+          </div>
+          <div class="form-group">
+            <label for="edit-contact-position">Position</label>
+            <input type="text" id="edit-contact-position" value="${contact.position}">
+          </div>
+          <div class="form-group">
+            <label for="edit-contact-notes">Notes</label>
+            <textarea id="edit-contact-notes">${contact.notes || ''}</textarea>
+          </div>
+        </div>
+        <div class="form-footer">
+          <button class="cancel-button">Cancel</button>
+          <button class="save-button">Save Changes</button>
+        </div>
+      </div>
+    `;
+
+    parentElement.appendChild(formContainer);
+
+    // Animation
+    formContainer.style.opacity = '0';
+    setTimeout(() => {
+      formContainer.style.opacity = '1';
+    }, 10);
+
+    // Handle close button
+    const closeButton = formContainer.querySelector('.form-close');
+    if (closeButton) {
+      closeButton.addEventListener('click', function hidePanel(ev) {
+        formContainer.style.opacity = '0';
+        setTimeout(() => {
+          formContainer.remove();
+        }, 300);
+      });
+    }
+
+    // Handle cancel button
+    const cancelButton = formContainer.querySelector('.cancel-button');
+    if (cancelButton) {
+      cancelButton.addEventListener('click', () => {
+        formContainer.style.opacity = '0';
+        setTimeout(() => {
+          formContainer.remove();
+        }, 300);
+      });
+    }
+
+    // Handle save button
+    const saveButton = formContainer.querySelector('.save-button');
+    if (saveButton) {
+      saveButton.addEventListener('click', () => {
+        // Update contact with form values
+        contact.firstName = formContainer.querySelector('#edit-contact-name').value.split(' ')[0];
+        contact.lastName = formContainer.querySelector('#edit-contact-name').value.split(' ')[1];
+        contact.email = formContainer.querySelector('#edit-contact-email').value;
+        contact.phone = formContainer.querySelector('#edit-contact-phone').value;
+        contact.company = formContainer.querySelector('#edit-contact-company').value;
+        contact.position = formContainer.querySelector('#edit-contact-position').value;
+        contact.notes = formContainer.querySelector('#edit-contact-notes').value;
+
+        // Update first letter if name changed
+        const firstLetter = contact.firstName.charAt(0).toUpperCase();
+        if (contact.letter !== firstLetter) {
+          contact.letter = firstLetter;
+
+          // Rebuild grouped contacts
+          const groupedContacts = contacts.reduce((acc, contact) => {
+            if (!acc[contact.letter]) acc[contact.letter] = [];
+            acc[contact.letter].push(contact);
+            return acc;
+          }, {});
+        }
+
+        // Update UI
+        renderContactList(contact.id);
+        renderContactContent(contact);
+
+        // Close form
+        formContainer.style.opacity = '0';
+        setTimeout(() => {
+          formContainer.remove();
+        }, 300);
+      });
+    }
+  }
+
+  function isMobileContactApp() {
+    return window.innerWidth <= 767 && windowElement.querySelector('.contact-app-window');
+  }
+
+  function showContactContentPanel() {
+    if (isMobileContactApp() && windowMainContent) {
+      // Force a reflow before adding the class to ensure smooth transition
+      windowMainContent.offsetHeight;
+
+      // Add animation class FIRST
+      windowMainContent.classList.add('animate-content-transition');
+
+      // Make sure content is visible before transition starts
+      const contentSection = windowMainContent.querySelector('.contact-content-section');
+      if (contentSection) {
+        contentSection.style.zIndex = '2';
+        contentSection.style.visibility = 'visible';
+      }
+
+      // Then add the class that triggers transform
+      windowMainContent.classList.add('show-contact-content');
+
+      // Remove animation class after transition completes
+      setTimeout(() => {
+        windowMainContent.classList.remove('animate-content-transition');
+      }, 350);
+    }
+  }
+
+  function updateContactListToolbar(selectedId) {
+    const tableHeader = windowElement.querySelector('.contact-list-table-header');
+    const searchSort = windowElement.querySelector('.contact-list-toolbar-searchsort1');
+    if (!isMobileContactApp()) {
+      if (typeof selectedId === 'undefined' || selectedId === null) {
+        // No contact selected: show table header, hide search/sort
+        if (tableHeader) tableHeader.style.display = '';
+        if (searchSort) searchSort.style.display = 'none';
+      } else {
+        // Contact selected: show search/sort, hide table header
+        if (tableHeader) tableHeader.style.display = 'none';
+        if (searchSort) searchSort.style.display = '';
+      }
+    } else {
+      // On mobile, always show search/sort, hide table header
+      if (tableHeader) tableHeader.style.display = 'none';
+      if (searchSort) searchSort.style.display = '';
+    }
+  }
+
+  // Patch renderContactList to handle mobile view properly
+  const origRenderContactList = renderContactList;
+  renderContactList = function (selectedId) {
+    updateContactListToolbar(selectedId);
+    origRenderContactList(selectedId);
+    const selectedContact = contacts.find(c => c.id === selectedId);
+
+    if (isMobileContactApp() && typeof selectedId === 'number' && selectedContact) {
+      // Render content first, then show panel
+      renderContactContent(selectedContact);
+      // Use requestAnimationFrame to ensure content is rendered before transition
+      requestAnimationFrame(() => {
+        showContactContentPanel();
+      });
+    } else if (selectedContact) {
+      // On desktop, just render content
+      renderContactContent(selectedContact);
+    }
+  };
+
+  // On resize, update layout
+  window.addEventListener('resize', function () {
+    if (!isMobileContactApp() && windowMainContent) {
+      windowMainContent.classList.remove('show-contact-content');
+      // Reset layout when switching from mobile to desktop
+      if (contactContentSection && contactContent && contactContent.querySelector('.contact-content-wrapper')) {
+        // If a contact is already selected
+        contactContentSection.style.visibility = 'visible';
+        contactContentSection.style.display = '';
+        if (contactListSection) contactListSection.style.width = '320px';
+      } else {
+        // If no contact is selected
+        initializeContactAppLayout();
+      }
+    }
+  });
+
+  // Add mobile back button to toolbar if it doesn't exist
+  const contactToolbar = windowElement.querySelector('.contact-content-section .window-toolbar');
+  if (contactToolbar && !contactToolbar.querySelector('.contact-back-button')) {
+    const backButton = document.createElement('button');
+    backButton.className = 'toolbar-button contact-back-button';
+    backButton.title = 'Back';
+    backButton.innerHTML = '<i class="fas fa-arrow-left"></i><span>Back</span>';
+    backButton.addEventListener('click', () => {
+      showContactListPanel();
+    });
+
+    // Insert at the beginning of the toolbar
+    const toolbarLeft = contactToolbar.querySelector('.toolbar-buttons-left');
+    if (toolbarLeft) {
+      toolbarLeft.insertBefore(backButton, toolbarLeft.firstChild);
+    }
+  }
+
+  function showContactListPanel() {
+    if (isMobileContactApp() && windowMainContent) {
+      // Force a reflow before removing the class to ensure smooth transition
+      windowMainContent.offsetHeight;
+
+      // Add animation class FIRST
+      windowMainContent.classList.add('animate-content-transition');
+
+      // Then remove the class that controls transform
+      windowMainContent.classList.remove('show-contact-content');
+
+      // Remove animation class after transition completes
+      setTimeout(() => {
+        windowMainContent.classList.remove('animate-content-transition');
+      }, 350);
+
+      // Reset z-index after animation completes
+      const contentSection = windowMainContent.querySelector('.contact-content-section');
+      if (contentSection) {
+        setTimeout(() => {
+          if (!windowMainContent.classList.contains('show-contact-content')) {
+            contentSection.style.zIndex = '';
+            contentSection.style.visibility = '';
+          }
+        }, 350);
+      }
+    } else if (!isMobileContactApp()) {
+      // On desktop, reset the layout
+      if (contactContentSection) {
+        contactContentSection.style.visibility = 'hidden';
+        contactContentSection.style.display = 'none';
+      }
+
+      if (contactListSection) {
+        contactListSection.style.width = '100%';
+        contactListSection.classList.add('table-mode');
+        contactListSection.classList.remove('contact-selected-mode');
+      }
+
+      // Show table header
+      const tableHeader = windowElement.querySelector('.contact-list-table-header');
+      if (tableHeader) {
+        tableHeader.style.display = '';
+      }
+
+      // Render the contact list without a selected contact
+      renderContactList();
+    }
+  }
+
+  // Initial render
+  renderContactList();
+  initializeContactAppLayout();
+
+  // Setup back button for mobile view
+  const existingBackButton = windowElement.querySelector('.contact-back-button');
+  if (existingBackButton) {
+    existingBackButton.addEventListener('click', () => {
+      showContactListPanel();
+    });
+  }
+
+
+  // Setup compose button to add new contact
+  const composeBtn = windowElement.querySelector('.compose-btn');
+  if (composeBtn) {
+    composeBtn.addEventListener('click', () => {
+      // Generate a unique window ID for each add contact window
+      let addContactWindowCount = 1;
+      while (openWindows[`add-contact-window-${addContactWindowCount}`]) {
+        addContactWindowCount++;
+      }
+      const windowId = `add-contact-window-${addContactWindowCount}`;
+
+      // Create the window from template
+      const addContactWindow = createWindowFromTemplate('add-contact-window', windowId, false);
+      if (!addContactWindow) return;
+      
+      // Add simple opening animation
+      addContactWindow.classList.add('window-anim-open');
+
+      // Inject the add contact form HTML
+      const content = addContactWindow.querySelector('.add-contact-window-content');
+      if (content) {
+        content.innerHTML = getAddContactFormHTML();
+
+        // Handle close button
+        const closeButton = content.querySelector('.form-close');
+        if (closeButton) {
+          closeButton.addEventListener('click', () => {
+            // Use standard window close animation
+            const standardCloseBtn = addContactWindow.querySelector('.window-close');
+            if (standardCloseBtn) {
+              standardCloseBtn.click();
+            } else {
+              // Fallback: manual close with animation
+              addContactWindow.classList.remove('window-anim-open', 'window-anim-maximize', 'window-anim-close');
+              addContactWindow.classList.add('window-anim-close');
+              addContactWindow.addEventListener('animationend', function handler(ev) {
+                if (ev.animationName === 'windowClose') {
+                  if (addContactWindow.parentNode) addContactWindow.parentNode.removeChild(addContactWindow);
+                  if (openWindows[windowId]) delete openWindows[windowId];
+                }
+              }, { once: true });
+            }
+          });
+        }
+
+        // Handle cancel button
+        const cancelButton = content.querySelector('.cancel-button');
+        if (cancelButton) {
+          cancelButton.addEventListener('click', () => {
+            // Use standard window close animation
+            const standardCloseBtn = addContactWindow.querySelector('.window-close');
+            if (standardCloseBtn) {
+              standardCloseBtn.click();
+            } else {
+              // Fallback: manual close with animation
+              addContactWindow.classList.remove('window-anim-open', 'window-anim-maximize', 'window-anim-close');
+              addContactWindow.classList.add('window-anim-close');
+              addContactWindow.addEventListener('animationend', function handler(ev) {
+                if (ev.animationName === 'windowClose') {
+                  if (addContactWindow.parentNode) addContactWindow.parentNode.removeChild(addContactWindow);
+                  if (openWindows[windowId]) delete openWindows[windowId];
+                }
+              }, { once: true });
+            }
+          });
+        }
+
+        // Handle save button
+        const saveButton = content.querySelector('.save-button');
+        if (saveButton) {
+          saveButton.addEventListener('click', () => {
+            // Get form values
+            const name = content.querySelector('#contact-name').value;
+            const email = content.querySelector('#contact-email').value;
+            const phone = content.querySelector('#contact-phone').value;
+            const company = content.querySelector('#contact-company').value;
+            const position = content.querySelector('#contact-position').value;
+            const notes = content.querySelector('#contact-notes').value;
+
+            if (!name) {
+              alert('Name is required');
+              return;
+            }
+
+            // Create new contact object
+            const newContact = {
+              id: contacts.length + 1,
+              name,
+              email,
+              phone,
+              company,
+              position,
+              notes,
+              favorite: false,
+              letter: name.charAt(0).toUpperCase(),
+              icon: 'fa-user',
+              color: '#' + Math.floor(Math.random() * 16777215).toString(16)
+            };
+
+            // Add to contacts array
+            contacts.push(newContact);
+
+            // Rebuild grouped contacts
+            const groupedContacts = contacts.reduce((acc, contact) => {
+              if (!acc[contact.letter]) acc[contact.letter] = [];
+              acc[contact.letter].push(contact);
+              return acc;
+            }, {});
+
+            // Update UI
+            renderContactList(newContact.id);
+            renderContactContent(newContact);
+
+            // Close window with animation
+            const standardCloseBtn = addContactWindow.querySelector('.window-close');
+            if (standardCloseBtn) {
+              standardCloseBtn.click();
+            } else {
+              // Fallback: manual close with animation
+              addContactWindow.classList.remove('window-anim-open', 'window-anim-maximize', 'window-anim-close');
+              addContactWindow.classList.add('window-anim-close');
+              addContactWindow.addEventListener('animationend', function handler(ev) {
+                if (ev.animationName === 'windowClose') {
+                  if (addContactWindow.parentNode) addContactWindow.parentNode.removeChild(addContactWindow);
+                  if (openWindows[windowId]) delete openWindows[windowId];
+                }
+              }, { once: true });
+            }
+          });
+        }
+      }
+
+      // Register the window in openWindows
+      const iconClass = 'fa-user-plus';
+      const iconBgClass = 'green-icon';
+      const appTitle = 'Add New Contact';
+      openWindows[windowId] = {
+        element: addContactWindow,
+        name: 'add-contact',
+        title: appTitle,
+        iconClass: iconClass,
+        iconBgClass: iconBgClass,
+        appTitle: appTitle
+      };
+      makeWindowActive(addContactWindow);
+      // Call renderPinnedTaskbarIcons to immediately update the taskbar
+      renderPinnedTaskbarIcons();
+    });
+  }
+
+  // Apply search functionality
+  const searchInput = windowElement.querySelector('.orders-search-input');
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      const searchTerm = e.target.value.toLowerCase();
+
+      if (!searchTerm) {
+        renderContactList();
+        return;
+      }
+
+      // Filter contacts based on search term
+      const filteredContacts = contacts.filter(contact =>
+        contact.firstName.toLowerCase().includes(searchTerm) ||
+        contact.lastName.toLowerCase().includes(searchTerm) ||
+        contact.email.toLowerCase().includes(searchTerm) ||
+        contact.company.toLowerCase().includes(searchTerm) ||
+        contact.position.toLowerCase().includes(searchTerm) ||
+        (contact.notes && contact.notes.toLowerCase().includes(searchTerm))
+      );
+
+      // Group filtered contacts by letter
+      const filteredGrouped = filteredContacts.reduce((acc, contact) => {
+        if (!acc[contact.letter]) acc[contact.letter] = [];
+        acc[contact.letter].push(contact);
+        return acc;
+      }, {});
+
+      // Save original grouped contacts
+      const originalGrouped = Object.assign({}, groupedContacts);
+
+      // Temporarily replace grouped contacts with filtered results
+      Object.keys(groupedContacts).forEach(key => {
+        delete groupedContacts[key];
+      });
+
+      Object.keys(filteredGrouped).forEach(key => {
+        groupedContacts[key] = filteredGrouped[key];
+      });
+
+      // Render filtered list
+      renderContactList();
+
+      // Restore original grouped contacts
+      Object.keys(groupedContacts).forEach(key => {
+        delete groupedContacts[key];
+      });
+
+      Object.keys(originalGrouped).forEach(key => {
+        groupedContacts[key] = originalGrouped[key];
+      });
+    });
+  }
+}
+
+//Orders App Content
+function setupOrdersManager(windowElement) {
+  // Sidebar: do NOT set content here. Sidebar content is defined in index.html template using the generic sidebar structure.
+  // Only update dynamic values (like unread counts, user name, etc.) here if needed.
+
+  // --- Ensure sidebar toggle and overlay exist (for consistent sidebar behavior) ---
+  ensureSidebarElements(windowElement);
+
+  if (typeof window.updateSidebarForWindow === 'function') {
+    window.updateSidebarForWindow(windowElement);
+  }
+  if (typeof attachSidebarResizeObserver === 'function') {
+    attachSidebarResizeObserver(windowElement);
+  }
+
+  // Setup toolbar buttons
+  const toolbarButtons = windowElement.querySelectorAll('.window-toolbar .toolbar-button');
+  toolbarButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      // Add ripple effect
+      const ripple = document.createElement('span');
+      ripple.classList.add('ripple');
+      button.appendChild(ripple);
+      setTimeout(() => {
+        ripple.remove();
+      }, 600);
+    });
+  });
+
+  // Single source of orders data with all fields
+  const orders = [
+    {
+      id: 1,
+      orderNumber: 'ORD-10001',
+      customerName: 'Andrei Antoniade',
+      firstName: 'Andrei',
+      lastName: 'Alexandru',
+      avatar: 'fa-shopping-bag',
+      email: 'andrei@example.com',
+      phone: '0732 425 448',
+      company: 'Tech Solutions Inc.',
+      status: 'Completed',
+      notes: 'Express delivery',
+      paymentStatus: 'Paid',
+      shippingStatus: 'Delivered',
+      type: 'eShop',
+      favorite: true,
+      letter: 'A',
+      icon: 'fa-shopping-bag',
+      color: '#F6AD55',
+      creationDate: '12:40 AM',
+      deliveryDate: '14:20 PM',
+      lastUpdate: '12:40 AM',
+      city: 'Constanta',
+      country: 'Romania',
+      itemsCount: 7,
+      totalAmount: '$ 220.2',
+      isNew: true
+    },
+    {
+      id: 2,
+      orderNumber: 'ORD-10002',
+      customerName: 'Andrei Antoniade',
+      firstName: 'Andrei',
+      lastName: 'Alexandru',
+      avatar: 'fa-shopping-bag',
+      email: 'andrei@example.com',
+      phone: '0732 425 448',
+      company: 'Tech Solutions Inc.',
+      status: 'Pending',
+      paymentStatus: 'On arrival',
+      shippingStatus: '-',
+      notes: false,
+      type: 'Booking',
+      favorite: true,
+      letter: 'A',
+      icon: 'fa-shopping-bag',
+      color: '#F6AD55',
+      creationDate: '12:40 AM',
+      deliveryDate: '14:20 PM',
+      lastUpdate: '12:40 AM',
+      city: 'Constanta',
+      country: 'Romania',
+      itemsCount: 7,
+      totalAmount: '$ 220.2',
+      isNew: true
+    },
+    {
+      id: 3,
+      orderNumber: 'ORD-10001',
+      customerName: 'Andrei Antoniade',
+      firstName: 'Andrei',
+      lastName: 'Alexandru',
+      avatar: 'fa-shopping-bag',
+      email: 'andrei@example.com',
+      phone: '0732 425 448',
+      company: 'Tech Solutions Inc.',
+      status: 'Pending Payment',
+      notes: false,
+      type: 'Appointment',
+      paymentStatus: 'PayPal',
+      shippingStatus: '-',
+      favorite: true,
+      letter: 'A',
+      icon: 'fa-shopping-bag',
+      color: '#F6AD55',
+      creationDate: '12:40 AM',
+      deliveryDate: '14:20 PM',
+      lastUpdate: '12:40 AM',
+      city: 'Constanta',
+      country: 'Romania',
+      itemsCount: 7,
+      totalAmount: '$ 220.2',
+      isNew: false
+    },
+    {
+      id: 4,
+      orderNumber: 'ORD-10001',
+      customerName: 'Andrei Antoniade',
+      firstName: 'Andrei',
+      lastName: 'Alexandru',
+      avatar: 'fa-shopping-bag',
+      email: 'andrei@example.com',
+      phone: '0732 425 448',
+      company: 'Tech Solutions Inc.',
+      status: 'Processing',
+      notes: false,
+      type: 'Ticket',
+      paymentStatus: 'On arrival',
+      shippingStatus: '-',
+      favorite: true,
+      letter: 'A',
+      icon: 'fa-shopping-bag',
+      color: '#F6AD55',
+      creationDate: '12:40 AM',
+      deliveryDate: '14:20 PM',
+      lastUpdate: '12:40 AM',
+      city: 'Constanta',
+      country: 'Romania',
+      itemsCount: 7,
+      totalAmount: '$ 220.2',
+      isNew: false
+    },
+    {
+      id: 5,
+      orderNumber: 'ORD-10001',
+      customerName: 'Andrei Antoniade',
+      firstName: 'Andrei',
+      lastName: 'Alexandru',
+      avatar: 'fa-shopping-bag',
+      email: 'andrei@example.com',
+      phone: '0732 425 448',
+      company: 'Tech Solutions Inc.',
+      status: 'Cancelled',
+      notes: 'Express delivery',
+      type: 'Digital',
+      paymentStatus: 'Free',
+      shippingStatus: '-',
+      favorite: true,
+      letter: 'A',
+      icon: 'fa-shopping-bag',
+      color: '#F6AD55',
+      creationDate: '12:40 AM',
+      deliveryDate: '14:20 PM',
+      lastUpdate: '12:40 AM',
+      city: 'Constanta',
+      country: 'Romania',
+      itemsCount: 7,
+      totalAmount: '$ 220.2',
+      isNew: false
+    },
+    {
+      id: 6,
+      orderNumber: 'ORD-10001',
+      customerName: 'Andrei Antoniade',
+      firstName: 'Andrei',
+      lastName: 'Alexandru',
+      avatar: 'fa-shopping-bag',
+      email: 'andrei@example.com',
+      phone: '0732 425 448',
+      company: 'Tech Solutions Inc.',
+      status: 'Refunded',
+      notes: 'Express delivery',
+      type: 'Taxi',
+      paymentStatus: 'Credit Card',
+      shippingStatus: 'Local Pickup',
+      favorite: true,
+      letter: 'A',
+      icon: 'fa-shopping-bag',
+      color: '#F6AD55',
+      creationDate: '12:40 AM',
+      deliveryDate: '14:20 PM',
+      lastUpdate: '12:40 AM',
+      city: 'Constanta',
+      country: 'Romania',
+      itemsCount: 7,
+      totalAmount: '$ 220.2',
+      isNew: false
+    },
+    {
+      id: 7,
+      orderNumber: 'ORD-10001',
+      customerName: 'Andrei Antoniade',
+      firstName: 'Andrei',
+      lastName: 'Alexandru',
+      avatar: 'fa-shopping-bag',
+      email: 'andrei@example.com',
+      phone: '0732 425 448',
+      company: 'Tech Solutions Inc.',
+      status: 'Draft',
+      notes: 'Express delivery',
+      type: 'Food Order',
+      paymentStatus: 'Crdit Card',
+      shippingStatus: 'Courier',
+      favorite: true,
+      letter: 'A',
+      icon: 'fa-shopping-bag',
+      color: '#F6AD55',
+      creationDate: '12:40 AM',
+      deliveryDate: '14:20 PM',
+      lastUpdate: '12:40 AM',
+      city: 'Constanta',
+      country: 'Romania',
+      itemsCount: 7,
+      totalAmount: '$ 220.2',
+      isNew: false
+    },
+    {
+      id: 8,
+      orderNumber: 'ORD-10001',
+      customerName: 'Andrei Antoniade',
+      firstName: 'Andrei',
+      lastName: 'Alexandru',
+      avatar: 'fa-shopping-bag',
+      email: 'andrei@example.com',
+      phone: '0732 425 448',
+      company: 'Tech Solutions Inc.',
+      status: 'Deleted',
+      notes: 'Express delivery',
+      type: 'Booking',
+      paymentStatus: 'Cash',
+      shippingStatus: 'Local Pickup',
+      favorite: true,
+      letter: 'A',
+      icon: 'fa-shopping-bag',
+      color: '#F6AD55',
+      creationDate: '12:40 AM',
+      deliveryDate: '14:20 PM',
+      lastUpdate: '12:40 AM',
+      city: 'Constanta',
+      country: 'Romania',
+      itemsCount: 7,
+      totalAmount: '$ 220.2',
+      isNew: false
+    },
+    {
+      id: 9,
+      orderNumber: 'ORD-10001',
+      customerName: 'Andrei Antoniade',
+      firstName: 'Andrei',
+      lastName: 'Alexandru',
+      avatar: 'fa-shopping-bag',
+      email: 'andrei@example.com',
+      phone: '0732 425 448',
+      company: 'Tech Solutions Inc.',
+      status: 'Completed',
+      notes: 'Express delivery',
+      type: 'Booking',
+      paymentStatus: 'Cash',
+      shippingStatus: 'Local Pickup',
+      favorite: true,
+      letter: 'A',
+      icon: 'fa-shopping-bag',
+      color: '#F6AD55',
+      creationDate: '12:40 AM',
+      deliveryDate: '14:20 PM',
+      lastUpdate: '12:40 AM',
+      city: 'Constanta',
+      country: 'Romania',
+      itemsCount: 7,
+      totalAmount: '$ 220.2',
+      isNew: false
+    },
+    {
+      id: 10,
+      orderNumber: 'ORD-10001',
+      customerName: 'Andrei Antoniade',
+      firstName: 'Andrei',
+      lastName: 'Alexandru',
+      avatar: 'fa-shopping-bag',
+      email: 'andrei@example.com',
+      phone: '0732 425 448',
+      company: 'Tech Solutions Inc.',
+      status: 'Completed',
+      notes: 'Express delivery',
+      type: 'Booking',
+      paymentStatus: 'Cash',
+      shippingStatus: 'Local Pickup',
+      favorite: true,
+      letter: 'A',
+      icon: 'fa-shopping-bag',
+      color: '#F6AD55',
+      creationDate: '12:40 AM',
+      deliveryDate: '14:20 PM',
+      lastUpdate: '12:40 AM',
+      city: 'Constanta',
+      country: 'Romania',
+      itemsCount: 7,
+      totalAmount: '$ 220.2',
+      isNew: false
+    },
+    {
+      id: 11,
+      orderNumber: 'ORD-10001',
+      customerName: 'Andrei Antoniade',
+      firstName: 'Andrei',
+      lastName: 'Alexandru',
+      avatar: 'fa-shopping-bag',
+      email: 'andrei@example.com',
+      phone: '0732 425 448',
+      company: 'Tech Solutions Inc.',
+      status: 'Completed',
+      notes: 'Express delivery',
+      type: 'Booking',
+      paymentStatus: 'Credit Card',
+      shippingStatus: 'Transport',
+      favorite: true,
+      letter: 'A',
+      icon: 'fa-shopping-bag',
+      color: '#F6AD55',
+      creationDate: '12:40 AM',
+      deliveryDate: '14:20 PM',
+      lastUpdate: '12:40 AM',
+      city: 'Constanta',
+      country: 'Romania',
+      itemsCount: 7,
+      totalAmount: '$ 220.2',
+      isNew: false
+    },
+    {
+      id: 12,
+      orderNumber: 'ORD-10001',
+      customerName: 'Andrei Antoniade',
+      firstName: 'Andrei',
+      lastName: 'Alexandru',
+      avatar: 'fa-shopping-bag',
+      email: 'andrei@example.com',
+      phone: '0732 425 448',
+      company: 'Tech Solutions Inc.',
+      status: 'Completed',
+      notes: 'Express delivery',
+      type: 'Booking',
+      paymentStatus: 'Cash',
+      shippingStatus: 'Transport',
+      favorite: true,
+      letter: 'A',
+      icon: 'fa-shopping-bag',
+      color: '#F6AD55',
+      creationDate: '12:40 AM',
+      deliveryDate: '14:20 PM',
+      lastUpdate: '12:40 AM',
+      city: 'Constanta',
+      country: 'Romania',
+      itemsCount: 7,
+      totalAmount: '$ 220.2',
+      isNew: false
+    },
+    {
+      id: 13,
+      orderNumber: 'ORD-10001',
+      customerName: 'Andrei Antoniade',
+      firstName: 'Andrei',
+      lastName: 'Alexandru',
+      avatar: 'fa-shopping-bag',
+      email: 'andrei@example.com',
+      phone: '0732 425 448',
+      company: 'Tech Solutions Inc.',
+      status: 'Completed',
+      notes: 'Express delivery',
+      type: 'Booking',
+      paymentStatus: 'Cash',
+      shippingStatus: 'Local Pickup',
+      favorite: true,
+      letter: 'A',
+      icon: 'fa-shopping-bag',
+      color: '#F6AD55',
+      creationDate: '12:40 AM',
+      deliveryDate: '14:20 PM',
+      lastUpdate: '12:40 AM',
+      city: 'Constanta',
+      country: 'Romania',
+      itemsCount: 7,
+      totalAmount: '$ 220.2',
+      isNew: false
+    },
+    {
+      id: 14,
+      orderNumber: 'ORD-10001',
+      customerName: 'Andrei Antoniade',
+      firstName: 'Andrei',
+      lastName: 'Alexandru',
+      avatar: 'fa-shopping-bag',
+      email: 'andrei@example.com',
+      phone: '0732 425 448',
+      company: 'Tech Solutions Inc.',
+      status: 'Completed',
+      notes: 'Express delivery',
+      type: 'Booking',
+      paymentStatus: 'Cash',
+      shippingStatus: 'Local Pickup',
+      favorite: true,
+      letter: 'A',
+      icon: 'fa-shopping-bag',
+      color: '#F6AD55',
+      creationDate: '12:40 AM',
+      deliveryDate: '14:20 PM',
+      lastUpdate: '12:40 AM',
+      city: 'Constanta',
+      country: 'Romania',
+      itemsCount: 7,
+      totalAmount: '$ 220.2',
+      isNew: false
+    },
+    {
+      id: 15,
+      orderNumber: 'ORD-10001',
+      customerName: 'Andrei Antoniade',
+      firstName: 'Andrei',
+      lastName: 'Alexandru',
+      avatar: 'fa-shopping-bag',
+      email: 'andrei@example.com',
+      phone: '0732 425 448',
+      company: 'Tech Solutions Inc.',
+      status: 'Completed',
+      notes: 'Express delivery',
+      type: 'Booking',
+      paymentStatus: 'Cash',
+      shippingStatus: 'Local Pickup',
+      favorite: true,
+      letter: 'A',
+      icon: 'fa-shopping-bag',
+      color: '#F6AD55',
+      creationDate: '12:40 AM',
+      deliveryDate: '14:20 PM',
+      lastUpdate: '12:40 AM',
+      city: 'Constanta',
+      country: 'Romania',
+      itemsCount: 7,
+      totalAmount: '$ 220.2',
+      isNew: false
+    },
+    {
+      id: 16,
+      orderNumber: 'ORD-10001',
+      customerName: 'Andrei Antoniade',
+      firstName: 'Andrei',
+      lastName: 'Alexandru',
+      avatar: 'fa-shopping-bag',
+      email: 'andrei@example.com',
+      phone: '0732 425 448',
+      company: 'Tech Solutions Inc.',
+      status: 'Completed',
+      notes: 'Express delivery',
+      type: 'Booking',
+      paymentStatus: 'Cash',
+      shippingStatus: 'Local Pickup',
+      favorite: true,
+      letter: 'A',
+      icon: 'fa-shopping-bag',
+      color: '#F6AD55',
+      creationDate: '12:40 AM',
+      deliveryDate: '14:20 PM',
+      lastUpdate: '12:40 AM',
+      city: 'Constanta',
+      country: 'Romania',
+      itemsCount: 7,
+      totalAmount: '$ 220.2',
+      isNew: true
+    },
+    {
+      id: 17,
+      orderNumber: 'ORD-10001',
+      customerName: 'Andrei Antoniade',
+      firstName: 'Andrei',
+      lastName: 'Alexandru',
+      avatar: 'fa-shopping-bag',
+      email: 'andrei@example.com',
+      phone: '0732 425 448',
+      company: 'Tech Solutions Inc.',
+      status: 'Completed',
+      notes: 'Express delivery',
+      type: 'Booking',
+      paymentStatus: 'Cash',
+      shippingStatus: 'Local Pickup',
+      favorite: true,
+      letter: 'A',
+      icon: 'fa-shopping-bag',
+      color: '#F6AD55',
+      creationDate: '12:40 AM',
+      deliveryDate: '14:20 PM',
+      lastUpdate: '12:40 AM',
+      city: 'Constanta',
+      country: 'Romania',
+      itemsCount: 7,
+      totalAmount: '$ 220.2',
+      isNew: true
+    },
+    {
+      id: 18,
+      orderNumber: 'ORD-10001',
+      customerName: 'Andrei Antoniade',
+      firstName: 'Andrei',
+      lastName: 'Alexandru',
+      avatar: 'fa-shopping-bag',
+      email: 'andrei@example.com',
+      phone: '0732 425 448',
+      company: 'Tech Solutions Inc.',
+      status: 'Completed',
+      notes: 'Express delivery',
+      type: 'Booking',
+      paymentStatus: 'Cash',
+      shippingStatus: 'Local Pickup',
+      favorite: true,
+      letter: 'A',
+      icon: 'fa-shopping-bag',
+      color: '#F6AD55',
+      creationDate: '12:40 AM',
+      deliveryDate: '14:20 PM',
+      lastUpdate: '12:40 AM',
+      city: 'Constanta',
+      country: 'Romania',
+      itemsCount: 7,
+      totalAmount: '$ 220.2',
+      isNew: false
+    },
+    {
+      id: 19,
+      orderNumber: 'ORD-10001',
+      customerName: 'Andrei Antoniade',
+      firstName: 'Andrei',
+      lastName: 'Alexandru',
+      avatar: 'fa-shopping-bag',
+      email: 'andrei@example.com',
+      phone: '0732 425 448',
+      company: 'Tech Solutions Inc.',
+      status: 'Completed',
+      notes: 'Express delivery',
+      type: 'Booking',
+      paymentStatus: 'Cash',
+      shippingStatus: 'Local Pickup',
+      favorite: true,
+      letter: 'A',
+      icon: 'fa-shopping-bag',
+      color: '#F6AD55',
+      creationDate: '12:40 AM',
+      deliveryDate: '14:20 PM',
+      lastUpdate: '12:40 AM',
+      city: 'Constanta',
+      country: 'Romania',
+      itemsCount: 7,
+      totalAmount: '$ 220.2',
+      isNew: true
+    },
+    {
+      id: 20,
+      orderNumber: 'ORD-10001',
+      customerName: 'Andrei Antoniade',
+      firstName: 'Andrei',
+      lastName: 'Alexandru',
+      avatar: 'fa-shopping-bag',
+      email: 'andrei@example.com',
+      phone: '0732 425 448',
+      company: 'Tech Solutions Inc.',
+      status: 'Completed',
+      notes: 'Express delivery',
+      type: 'Booking',
+      paymentStatus: 'Cash',
+      shippingStatus: 'Local Pickup',
+      favorite: true,
+      letter: 'A',
+      icon: 'fa-shopping-bag',
+      color: '#F6AD55',
+      creationDate: '12:40 AM',
+      deliveryDate: '14:20 PM',
+      lastUpdate: '12:40 AM',
+      city: 'Constanta',
+      country: 'Romania',
+      itemsCount: 7,
+      totalAmount: '$ 220.2',
+      isNew: false
+    },
+    {
+      id: 21,
+      orderNumber: 'ORD-10001',
+      customerName: 'Andrei Antoniade',
+      firstName: 'Andrei',
+      lastName: 'Alexandru',
+      avatar: 'fa-shopping-bag',
+      email: 'andrei@example.com',
+      phone: '0732 425 448',
+      company: 'Tech Solutions Inc.',
+      status: 'Completed',
+      notes: 'Express delivery',
+      type: 'Booking',
+      paymentStatus: 'Cash',
+      shippingStatus: 'Local Pickup',
+      favorite: true,
+      letter: 'A',
+      icon: 'fa-shopping-bag',
+      color: '#F6AD55',
+      creationDate: '12:40 AM',
+      deliveryDate: '14:20 PM',
+      lastUpdate: '12:40 AM',
+      city: 'Constanta',
+      country: 'Romania',
+      itemsCount: 7,
+      totalAmount: '$ 220.2',
+      isNew: false
+    },
+    {
+      id: 22,
+      orderNumber: 'ORD-10001',
+      customerName: 'Andrei Antoniade',
+      firstName: 'Andrei',
+      lastName: 'Alexandru',
+      avatar: 'fa-shopping-bag',
+      email: 'andrei@example.com',
+      phone: '0732 425 448',
+      company: 'Tech Solutions Inc.',
+      status: 'Completed',
+      notes: 'Express delivery',
+      type: 'Booking',
+      paymentStatus: 'Cash',
+      shippingStatus: 'Local Pickup',
+      favorite: true,
+      letter: 'A',
+      icon: 'fa-shopping-bag',
+      color: '#F6AD55',
+      creationDate: '12:40 AM',
+      deliveryDate: '14:20 PM',
+      lastUpdate: '12:40 AM',
+      city: 'Constanta',
+      country: 'Romania',
+      itemsCount: 7,
+      totalAmount: '$ 220.2',
+      isNew: false
+    },
+    {
+      id: 23,
+      orderNumber: 'ORD-10001',
+      customerName: 'Andrei Antoniade',
+      firstName: 'Andrei',
+      lastName: 'Alexandru',
+      avatar: 'fa-shopping-bag',
+      email: 'andrei@example.com',
+      phone: '0732 425 448',
+      company: 'Tech Solutions Inc.',
+      status: 'Completed',
+      notes: 'Express delivery',
+      type: 'Booking',
+      paymentStatus: 'Cash',
+      shippingStatus: 'Local Pickup',
+      favorite: true,
+      letter: 'A',
+      icon: 'fa-shopping-bag',
+      color: '#F6AD55',
+      creationDate: '12:40 AM',
+      deliveryDate: '14:20 PM',
+      lastUpdate: '12:40 AM',
+      city: 'Constanta',
+      country: 'Romania',
+      itemsCount: 7,
+      totalAmount: '$ 220.2',
+      isNew: false
+    },
+    {
+      id: 24,
+      orderNumber: 'ORD-10001',
+      customerName: 'Andrei Antoniade',
+      firstName: 'Andrei',
+      lastName: 'Alexandru',
+      avatar: 'fa-shopping-bag',
+      email: 'andrei@example.com',
+      phone: '0732 425 448',
+      company: 'Tech Solutions Inc.',
+      status: 'Completed',
+      notes: 'Express delivery',
+      type: 'Booking',
+      paymentStatus: 'Cash',
+      shippingStatus: 'Local Pickup',
+      favorite: true,
+      letter: 'A',
+      icon: 'fa-shopping-bag',
+      color: '#F6AD55',
+      creationDate: '12:40 AM',
+      deliveryDate: '14:20 PM',
+      lastUpdate: '12:40 AM',
+      city: 'Constanta',
+      country: 'Romania',
+      itemsCount: 7,
+      totalAmount: '$ 220.2',
+      isNew: false
+    }
+  ];
+
+  // Group contacts by letter
+  // Group orders by first letter of customer name
+  // Group orders by first letter of customer name
+  let groupedOrders = orders.reduce((acc, order) => {
+    // Add customerName property for orders that don't have it
+    if (!order.customerName && order.firstName && order.lastName) {
+      order.customerName = order.firstName + ' ' + order.lastName;
+    }
+
+    // Ensure letter is set based on customer name
+    if (!order.letter && order.customerName) {
+      order.letter = order.customerName.charAt(0).toUpperCase();
+    }
+
+    // Add to appropriate group
+    if (order.letter) {
+      if (!acc[order.letter]) acc[order.letter] = [];
+      acc[order.letter].push(order);
+    }
+    return acc;
+  }, {});
+
+  const ordersListSection = windowElement.querySelector('.orders-list-section');
+  const ordersList = windowElement.querySelector('.orders-list');
+  const ordersContentSection = windowElement.querySelector('.orders-content-section');
+  const ordersContent = windowElement.querySelector('.orders-content-section .orders-content');
+  const windowMainContent = windowElement.querySelector('.orders-manager-window');
+
+  // Helper function to get the appropriate icon for each status
+  function getStatusIcon(status) {
+    switch (status) {
+      case 'Completed':
+        return '<i class="fas fa-check-circle status-icon"></i>';
+      case 'Pending':
+        return '<i class="fas fa-clock status-icon"></i>';
+      case 'Pending Payment':
+        return '<i class="fas fa-money-bill-wave status-icon"></i>';
+      case 'Processing':
+        return '<i class="fas fa-cogs status-icon"></i>';
+      case 'On Hold':
+        return '<i class="fas fa-pause-circle status-icon"></i>';
+      case 'Cancelled':
+        return '<i class="fas fa-ban status-icon"></i>';
+      case 'Refunded':
+        return '<i class="fas fa-undo-alt status-icon"></i>';
+      case 'Draft':
+        return '<i class="fas fa-pencil-alt status-icon"></i>';
+      case 'Deleted':
+      case 'Trash':
+        return '<i class="fas fa-trash-alt status-icon"></i>';
+      default:
+        return '<i class="fas fa-info-circle status-icon"></i>';
+    }
+  }
+
+  // Helper function to get the appropriate icon for each status
+  function getOrderTypeIcon(type) {
+    switch (type) {
+      case 'eShop':
+        return '<i class="fas fa-cart-shopping ordertype-icon"></i>';
+      case 'Booking':
+        return '<i class="fas fa-hotel ordertype-icon"></i>';
+      case 'Appointment':
+        return '<i class="fas fa-calendar ordertype-icon"></i>';
+      case 'Food Order':
+        return '<i class="fas fa-utensils ordertype-icon"></i>';
+      case 'Ticket':
+        return '<i class="fas fa-ticket ordertype-icon"></i>';
+      case 'Digital':
+        return '<i class="fas fa-floppy-disk ordertype-icon"></i>';
+      case 'Donation':
+        return '<i class="fas fa-circle-dollar-to-slot ordertype-icon"></i>';
+      case 'Subscription':
+        return '<i class="fas fa-clipboard-check ordertype-icon"></i>';
+      case 'Taxi':
+        return '<i class="fas fa-taxi ordertype-icon"></i>';
+      default:
+        return '<i class="fas fa-info-circle ordertype-icon"></i>';
+    }
+  }
+
+  // Initialize the layout and render the orders list
+  initializeOrdersAppLayout();
+  renderOrdersList();
+
+  // Initialize desktop layout (orders list takes full width, content section hidden)
+  function initializeOrdersAppLayout() {
+    // Desktop layout setup:
+    // 1. Hide content section initially
+    if (ordersContentSection) {
+      ordersContentSection.style.visibility = 'hidden';
+      ordersContentSection.style.display = 'none';
+    }
+
+    // 2. Make orders list section take 100% width
+    if (ordersListSection) {
+      ordersListSection.style.width = '100%';
+    }
+
+    // 3. Show table header by default
+    const tableHeader = windowElement.querySelector('.orders-list-table-header');
+    if (tableHeader) {
+      tableHeader.style.display = '';
+    }
+
+    // Make sure orders list is visible
+    if (ordersList) {
+      ordersList.style.display = '';
+    }
+  }
+
+  function renderOrdersList(selectedId) {
+    if (!ordersList) return;
+    ordersList.innerHTML = '';
+
+    // If there's no selected order and we're not in mobile mode, show a table view
+    if ((typeof selectedId === 'undefined' || selectedId === null) && !isMobileOrdersApp()) {
+      // Make sure orders content section is hidden
+      if (ordersContentSection) {
+        ordersContentSection.style.visibility = 'hidden';
+        ordersContentSection.style.display = 'none';
+      }
+
+      // Make orders list section take 100% width and add table-mode class
+      if (ordersListSection) {
+        ordersListSection.style.width = '100%';
+        ordersListSection.classList.add('table-mode');
+        ordersListSection.classList.remove('orders-selected-mode');
+      }
+
+      // Use the unified orders data for the table view
+      // Create a table row for each order
+      orders.forEach(order => {
+        const li = document.createElement('li');
+        li.className = `orders-list-item order-item-status-${order.status.toLowerCase().replace(/\s+/g, '-')} orders-table-row`;
+
+        const bgColor = `rgba(${parseInt(order.color.slice(1, 3), 16)},${parseInt(order.color.slice(3, 5), 16)},${parseInt(order.color.slice(5, 7), 16)},0.1)`;
+
+        li.innerHTML = `
+          <div style="display: flex; width: 100%; align-items: center; padding: 10px 14px;">
+            <div style="width: 32px; min-width: 32px; display: flex; justify-content: center;">
+              ${order.isNew ? '<div style="width: 8px; height: 8px; border-radius: 50%; background-color: var(--accent-color);"></div>' : ''}
+            </div>
+            <div style="flex: 1; display: flex; align-items: center; gap: 10px;">
+<input type="checkbox" id="orders-select-all-box" name="orders-select-all-box" />
+              <span class="orders-list-order-number" style="flex: 1.2;">${order.orderNumber}</span>
+            </div>
+            
+            <div style="flex: 1.6; display: flex; align-items: center; gap: 10px;" class="orders-list-customer-name">
+                          <div class="order-list-avatar" style="color:${order.color};background-color:${bgColor}">
+                <i class="fas ${order.icon}"></i></div>
+            
+            ${order.firstName} ${order.lastName}</div>
+            <div style="flex: 1;">${order.creationDate}</div>
+            <div style="flex: 1;"><span class="status-badge status-${order.status.toLowerCase().replace(/\s+/g, '-')}">${getStatusIcon(order.status)} <div class="order-status-list-view">${order.status}</div></span></div>
+                        <div style="flex: 1;"><span class="order-type-badge status-${order.type.toLowerCase().replace(/\s+/g, '-')}">${getOrderTypeIcon(order.type)} <div class="order-status-list-view">${order.type}</div></span></div>
+
+            <div style="flex: 1;">${order.paymentStatus}</div>
+            <div style="flex: 1;">${order.shippingStatus}</div>
+
+            <div class="orders-list-total-amount">${order.totalAmount}</div>
+            <div style="width: 20px; min-width: 20px;"></div>
+          </div>
+        `;
+
+        li.onclick = () => {
+          // When a row is clicked, use the order's ID to load the detail view
+          renderOrdersList(order.id);
+        };
+
+        ordersList.appendChild(li);
+      });
+
+      return;
+    }
+
+    // If selectedId is provided, render the regular orders list view
+    Object.keys(groupedOrders).sort().forEach(letter => {
+
+
+      groupedOrders[letter].forEach(order => {
+        const li = document.createElement('li');
+        li.className = `orders-list-item order-item-status-${order.status.toLowerCase().replace(/\s+/g, '-')}` + (order.id === selectedId ? ' selected' : '') + (order.favorite ? ' favorite' : '');
+
+        li.innerHTML = `
+        <div class="orders-list-avatar" style="color:${order.color};background-color:rgba(${parseInt(order.color.slice(1, 3), 16)},${parseInt(order.color.slice(3, 5), 16)},${parseInt(order.color.slice(5, 7), 16)},0.1)"><i class="fas ${order.icon}"></i></div>
+        <div class="orders-list-info">
+          <div class="orders-list-name" style="display: flex; align-items: center; gap: 10px;"> ${order.isNew ? '<div style="width: 8px; height: 8px; border-radius: 50%; background-color: var(--accent-color);"></div>' : ''}${order.firstName} ${order.lastName}</div>
+          <div class="orders-list-details"><span class="order-type-badge status-${order.type.toLowerCase().replace(/\s+/g, '-')}">${getOrderTypeIcon(order.type)}</span>${order.orderNumber} <span class="status-badge status-${order.status.toLowerCase().replace(/\s+/g, '-')}">${getStatusIcon(order.status)} <div class="order-status-list-view">${order.status}</div></span>            ${order.notes ? '<i class="fas fa-sticky-note"></i>' : ''}</div>
+        </div>
+        <div class="orders-list-meta">
+          <div class="orders-list-total-amount">${order.totalAmount}</div>
+          <div class="orders-list-date">${order.creationDate}</div>
+
+        </div>
+        `;
+
+        li.onclick = () => {
+          console.log('Order clicked:', order.id, order.orderNumber, order.customerName);
+
+          // On mobile, we need to use the patched renderOrdersList which will handle
+          // showing the content panel after rendering the content
+          renderOrdersList(order.id);
+
+          // On desktop or when the patched renderOrdersList isn't in effect yet,
+          // we need to render the content directly
+          if (!isMobileOrdersApp()) {
+            renderOrdersContent(order);
+          }
+        };
+
+        li.ondblclick = () => {
+          // Generate a unique window ID for each order content popout
+          let ordersContentWindowCount = 1;
+          while (openWindows[`orders-content-window-${ordersContentWindowCount}`]) {
+            ordersContentWindowCount++;
+          }
+          const windowId = `orders-content-window-${ordersContentWindowCount}`;
+
+          const ordersContentWindow = createWindowFromTemplate('orders-content-window', windowId, false);
+          if (!ordersContentWindow) return;
+          
+          // Add simple opening animation
+          ordersContentWindow.classList.add('window-anim-open');
+
+          // Inject the full orders-content-section structure
+          const content = ordersContentWindow.querySelector('.orders-content-body');
+          if (!content) return;
+
+          content.innerHTML = `
+          <section class="orders-content-section">
+            <div class="window-toolbar">
+              <div class="toolbar-buttons-left">
+                <button class="toolbar-button" title="Notes"><i class="fas fa-clipboard-list"></i><span>Add Note</span></button>
+                <button class="toolbar-button" title="Shipping"><i class="fas fa-shipping-fast"></i><span>Shipping</span></button>
+                <button class="toolbar-button" title="Invoice"><i class="fas fa-file-invoice"></i><span>Invoice</span></button>
+                <button class="toolbar-button" title="Order log"><i class="fas fa-history"></i><span>Order log</span></button>
+                                <button class="toolbar-button orders-delete-button"><i class="fas fa-trash"></i></button>
+
+              </div>
+              <div class="toolbar-buttons-right">
+                <div class="order-assign">
+                  <span>Assign agent</span>
+                  <button class="assign-agent-btn">Alina Caramitru <i class="fas fa-chevron-down"></i></button>
+                </div>
+              </div>
+            </div>
+            
+            <div class="orders-content">
+              ${getOrdersContentHTML(order)}
+            </div>
+          </section>
+          `;
+
+          // Setup back button in the popout window
+          const backButton = content.querySelector('.orders-back-button');
+          if (backButton) {
+            backButton.addEventListener('click', () => {
+              const closeButton = ordersContentWindow.querySelector('.window-close');
+              if (closeButton) closeButton.click();
+            });
+          }
+
+          // Setup status dropdown functionality for the popup window
+          const statusButton = content.querySelector('.order-status-button');
+          const statusDropdown = content.querySelector('.order-status-dropdown');
+
+          if (statusButton && statusDropdown) {
+            // Initially hide the dropdown
+            statusDropdown.style.display = 'none';
+
+            // Apply dropdown styles
+            statusDropdown.style.position = 'absolute';
+            statusDropdown.style.zIndex = '1000';
+            statusDropdown.style.backgroundColor = '#EBF5FF';
+            statusDropdown.style.borderRadius = '16px';
+            statusDropdown.style.boxShadow = '0 4px 16px rgba(0,0,0,0.15)';
+            statusDropdown.style.padding = '1px 0';
+            statusDropdown.style.maxHeight = 'max-content';
+            statusDropdown.style.overflowY = 'auto';
+            statusDropdown.style.border = '1px solid var(--border-color, #e1e1e1)';
+            statusDropdown.style.borderTop = 'none';
+            statusDropdown.style.marginTop = '-77px';
+            statusDropdown.style.width = '220px';
+
+            // Apply styles to dropdown options
+            const dropdownOptionElements = statusDropdown.querySelectorAll('.dropdown-option');
+            dropdownOptionElements.forEach(option => {
+              option.style.padding = '8px 18px';
+              option.style.display = 'flex';
+              option.style.alignItems = 'center';
+              option.style.gap = '10px';
+              option.style.cursor = 'pointer';
+              option.style.transition = 'background-color 0.2s ease';
+              option.style.borderRadius = '8px';
+              option.style.margin = '3px 5px';
+
+              const status = option.getAttribute('data-status');
+              option.classList.add(`status-${status.toLowerCase().replace(/\s+/g, '-')}`);
+
+              option.addEventListener('mouseover', () => {
+                option.style.backgroundColor = 'var(--accent-color)';
+                option.style.color = '#fff';
+              });
+
+              option.addEventListener('mouseout', () => {
+                option.style.backgroundColor = '';
+                option.style.color = '';
+              });
+            });
+
+            // Toggle dropdown on button click
+            statusButton.addEventListener('click', (e) => {
+              if (statusDropdown.style.display === 'none') {
+                // Position the dropdown directly beneath the button
+                const buttonRect = statusButton.getBoundingClientRect();
+                const windowRect = ordersContentWindow.getBoundingClientRect();
+                const orderStatusContainer = content.querySelector('.order-status-container');
+
+                // Calculate position relative to the window
+                statusDropdown.style.top = (buttonRect.bottom - windowRect.top) + 'px';
+
+                // Ensure dropdown is aligned with the button's container instead of the button itself
+                if (orderStatusContainer) {
+                  const containerRect = orderStatusContainer.getBoundingClientRect();
+                  statusDropdown.style.right = (windowRect.right - containerRect.right) + 'px';
+                  statusDropdown.style.left = 'auto';
+                } else {
+                  // Fallback if container not found
+                  statusDropdown.style.right = (windowRect.right - buttonRect.right) + 'px';
+                  statusDropdown.style.left = 'auto';
+                }
+
+                // Setup animation starting state
+                statusDropdown.style.opacity = '0';
+                statusDropdown.style.display = 'block';
+
+                // Force reflow to ensure animation works
+                statusDropdown.offsetHeight;
+
+                // Add animation
+                statusDropdown.style.transition = 'opacity 0.2s ease-out, transform 0.2s ease-out';
+                statusDropdown.style.opacity = '1';
+                statusDropdown.classList.add('dropdown-anim-in');
+              } else {
+                // Animate out
+                statusDropdown.style.opacity = '0';
+
+                // Hide after animation completes
+                setTimeout(() => {
+                  statusDropdown.style.display = 'none';
+                  statusDropdown.style.transform = '';
+                }, 200);
+              }
+              e.stopPropagation();
+            });
+
+            // Close dropdown when clicking elsewhere
+            document.addEventListener('click', (e) => {
+              if (statusDropdown.style.display === 'block' && !statusDropdown.contains(e.target) && e.target !== statusButton) {
+                // Animate out
+                statusDropdown.style.opacity = '0';
+
+                // Hide after animation completes
+                setTimeout(() => {
+                  statusDropdown.style.display = 'none';
+                  statusDropdown.style.transform = '';
+                }, 200);
+              }
+            });
+
+            // Handle status option selection
+            const dropdownOptions = statusDropdown.querySelectorAll('.dropdown-option');
+            dropdownOptions.forEach(option => {
+              option.addEventListener('click', () => {
+                const newStatus = option.getAttribute('data-status');
+                const oldStatus = order.status;
+
+                if (newStatus !== oldStatus) {
+                  // Create confirmation overlay
+                  const overlay = document.createElement('div');
+                  overlay.className = 'confirmation-overlay';
+                  overlay.innerHTML = `
+                    <div class="confirmation-dialog">
+                      <h3>Update Order Status</h3>
+                      <p>Change order status from "${oldStatus}" to "${newStatus}"?</p>
+                      <div class="confirmation-options">
+                        <label><input type="checkbox" checked> Send email notification to customer</label>
+                        <label><input type="checkbox"> Add internal note</label>
+                      </div>
+                      <div class="confirmation-buttons">
+                        <button class="cancel-button">Cancel</button>
+                        <button class="confirm-button">Update Status</button>
+                      </div>
+                    </div>
+                  `;
+
+                  // Add to DOM
+                  document.body.appendChild(overlay);
+
+                  // Add styles
+                  overlay.style.position = 'fixed';
+                  overlay.style.top = '0';
+                  overlay.style.left = '0';
+                  overlay.style.width = '100%';
+                  overlay.style.height = '100%';
+                  overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+                  overlay.style.display = 'flex';
+                  overlay.style.justifyContent = 'center';
+                  overlay.style.alignItems = 'center';
+                  overlay.style.zIndex = '9999';
+
+                  const dialog = overlay.querySelector('.confirmation-dialog');
+                  dialog.style.backgroundColor = 'var(--window-content-bg)';
+                  dialog.style.padding = '24px';
+                  dialog.style.borderRadius = '16px';
+                  dialog.style.width = '400px';
+                  dialog.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.2)';
+
+                  // Setup buttons
+                  const cancelButton = overlay.querySelector('.cancel-button');
+                  const confirmButton = overlay.querySelector('.confirm-button');
+
+                  cancelButton.addEventListener('click', () => {
+                    overlay.style.opacity = '0';
+                    setTimeout(() => overlay.remove(), 300);
+                  });
+
+                  confirmButton.addEventListener('click', () => {
+                    // Update the order's status
+                    order.status = newStatus;
+
+                    // Update UI
+                    const statusBadge = content.querySelector('.order-status-badge');
+                    if (statusBadge) {
+                      statusBadge.className = `order-status-badge status-${newStatus.toLowerCase().replace(/\s+/g, '-')}`;
+                      statusBadge.innerHTML = `${getStatusIcon(newStatus)} <span>${newStatus}</span>`;
+                    }
+
+                    // Update the list item if it's visible
+                    const orderItem = windowElement.querySelector(`.orders-list-item[data-id="${order.id}"] .status-badge`);
+                    if (orderItem) {
+                      orderItem.className = `status-badge status-${newStatus.toLowerCase().replace(/\s+/g, '-')}`;
+                      orderItem.innerHTML = `${getStatusIcon(newStatus)} <span>${newStatus}</span>`;
+                    }
+
+                    overlay.style.opacity = '0';
+                    setTimeout(() => overlay.remove(), 300);
+
+                    // Add ripple effect to selected option
+                    const ripple = document.createElement('span');
+                    ripple.classList.add('ripple');
+                    option.appendChild(ripple);
+                    setTimeout(() => {
+                      ripple.remove();
+                    }, 600);
+
+                    // Close the dropdown with animation
+                    statusDropdown.style.opacity = '0';
+                    statusDropdown.style.transform = 'translateY(-10px)';
+
+                    // Hide after animation completes
+                    setTimeout(() => {
+                      statusDropdown.style.display = 'none';
+                      statusDropdown.style.transform = '';
+                    }, 200);
+                  });
+                }
+                else {
+                  // If status hasn't changed, just close the dropdown
+                  statusDropdown.style.opacity = '0';
+                  statusDropdown.style.transform = 'translateY(-10px)';
+
+                  // Hide after animation completes
+                  setTimeout(() => {
+                    statusDropdown.style.display = 'none';
+                    statusDropdown.style.transform = '';
+                  }, 200);
+                }
+              });
+            });
+          }
+
+          // Setup edit button
+          const editButton = content.querySelector('.orders-edit-button');
+          if (editButton) {
+            editButton.addEventListener('click', () => {
+              showEditOrdersForm(order, content);
+            });
+          }
+
+          // Setup delete button
+          const deleteButton = content.querySelector('.orders-delete-button');
+          if (deleteButton) {
+            deleteButton.addEventListener('click', () => {
+              // Show confirmation dialog
+              const confirmMessage = `Are you sure you want to delete order ${order.orderNumber}?`;
+              if (confirm(confirmMessage)) {
+                // Remove order from data
+                const index = orders.findIndex(o => o.id === order.id);
+                if (index !== -1) {
+                  orders.splice(index, 1);
+
+                  // Close the window
+                  const closeButton = ordersContentWindow.querySelector('.window-close');
+                  if (closeButton) closeButton.click();
+
+                  // Update the main orders list if visible
+                  renderOrdersList();
+                }
+              }
+            });
+          }
+
+          // Setup more options button
+          const moreButton = content.querySelector('.orders-more-button');
+          if (moreButton) {
+            moreButton.addEventListener('click', (e) => {
+              showOrdersMoreOptions(e.target, order);
+            });
+          }
+
+          // Register the window in openWindows and show taskbar icon
+          const iconClass = 'fa-shopping-bag';
+          const iconBgClass = 'green-icon';
+          const appTitle = `Order: ${order.orderNumber}`;
+          openWindows[windowId] = {
+            element: ordersContentWindow,
+            name: 'orders-content',
+            title: appTitle,
+            iconClass: iconClass,
+            iconBgClass: iconBgClass,
+            appTitle: appTitle
+          };
+
+          // Update the window title with the order number
+          const titleSpan = ordersContentWindow.querySelector('.window-title span');
+          if (titleSpan) {
+            titleSpan.textContent = `Order: ${order.orderNumber}`;
+          }
+          makeWindowActive(ordersContentWindow);
+          renderPinnedTaskbarIcons();
+        };
+        ordersList.appendChild(li);
+      });
+    });
+  }
+
+  function renderOrdersContent(order) {
+    if (!ordersContentSection || !ordersContent) return;
+
+    // When an order is selected, make the content section visible
+    if (!isMobileOrdersApp()) {
+      if (ordersContentSection) {
+        ordersContentSection.style.visibility = 'visible';
+        ordersContentSection.style.display = '';
+      }
+
+      // Restore orders list section width and update classes
+      if (ordersListSection) {
+        ordersListSection.style.width = '390px';
+        ordersListSection.classList.remove('table-mode');
+        ordersListSection.classList.add('orders-selected-mode');
+      }
+
+      // Hide table header
+      const tableHeader = windowElement.querySelector('.orders-list-table-header');
+      if (tableHeader) {
+        tableHeader.style.display = 'none';
+      }
+    }
+
+    ordersContent.innerHTML = getOrdersContentHTML(order);
+
+    // Setup status dropdown functionality
+    const statusButton = windowElement.querySelector('.order-status-button');
+    const statusDropdown = windowElement.querySelector('.order-status-dropdown');
+
+    if (statusButton && statusDropdown) {
+      // Initially hide the dropdown
+      statusDropdown.style.display = 'none';
+
+      // Apply dropdown styles
+      statusDropdown.style.position = 'absolute';
+      statusDropdown.style.zIndex = '1000';
+      statusDropdown.style.backgroundColor = '#EBF5FF';
+      statusDropdown.style.borderRadius = '16px'; // Rounded only on bottom corners
+      statusDropdown.style.boxShadow = '0 4px 16px rgba(0,0,0,0.15)';
+      statusDropdown.style.padding = '1px 0';
+      statusDropdown.style.maxHeight = 'max-content';
+      statusDropdown.style.overflowY = 'auto';
+      statusDropdown.style.border = '1px solid var(--border-color, #e1e1e1)';
+      statusDropdown.style.borderTop = 'none'; // Remove top border to connect with button
+      statusDropdown.style.marginTop = '-75px'; // No gap between button and dropdown
+      statusDropdown.style.width = '220px';
+
+      // Apply styles to dropdown options
+      const dropdownOptionElements = statusDropdown.querySelectorAll('.dropdown-option');
+      dropdownOptionElements.forEach(option => {
+        option.style.padding = '8px 16px';
+        option.style.cursor = 'pointer';
+        option.style.display = 'flex';
+        option.style.alignItems = 'center';
+        option.style.gap = '10px';
+        option.style.transition = 'background-color 0.2s';
+        option.style.color = '#333';
+        option.style.fontWeight = '600';
+        option.style.borderRadius = '16px';
+        option.style.height = '35px';
+
+        // Add hover effect
+        option.addEventListener('mouseenter', () => {
+          option.style.backgroundColor = 'var(--accent-color)';
+          option.style.color = '#fff';
+          option.querySelector('i').style.color = '#fff !important';
+        });
+        option.addEventListener('mouseleave', () => {
+          option.style.backgroundColor = '';
+          option.style.color = '#333';
+          option.querySelector('i').style.color = 'var(--accent-color)';
+        });
+      });
+
+      // Toggle dropdown on button click
+      statusButton.addEventListener('click', (e) => {
+        if (statusDropdown.style.display === 'none') {
+          // Position the dropdown directly beneath the button
+          const buttonRect = statusButton.getBoundingClientRect();
+          const windowRect = windowElement.getBoundingClientRect();
+          const orderStatusContainer = windowElement.querySelector('.order-status-container');
+
+          // Calculate position relative to the window
+          statusDropdown.style.top = (buttonRect.bottom - windowRect.top) + 'px';
+
+          // Ensure dropdown is aligned with the button's container instead of the button itself
+          if (orderStatusContainer) {
+            const containerRect = orderStatusContainer.getBoundingClientRect();
+            statusDropdown.style.right = (windowRect.right - containerRect.right) + 'px';
+            statusDropdown.style.left = 'auto';
+          } else {
+            // Fallback if container not found
+            statusDropdown.style.right = (windowRect.right - buttonRect.right) + 'px';
+            statusDropdown.style.left = 'auto';
+          }
+
+          // Setup animation starting state
+          statusDropdown.style.opacity = '0';
+          statusDropdown.style.display = 'block';
+
+          // Force reflow to ensure animation works
+          statusDropdown.offsetHeight;
+
+          // Add animation
+          statusDropdown.style.transition = 'opacity 0.2s ease-out, transform 0.2s ease-out';
+          statusDropdown.style.opacity = '1';
+          statusDropdown.classList.add('dropdown-anim-in');
+        } else {
+          // Animate out
+          statusDropdown.style.opacity = '0';
+
+          // Hide after animation completes
+          setTimeout(() => {
+            statusDropdown.style.display = 'none';
+            statusDropdown.style.transform = '';
+          }, 200);
+        }
+        e.stopPropagation();
+      });
+
+      // Close dropdown when clicking elsewhere
+      document.addEventListener('click', (e) => {
+        if (statusDropdown.style.display === 'block' && !statusDropdown.contains(e.target) && e.target !== statusButton) {
+          // Animate out
+          statusDropdown.style.opacity = '0';
+
+          // Hide after animation completes
+          setTimeout(() => {
+            statusDropdown.style.display = 'none';
+            statusDropdown.style.transform = '';
+          }, 200);
+        }
+      });
+
+      // Handle status option selection
+      const dropdownOptions = statusDropdown.querySelectorAll('.dropdown-option');
+      dropdownOptions.forEach(option => {
+        option.addEventListener('click', () => {
+          const newStatus = option.getAttribute('data-status');
+          const oldStatus = order.status;
+
+          if (newStatus !== oldStatus) {
+            // Show confirmation dialog
+            const alertDialog = document.createElement('div');
+            alertDialog.className = 'alert-dialog desktop-alert-dialog';
+            alertDialog.innerHTML = `
+            
+              <div class="alert-dialog-container">
+                        <div class="alert-icon"><i class="fas fa-repeat"></i></div>
+
+                <div class="alert-dialog-header">
+                  <div class="alert-title">Change status to ${newStatus}</div>
+                </div>
+                <div class="alert-dialog-content">
+                  <div class="alert-message">Are you sure you want to change order status to ${newStatus}?</div>
+                  <div class="alert-dialog-options">
+                    <label class="alert-dialog-checkbox">
+                      <input type="checkbox" id="send-email-checkbox"> Send email to customer
+                    </label>
+                    <label class="alert-dialog-checkbox">
+                      <input type="checkbox" id="remember-answer-checkbox"> Remember answer and don't ask me again
+                    </label>
+                  </div>
+                </div>
+                <div class="alert-actions">
+                  <button class="alert-btn alert-cancel desktop-alert-cancel">Cancel</button>
+                  <button class="alert-btn alert-ok desktop-alert-ok">Confirm</button>
+                </div>
+              </div>
+            `;
+
+            // Add overlay for center positioning
+            const overlay = document.createElement('div');
+            overlay.className = 'desktop-alert-overlay';
+            overlay.style.position = 'fixed';
+            overlay.style.top = '0';
+            overlay.style.left = '0';
+            overlay.style.right = '0';
+            overlay.style.bottom = '0';
+            overlay.style.display = 'flex';
+            overlay.style.alignItems = 'center';
+            overlay.style.justifyContent = 'center';
+            overlay.style.zIndex = '9999';
+            overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+
+            // Ensure the dialog itself maintains its original styling
+            alertDialog.style.position = 'relative';
+            alertDialog.style.margin = 'auto';
+
+            // Place the dialog inside the overlay
+            document.body.appendChild(overlay);
+            overlay.appendChild(alertDialog);
+
+            // Animation
+            overlay.style.opacity = '0';
+            alertDialog.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+              overlay.style.opacity = '1';
+              alertDialog.style.transform = 'scale(1)';
+            }, 10);
+
+            // Handle close button
+            const closeButton = alertDialog.querySelector('.alert-dialog-close');
+            if (closeButton) {
+              closeButton.addEventListener('click', () => {
+                overlay.style.opacity = '0';
+                alertDialog.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                  overlay.remove();
+                }, 300);
+              });
+            }
+
+            // Handle cancel button
+            const cancelButton = alertDialog.querySelector('.alert-dialog-cancel');
+            if (cancelButton) {
+              cancelButton.addEventListener('click', () => {
+                overlay.style.opacity = '0';
+                alertDialog.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                  overlay.remove();
+                }, 300);
+              });
+            }
+
+            // Handle confirm button
+            const confirmButton = alertDialog.querySelector('.alert-dialog-confirm');
+            if (confirmButton) {
+              confirmButton.addEventListener('click', () => {
+                // Get checkbox values
+                const sendEmail = alertDialog.querySelector('#send-email-checkbox').checked;
+                const rememberAnswer = alertDialog.querySelector('#remember-answer-checkbox').checked;
+
+                // Update order status
+                order.status = newStatus;
+
+                // Update badge in the button
+                const statusBadge = statusButton.querySelector('.order-status-badge');
+                if (statusBadge) {
+                  statusBadge.className = `order-status-badge status-${newStatus.toLowerCase().replace(/\s+/g, '-')}`;
+                  statusBadge.innerHTML = `${getStatusIcon(newStatus)} <span>${newStatus}</span>`;
+                }
+
+                // Update orders list
+                renderOrdersList(order.id);
+
+                // If sendEmail is checked, we would typically send an email here
+                // This is just a placeholder
+                if (sendEmail) {
+                  console.log(`Would send email to ${order.email} about status change to ${newStatus}`);
+                }
+
+                // If rememberAnswer is checked, we would store this preference
+                // This is just a placeholder
+                if (rememberAnswer) {
+                  // In a real implementation, this would store the preference
+                  console.log(`Remember not to ask again for status changes to ${newStatus}`);
+                  // For demo purposes, we could store this in localStorage
+                  localStorage.setItem('dontAskStatusChange', 'true');
+                }
+
+                // Close dialog
+                overlay.style.opacity = '0';
+                alertDialog.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                  overlay.remove();
+                }, 300);
+
+                // Add ripple effect to selected option
+                const ripple = document.createElement('span');
+                ripple.classList.add('ripple');
+                option.appendChild(ripple);
+                setTimeout(() => {
+                  ripple.remove();
+                }, 600);
+
+                // Close the dropdown with animation
+                statusDropdown.style.opacity = '0';
+                statusDropdown.style.transform = 'translateY(-10px)';
+
+                // Hide after animation completes
+                setTimeout(() => {
+                  statusDropdown.style.display = 'none';
+                  statusDropdown.style.transform = '';
+                }, 200);
+              });
+            }
+          } else {
+            // If status hasn't changed, just close the dropdown
+            statusDropdown.style.opacity = '0';
+            statusDropdown.style.transform = 'translateY(-10px)';
+
+            // Hide after animation completes
+            setTimeout(() => {
+              statusDropdown.style.display = 'none';
+              statusDropdown.style.transform = '';
+            }, 200);
+          }
+        });
+      });
+    }
+
+    // Setup edit button
+    const editButton = windowElement.querySelector('.orders-edit-button');
+    if (editButton) {
+      editButton.addEventListener('click', () => {
+        showEditOrdersForm(order, windowElement);
+      });
+    }
+
+    // Setup delete button
+    const deleteButton = windowElement.querySelector('.orders-delete-button');
+    if (deleteButton) {
+      deleteButton.addEventListener('click', () => {
+        // Show confirmation dialog
+        const confirmMessage = `Are you sure you want to delete order ${order.orderNumber}?`;
+        if (confirm(confirmMessage)) {
+          // Remove order from data
+          const index = orders.findIndex(o => o.id === order.id);
+          if (index !== -1) {
+            orders.splice(index, 1);
+
+            // Rebuild grouped orders
+            const groupedOrders = orders.reduce((acc, order) => {
+              if (!acc[order.letter]) acc[order.letter] = [];
+              acc[order.letter].push(order);
+              return acc;
+            }, {});
+
+            // Render updated list and clear content area
+            renderOrdersList();
+            if (ordersContent) {
+              ordersContent.innerHTML = '<div class="no-order-selected">No order selected</div>';
+            }
+            // Hide the content section
+            if (ordersContentSection) {
+              ordersContentSection.style.visibility = 'hidden';
+              ordersContentSection.style.display = 'none';
+            }
+          }
+        }
+      });
+    }
+
+    // Setup more options button
+    const moreButton = windowElement.querySelector('.orders-more-button');
+    if (moreButton) {
+      moreButton.addEventListener('click', (e) => {
+        showOrdersMoreOptions(e.target, order);
+      });
+    }
+  }
+
+  function getOrdersContentHTML(order) {
+    return `
+            <!-- Order content based on the image -->
+            <div class="orders-content-wrapper">
+              <div class="order-header">
+
+                <div class="order-id-and-time">
+                                <div class="order-id">Order #CMD2574 details</div>
+                                <div class="order-created-and-modified">
+                <div class="order-created">Created: 17 April 2025 23:36:56</div>
+                <div class="order-modified">Last edit: 24 April 2025 23:36:56</div>
+                </div>
+                </div>
+                                              <div class="order-status-container">
+                    <div class="order-status-text">Order status</div>
+                    <div class="order-status-button"> 
+                      <div class="order-status-badge status-${order.status.toLowerCase().replace(/\s+/g, '-')}">
+                        ${getStatusIcon(order.status)} 
+                        <span>${order.status}</span> 
+                      </div>
+                      <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="order-status-dropdown">
+
+                      <div class="dropdown-option status-pending" data-status="Pending">
+                        ${getStatusIcon('Pending')} <span>Pending</span>
+                      </div>
+                      <div class="dropdown-option status-pending-payment" data-status="Pending Payment">
+                        ${getStatusIcon('Pending Payment')} <span>Pending Payment</span>
+                      </div>
+                      <div class="dropdown-option status-processing" data-status="Processing">
+                        ${getStatusIcon('Processing')} <span>Processing</span>
+                      </div>
+                      <div class="dropdown-option status-on-hold" data-status="On Hold">
+                        ${getStatusIcon('On Hold')} <span>On Hold</span>
+                      </div>
+                      <div class="dropdown-option status-cancelled" data-status="Cancelled">
+                        ${getStatusIcon('Cancelled')} <span>Cancelled</span>
+                      </div>
+                      <div class="dropdown-option status-refunded" data-status="Refunded">
+                        ${getStatusIcon('Refunded')} <span>Refunded</span>
+                      </div>
+                                            <div class="dropdown-option status-completed" data-status="Completed">
+                        ${getStatusIcon('Completed')} <span>Completed</span>
+                      </div>
+                    </div>
+                  </div>
+
+
+              </div>
+              <div class="detail-section customer-info-with-invoice">
+
+                    <div class="customer-info ">
+                      <div class="customer-avatar">
+                        <img src="img//avatar.png" alt="Customer Avatar">
+                      </div>
+                         <div class="customer-details-first-last-name">
+        <div class="customer-details">
+                      
+            <h3>First name</h3>
+            <div class="customer-name">${order.firstName}
+			</div>
+        </div>
+        <div class="customer-details">
+            <h3>Last Name</h3>
+            <div class="customer-name">${order.lastName}
+			</div>
+        </div>
+		</div>
+                    </div>
+
+                         <div class="customer-invoice">
+                <div class="invoice-icon"><i class="fas fa-file-invoice"></i></div>
+                <div class="invoice-text-wrapper">
+                  <div class="invoice-text-title">Invoice</div>
+                  <div class="invoice-text">INOICE #234423232.</div>
+                </div>
+              </div>
+
+                  </div>
+
+
+
+              <div class="order-details-container">
+              
+                <div class="order-customer-details">
+                  
+                  
+                  <div class="detail-section">
+                                      <div class="detail-section-header">
+                  <i class="fas fa-envelope"></i>
+                    <h3>Email Address</h3></div>
+                    <div class="detail-value email-address">justmearg@yahoo.com</div>
+                  </div>
+                  
+                  <div class="detail-section">
+                                      <div class="detail-section-header">
+                  <i class="fas fa-phone"></i>
+                    <h3>Phone number</h3></div>
+                    <div class="detail-value">0732 743 284 <i class="fab fa-whatsapp"></i></div>
+                  </div>
+                  
+                  <div class="detail-section">
+                                      <div class="detail-section-header">
+                  <i class="fas fa-calendar-alt"></i>
+                    <h3>Registered</h3></div>
+                    <div class="detail-value">2 weeks ago</div>
+                  </div>
+
+                  <div class="detail-section">
+                                      <div class="detail-section-header">
+                  <i class="fas fa-shopping-cart"></i>
+                    <h3>Total orders</h3></div>
+                    <div class="detail-value">10 orders - $ 2,545.76</div>
+                  </div>
+
+                </div>
+
+                <div class="order-payment-details">
+                  <div class="detail-section">
+                                      <div class="detail-section-header">
+                  <i class="fas fa-credit-card"></i>
+                    <h3>Payment</h3></div>
+                    <div class="detail-value">Credit Card</div>
+                  </div>
+                  
+                  <div class="detail-section">
+                                      <div class="detail-section-header">
+                  <i class="fas fa-globe"></i>
+                    <h3>IP Address</h3></div>
+                    <div class="detail-value">5.14.184.112</div>
+                  </div>
+                  
+                  <div class="detail-section">
+                                      <div class="detail-section-header">
+                  <i class="fas fa-store"></i>
+                    <h3>Channel</h3></div>
+                    <div class="detail-value">Website / eMag etc</div>
+                  </div>
+
+                  <div class="detail-section">
+                                      <div class="detail-section-header">
+                  <i class="fas fa-building"></i>
+                    <h3>Billing</h3></div>
+                    <div class="detail-value">Company</div>
+                  </div>
+                </div>
+                
+                <div class="order-billing-details">
+                  <div class="detail-section">
+                                                          <div class="detail-section-header">
+                  <i class="fas fa-address-card"></i>
+                    <h3>Billing Address</h3></div> 
+                    <div class="detail-value">Fresh Media SRL</div>
+                    <div class="detail-value">+40 721 182 557</div>
+                    <div class="detail-value">VAT: RO43425589</div>
+                    <div class="detail-value">J13/232/2023</div>
+                    <div class="detail-value">Aleea Stefan cel Mare</div>
+                    <div class="detail-value">Bloc M25, parter</div>
+                    <div class="detail-value-with-flag"><span class="flag-icon flag-ro"></span> Romania</div>
+                    <div class="detail-value">Constanta</div>
+                    <div class="detail-value">Constanta, 400202</div>
+                  </div>
+                </div>
+                
+                <div class="order-shipping-details">
+                  <div class="detail-section">
+                                      <div class="detail-section-header">
+                  <i class="fas fa-truck"></i>
+                    <h3>Delivery Address<i class="fas fa-pen"></i></h3></div> 
+                    <div class="detail-value">Argenti Radu</div>
+                    <div class="detail-value">+40 721 182 557</div>
+                    <div class="detail-value">Aleea Aman Theodor, B1</div>
+                    <div class="detail-value">Bloc M25, parter</div>
+                    <div class="detail-value-with-flag"><span class="flag-icon flag-ro"></span> Romania</div>
+                    <div class="detail-value">Cluj-Napoca</div>
+                    <div class="detail-value">Cluj, 400202</div>
+                    <div class="map-link"><a href="#">View on map <i class="fas fa-chevron-right"></i></a></div>
+                  </div>
+                </div>
+                
+                
+              </div>
+              
+              <div class="customer-note">
+                <div class="note-icon"><i class="fas fa-info-circle"></i></div>
+                <div class="note-text-wrapper">
+                  <div class="note-text-title">Customer Note</div>
+                  <div class="note-text">Va rog frumos sa luati in considerare aceasta nota a clientului prin care adauga acest text ca exemplu.</div>
+                </div>
+              </div>
+              
+              <div class="order-items">
+                <table class="order-items-table">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>SKU</th>
+                      <th>Name</th>
+                      <th>Price</th>
+                      <th>Qty</th>
+                      <th>Disc.</th>
+                      <th>Total</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>
+                        <div class="product-image">
+                          <img src="img/appsimg/router.png" alt="Router">
+                        </div>
+                      </td>
+                      <td>382934</td>
+                      <td>NETGEAR R6700 Nighthawk AC1750 Dual Band</td>
+                      <td>$99.00</td>
+                      <td>× 1</td>
+                      <td>5%</td>
+                      <td>$88.80</td>
+                      <td><button class="item-options-btn"><i class="fas fa-ellipsis-h"></i></button></td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div class="product-image">
+                          <img src="img/appsimg/camera.png" alt="Camera">
+                        </div>
+                      </td>
+                      <td>382955</td>
+                      <td>Arlo Technologies NETGEAR Baby Monitor</td>
+                      <td>$19.00</td>
+                      <td>× 2</td>
+                      <td>—</td>
+                      <td>$38.00</td>
+                      <td><button class="item-options-btn"><i class="fas fa-ellipsis-h"></i></button></td>
+                    </tr>
+                  </tbody>
+                </table>
+                
+                <div class="order-totals">
+                  <div class="total-row">
+                    <div class="total-label">Subtotal</div>
+                    <div class="total-value">$132.00</div>
+                  </div>
+                  <div class="total-row">
+                    <div class="total-label">Shipping</div>
+                    <div class="total-value">$2.00</div>
+                  </div>
+                  <div class="total-row">
+                    <div class="total-label">Discount</div>
+                    <div class="total-value">$11.00</div>
+                  </div>
+                  <div class="total-row final-total">
+                    <div class="total-label">Total</div>
+                    <div class="total-value">$134.00</div>
+                  </div>
+                </div>
+              </div>
+
+
+                            <div class="generate-invoice">
+                            <div class="invoice-header">
+                <div class="invoice-icon"><i class="fas fa-file-invoice"></i></div>
+                <div class="invoice-text-wrapper">
+                  <div class="invoice-text-title">Generate Invoice</div>
+                  <div class="invoice-text">Va rog frumos sa luati in considerare aceasta nota a clientului prin care adauga acest text ca exemplu.</div>
+                </div>
+                </div>
+                <div class="invoice-button">
+                  <button class="invoice-button-text">Generate Invoice</button>
+                </div>
+              </div>
+
+
+                         <div class="generate-shipping">
+                            <div class="shipping-header">
+                <div class="shipping-icon"><i class="fas fa-shipping-fast"></i></div>
+                <div class="shipping-text-wrapper">
+                  <div class="shipping-text-title">Generate Shipping Label</div>
+                  <div class="shipping-text">Va rog frumos sa luati in considerare aceasta nota a clientului prin care adauga acest text ca exemplu.</div>
+                </div>
+                </div>
+                <div class="shipping-button">
+                  <button class="invoice-button-text">Generate Shipping</button>
+                </div>
+              </div>
+
+
+            </div>
+
+
+            
+    `;
+  }
+
+  function showOrdersMoreOptions(targetElement, order) {
+    // Create more options panel
+    const morePanel = document.createElement('div');
+    morePanel.className = 'orders-more-panel';
+    morePanel.innerHTML = `
+      <div class="more-panel-header">
+        <div class="more-panel-title">Order Options</div>
+        <button class="more-panel-close"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="more-panel-content">
+        <button class="more-panel-option ${order.favorite ? 'active' : ''}" data-action="favorite">
+          <i class="fas fa-star"></i> ${order.favorite ? 'Remove from Favorites' : 'Add to Favorites'}
+        </button>
+        <button class="more-panel-option" data-action="print">
+          <i class="fas fa-print"></i> Print Order
+        </button>
+        <button class="more-panel-option" data-action="export">
+          <i class="fas fa-file-export"></i> Export Order
+        </button>
+        <button class="more-panel-option" data-action="duplicate">
+          <i class="fas fa-copy"></i> Duplicate Order
+        </button>
+      </div>
+    `;
+
+    // Position the panel
+    const rect = targetElement.getBoundingClientRect();
+    morePanel.style.position = 'absolute';
+    morePanel.style.top = `${rect.bottom + window.scrollY + 5}px`;
+    morePanel.style.right = `${window.innerWidth - rect.right - window.scrollX}px`;
+    document.body.appendChild(morePanel);
+
+    // Animation
+    morePanel.style.opacity = '0';
+    morePanel.style.transform = 'scale(0.95)';
+    morePanel.classList.add('more-panel-anim-in');
+
+    // Handle close button
+    const closeButton = morePanel.querySelector('.more-panel-close');
+    if (closeButton) {
+      closeButton.addEventListener('click', function hideMorePanel(ev) {
+        morePanel.classList.remove('more-panel-anim-in');
+        morePanel.classList.add('more-panel-anim-out');
+
+        morePanel.addEventListener('animationend', function handler() {
+          morePanel.removeEventListener('animationend', handler);
+          morePanel.remove();
+        });
+      });
+    }
+
+    // Handle click outside
+    const handleOutsideClick = (e) => {
+      if (!morePanel.contains(e.target) && e.target !== targetElement) {
+        morePanel.classList.remove('more-panel-anim-in');
+        morePanel.classList.add('more-panel-anim-out');
+
+        morePanel.addEventListener('animationend', function handler() {
+          morePanel.removeEventListener('animationend', handler);
+          morePanel.remove();
+          document.removeEventListener('click', handleOutsideClick, true);
+        });
+      }
+    };
+
+    // Delay adding the click handler to prevent immediate closing
+    setTimeout(() => {
+      document.addEventListener('click', handleOutsideClick, true);
+    }, 100);
+
+    // Handle options
+    const options = morePanel.querySelectorAll('.more-panel-option');
+    options.forEach(option => {
+      option.addEventListener('click', () => {
+        const action = option.getAttribute('data-action');
+
+        if (action === 'favorite') {
+          // Toggle favorite status
+          order.favorite = !order.favorite;
+          renderOrdersList(order.id);
+          renderOrdersContent(order);
+
+          // Close panel
+          morePanel.classList.remove('more-panel-anim-in');
+          morePanel.classList.add('more-panel-anim-out');
+          morePanel.addEventListener('animationend', function handler() {
+            morePanel.removeEventListener('animationend', handler);
+            morePanel.remove();
+            document.removeEventListener('click', handleOutsideClick, true);
+          });
+        } else {
+          // For other actions, just show a notification
+          alert(`Action: ${action} - This feature is not implemented in the demo`);
+        }
+      });
+    });
+  }
+
+  function getAddOrdersFormHTML() {
+    return `
+      <div class="add-orders-form">
+        <div class="form-header">
+          <h3>Add New Order</h3>
+          <button class="form-close"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="form-body">
+          <div class="form-group">
+            <label for="order-number">Order Number</label>
+            <input type="text" id="order-number" placeholder="Order Number" value="ORD-${Math.floor(10000 + Math.random() * 90000)}">
+          </div>
+          <div class="form-group">
+            <label for="customer-name">Customer Name</label>
+            <input type="text" id="customer-name" placeholder="Customer Name">
+          </div>
+          <div class="form-group">
+            <label for="order-email">Email</label>
+            <input type="email" id="order-email" placeholder="Email Address">
+          </div>
+          <div class="form-group">
+            <label for="order-phone">Phone</label>
+            <input type="tel" id="order-phone" placeholder="Phone Number">
+          </div>
+          <div class="form-group">
+            <label for="order-status">Status</label>
+            <select id="order-status">
+              <option value="Pending">Pending</option>
+              <option value="Processing">Processing</option>
+              <option value="Shipped">Shipped</option>
+              <option value="Completed">Completed</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="order-total">Total Amount</label>
+            <input type="text" id="order-total" placeholder="Total Amount">
+          </div>
+          <div class="form-group">
+            <label for="order-items">Items Count</label>
+            <input type="number" id="order-items" placeholder="Number of Items">
+          </div>
+          <div class="form-group">
+            <label for="order-notes">Notes</label>
+            <textarea id="order-notes" placeholder="Additional Notes"></textarea>
+          </div>
+        </div>
+        <div class="form-footer">
+          <button class="cancel-button">Cancel</button>
+          <button class="save-button">Save Order</button>
+        </div>
+      </div>
+    `;
+  }
+
+  function showEditOrdersForm(order, parentElement) {
+    const formContainer = document.createElement('div');
+    formContainer.className = 'add-orders-overlay';
+    formContainer.innerHTML = `
+      <div class="add-orders-form">
+        <div class="form-header">
+          <h3>Edit Order</h3>
+          <button class="form-close"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="form-body">
+          <div class="form-group">
+            <label for="edit-order-number">Order Number</label>
+            <input type="text" id="edit-order-number" value="${order.orderNumber}">
+          </div>
+          <div class="form-group">
+            <label for="edit-customer-name">Customer Name</label>
+            <input type="text" id="edit-customer-name" value="${order.customerName}">
+          </div>
+          <div class="form-group">
+            <label for="edit-order-email">Email</label>
+            <input type="email" id="edit-order-email" value="${order.email}">
+          </div>
+          <div class="form-group">
+            <label for="edit-order-phone">Phone</label>
+            <input type="tel" id="edit-order-phone" value="${order.phone}">
+          </div>
+          <div class="form-group">
+            <label for="edit-order-status">Status</label>
+            <select id="edit-order-status">
+              <option value="Pending" ${order.status === 'Pending' ? 'selected' : ''}>Pending</option>
+              <option value="Processing" ${order.status === 'Processing' ? 'selected' : ''}>Processing</option>
+              <option value="Shipped" ${order.status === 'Shipped' ? 'selected' : ''}>Shipped</option>
+              <option value="Completed" ${order.status === 'Completed' ? 'selected' : ''}>Completed</option>
+              <option value="Cancelled" ${order.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="edit-order-total">Total Amount</label>
+            <input type="text" id="edit-order-total" value="${order.totalAmount}">
+          </div>
+          <div class="form-group">
+            <label for="edit-order-items">Items Count</label>
+            <input type="number" id="edit-order-items" value="${order.itemsCount}">
+          </div>
+          <div class="form-group">
+            <label for="edit-order-notes">Notes</label>
+            <textarea id="edit-order-notes">${order.notes || ''}</textarea>
+          </div>
+        </div>
+        <div class="form-footer">
+          <button class="cancel-button">Cancel</button>
+          <button class="save-button">Save Changes</button>
+        </div>
+      </div>
+    `;
+
+    parentElement.appendChild(formContainer);
+
+    // Animation
+    formContainer.style.opacity = '0';
+    setTimeout(() => {
+      formContainer.style.opacity = '1';
+    }, 10);
+
+    // Handle close button
+    const closeButton = formContainer.querySelector('.form-close');
+    if (closeButton) {
+      closeButton.addEventListener('click', function hidePanel(ev) {
+        formContainer.style.opacity = '0';
+        setTimeout(() => {
+          formContainer.remove();
+        }, 300);
+      });
+    }
+
+    // Handle cancel button
+    const cancelButton = formContainer.querySelector('.cancel-button');
+    if (cancelButton) {
+      cancelButton.addEventListener('click', () => {
+        formContainer.style.opacity = '0';
+        setTimeout(() => {
+          formContainer.remove();
+        }, 300);
+      });
+    }
+
+    // Handle save button
+    const saveButton = formContainer.querySelector('.save-button');
+    if (saveButton) {
+      saveButton.addEventListener('click', () => {
+        // Update order with form values
+        order.orderNumber = formContainer.querySelector('#edit-order-number').value;
+        order.customerName = formContainer.querySelector('#edit-customer-name').value;
+        order.email = formContainer.querySelector('#edit-order-email').value;
+        order.phone = formContainer.querySelector('#edit-order-phone').value;
+        order.status = formContainer.querySelector('#edit-order-status').value;
+        order.totalAmount = formContainer.querySelector('#edit-order-total').value;
+        order.itemsCount = formContainer.querySelector('#edit-order-items').value;
+        order.notes = formContainer.querySelector('#edit-order-notes').value;
+
+        // Update first letter if customer name changed
+        const firstName = order.customerName.split(' ')[0];
+        const firstLetter = firstName.charAt(0).toUpperCase();
+        if (order.letter !== firstLetter) {
+          order.letter = firstLetter;
+
+          // Rebuild grouped orders
+          const groupedOrders = orders.reduce((acc, order) => {
+            if (!acc[order.letter]) acc[order.letter] = [];
+            acc[order.letter].push(order);
+            return acc;
+          }, {});
+        }
+
+        // Update UI
+        renderOrdersList(order.id);
+        renderOrdersContent(order);
+
+        // Close form
+        formContainer.style.opacity = '0';
+        setTimeout(() => {
+          formContainer.remove();
+        }, 300);
+      });
+    }
+  }
+
+  function isMobileOrdersApp() {
+    return window.innerWidth <= 767 && windowElement.querySelector('.orders-selected-mode');
+  }
+
+  function showOrdersContentPanel() {
+    if (isMobileOrdersApp() && windowMainContent) {
+      // Force a reflow before adding the class to ensure smooth transition
+      windowMainContent.offsetHeight;
+
+      // Add animation class FIRST
+      windowMainContent.classList.add('animate-content-transition');
+
+      // Make sure content is visible before transition starts
+      const contentSection = windowMainContent.querySelector('.orders-content-section');
+      if (contentSection) {
+        contentSection.style.zIndex = '2';
+        contentSection.style.visibility = 'visible';
+      }
+
+      // Then add the class that triggers transform
+      windowMainContent.classList.add('show-orders-content');
+
+      // Remove animation class after transition completes
+      setTimeout(() => {
+        windowMainContent.classList.remove('animate-content-transition');
+      }, 350);
+    }
+  }
+
+  function updateOrdersListToolbar(selectedId) {
+    const tableHeader = windowElement.querySelector('.orders-list-table-header');
+    const searchSort = windowElement.querySelector('.orders-list-toolbar-searchsort1');
+    if (!isMobileOrdersApp()) {
+      if (typeof selectedId === 'undefined' || selectedId === null) {
+        // No order selected: show table header, hide search/sort
+        if (tableHeader) tableHeader.style.display = '';
+        if (searchSort) searchSort.style.display = 'none';
+      } else {
+        // Order selected: show search/sort, hide table header
+        if (tableHeader) tableHeader.style.display = 'none';
+        if (searchSort) searchSort.style.display = '';
+      }
+    } else {
+      // On mobile, always show search/sort, hide table header
+      if (tableHeader) tableHeader.style.display = 'none';
+      if (searchSort) searchSort.style.display = '';
+    }
+  }
+
+  // Patch renderOrdersList to handle mobile view properly
+  const origRenderOrdersList = renderOrdersList;
+  renderOrdersList = function (selectedId) {
+    updateOrdersListToolbar(selectedId);
+    origRenderOrdersList(selectedId);
+    const selectedOrder = orders.find(o => o.id === selectedId);
+
+    if (isMobileOrdersApp() && typeof selectedId === 'number' && selectedOrder) {
+      // Render content first, then show panel
+      renderOrdersContent(selectedOrder);
+      // Use requestAnimationFrame to ensure content is rendered before transition
+      requestAnimationFrame(() => {
+        showOrdersContentPanel();
+      });
+    } else if (selectedOrder) {
+      // On desktop, just render content
+      renderOrdersContent(selectedOrder);
+    }
+  };
+
+  // On resize, update layout
+  window.addEventListener('resize', function () {
+    if (!isMobileOrdersApp() && windowMainContent) {
+      windowMainContent.classList.remove('show-orders-content');
+      // Reset layout when switching from mobile to desktop
+      if (ordersContentSection && ordersContent && ordersContent.querySelector('.orders-content-wrapper')) {
+        // If an order is already selected
+        ordersContentSection.style.visibility = 'visible';
+        ordersContentSection.style.display = '';
+        if (ordersListSection) ordersListSection.style.width = '320px';
+      } else {
+        // If no order is selected
+        initializeOrdersAppLayout();
+      }
+    }
+  });
+
+  // Add mobile back button to toolbar if it doesn't exist
+  const ordersToolbar = windowElement.querySelector('.orders-content-section .window-toolbar');
+  if (ordersToolbar && !ordersToolbar.querySelector('.orders-back-button')) {
+    const backButton = document.createElement('button');
+    backButton.className = 'toolbar-button orders-back-button';
+    backButton.title = 'Back';
+    backButton.innerHTML = '<i class="fas fa-arrow-left"></i><span>Back</span>';
+    backButton.addEventListener('click', () => {
+      showOrdersListPanel();
+    });
+
+    // Insert at the beginning of the toolbar
+    const toolbarLeft = ordersToolbar.querySelector('.toolbar-buttons-left');
+    if (toolbarLeft) {
+      toolbarLeft.insertBefore(backButton, toolbarLeft.firstChild);
+    }
+  }
+
+  function showOrdersListPanel() {
+    if (isMobileOrdersApp() && windowMainContent) {
+      // Force a reflow before removing the class to ensure smooth transition
+      windowMainContent.offsetHeight;
+
+      // Add animation class FIRST
+      windowMainContent.classList.add('animate-content-transition');
+
+      // Then remove the class that controls transform
+      windowMainContent.classList.remove('show-orders-content');
+
+      // Remove animation class after transition completes
+      setTimeout(() => {
+        windowMainContent.classList.remove('animate-content-transition');
+      }, 350);
+
+      // Reset z-index after animation completes
+      const contentSection = windowMainContent.querySelector('.orders-content-section');
+      if (contentSection) {
+        setTimeout(() => {
+          if (!windowMainContent.classList.contains('show-orders-content')) {
+            contentSection.style.zIndex = '';
+            contentSection.style.visibility = '';
+          }
+        }, 350);
+      }
+    } else if (!isMobileOrdersApp()) {
+      // On desktop, reset the layout
+      if (ordersContentSection) {
+        ordersContentSection.style.visibility = 'hidden';
+        ordersContentSection.style.display = 'none';
+      }
+
+      if (ordersListSection) {
+        ordersListSection.style.width = '100%';
+        ordersListSection.classList.add('table-mode');
+        ordersListSection.classList.remove('orders-selected-mode');
+      }
+
+      // Show table header
+      const tableHeader = windowElement.querySelector('.orders-list-table-header');
+      if (tableHeader) {
+        tableHeader.style.display = '';
+      }
+
+      // Render the orders list without a selected order
+      renderOrdersList();
+    }
+  }
+
+  // Initial render
+  renderOrdersList();
+  initializeOrdersAppLayout();
+
+  // Setup back button for mobile view
+  const existingBackButton = windowElement.querySelector('.orders-back-button');
+  if (existingBackButton) {
+    existingBackButton.addEventListener('click', () => {
+      showOrdersListPanel();
+    });
+  }
+
+
+  // Setup compose button to add new order
+  const composeBtn = windowElement.querySelector('.compose-btn');
+  if (composeBtn) {
+    composeBtn.addEventListener('click', () => {
+      // Generate a unique window ID for each add order window
+      let addOrderWindowCount = 1;
+      while (openWindows[`add-order-window-${addOrderWindowCount}`]) {
+        addOrderWindowCount++;
+      }
+      const windowId = `add-order-window-${addOrderWindowCount}`;
+
+      // Create the window from template
+      const addOrderWindow = createWindowFromTemplate('add-order-window', windowId, false);
+      if (!addOrderWindow) return;
+      
+      // Add simple opening animation
+      addOrderWindow.classList.add('window-anim-open');
+
+      // Inject the add order form HTML
+      const content = addOrderWindow.querySelector('.add-order-window-content');
+      if (content) {
+        content.innerHTML = getAddOrdersFormHTML();
+
+        // Handle close button
+        const closeButton = content.querySelector('.form-close');
+        if (closeButton) {
+          closeButton.addEventListener('click', () => {
+            // Use standard window close animation
+            const standardCloseBtn = addOrderWindow.querySelector('.window-close');
+            if (standardCloseBtn) {
+              standardCloseBtn.click();
+            } else {
+              // Fallback: manual close with animation
+              addOrderWindow.classList.remove('window-anim-open', 'window-anim-maximize', 'window-anim-close');
+              addOrderWindow.classList.add('window-anim-close');
+              addOrderWindow.addEventListener('animationend', function handler(ev) {
+                if (ev.animationName === 'windowClose') {
+                  if (addOrderWindow.parentNode) addOrderWindow.parentNode.removeChild(addOrderWindow);
+                  if (openWindows[windowId]) delete openWindows[windowId];
+                }
+              }, { once: true });
+            }
+          });
+        }
+
+        // Handle cancel button
+        const cancelButton = content.querySelector('.cancel-button');
+        if (cancelButton) {
+          cancelButton.addEventListener('click', () => {
+            // Use standard window close animation
+            const standardCloseBtn = addOrderWindow.querySelector('.window-close');
+            if (standardCloseBtn) {
+              standardCloseBtn.click();
+            } else {
+              // Fallback: manual close with animation
+              addOrderWindow.classList.remove('window-anim-open', 'window-anim-maximize', 'window-anim-close');
+              addOrderWindow.classList.add('window-anim-close');
+              addOrderWindow.addEventListener('animationend', function handler(ev) {
+                if (ev.animationName === 'windowClose') {
+                                     if (addOrderWindow.parentNode) addOrderWindow.parentNode.removeChild(addOrderWindow);
+                  if (openWindows[windowId]) delete openWindows[windowId];
+                }
+              }, { once: true });
+            }
+          });
+        }
+
+        // Handle save button
+        const saveButton = content.querySelector('.save-button');
+        if (saveButton) {
+          saveButton.addEventListener('click', () => {
+            // Get form values
+            const orderNumber = content.querySelector('#order-number').value;
+            const customerName = content.querySelector('#customer-name').value;
+            const email = content.querySelector('#order-email').value;
+            const phone = content.querySelector('#order-phone').value;
+            const status = content.querySelector('#order-status').value;
+            const totalAmount = content.querySelector('#order-total').value;
+            const itemsCount = content.querySelector('#order-items').value;
+            const notes = content.querySelector('#order-notes').value;
+
+            if (!orderNumber || !customerName) {
+              alert('Order number and customer name are required');
+              return;
+            }
+
+            // Create new order object
+            const newOrder = {
+              id: orders.length + 1,
+              orderNumber,
+              customerName,
+              firstName: customerName.split(' ')[0],
+              lastName: customerName.split(' ').slice(1).join(' '),
+              email,
+              phone,
+              status,
+              notes,
+              favorite: false,
+              letter: customerName.charAt(0).toUpperCase(),
+              icon: 'fa-shopping-bag',
+              color: '#' + Math.floor(Math.random() * 16777215).toString(16),
+              creationDate: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+              deliveryDate: 'Pending',
+              lastUpdate: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+              itemsCount: itemsCount || 0,
+              totalAmount: totalAmount || '$ 0.00',
+              isNew: false
+            };
+
+            // Add to orders array
+            orders.push(newOrder);
+
+            // Rebuild grouped orders
+            const groupedOrders = orders.reduce((acc, order) => {
+              if (!acc[order.letter]) acc[order.letter] = [];
+              acc[order.letter].push(order);
+              return acc;
+            }, {});
+
+            // Update UI
+            renderOrdersList(newOrder.id);
+            renderOrdersContent(newOrder);
+
+            // Close window with animation
+            const standardCloseBtn = addOrderWindow.querySelector('.window-close');
+            if (standardCloseBtn) {
+              standardCloseBtn.click();
+            } else {
+              // Fallback: manual close with animation
+              addOrderWindow.classList.remove('window-anim-open', 'window-anim-maximize', 'window-anim-close');
+              addOrderWindow.classList.add('window-anim-close');
+              addOrderWindow.addEventListener('animationend', function handler(ev) {
+                if (ev.animationName === 'windowClose') {
+                  if (addOrderWindow.parentNode) addOrderWindow.parentNode.removeChild(addOrderWindow);
+                  if (openWindows[windowId]) delete openWindows[windowId];
+                }
+              }, { once: true });
+            }
+          });
+        }
+      }
+
+      // Register the window in openWindows
+      const iconClass = 'fa-plus-circle';
+      const iconBgClass = 'green-icon';
+      const appTitle = 'Add New Order';
+      openWindows[windowId] = {
+        element: addOrderWindow,
+        name: 'add-order',
+        title: appTitle,
+        iconClass: iconClass,
+        iconBgClass: iconBgClass,
+        appTitle: appTitle
+      };
+      makeWindowActive(addOrderWindow);
+      // Call renderPinnedTaskbarIcons to immediately update the taskbar
+      renderPinnedTaskbarIcons();
+    });
+  }
+
+  // Apply search functionality
+  const searchInput = windowElement.querySelector('.orders-search-input');
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      const searchTerm = e.target.value.toLowerCase();
+
+      if (!searchTerm) {
+        renderOrdersList();
+        return;
+      }
+
+      // Filter orders based on search term
+      const filteredOrders = orders.filter(order =>
+        (order.orderNumber && order.orderNumber.toLowerCase().includes(searchTerm)) ||
+        (order.customerName && order.customerName.toLowerCase().includes(searchTerm)) ||
+        (order.firstName && order.firstName.toLowerCase().includes(searchTerm)) ||
+        (order.lastName && order.lastName.toLowerCase().includes(searchTerm)) ||
+        (order.email && order.email.toLowerCase().includes(searchTerm)) ||
+        (order.status && order.status.toLowerCase().includes(searchTerm)) ||
+        (order.company && order.company.toLowerCase().includes(searchTerm)) ||
+        (order.notes && order.notes.toLowerCase().includes(searchTerm))
+      );
+
+      // Group filtered orders by letter
+      const filteredGrouped = filteredOrders.reduce((acc, order) => {
+        if (!acc[order.letter]) acc[order.letter] = [];
+        acc[order.letter].push(order);
+        return acc;
+      }, {});
+
+      // Save original grouped orders
+      const originalGrouped = Object.assign({}, groupedOrders);
+
+      // Temporarily replace grouped orders with filtered results
+      Object.keys(groupedOrders).forEach(key => {
+        delete groupedOrders[key];
+      });
+
+      Object.keys(filteredGrouped).forEach(key => {
+        groupedOrders[key] = filteredGrouped[key];
+      });
+
+      // Render filtered list
+      renderOrdersList();
+
+      // Restore original grouped orders
+      Object.keys(groupedOrders).forEach(key => {
+        delete groupedOrders[key];
+      });
+
+      Object.keys(originalGrouped).forEach(key => {
+        groupedOrders[key] = originalGrouped[key];
+      });
+    });
+  }
+}
+
+//Products App Content
+function setupProductsManager(windowElement) {
+  // Sidebar: do NOT set content here. Sidebar content is defined in index.html template using the generic sidebar structure.
+  // Only update dynamic values (like unread counts, user name, etc.) here if needed.
+  function isMobileProductsApp() {
+    return window.innerWidth <= 767 && windowElement.querySelector('.products-selected-mode');
+  }
+  // --- Ensure sidebar toggle and overlay exist (for consistent sidebar behavior) ---
+  ensureSidebarElements(windowElement);
+
+  if (typeof window.updateSidebarForWindow === 'function') {
+    window.updateSidebarForWindow(windowElement);
+  }
+  if (typeof attachSidebarResizeObserver === 'function') {
+    attachSidebarResizeObserver(windowElement);
+  }
+
+  // Setup toolbar buttons
+  const toolbarButtons = windowElement.querySelectorAll('.window-toolbar .toolbar-button');
+  toolbarButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      // Add ripple effect
+      const ripple = document.createElement('span');
+      ripple.classList.add('ripple');
+      button.appendChild(ripple);
+      setTimeout(() => {
+        ripple.remove();
+      }, 600);
+    });
+  });
+
+  // Single source of products data with all fields
+  const products = [
+    {
+      id: 1,
+      productSKU: 'PRD-10001',
+      productName: 'Tastatura muzicala cu multe muzicute',
+      category: 'Electronics',
+      brand: 'NETGEAR',
+      avatar: 'fa-box',
+      description: 'AC1750 Dual Band Smart WiFi Router',
+      price: '$99.99',
+      salePrice: '$84.99',
+      stock: 42,
+      status: 'Published',
+      notes: 'Best seller',
+      type: 'eCommerce',
+      featured: true,
+      letter: 'N',
+      icon: 'fa-box',
+      color: '#F6AD55',
+      creationDate: '12:40 AM',
+      lastUpdate: '14:20 PM',
+      tags: ['router', 'wifi', 'networking'],
+      attributes: ['color: black', 'warranty: 1 year'],
+      variations: ['standard', 'extended range'],
+      isNew: true
+    },
+    {
+      id: 2,
+      productSKU: 'PRD-10001',
+      productName: 'Cel mai fericit produs de pe pamant',
+      category: 'Electronics',
+      brand: 'NETGEAR',
+      avatar: 'fa-box',
+      description: 'AC1750 Dual Band Smart WiFi Router',
+      price: '$99.99',
+      salePrice: '$84.99',
+      stock: 42,
+      status: 'Published',
+      notes: 'Best seller',
+      type: 'Subscription',
+      featured: true,
+      letter: 'N',
+      icon: 'fa-box',
+      color: '#F6AD55',
+      creationDate: '12:40 AM',
+      lastUpdate: '14:20 PM',
+      tags: ['router', 'wifi', 'networking'],
+      attributes: ['color: black', 'warranty: 1 year'],
+      variations: ['standard', 'extended range'],
+      isNew: true
+    },
+    {
+      id: 3,
+      productSKU: 'PRD-10001',
+      productName: 'NETGEAR R6700 Nighthawk',
+      category: 'Electronics',
+      brand: 'NETGEAR',
+      avatar: 'fa-box',
+      description: 'AC1750 Dual Band Smart WiFi Router',
+      price: '$99.99',
+      salePrice: '$84.99',
+      stock: 42,
+      status: 'Published',
+      notes: 'Best seller',
+      type: 'Booking',
+      featured: false,
+      letter: 'N',
+      icon: 'fa-box',
+      color: '#F6AD55',
+      creationDate: '12:40 AM',
+      lastUpdate: '14:20 PM',
+      tags: ['router', 'wifi', 'networking'],
+      attributes: ['color: black', 'warranty: 1 year'],
+      variations: ['standard', 'extended range'],
+      isNew: true
+    },
+    {
+      id: 4,
+      productSKU: 'PRD-10001',
+      productName: 'NETGEAR R6700 Nighthawk',
+      category: 'Electronics',
+      brand: 'NETGEAR',
+      avatar: 'fa-box',
+      description: 'AC1750 Dual Band Smart WiFi Router',
+      price: '$99.99',
+      salePrice: '$84.99',
+      stock: 42,
+      status: 'Published',
+      notes: 'Best seller',
+      type: 'Appointments',
+      featured: false,
+      letter: 'N',
+      icon: 'fa-box',
+      color: '#F6AD55',
+      creationDate: '12:40 AM',
+      lastUpdate: '14:20 PM',
+      tags: ['router', 'wifi', 'networking'],
+      attributes: ['color: black', 'warranty: 1 year'],
+      variations: ['standard', 'extended range'],
+      isNew: true
+    },
+    {
+      id: 5,
+      productSKU: 'PRD-10001',
+      productName: 'NETGEAR R6700 Nighthawk',
+      category: 'Electronics',
+      brand: 'NETGEAR',
+      avatar: 'fa-box',
+      description: 'AC1750 Dual Band Smart WiFi Router',
+      price: '$99.99',
+      salePrice: '$84.99',
+      stock: 42,
+      status: 'Published',
+      notes: 'Best seller',
+      type: 'eCommerce',
+      featured: true,
+      letter: 'N',
+      icon: 'fa-box',
+      color: '#F6AD55',
+      creationDate: '12:40 AM',
+      lastUpdate: '14:20 PM',
+      tags: ['router', 'wifi', 'networking'],
+      attributes: ['color: black', 'warranty: 1 year'],
+      variations: ['standard', 'extended range'],
+      isNew: true
+    },
+    {
+      id: 6,
+      productSKU: 'PRD-10001',
+      productName: 'NETGEAR R6700 Nighthawk',
+      category: 'Electronics',
+      brand: 'NETGEAR',
+      avatar: 'fa-box',
+      description: 'AC1750 Dual Band Smart WiFi Router',
+      price: '$99.99',
+      salePrice: '$84.99',
+      stock: 42,
+      status: 'Published',
+      notes: 'Best seller',
+      type: 'eCommerce',
+      featured: false,
+      letter: 'N',
+      icon: 'fa-box',
+      color: '#F6AD55',
+      creationDate: '12:40 AM',
+      lastUpdate: '14:20 PM',
+      tags: ['router', 'wifi', 'networking'],
+      attributes: ['color: black', 'warranty: 1 year'],
+      variations: ['standard', 'extended range'],
+      isNew: false
+    },
+    {
+      id: 7,
+      productSKU: 'PRD-10001',
+      productName: 'NETGEAR R6700 Nighthawk',
+      category: 'Electronics',
+      brand: 'NETGEAR',
+      avatar: 'fa-box',
+      description: 'AC1750 Dual Band Smart WiFi Router',
+      price: '$99.99',
+      salePrice: '$84.99',
+      stock: 42,
+      status: 'Published',
+      notes: 'Best seller',
+      type: 'eCommerce',
+      featured: false,
+      letter: 'N',
+      icon: 'fa-box',
+      color: '#F6AD55',
+      creationDate: '12:40 AM',
+      lastUpdate: '14:20 PM',
+      tags: ['router', 'wifi', 'networking'],
+      attributes: ['color: black', 'warranty: 1 year'],
+      variations: ['standard', 'extended range'],
+      isNew: false
+    },
+    {
+      id: 8,
+      productSKU: 'PRD-10001',
+      productName: 'NETGEAR R6700 Nighthawk',
+      category: 'Electronics',
+      brand: 'NETGEAR',
+      avatar: 'fa-box',
+      description: 'AC1750 Dual Band Smart WiFi Router',
+      price: '$99.99',
+      salePrice: '$84.99',
+      stock: 42,
+      status: 'Published',
+      notes: 'Best seller',
+      type: 'eCommerce',
+      featured: false,
+      letter: 'N',
+      icon: 'fa-box',
+      color: '#F6AD55',
+      creationDate: '12:40 AM',
+      lastUpdate: '14:20 PM',
+      tags: ['router', 'wifi', 'networking'],
+      attributes: ['color: black', 'warranty: 1 year'],
+      variations: ['standard', 'extended range'],
+      isNew: false
+    },
+    {
+      id: 9,
+      productSKU: 'PRD-10001',
+      productName: 'NETGEAR R6700 Nighthawk',
+      category: 'Electronics',
+      brand: 'NETGEAR',
+      avatar: 'fa-box',
+      description: 'AC1750 Dual Band Smart WiFi Router',
+      price: '$99.99',
+      salePrice: '$84.99',
+      stock: 42,
+      status: 'Published',
+      notes: 'Best seller',
+      type: 'eCommerce',
+      featured: false,
+      letter: 'N',
+      icon: 'fa-box',
+      color: '#F6AD55',
+      creationDate: '12:40 AM',
+      lastUpdate: '14:20 PM',
+      tags: ['router', 'wifi', 'networking'],
+      attributes: ['color: black', 'warranty: 1 year'],
+      variations: ['standard', 'extended range'],
+      isNew: false
+    },
+    {
+      id: 10,
+      productSKU: 'PRD-10001',
+      productName: 'NETGEAR R6700 Nighthawk',
+      category: 'Electronics',
+      brand: 'NETGEAR',
+      avatar: 'fa-box',
+      description: 'AC1750 Dual Band Smart WiFi Router',
+      price: '$99.99',
+      salePrice: '$84.99',
+      stock: 42,
+      status: 'Published',
+      notes: 'Best seller',
+      type: 'eCommerce',
+      featured: false,
+      letter: 'N',
+      icon: 'fa-box',
+      color: '#F6AD55',
+      creationDate: '12:40 AM',
+      lastUpdate: '14:20 PM',
+      tags: ['router', 'wifi', 'networking'],
+      attributes: ['color: black', 'warranty: 1 year'],
+      variations: ['standard', 'extended range'],
+      isNew: false
+    },
+    {
+      id: 11,
+      productSKU: 'PRD-10001',
+      productName: 'NETGEAR R6700 Nighthawk',
+      category: 'Electronics',
+      brand: 'NETGEAR',
+      avatar: 'fa-box',
+      description: 'AC1750 Dual Band Smart WiFi Router',
+      price: '$99.99',
+      salePrice: '$84.99',
+      stock: 42,
+      status: 'Published',
+      notes: 'Best seller',
+      type: 'eCommerce',
+      featured: false,
+      letter: 'N',
+      icon: 'fa-box',
+      color: '#F6AD55',
+      creationDate: '12:40 AM',
+      lastUpdate: '14:20 PM',
+      tags: ['router', 'wifi', 'networking'],
+      attributes: ['color: black', 'warranty: 1 year'],
+      variations: ['standard', 'extended range'],
+      isNew: false
+    },
+    {
+      id: 12,
+      productSKU: 'PRD-10001',
+      productName: 'NETGEAR R6700 Nighthawk',
+      category: 'Electronics',
+      brand: 'NETGEAR',
+      avatar: 'fa-box',
+      description: 'AC1750 Dual Band Smart WiFi Router',
+      price: '$99.99',
+      salePrice: '$84.99',
+      stock: 42,
+      status: 'Published',
+      notes: 'Best seller',
+      type: 'eCommerce',
+      featured: true,
+      letter: 'N',
+      icon: 'fa-box',
+      color: '#F6AD55',
+      creationDate: '12:40 AM',
+      lastUpdate: '14:20 PM',
+      tags: ['router', 'wifi', 'networking'],
+      attributes: ['color: black', 'warranty: 1 year'],
+      variations: ['standard', 'extended range'],
+      isNew: false
+    },
+    {
+      id: 13,
+      productSKU: 'PRD-10001',
+      productName: 'NETGEAR R6700 Nighthawk',
+      category: 'Electronics',
+      brand: 'NETGEAR',
+      avatar: 'fa-box',
+      description: 'AC1750 Dual Band Smart WiFi Router',
+      price: '$99.99',
+      salePrice: '$84.99',
+      stock: 42,
+      status: 'Published',
+      notes: 'Best seller',
+      type: 'eCommerce',
+      featured: false,
+      letter: 'N',
+      icon: 'fa-box',
+      color: '#F6AD55',
+      creationDate: '12:40 AM',
+      lastUpdate: '14:20 PM',
+      tags: ['router', 'wifi', 'networking'],
+      attributes: ['color: black', 'warranty: 1 year'],
+      variations: ['standard', 'extended range'],
+      isNew: false
+    },
+    {
+      id: 14,
+      productSKU: 'PRD-10001',
+      productName: 'NETGEAR R6700 Nighthawk',
+      category: 'Electronics',
+      brand: 'NETGEAR',
+      avatar: 'fa-box',
+      description: 'AC1750 Dual Band Smart WiFi Router',
+      price: '$99.99',
+      salePrice: '$84.99',
+      stock: 42,
+      status: 'Published',
+      notes: 'Best seller',
+      type: 'eCommerce',
+      featured: false,
+      letter: 'N',
+      icon: 'fa-box',
+      color: '#F6AD55',
+      creationDate: '12:40 AM',
+      lastUpdate: '14:20 PM',
+      tags: ['router', 'wifi', 'networking'],
+      attributes: ['color: black', 'warranty: 1 year'],
+      variations: ['standard', 'extended range'],
+      isNew: false
+    },
+    {
+      id: 15,
+      productSKU: 'PRD-10001',
+      productName: 'NETGEAR R6700 Nighthawk',
+      category: 'Electronics',
+      brand: 'NETGEAR',
+      avatar: 'fa-box',
+      description: 'AC1750 Dual Band Smart WiFi Router',
+      price: '$99.99',
+      salePrice: '$84.99',
+      stock: 42,
+      status: 'Published',
+      notes: 'Best seller',
+      type: 'eCommerce',
+      featured: false,
+      letter: 'N',
+      icon: 'fa-box',
+      color: '#F6AD55',
+      creationDate: '12:40 AM',
+      lastUpdate: '14:20 PM',
+      tags: ['router', 'wifi', 'networking'],
+      attributes: ['color: black', 'warranty: 1 year'],
+      variations: ['standard', 'extended range'],
+      isNew: false
+    },
+    {
+      id: 16,
+      productSKU: 'PRD-10001',
+      productName: 'NETGEAR R6700 Nighthawk',
+      category: 'Electronics',
+      brand: 'NETGEAR',
+      avatar: 'fa-box',
+      description: 'AC1750 Dual Band Smart WiFi Router',
+      price: '$99.99',
+      salePrice: '$84.99',
+      stock: 42,
+      status: 'Published',
+      notes: 'Best seller',
+      type: 'eCommerce',
+      featured: false,
+      letter: 'N',
+      icon: 'fa-box',
+      color: '#F6AD55',
+      creationDate: '12:40 AM',
+      lastUpdate: '14:20 PM',
+      tags: ['router', 'wifi', 'networking'],
+      attributes: ['color: black', 'warranty: 1 year'],
+      variations: ['standard', 'extended range'],
+      isNew: true
+    },
+    {
+      id: 17,
+      productSKU: 'PRD-10001',
+      productName: 'NETGEAR R6700 Nighthawk',
+      category: 'Electronics',
+      brand: 'NETGEAR',
+      avatar: 'fa-box',
+      description: 'AC1750 Dual Band Smart WiFi Router',
+      price: '$99.99',
+      salePrice: '$84.99',
+      stock: 42,
+      status: 'Published',
+      notes: 'Best seller',
+      type: 'eCommerce',
+      featured: false,
+      letter: 'N',
+      icon: 'fa-box',
+      color: '#F6AD55',
+      creationDate: '12:40 AM',
+      lastUpdate: '14:20 PM',
+      tags: ['router', 'wifi', 'networking'],
+      attributes: ['color: black', 'warranty: 1 year'],
+      variations: ['standard', 'extended range'],
+      isNew: true
+    },
+    {
+      id: 18,
+      productSKU: 'PRD-10001',
+      productName: 'NETGEAR R6700 Nighthawk',
+      category: 'Electronics',
+      brand: 'NETGEAR',
+      avatar: 'fa-box',
+      description: 'AC1750 Dual Band Smart WiFi Router',
+      price: '$99.99',
+      salePrice: '$84.99',
+      stock: 42,
+      status: 'Published',
+      notes: 'Best seller',
+      type: 'eCommerce',
+      featured: false,
+      letter: 'N',
+      icon: 'fa-box',
+      color: '#F6AD55',
+      creationDate: '12:40 AM',
+      lastUpdate: '14:20 PM',
+      tags: ['router', 'wifi', 'networking'],
+      attributes: ['color: black', 'warranty: 1 year'],
+      variations: ['standard', 'extended range'],
+      isNew: false
+    },
+    {
+      id: 19,
+      productSKU: 'PRD-10001',
+      productName: 'NETGEAR R6700 Nighthawk',
+      category: 'Electronics',
+      brand: 'NETGEAR',
+      avatar: 'fa-box',
+      description: 'AC1750 Dual Band Smart WiFi Router',
+      price: '$99.99',
+      salePrice: '$84.99',
+      stock: 42,
+      status: 'Published',
+      notes: 'Best seller',
+      type: 'eCommerce',
+      featured: false,
+      letter: 'N',
+      icon: 'fa-box',
+      color: '#F6AD55',
+      creationDate: '12:40 AM',
+      lastUpdate: '14:20 PM',
+      tags: ['router', 'wifi', 'networking'],
+      attributes: ['color: black', 'warranty: 1 year'],
+      variations: ['standard', 'extended range'],
+      isNew: true
+    },
+    {
+      id: 20,
+      productSKU: 'PRD-10001',
+      productName: 'NETGEAR R6700 Nighthawk',
+      category: 'Electronics',
+      brand: 'NETGEAR',
+      avatar: 'fa-box',
+      description: 'AC1750 Dual Band Smart WiFi Router',
+      price: '$99.99',
+      salePrice: '$84.99',
+      stock: 42,
+      status: 'Published',
+      notes: 'Best seller',
+      type: 'eCommerce',
+      featured: true,
+      letter: 'N',
+      icon: 'fa-box',
+      color: '#F6AD55',
+      creationDate: '12:40 AM',
+      lastUpdate: '14:20 PM',
+      tags: ['router', 'wifi', 'networking'],
+      attributes: ['color: black', 'warranty: 1 year'],
+      variations: ['standard', 'extended range'],
+      isNew: false
+    },
+    {
+      id: 21,
+      productSKU: 'PRD-10001',
+      productName: 'NETGEAR R6700 Nighthawk',
+      category: 'Electronics',
+      brand: 'NETGEAR',
+      avatar: 'fa-box',
+      description: 'AC1750 Dual Band Smart WiFi Router',
+      price: '$99.99',
+      salePrice: '$84.99',
+      stock: 42,
+      status: 'Published',
+      notes: 'Best seller',
+      type: 'eCommerce',
+      featured: false,
+      letter: 'N',
+      icon: 'fa-box',
+      color: '#F6AD55',
+      creationDate: '12:40 AM',
+      lastUpdate: '14:20 PM',
+      tags: ['router', 'wifi', 'networking'],
+      attributes: ['color: black', 'warranty: 1 year'],
+      variations: ['standard', 'extended range'],
+      isNew: false
+    },
+    {
+      id: 22,
+      productSKU: 'PRD-10001',
+      productName: 'NETGEAR R6700 Nighthawk',
+      category: 'Electronics',
+      brand: 'NETGEAR',
+      avatar: 'fa-box',
+      description: 'AC1750 Dual Band Smart WiFi Router',
+      price: '$99.99',
+      salePrice: '$84.99',
+      stock: 42,
+      status: 'Published',
+      notes: 'Best seller',
+      type: 'eCommerce',
+      featured: false,
+      letter: 'N',
+      icon: 'fa-box',
+      color: '#F6AD55',
+      creationDate: '12:40 AM',
+      lastUpdate: '14:20 PM',
+      tags: ['router', 'wifi', 'networking'],
+      attributes: ['color: black', 'warranty: 1 year'],
+      variations: ['standard', 'extended range'],
+      isNew: false
+    },
+    {
+      id: 23,
+      productSKU: 'PRD-10001',
+      productName: 'NETGEAR R6700 Nighthawk',
+      category: 'Electronics',
+      brand: 'NETGEAR',
+      avatar: 'fa-box',
+      description: 'AC1750 Dual Band Smart WiFi Router',
+      price: '$99.99',
+      salePrice: '$84.99',
+      stock: 42,
+      status: 'Published',
+      notes: 'Best seller',
+      type: 'eCommerce',
+      featured: false,
+      letter: 'N',
+      icon: 'fa-box',
+      color: '#F6AD55',
+      creationDate: '12:40 AM',
+      lastUpdate: '14:20 PM',
+      tags: ['router', 'wifi', 'networking'],
+      attributes: ['color: black', 'warranty: 1 year'],
+      variations: ['standard', 'extended range'],
+      isNew: false
+    },
+    {
+      id: 24,
+      productSKU: 'PRD-10001',
+      productName: 'NETGEAR R6700 Nighthawk',
+      category: 'Electronics',
+      brand: 'NETGEAR',
+      avatar: 'fa-box',
+      description: 'AC1750 Dual Band Smart WiFi Router',
+      price: '$99.99',
+      salePrice: '$84.99',
+      stock: 42,
+      status: 'Published',
+      notes: 'Best seller',
+      type: 'eCommerce',
+      featured: false,
+      letter: 'N',
+      icon: 'fa-box',
+      color: '#F6AD55',
+      creationDate: '12:40 AM',
+      lastUpdate: '14:20 PM',
+      tags: ['router', 'wifi', 'networking'],
+      attributes: ['color: black', 'warranty: 1 year'],
+      variations: ['standard', 'extended range'],
+      isNew: false
+    }
+  ];
+
+  // Group products by first letter of product name
+  let groupedProducts = products.reduce((acc, product) => {
+    // Ensure letter is set based on product name
+    if (!product.letter && product.productName) {
+      product.letter = product.productName.charAt(0).toUpperCase();
+    }
+
+    // Add to appropriate group
+    if (product.letter) {
+      if (!acc[product.letter]) acc[product.letter] = [];
+      acc[product.letter].push(product);
+    }
+    return acc;
+  }, {});
+
+  const productsListSection = windowElement.querySelector('.products-list-section');
+  const productsList = windowElement.querySelector('.products-list');
+  const productsContentSection = windowElement.querySelector('.products-content-section');
+  const productsContent = windowElement.querySelector('.products-content-section .products-content');
+  const windowMainContent = windowElement.querySelector('.products-manager-window');
+
+  // Helper function to get the appropriate icon for each status
+  function getStatusIcon(status) {
+    switch (status) {
+      case 'Published':
+        return '<i class="fas fa-check-circle status-icon"></i>';
+      case 'Draft':
+        return '<i class="fas fa-pencil-alt status-icon"></i>';
+      case 'Pending Review':
+        return '<i class="fas fa-clock status-icon"></i>';
+      case 'On Sale':
+        return '<i class="fas fa-tag status-icon"></i>';
+      case 'Out of Stock':
+        return '<i class="fas fa-ban status-icon"></i>';
+      case 'Archived':
+        return '<i class="fas fa-archive status-icon"></i>';
+      case 'Deleted':
+      case 'Trash':
+        return '<i class="fas fa-trash-alt status-icon"></i>';
+      default:
+        return '<i class="fas fa-info-circle status-icon"></i>';
+    }
+  }
+
+  // Helper function to get the appropriate icon for each product type
+  function getProductTypeIcon(type) {
+    switch (type) {
+      case 'eCommerce':
+        return '<i class="fas fa-cart-shopping producttype-icon"></i>';
+      case 'Subscription':
+        return '<i class="fas fa-clipboard-check producttype-icon"></i>';
+      case 'Bookings':
+        return '<i class="fas fa-calendar-check producttype-icon"></i>';
+      case 'Appointments':
+        return '<i class="fas fa-calendar-days producttype-icon"></i>';
+      case 'Digital':
+        return '<i class="fas fa-floppy-disk producttype-icon"></i>';
+      case 'Physical':
+        return '<i class="fas fa-box producttype-icon"></i>';
+      case 'Variable':
+        return '<i class="fas fa-sliders producttype-icon"></i>';
+      case 'Downloadable':
+        return '<i class="fas fa-download producttype-icon"></i>';
+      default:
+        return '<i class="fas fa-info-circle producttype-icon"></i>';
+    }
+  }
+
+  // Initialize the layout and render the products list
+  initializeProductsAppLayout();
+  renderProductsList();
+
+  // Initialize desktop layout (products list takes full width, content section hidden)
+  function initializeProductsAppLayout() {
+    // Desktop layout setup:
+    // 1. Hide content section initially
+    if (productsContentSection) {
+      productsContentSection.style.visibility = 'hidden';
+      productsContentSection.style.display = 'none';
+    }
+
+    // 2. Make products list section take 100% width
+    if (productsListSection) {
+      productsListSection.style.width = '100%';
+    }
+
+    // 3. Show table header by default
+    const tableHeader = windowElement.querySelector('.products-list-table-header');
+    if (tableHeader) {
+      tableHeader.style.display = '';
+    }
+
+    // Make sure products list is visible
+    if (productsList) {
+      productsList.style.display = '';
+    }
+  }
+
+  function renderProductsList(selectedId) {
+    if (!productsList) return;
+    productsList.innerHTML = '';
+
+    // If there's no selected product and we're not in mobile mode, show a table view
+    if ((typeof selectedId === 'undefined' || selectedId === null) && !isMobileProductsApp()) {
+      // Make sure products content section is hidden
+      if (productsContentSection) {
+        productsContentSection.style.visibility = 'hidden';
+        productsContentSection.style.display = 'none';
+      }
+
+      // Make products list section take 100% width and add table-mode class
+      if (productsListSection) {
+        productsListSection.style.width = '100%';
+        productsListSection.classList.add('table-mode');
+        productsListSection.classList.remove('products-selected-mode');
+      }
+
+      // Use the unified products data for the table view
+      // Create a table row for each product
+      products.forEach(product => {
+        const li = document.createElement('li');
+        li.className = 'products-list-item products-table-row';
+
+        const bgColor = `rgba(${parseInt(product.color.slice(1, 3), 16)},${parseInt(product.color.slice(3, 5), 16)},${parseInt(product.color.slice(5, 7), 16)},0.1)`;
+
+        li.innerHTML = `
+          <div style="display: flex; width: 100%; align-items: center; padding: 14px 14px;">
+            <div class="products-list-featured-icon">
+              ${product.featured ? ' <i class="fas fa-star"></i>' : ''}
+            </div>
+            <div style="flex: 1; display: flex; align-items: center; gap: 10px;">
+              
+              <span class="products-list-product-sku" style="text-wrap-mode: nowrap; flex: 1; gap: 10px; display: flex; align-items: center;"><input type="checkbox" id="products-select-all-box" name="products-select-all-box" />${product.productSKU}</span>
+
+              <div style="flex: 2.5; display: flex; align-items: center; gap: 10px;" class="products-list-product-name">
+                            <div class="product-list-avatar" style="background-color: transparent;">
+              <img src="${product.id % 2 === 0 ? 'img/appsimg/camera.png' : 'img/appsimg/router.png'}" alt="Product" style="width: 42px; height: 42px; object-fit: contain; border-radius: 7px;"></div>
+              ${product.productName}
+</div>
+           
+            
+    
+                  
+            
+            
+            <div style="flex: 1;">${product.brand}</div>
+            <div style="flex: 1;"><span class="status-badge status-${product.status.toLowerCase().replace(/\s+/g, '-')}">${getStatusIcon(product.status)} <div class="product-status-list-view">${product.status}</div></span></div>
+                        <div style="flex: 1;"><span class="product-type-badge status-${product.type.toLowerCase().replace(/\s+/g, '-')}">${getProductTypeIcon(product.type)} <div class="product-status-list-view">${product.type}</div></span></div>
+<div style="flex: 1;">${product.category}</div>
+            <div style="flex: 1;">${product.tags}</div>
+            <div style="flex: 1;">${product.creationDate}</div>
+            <div style="flex: 0.3;">${product.stock}</div>
+            <div style="flex: 0.3;">${product.id}</div>
+            <div class="products-list-price">${product.price}</div>
+            <div style="width: 20px; min-width: 20px;"></div>
+          </div>
+        `;
+
+        li.onclick = () => {
+          // When a row is clicked, use the product's ID to load the detail view
+          renderProductsList(product.id);
+        };
+
+        productsList.appendChild(li);
+      });
+
+      return;
+    }
+
+    // If selectedId is provided, render the regular products list view
+    Object.keys(groupedProducts).sort().forEach(letter => {
+
+
+      groupedProducts[letter].forEach(product => {
+        const li = document.createElement('li');
+        li.className = 'products-list-item' + (product.id === selectedId ? ' selected' : '') + (product.favorite ? ' favorite' : '');
+
+        li.innerHTML = `
+        <div class="products-list-avatar" style="background-color: transparent;">
+          <img src="${product.id % 2 === 0 ? 'img/appsimg/camera.png' : 'img/appsimg/router.png'}" alt="Product" style="width: 42px; height: 42px; object-fit: contain;">
+        </div>
+        <div class="products-list-info">
+          <div class="products-list-name" style="display: flex; align-items: center; gap: 10px;"> ${product.featured ? ' <i class="fas fa-star"></i>' : ''} ${product.productName}</div>
+          <div class="products-list-details"><span class="product-type-badge status-${product.type.toLowerCase().replace(/\s+/g, '-')}">${getProductTypeIcon(product.type)}</span>${product.productSKU} <span class="status-badge status-${product.status.toLowerCase().replace(/\s+/g, '-')}">${getStatusIcon(product.status)} <div class="product-status-list-view">${product.status}</div></span>            ${product.notes ? '<i class="fas fa-sticky-note"></i>' : ''}</div>
+        </div>
+        <div class="products-list-meta">
+          <div class="products-list-price">${product.price}</div>
+          <div class="products-list-date">${product.creationDate}</div>
+
+        </div>
+        `;
+
+        li.onclick = () => {
+          console.log('Product clicked:', product.id, product.productSKU, product.productName);
+
+          // On mobile, we need to use the patched renderProductsList which will handle
+          // showing the content panel after rendering the content
+          renderProductsList(product.id);
+
+          // On desktop or when the patched renderProductsList isn't in effect yet,
+          // we need to render the content directly
+          if (!isMobileProductsApp()) {
+            renderProductsContent(product);
+          }
+        };
+
+        li.ondblclick = () => {
+          // Generate a unique window ID for each product content popout
+          let productsContentWindowCount = 1;
+          while (openWindows[`products-content-window-${productsContentWindowCount}`]) {
+            productsContentWindowCount++;
+          }
+          const windowId = `products-content-window-${productsContentWindowCount}`;
+
+          const productsContentWindow = createWindowFromTemplate('products-content-window', windowId, false);
+          if (!productsContentWindow) return;
+          
+          // Add simple opening animation
+          productsContentWindow.classList.add('window-anim-open');
+
+          // Inject the full products-content-section structure
+          const content = productsContentWindow.querySelector('.products-content-body');
+          if (!content) return;
+
+          content.innerHTML = `
+          <section class="products-content-section">
+            <div class="window-toolbar">
+              <div class="toolbar-buttons-left">
+                <button class="toolbar-button" title="Notes"><i class="fas fa-clipboard-list"></i><span>Add Note</span></button>
+                <button class="toolbar-button" title="Shipping"><i class="fas fa-shipping-fast"></i><span>Shipping</span></button>
+                <button class="toolbar-button" title="Invoice"><i class="fas fa-file-invoice"></i><span>Invoice</span></button>
+                <button class="toolbar-button" title="Product log"><i class="fas fa-history"></i><span>Product log</span></button>
+                                <button class="toolbar-button products-delete-button"><i class="fas fa-trash"></i></button>
+
+              </div>
+              <div class="toolbar-buttons-right">
+                <div class="product-assign">
+          <button class="btn btn-secondary">Discard</button>
+          <button class="btn btn-secondary">Schedule</button>
+          <button class="btn btn-primary">Save changes</button>
+                </div>
+              </div>
+            </div>
+            
+            <div class="products-content">
+              ${getProductsContentHTML(product)}
+            </div>
+          </section>
+          `;
+
+          // Setup back button in the popout window
+          const backButton = content.querySelector('.products-back-button');
+          if (backButton) {
+            backButton.addEventListener('click', () => {
+              const closeButton = productsContentWindow.querySelector('.window-close');
+              if (closeButton) closeButton.click();
+            });
+          }
+
+          // Setup status dropdown functionality for the popup window
+          const statusButton = content.querySelector('.product-status-button');
+          const statusDropdown = content.querySelector('.product-status-dropdown');
+
+          if (statusButton && statusDropdown) {
+            // Initially hide the dropdown
+            statusDropdown.style.display = 'none';
+
+            // Apply dropdown styles
+            statusDropdown.style.position = 'absolute';
+            statusDropdown.style.zIndex = '1000';
+            statusDropdown.style.backgroundColor = '#EBF5FF';
+            statusDropdown.style.borderRadius = '16px';
+            statusDropdown.style.boxShadow = '0 4px 16px rgba(0,0,0,0.15)';
+            statusDropdown.style.padding = '1px 0';
+            statusDropdown.style.maxHeight = 'max-content';
+            statusDropdown.style.overflowY = 'auto';
+            statusDropdown.style.border = '1px solid var(--border-color, #e1e1e1)';
+            statusDropdown.style.borderTop = 'none';
+            statusDropdown.style.marginTop = '-75px';
+            statusDropdown.style.width = '220px';
+
+            // Apply styles to dropdown options
+            const dropdownOptionElements = statusDropdown.querySelectorAll('.dropdown-option');
+            dropdownOptionElements.forEach(option => {
+              option.style.padding = '14px 18px';
+              option.style.display = 'flex';
+              option.style.alignItems = 'center';
+              option.style.gap = '10px';
+              option.style.cursor = 'pointer';
+              option.style.transition = 'background-color 0.2s ease';
+              option.style.borderRadius = '8px';
+              option.style.margin = '3px 5px';
+
+              const status = option.getAttribute('data-status');
+              option.classList.add(`status-${status.toLowerCase().replace(/\s+/g, '-')}`);
+
+              option.addEventListener('mouseover', () => {
+                option.style.backgroundColor = 'var(--accent-color)';
+                option.style.color = '#fff';
+              });
+
+              option.addEventListener('mouseout', () => {
+                option.style.backgroundColor = '';
+                option.style.color = '';
+              });
+            });
+
+            // Toggle dropdown on button click
+            statusButton.addEventListener('click', (e) => {
+              if (statusDropdown.style.display === 'none') {
+                // Position the dropdown directly beneath the button
+                const buttonRect = statusButton.getBoundingClientRect();
+                const windowRect = productsContentWindow.getBoundingClientRect();
+                const productStatusContainer = content.querySelector('.product-status-container');
+
+                // Calculate position relative to the window
+                statusDropdown.style.top = (buttonRect.bottom - windowRect.top) + 'px';
+
+                // Ensure dropdown is aligned with the button's container instead of the button itself
+                if (productStatusContainer) {
+                  const containerRect = productStatusContainer.getBoundingClientRect();
+                  statusDropdown.style.right = (windowRect.right - containerRect.right) + 'px';
+                  statusDropdown.style.left = 'auto';
+                } else {
+                  // Fallback if container not found
+                  statusDropdown.style.right = (windowRect.right - buttonRect.right) + 'px';
+                  statusDropdown.style.left = 'auto';
+                }
+
+                // Setup animation starting state
+                statusDropdown.style.opacity = '0';
+                statusDropdown.style.display = 'block';
+
+                // Force reflow to ensure animation works
+                statusDropdown.offsetHeight;
+
+                // Add animation
+                statusDropdown.style.transition = 'opacity 0.2s ease-out, transform 0.2s ease-out';
+                statusDropdown.style.opacity = '1';
+                statusDropdown.classList.add('dropdown-anim-in');
+              } else {
+                // Animate out
+                statusDropdown.style.opacity = '0';
+
+                // Hide after animation completes
+                setTimeout(() => {
+                  statusDropdown.style.display = 'none';
+                  statusDropdown.style.transform = '';
+                }, 200);
+              }
+              e.stopPropagation();
+            });
+
+            // Close dropdown when clicking elsewhere
+            document.addEventListener('click', (e) => {
+              if (statusDropdown.style.display === 'block' && !statusDropdown.contains(e.target) && e.target !== statusButton) {
+                // Animate out
+                statusDropdown.style.opacity = '0';
+
+                // Hide after animation completes
+                setTimeout(() => {
+                  statusDropdown.style.display = 'none';
+                  statusDropdown.style.transform = '';
+                }, 200);
+              }
+            });
+
+            // Handle status option selection
+            const dropdownOptions = statusDropdown.querySelectorAll('.dropdown-option');
+            dropdownOptions.forEach(option => {
+              option.addEventListener('click', () => {
+                const newStatus = option.getAttribute('data-status');
+                const oldStatus = product.status;
+
+                if (newStatus !== oldStatus) {
+                  // Create confirmation overlay
+                  const overlay = document.createElement('div');
+                  overlay.className = 'confirmation-overlay';
+                  overlay.innerHTML = `
+                    <div class="confirmation-dialog">
+                      <h3>Update Product Status</h3>
+                      <p>Change product status from "${oldStatus}" to "${newStatus}"?</p>
+                      <div class="confirmation-options">
+                        <label><input type="checkbox" checked> Notify product team</label>
+                        <label><input type="checkbox"> Add internal note</label>
+                      </div>
+                      <div class="confirmation-buttons">
+                        <button class="cancel-button">Cancel</button>
+                        <button class="confirm-button">Update Status</button>
+                      </div>
+                    </div>
+                  `;
+
+                  // Add to DOM
+                  document.body.appendChild(overlay);
+
+                  // Add styles
+                  overlay.style.position = 'fixed';
+                  overlay.style.top = '0';
+                  overlay.style.left = '0';
+                  overlay.style.width = '100%';
+                  overlay.style.height = '100%';
+                  overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+                  overlay.style.display = 'flex';
+                  overlay.style.justifyContent = 'center';
+                  overlay.style.alignItems = 'center';
+                  overlay.style.zIndex = '9999';
+
+                  const dialog = overlay.querySelector('.confirmation-dialog');
+                  dialog.style.backgroundColor = 'var(--window-content-bg)';
+                  dialog.style.padding = '24px';
+                  dialog.style.borderRadius = '16px';
+                  dialog.style.width = '400px';
+                  dialog.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.2)';
+
+                  // Setup buttons
+                  const cancelButton = overlay.querySelector('.cancel-button');
+                  const confirmButton = overlay.querySelector('.confirm-button');
+
+                  cancelButton.addEventListener('click', () => {
+                    overlay.style.opacity = '0';
+                    setTimeout(() => overlay.remove(), 300);
+                  });
+
+                  confirmButton.addEventListener('click', () => {
+                    // Update the product's status
+                    product.status = newStatus;
+
+                    // Update UI
+                    const statusBadge = content.querySelector('.product-status-badge');
+                    if (statusBadge) {
+                      statusBadge.className = `product-status-badge status-${newStatus.toLowerCase().replace(/\s+/g, '-')}`;
+                      statusBadge.innerHTML = `${getStatusIcon(newStatus)} <span>${newStatus}</span>`;
+                    }
+
+                    // Update the list item if it's visible
+                    const productItem = windowElement.querySelector(`.products-list-item[data-id="${product.id}"] .status-badge`);
+                    if (productItem) {
+                      productItem.className = `status-badge status-${newStatus.toLowerCase().replace(/\s+/g, '-')}`;
+                      productItem.innerHTML = `${getStatusIcon(newStatus)} <span>${newStatus}</span>`;
+                    }
+
+                    overlay.style.opacity = '0';
+                    setTimeout(() => overlay.remove(), 300);
+
+                    // Add ripple effect to selected option
+                    const ripple = document.createElement('span');
+                    ripple.classList.add('ripple');
+                    option.appendChild(ripple);
+                    setTimeout(() => {
+                      ripple.remove();
+                    }, 600);
+
+                    // Close the dropdown with animation
+                    statusDropdown.style.opacity = '0';
+                    statusDropdown.style.transform = 'translateY(-10px)';
+
+                    // Hide after animation completes
+                    setTimeout(() => {
+                      statusDropdown.style.display = 'none';
+                      statusDropdown.style.transform = '';
+                    }, 200);
+                  });
+                }
+                else {
+                  // If status hasn't changed, just close the dropdown
+                  statusDropdown.style.opacity = '0';
+                  statusDropdown.style.transform = 'translateY(-10px)';
+
+                  // Hide after animation completes
+                  setTimeout(() => {
+                    statusDropdown.style.display = 'none';
+                    statusDropdown.style.transform = '';
+                  }, 200);
+                }
+              });
+            });
+          }
+
+          // Setup edit button
+          const editButton = content.querySelector('.products-edit-button');
+          if (editButton) {
+            editButton.addEventListener('click', () => {
+              showEditProductsForm(product, content);
+            });
+          }
+
+          // Setup delete button
+          const deleteButton = content.querySelector('.products-delete-button');
+          if (deleteButton) {
+            deleteButton.addEventListener('click', () => {
+              // Show confirmation dialog
+              const confirmMessage = `Are you sure you want to delete product ${product.productSKU}?`;
+              if (confirm(confirmMessage)) {
+                // Remove product from data
+                const index = products.findIndex(p => p.id === product.id);
+                if (index !== -1) {
+                  products.splice(index, 1);
+
+                  // Close the window
+                  const closeButton = productsContentWindow.querySelector('.window-close');
+                  if (closeButton) closeButton.click();
+
+                  // Update the main products list if visible
+                  renderProductsList();
+                }
+              }
+            });
+          }
+
+          // Setup more options button
+          const moreButton = content.querySelector('.products-more-button');
+          if (moreButton) {
+            moreButton.addEventListener('click', (e) => {
+              showProductsMoreOptions(e.target, product);
+            });
+          }
+
+          // Register the window in openWindows and show taskbar icon
+          const iconClass = 'fa-box-open';
+          const iconBgClass = 'purple-icon';
+          const appTitle = `Product: ${product.productSKU}`;
+          openWindows[windowId] = {
+            element: productsContentWindow,
+            name: 'products-content',
+            title: appTitle,
+            iconClass: iconClass,
+            iconBgClass: iconBgClass,
+            appTitle: appTitle
+          };
+
+          // Update the window title with the product number
+          const titleSpan = productsContentWindow.querySelector('.window-title span');
+          if (titleSpan) {
+            titleSpan.textContent = `Product: ${product.productSKU}`;
+          }
+          makeWindowActive(productsContentWindow);
+          renderPinnedTaskbarIcons();
+        };
+        productsList.appendChild(li);
+      });
+    });
+  }
+
+  function renderProductsContent(product) {
+    if (!productsContentSection || !productsContent) return;
+
+    // When a product is selected, make the content section visible
+    if (!isMobileProductsApp()) {
+      if (productsContentSection) {
+        productsContentSection.style.visibility = 'visible';
+        productsContentSection.style.display = '';
+      }
+
+      // Restore products list section width and update classes
+      if (productsListSection) {
+        productsListSection.style.width = '390px';
+        productsListSection.classList.remove('table-mode');
+        productsListSection.classList.add('products-selected-mode');
+      }
+
+      // Hide table header
+      const tableHeader = windowElement.querySelector('.products-list-table-header');
+      if (tableHeader) {
+        tableHeader.style.display = 'none';
+      }
+    }
+
+    productsContent.innerHTML = getProductsContentHTML(product);
+
+    // Initialize toggles after content is rendered
+    if (typeof initializeProductSectionToggles === 'function') {
+      initializeProductSectionToggles();
+    }
+
+
+
+    // Setup status dropdown functionality
+    const statusButton = windowElement.querySelector('.product-status-button');
+    const statusDropdown = windowElement.querySelector('.product-status-dropdown');
+
+    if (statusButton && statusDropdown) {
+      // Initially hide the dropdown
+      statusDropdown.style.display = 'none';
+
+      // Apply dropdown styles
+      statusDropdown.style.position = 'absolute';
+      statusDropdown.style.zIndex = '1000';
+      statusDropdown.style.backgroundColor = '#EBF5FF';
+      statusDropdown.style.borderRadius = '16px'; // Rounded only on bottom corners
+      statusDropdown.style.boxShadow = '0 4px 16px rgba(0,0,0,0.15)';
+      statusDropdown.style.padding = '1px 0';
+      statusDropdown.style.maxHeight = 'max-content';
+      statusDropdown.style.overflowY = 'auto';
+      statusDropdown.style.border = '1px solid var(--border-color, #e1e1e1)';
+      statusDropdown.style.borderTop = 'none'; // Remove top border to connect with button
+      statusDropdown.style.marginTop = '-75px'; // No gap between button and dropdown
+      statusDropdown.style.width = '220px';
+
+      // Apply styles to dropdown options
+      const dropdownOptionElements = statusDropdown.querySelectorAll('.dropdown-option');
+      dropdownOptionElements.forEach(option => {
+        option.style.padding = '8px 16px';
+        option.style.cursor = 'pointer';
+        option.style.display = 'flex';
+        option.style.alignItems = 'center';
+        option.style.gap = '10px';
+        option.style.transition = 'background-color 0.2s';
+        option.style.color = '#333';
+        option.style.fontWeight = '600';
+        option.style.borderRadius = '16px';
+        option.style.height = '35px';
+
+        // Add hover effect
+        option.addEventListener('mouseenter', () => {
+          option.style.backgroundColor = 'var(--accent-color)';
+          option.style.color = '#fff';
+          option.querySelector('i').style.color = '#fff !important';
+        });
+        option.addEventListener('mouseleave', () => {
+          option.style.backgroundColor = '';
+          option.style.color = '#333';
+          option.querySelector('i').style.color = 'var(--accent-color)';
+        });
+      });
+
+      // Toggle dropdown on button click
+      statusButton.addEventListener('click', (e) => {
+        if (statusDropdown.style.display === 'none') {
+          // Position the dropdown directly beneath the button
+          const buttonRect = statusButton.getBoundingClientRect();
+          const windowRect = windowElement.getBoundingClientRect();
+          const orderStatusContainer = windowElement.querySelector('.order-status-container');
+
+          // Calculate position relative to the window
+          statusDropdown.style.top = (buttonRect.bottom - windowRect.top) + 'px';
+
+          // Ensure dropdown is aligned with the button's container instead of the button itself
+          if (orderStatusContainer) {
+            const containerRect = orderStatusContainer.getBoundingClientRect();
+            statusDropdown.style.right = (windowRect.right - containerRect.right) + 'px';
+            statusDropdown.style.left = 'auto';
+          } else {
+            // Fallback if container not found
+            statusDropdown.style.right = (windowRect.right - buttonRect.right) + 'px';
+            statusDropdown.style.left = 'auto';
+          }
+
+          // Setup animation starting state
+          statusDropdown.style.opacity = '0';
+          statusDropdown.style.display = 'block';
+
+          // Force reflow to ensure animation works
+          statusDropdown.offsetHeight;
+
+          // Add animation
+          statusDropdown.style.transition = 'opacity 0.2s ease-out, transform 0.2s ease-out';
+          statusDropdown.style.opacity = '1';
+          statusDropdown.classList.add('dropdown-anim-in');
+        } else {
+          // Animate out
+          statusDropdown.style.opacity = '0';
+
+          // Hide after animation completes
+          setTimeout(() => {
+            statusDropdown.style.display = 'none';
+            statusDropdown.style.transform = '';
+          }, 200);
+        }
+        e.stopPropagation();
+      });
+
+      // Close dropdown when clicking elsewhere
+      document.addEventListener('click', (e) => {
+        if (statusDropdown.style.display === 'block' && !statusDropdown.contains(e.target) && e.target !== statusButton) {
+          // Animate out
+          statusDropdown.style.opacity = '0';
+
+          // Hide after animation completes
+          setTimeout(() => {
+            statusDropdown.style.display = 'none';
+            statusDropdown.style.transform = '';
+          }, 200);
+        }
+      });
+
+      // Handle status option selection
+      const dropdownOptions = statusDropdown.querySelectorAll('.dropdown-option');
+      dropdownOptions.forEach(option => {
+        option.addEventListener('click', () => {
+          const newStatus = option.getAttribute('data-status');
+          const oldStatus = order.status;
+
+          if (newStatus !== oldStatus) {
+            // Show confirmation dialog
+            const alertDialog = document.createElement('div');
+            alertDialog.className = 'alert-dialog desktop-alert-dialog';
+            alertDialog.innerHTML = `
+            
+              <div class="alert-dialog-container">
+                        <div class="alert-icon"><i class="fas fa-repeat"></i></div>
+
+                <div class="alert-dialog-header">
+                  <div class="alert-title">Change status to ${newStatus}</div>
+                </div>
+                <div class="alert-dialog-content">
+                  <div class="alert-message">Are you sure you want to change order status to ${newStatus}?</div>
+                  <div class="alert-dialog-options">
+                    <label class="alert-dialog-checkbox">
+                      <input type="checkbox" id="send-email-checkbox"> Send email to customer
+                    </label>
+                    <label class="alert-dialog-checkbox">
+                      <input type="checkbox" id="remember-answer-checkbox"> Remember answer and don't ask me again
+                    </label>
+                  </div>
+                </div>
+                <div class="alert-actions">
+                  <button class="alert-btn alert-cancel desktop-alert-cancel">Cancel</button>
+                  <button class="alert-btn alert-ok desktop-alert-ok">Confirm</button>
+                </div>
+              </div>
+            `;
+
+            // Add overlay for center positioning
+            const overlay = document.createElement('div');
+            overlay.className = 'desktop-alert-overlay';
+            overlay.style.position = 'fixed';
+            overlay.style.top = '0';
+            overlay.style.left = '0';
+            overlay.style.right = '0';
+            overlay.style.bottom = '0';
+            overlay.style.display = 'flex';
+            overlay.style.alignItems = 'center';
+            overlay.style.justifyContent = 'center';
+            overlay.style.zIndex = '9999';
+            overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+
+            // Ensure the dialog itself maintains its original styling
+            alertDialog.style.position = 'relative';
+            alertDialog.style.margin = 'auto';
+
+            // Place the dialog inside the overlay
+            document.body.appendChild(overlay);
+            overlay.appendChild(alertDialog);
+
+            // Animation
+            overlay.style.opacity = '0';
+            alertDialog.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+              overlay.style.opacity = '1';
+              alertDialog.style.transform = 'scale(1)';
+            }, 10);
+
+            // Handle close button
+            const closeButton = alertDialog.querySelector('.alert-dialog-close');
+            if (closeButton) {
+              closeButton.addEventListener('click', () => {
+                overlay.style.opacity = '0';
+                alertDialog.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                  overlay.remove();
+                }, 300);
+              });
+            }
+
+            // Handle cancel button
+            const cancelButton = alertDialog.querySelector('.alert-dialog-cancel');
+            if (cancelButton) {
+              cancelButton.addEventListener('click', () => {
+                overlay.style.opacity = '0';
+                alertDialog.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                  overlay.remove();
+                }, 300);
+              });
+            }
+
+            // Handle confirm button
+            const confirmButton = alertDialog.querySelector('.alert-dialog-confirm');
+            if (confirmButton) {
+              confirmButton.addEventListener('click', () => {
+                // Get checkbox values
+                const sendEmail = alertDialog.querySelector('#send-email-checkbox').checked;
+                const rememberAnswer = alertDialog.querySelector('#remember-answer-checkbox').checked;
+
+                // Update order status
+                product.status = newStatus;
+
+                // Update badge in the button
+                const statusBadge = statusButton.querySelector('.order-status-badge');
+                if (statusBadge) {
+                  statusBadge.className = `order-status-badge status-${newStatus.toLowerCase().replace(/\s+/g, '-')}`;
+                  statusBadge.innerHTML = `${getStatusIcon(newStatus)} <span>${newStatus}</span>`;
+                }
+
+                // Update orders list
+                renderProductsList(product.id);
+
+                // If sendEmail is checked, we would typically send an email here
+                // This is just a placeholder
+                if (sendEmail) {
+                  console.log(`Would send email to ${product.email} about status change to ${newStatus}`);
+                }
+
+                // If rememberAnswer is checked, we would store this preference
+                // This is just a placeholder
+                if (rememberAnswer) {
+                  // In a real implementation, this would store the preference
+                  console.log(`Remember not to ask again for status changes to ${newStatus}`);
+                  // For demo purposes, we could store this in localStorage
+                  localStorage.setItem('dontAskStatusChange', 'true');
+                }
+
+                // Close dialog
+                overlay.style.opacity = '0';
+                alertDialog.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                  overlay.remove();
+                }, 300);
+
+                // Add ripple effect to selected option
+                const ripple = document.createElement('span');
+                ripple.classList.add('ripple');
+                option.appendChild(ripple);
+                setTimeout(() => {
+                  ripple.remove();
+                }, 600);
+
+                // Close the dropdown with animation
+                statusDropdown.style.opacity = '0';
+                statusDropdown.style.transform = 'translateY(-10px)';
+
+                // Hide after animation completes
+                setTimeout(() => {
+                  statusDropdown.style.display = 'none';
+                  statusDropdown.style.transform = '';
+                }, 200);
+              });
+            }
+          } else {
+            // If status hasn't changed, just close the dropdown
+            statusDropdown.style.opacity = '0';
+            statusDropdown.style.transform = 'translateY(-10px)';
+
+            // Hide after animation completes
+            setTimeout(() => {
+              statusDropdown.style.display = 'none';
+              statusDropdown.style.transform = '';
+            }, 200);
+          }
+        });
+      });
+    }
+
+    // Setup edit button
+    const editButton = windowElement.querySelector('.orders-edit-button');
+    if (editButton) {
+      editButton.addEventListener('click', () => {
+        showEditProductsForm(product, windowElement);
+      });
+    }
+
+    // Setup delete button
+    const deleteButton = windowElement.querySelector('.orders-delete-button');
+    if (deleteButton) {
+      deleteButton.addEventListener('click', () => {
+        // Show confirmation dialog
+        const confirmMessage = `Are you sure you want to delete product ${order.orderNumber}?`;
+        if (confirm(confirmMessage)) {
+          // Remove order from data
+          const index = orders.findIndex(o => o.id === order.id);
+          if (index !== -1) {
+            orders.splice(index, 1);
+
+            // Rebuild grouped orders
+            const groupedOrders = orders.reduce((acc, order) => {
+              if (!acc[order.letter]) acc[order.letter] = [];
+              acc[order.letter].push(order);
+              return acc;
+            }, {});
+
+            // Render updated list and clear content area
+            renderProductsList();
+            if (ordersContent) {
+              productsContent.innerHTML = '<div class="no-order-selected">No order selected</div>';
+            }
+            // Hide the content section
+            if (productsContentSection) {
+              productsContentSection.style.visibility = 'hidden';
+              productsContentSection.style.display = 'none';
+            }
+          }
+        }
+      });
+    }
+
+    // Setup more options button
+    const moreButton = windowElement.querySelector('.orders-more-button');
+    if (moreButton) {
+      moreButton.addEventListener('click', (e) => {
+        showOrdersMoreOptions(e.target, order);
+      });
+    }
+  }
+
+  // Updated getProductsContentHTML function to match the reference image with 2-column layout
+  // Updated getProductsContentHTML function to match the reference image with 2-column layout
+  function getProductsContentHTML(product) {
+    return `
+    <div class="product-edit-container">
+      <div class="page-header">
+
+
+<div class="order-id-and-time">
+                                <div class="order-id">Edit product ${product.productName}</div>
+                                <div class="order-created-and-modified">
+                <div class="order-created">Created: 17 April 2025 23:36:56</div>
+                <div class="order-modified">Last edit: 24 April 2025 23:36:56</div>
+                </div>
+                </div>
+
+
+
+      </div>
+      
+      <div class="product-content-columns">
+        <!-- Left Column - Product Information (2/3 width) -->
+        <div class="product-main-column">
+          <!-- Product Information Section -->
+                      <h2 class="product-information-section-title">Product informations</h2>
+          <section class="product-section">
+
+            
+            <div class="form-group">
+            <div class="form-row-top-input" >
+              <label for="product-name">Product name</label>
+              <div class="char-count">58 of / 80 max recommended characters</div></div>
+              <input type="text" id="product-name" class="form-control" value="${product.productName}">
+              <div class="seo-url-preview">
+                <span class="url-prefix">https://yourstore.com/products/</span><span class="url-slug">macbook-pro-m3-16-inch-2025</span> <a href="#" class="edit-link">Edit</a>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label for="product-description">Product description</label>
+              <div class="rich-text-editor">
+                <div class="editor-toolbar">
+                <div class="toolbar-btns-left">
+                  <button class="toolbar-btn"><i class="fas fa-robot"></i></button>
+                  <div class="toolbar-btn-splitter"></div>
+                  <button class="toolbar-btn"><i class="fas fa-paragraph"></i> Paragraph</button>
+                  <div class="toolbar-btn-splitter"></div>
+                  <button class="toolbar-btn"><i class="fas fa-bold"></i></button>
+                  <button class="toolbar-btn"><i class="fas fa-italic"></i></button>
+                  <button class="toolbar-btn"><i class="fas fa-underline"></i></button>
+                  <div class="toolbar-btn-splitter"></div>
+                  <button class="toolbar-btn"><i class="fas fa-align-left"></i></button>
+                  <button class="toolbar-btn"><i class="fas fa-list"></i></button>
+                  <div class="toolbar-btn-splitter"></div>
+                  <button class="toolbar-btn"><i class="fas fa-link"></i></button>
+                  <button class="toolbar-btn"><i class="fas fa-image"></i></button>
+                  <button class="toolbar-btn"><i class="fas fa-video"></i></button>
+                  <div class="toolbar-btn-splitter"></div>
+
+                  <button class="toolbar-btn"><i class="fas fa-ellipsis-h"></i></button>
+                  </div>
+                  <div class="toolbar-btns-right">
+                  <button class="toolbar-btn"><i class="fas fa-code"></i></button>
+                  </div>
+                </div>
+                <div class="editor-content" contenteditable="true">
+                  <p>Experience the next evolution of performance and portability with the all-new MacBook Pro powered by Apple's revolutionary M3 chip. Designed for creative professionals, developers, and power users, this 16-inch powerhouse combines stunning visuals with blazing speed, all wrapped in a sleek, durable chassis.</p>
+                  <p>Key Features:</p>
+                  <ul>
+                    <li>Apple M3 Chip - Built with a 3nm architecture for unmatched speed efficiency, and graphics.</li>
+                    <li>16.2" Liquid Retina XDR Display - Immerse yourself in ultra-rich colors, deep blacks, and up to 1600 nits of brightness.</li>
+                    <li>Up to 22 Hours Battery Life - Work or create all day on a single charge.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            
+            <div class="form-row">
+              <div class="form-group half">
+                <label for="sku">SKU</label>
+                <input type="text" id="sku" class="form-control" value="MB-M3-16-512">
+              </div>
+              <div class="form-group half">
+                <label for="category">Category</label>
+                <div class="select-container">
+                <select id="category" class="form-control category-dropdown-select">
+                  <option value="">Select category</option>
+                </select>
+                <div class="category-dropdown">
+                  <div class="category-dropdown-header">
+                    <i class="fas fa-search"></i><h3>Type to search...</h3>
+                  </div>
+                  <div class="category-tabs">
+                    <div class="category-tab active">All categories</div>
+                    <div class="category-tab">Most Used</div>
+                  </div>
+                  <div class="category-options-container">
+                    <div class="category-dropdown-option"><input type="checkbox"> Artisti</div>
+                    <div class="category-dropdown-option"><input type="checkbox"> Editabile</div>
+                    <div class="category-dropdown-option category-child"><input type="checkbox"> Animale</div>
+                    <div class="category-dropdown-option category-child"><input type="checkbox"> Desene Animate</div>
+                    <div class="category-dropdown-option category-child"><input type="checkbox"> Food & Drinks</div>
+                    <div class="category-dropdown-option category-child"><input type="checkbox"> Muzica</div>
+                    <div class="category-dropdown-option category-child"><input type="checkbox"> Pasiuni</div>
+                    <div class="category-dropdown-option category-child"><input type="checkbox"> Profesii</div>
+                  </div>
+                  <div class="category-dropdown-footer">
+                    <a href="#" class="add-category-link">+ Add new category</a>
+                  </div>
+                </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="form-row">
+              <div class="form-group half">
+                <label for="gtin">GTIN, UPC, EAN, or ISBN</label>
+                <input type="text" id="gtin" class="form-control" value="">
+              </div>
+              <div class="form-group half">
+                <label for="product-id">Brand Name</label>
+                <div class="select-container">
+                <select id="brand" class="form-control">
+                  <option value="laptop" selected>Apple</option>
+                  <option value="laptop"  style="color: var(--os-gray-dark) !important;">Samsung</option>
+                  <option value="laptop"  style="color: var(--os-gray-dark) !important;">Microsoft</option>
+                  <option value="laptop"  style="color: var(--os-gray-dark) !important;">Lenovo</option>
+                  <option value="laptop"  style="color: var(--os-gray-dark) !important;">Dell</option>
+                  <option value="laptop"  style="color: var(--os-gray-dark) !important;">HP</option>
+                  <option value="laptop"  style="color: var(--os-gray-dark) !important;">Asus</option>
+                  <option value="laptop"  style="color: var(--os-gray-dark) !important;">Acer</option>
+                </select>
+                </div>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label>Tags</label>
+              <div class="tags-container">
+                <span class="tag">MacBook <i class="fas fa-times"></i></span>
+                <span class="tag">Apple <i class="fas fa-times"></i></span>
+                <span class="tag">M3 <i class="fas fa-times"></i></span>
+                <span class="tag">16-inch <i class="fas fa-times"></i></span>
+              </div>
+            </div>
+          </section>
+          
+          <!-- Product Images Section -->
+          <section class="product-section">
+          <div class="product-media-container">
+            <h2>Product images & Media <i class="fas fa-info-circle"></i></h2>
+            <div class="product-media-options">
+              <div class="product-media-option">
+                <i class="fas fa-image"></i>
+                <span>Add 360 Viewer</span>
+              </div>
+              <div class="product-media-option">
+                <i class="fas fa-video"></i>
+                <span>Add Video</span>
+            </div></div></div>
+            <div class="product-images-container">
+              <div class="product-image-upload">
+                <div class="upload-icon">
+                  <i class="fas fa-cloud-upload-alt"></i>
+                </div>
+                <div class="upload-text">Drop your image here</div>
+                <div class="upload-subtext">or select <a href="#">Click to browse</a></div>
+              </div>
+              
+              <div class="product-image-preview">
+                <img src="img/appsimg/macbook-pro.png" alt="MacBook Pro" class="main-preview-image">
+              </div>
+            </div>
+            
+            <div class="product-image-gallery">
+              <div class="image-thumbnail-nav prev-nav">
+                <i class="fas fa-chevron-left"></i>
+              </div>
+              <div class="image-thumbnails-container">
+                <div class="image-thumbnail selected">
+                  <img src="img/appsimg/macbook-pro.png" alt="MacBook Pro">
+                </div>
+                <div class="image-thumbnail">
+                  <img src="img/appsimg/macbook-pro.png" alt="MacBook Pro">
+                </div>
+                <div class="image-thumbnail">
+                  <img src="img/appsimg/macbook-pro.png" alt="MacBook Pro">
+                </div>
+                <div class="image-thumbnail">
+                  <img src="img/appsimg/macbook-pro.png" alt="MacBook Pro">
+                </div>
+                <div class="image-thumbnail">
+                  <img src="img/appsimg/macbook-pro.png" alt="MacBook Pro">
+                </div>
+              </div>
+              <div class="image-thumbnail-nav next-nav">
+                <i class="fas fa-chevron-right"></i>
+              </div>
+            </div>
+            
+            <div class="image-info-text">Only image of .jpeg, .jpg, .png and a minimum size of 500 x 500px for optimal image use.</div>
+          </section>
+
+
+
+          
+          <!-- Pricing Section -->
+          <section class="product-section toggle-section">
+            <div class="section-header-with-toggle">
+              <h2>Pricing</h2>
+              <div class="toggle-container">
+                <span class="toggle-label">Enable catalog mode (disable pricing)</span>
+                <label class="toggle-switch">
+                  <input type="checkbox" class="section-toggle">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+            
+            <div class="section-content">
+              <div class="form-row">
+                <div class="form-group half"><div class="form-row-top-input">
+                  <label for="regular-price">Regular price</label>
+                  <a href="#" class="schedule-link">Schedule</a>
+                  </div>
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">$</span>
+                    </div>
+                    <input type="text" id="regular-price" class="form-control" value="2,989">
+                  </div>
+                </div>
+                <div class="form-group half">  <div class="form-row-top-input">
+                  <label for="sale-price">Sale price</label>
+                
+                    <a href="#" class="schedule-link">Schedule</a>
+                  </div>
+                  <div class="input-group sale-price-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">$</span>
+                    </div>
+                    <input type="text" id="sale-price" class="form-control" value="3,599">
+                  </div>
+
+                </div>
+              </div>
+                            <div class="checkbox-option">
+                <input type="checkbox" id="continue-selling" checked>
+                <label for="continue-selling">Charge tax on this variant</label>
+              </div>
+            </div>
+          </section>
+          
+          <!-- Stock and Inventory Section -->
+          <section class="product-section toggle-section">
+            <div class="section-header-with-toggle">
+              <h2>Stock and inventory</h2>
+              <div class="toggle-container">
+                <span class="toggle-label">Enable stock for this product</span>
+                <label class="toggle-switch">
+                  <input type="checkbox" checked class="section-toggle">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+            
+            <div class="section-content">
+              <div class="form-row">
+                <div class="form-group half">
+                  <label for="available-quantity">Available Quantity</label>
+                  <input type="number" id="available-quantity" class="form-control" value="25">
+                </div>
+                <div class="form-group half">
+                  <label for="minimum-stock">Low Stock Alert</label>
+                  <input type="number" id="minimum-stock" class="form-control" value="5">
+                </div>
+                                <div class="form-group half">
+                  <label for="minimum-stock">In stock?</label>
+                                  <div class="select-container">
+                  <select class="form-control">
+                <option value="active" selected="" style="color: #333 !important;">In stock</option>
+                <option value="draft" style="color: #333 !important;">Out of stock</option>
+                <option value="archived" style="color: #333 !important;">Backorder</option>
+              </select>
+              </div>
+                </div>
+              </div>
+              
+              <div class="form-group"><div class="form-row-top-input">
+                <label for="inventory-location">Inventory Location</label>
+                                <div class="more-settings-container">
+                  <a href="#" class="link-text more-settings">More Stock settings</a>
+                </div> </div>
+                <div class="select-container">
+                  <select id="inventory-location" class="form-control">
+                    <option value="main-warehouse" selected>Main Warehouse - San Francisco, California</option>
+                  </select>
+                </div>
+
+              </div>
+              
+              <div class="checkbox-option">
+                <input type="checkbox" id="continue-selling" checked>
+                <label for="continue-selling">Continue selling when out of stock</label>
+              </div>
+            </div>
+          </section>
+          
+          <!-- Attributes Section -->
+          <section class="product-section toggle-section">
+            <div class="section-header-with-toggle">
+              <h2>Attributes</h2>
+              <div class="toggle-container">
+                <span class="toggle-label">Enable attributes for this product</span>
+                <label class="toggle-switch">
+                  <input type="checkbox" checked class="section-toggle">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+            
+            <div class="section-content">
+              <div class="section-description">
+                Attributes help products be filtered better in search results
+              </div>
+              
+              <div class="attribute-group">
+                <div class="attribute-header">
+                            <div class="variant-header-left">
+                <i class="fa-solid fa-bars-staggered"></i>
+                            <h3> Attribute 1</h3>
+                </div>
+                  <div class="attribute-actions">
+                    <a href="#" class="link-text">Advanced attribut</a>
+                    <button class="delete-btn"><i class="fas fa-trash"></i></button>
+                  </div>
+                </div>
+                
+                <div class="form-row">
+                  <div class="form-group half" style="flex: 0.4 !important;">
+                    <label>Type</label>
+                    <div class="select-container">
+                      <select class="form-control">
+                        <option value="color" selected>Color</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="form-group half">
+                    <label>Value</label>
+                    <div class="tags-container">
+                      <div class="tag">
+                        <span class="color-dot black"></span>
+                        <span>Space Black</span>
+                        <button class="remove-tag"><i class="fas fa-times"></i></button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="attribute-group">
+                <div class="attribute-header">
+                            <div class="variant-header-left">
+                <i class="fa-solid fa-bars-staggered"></i>
+                            <h3> Attribute 2</h3>
+                </div>
+                  <div class="attribute-actions">
+                    <a href="#" class="link-text">Advanced attribut</a>
+                    <button class="delete-btn"><i class="fas fa-trash"></i></button>
+                  </div>
+                </div>
+                
+                <div class="form-row">
+                  <div class="form-group half" style="flex: 0.4 !important;">
+                    <label>Type</label>
+                    <div class="select-container">
+                      <select class="form-control">
+                        <option value="ssd" selected>SSD</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="form-group half">
+                    <label>Value</label>
+                    <div class="tags-container">
+                      <div class="tag">
+                        <span>512GB</span>
+                        <button class="remove-tag"><i class="fas fa-times"></i></button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="add-more-container">
+                <button class="btn btn-add"><i class="fas fa-plus"></i> Add attribut</button>
+              </div>
+            </div>
+          </section>
+          
+          <!-- Product Options Section -->
+          <section class="product-section toggle-section">
+            <div class="section-header-with-toggle">
+              <h2>Product Options</h2>
+              <div class="toggle-container">
+                <span class="toggle-label">Product has options</span>
+                <label class="toggle-switch">
+                  <input type="checkbox" checked class="section-toggle">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+            
+            <div class="section-content">
+              <div class="section-description">
+                Options allow users to select different options for the same product like color, size, etc.
+              </div>
+              
+              <div class="variant-group">
+                <div class="variant-header">
+                            <div class="variant-header-left">
+                <i class="fa-solid fa-bars-staggered"></i>
+                            <h3> Option 1</h3>
+                </div>
+                  <div class="variant-actions">
+                    <button class="delete-btn"><i class="fas fa-trash"></i></button>
+                  </div>
+                </div>
+                
+                <div class="form-row">
+                  <div class="form-group half" style="flex: 0.4 !important;">
+                    <label>Type</label>
+                    <div class="select-container" >
+                      <select class="form-control">
+                        <option value="color" selected>Color</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="form-group half" >
+                    <label>Value</label>
+                    <div class="tags-container">
+                      <div class="tag">
+                        <span class="color-dot black"></span>
+                        <span>Space Black</span>
+                        <button class="remove-tag"><i class="fas fa-times"></i></button>
+                      </div>
+                      <div class="tag">
+                        <span class="color-dot silver"></span>
+                        <span>Silver</span>
+                        <button class="remove-tag"><i class="fas fa-times"></i></button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="variant-group">
+                <div class="variant-header">
+                            <div class="variant-header-left">
+                <i class="fa-solid fa-bars-staggered"></i>
+                            <h3> Option 2</h3>
+                </div>
+                  <div class="variant-actions">
+                      <button class="delete-btn"><i class="fas fa-trash"></i></button>
+                  </div>
+                </div>
+                
+                <div class="form-row">
+                  <div class="form-group half" style="flex: 0.4 !important;">
+                    <label>Type</label>
+                    <div class="select-container">
+                      <select class="form-control">
+                        <option value="ssd" selected>Size</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="form-group half">
+                    <label>Value</label>
+                    <div class="tags-container">
+                      <div class="tag">
+                        <span>Small</span>
+                        <button class="remove-tag"><i class="fas fa-times"></i></button>
+                      </div>
+                      <div class="tag">
+                        <span>Medium</span>
+                        <button class="remove-tag"><i class="fas fa-times"></i></button>
+                      </div>
+                      <div class="tag">
+                        <span>Large</span>
+                        <button class="remove-tag"><i class="fas fa-times"></i></button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="add-more-container">
+                <button class="btn btn-add"><i class="fas fa-plus"></i> Add Product Option</button>
+              </div>
+            </div>
+          </section>
+
+
+<!-- Variants Section -->
+          <section class="product-section toggle-section">
+            <div class="section-header-with-toggle">
+              <h2>Variants</h2>
+              <div class="toggle-container">
+                <span class="toggle-label">Product has variants</span>
+                <label class="toggle-switch">
+                  <input type="checkbox" checked class="section-toggle">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+            
+            <div class="section-content">
+              <div class="section-description">
+                Variants allow users to select variations of the same product but with different prices and stock.
+              </div>
+              
+              <div class="variant-group">
+                <div class="variant-header">
+                            <div class="variant-header-left">
+                <i class="fa-solid fa-bars-staggered"></i>
+                            <h3> Variant 1</h3>
+                </div>
+                  <div class="variant-actions">
+                    <a href="#" class="link-text">Advanced variation</a>
+                    <button class="delete-btn"><i class="fas fa-trash"></i></button>
+                  </div>
+                </div>
+                
+                <div class="form-row">
+                  <div class="form-group half" style="flex: 0.4 !important;">
+                    <label>Type</label>
+                    <div class="variant-image-upload-container" >
+<div class="variant-image-upload">
+                <div class="upload-icon">
+                  <i class="fas fa-cloud-upload-alt"></i>
+                </div>
+
+              </div>
+                              <span class="variant-image-upload-text">Small</span>
+                    </div>
+                  </div>
+                  <div class="form-group half" >
+                    <label>Value</label>
+                     <div class="variant-price-container">
+<div class="variant-text-group">
+                    text
+                  </div>
+
+                    </div>
+                  </div>
+
+                  <div class="form-group half" >
+                    <label>Value</label>
+                     <div class="variant-price-container">
+<div class="variant-text-group">
+                    text
+                  </div>
+
+                    </div>
+                  </div>
+
+                  <div class="form-group half" >
+                    <label>Value</label>
+                     <div class="variant-price-container">
+<div class="variant-text-group">
+                    text
+                  </div>
+
+                    </div>
+                  </div>
+
+
+                  <div class="form-group half" >
+                    <label>Price</label>
+                    <div class="variant-price-container">
+<div class="input-group sale-price-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">$</span>
+                    </div>
+                    <input type="text" id="sale-price" class="form-control" value="3,599">
+                  </div>
+
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+
+ <div class="variant-group">
+                <div class="variant-header">
+                            <div class="variant-header-left">
+                <i class="fa-solid fa-bars-staggered"></i>
+                            <h3> Variant 1</h3>
+                </div>
+                  <div class="variant-actions">
+                    <a href="#" class="link-text">Edit variant</a>
+                    <button class="delete-btn"><i class="fas fa-trash"></i></button>
+                  </div>
+                </div>
+                
+                <div class="form-row">
+                  <div class="form-group half" style="flex: 0.4 !important;">
+                    <label>Type</label>
+                    <div class="variant-image-upload-container" >
+<div class="variant-image-upload">
+                <div class="upload-icon">
+                  <i class="fas fa-cloud-upload-alt"></i>
+                </div>
+
+              </div>
+                              <span class="variant-image-upload-text">Small</span>
+                    </div>
+                  </div>
+                  <div class="form-group half" >
+                    <label>Value</label>
+                     <div class="variant-price-container">
+<div class="select-container">
+                      <select class="form-control">
+                        <option value="color" selected="">Color</option>
+                      </select>
+                    </div>
+
+                    </div>
+                  </div>
+
+                  <div class="form-group half" >
+                    <label>Value</label>
+                     <div class="variant-price-container">
+<div class="select-container">
+                      <select class="form-control">
+                        <option value="color" selected="">Color</option>
+                      </select>
+                    </div>
+
+                    </div>
+                  </div>
+
+                  <div class="form-group half" >
+                    <label>Value</label>
+                     <div class="variant-price-container">
+<div class="select-container">
+                      <select class="form-control">
+                        <option value="color" selected="">Color</option>
+                      </select>
+                    </div>
+
+                    </div>
+                  </div>
+
+
+                  <div class="form-group half" >
+                    <label>Price</label>
+                    <div class="variant-price-container">
+<div class="input-group sale-price-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">$</span>
+                    </div>
+                    <input type="text" id="sale-price" class="form-control" value="3,599">
+                  </div>
+
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+
+
+
+              
+
+
+
+              
+
+              <div class="variant-group">
+              <div class="variant-header">
+                            <div class="variant-header-left">
+                <i class="fa-solid fa-bars-staggered"></i>
+                            <h3> Variant 1</h3> <i class="fa-solid fa-chevron-up"></i>
+                </div>
+                <div class="variant-actions">
+                  <a href="#" class="link-text">Edit variant</a>
+                  <button class="delete-btn"><i class="fas fa-trash"></i></button>
+                </div>
+              </div>
+              
+              <div class="form-row">
+                <div class="form-group half" style="flex: 0.4 !important;">
+                  <div class="variant-image-upload-container" >
+<div class="variant-image-upload">
+              <div class="upload-icon">
+                <i class="fas fa-cloud-upload-alt"></i>
+              </div>
+
+            </div>
+            
+                  </div>
+                </div>
+                <div class="form-group half" >
+                   <div class="variant-price-container">
+<div class="select-container">
+                    <select class="form-control">
+                      <option value="color" selected="">Color</option>
+                    </select>
+                  </div>
+
+                  </div>
+                </div>
+
+                <div class="form-group half" >
+                   <div class="variant-price-container">
+<div class="select-container">
+                    <select class="form-control">
+                      <option value="color" selected="">Color</option>
+                    </select>
+                  </div>
+
+                  </div>
+                </div>
+
+                <div class="form-group half" >
+                   <div class="variant-price-container">
+<div class="sku-container">
+<input type="text" id="sale-price" class="form-control" value="SKU">
+                  </div>
+
+                  </div>
+                </div>
+
+
+                <div class="form-group half" >
+                  <div class="variant-price-container">
+<div class="input-group sale-price-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">$</span>
+                  </div>
+                  <input type="text" id="sale-price" class="form-control" value="3,599">
+                </div>
+
+                  </div>
+                </div>
+              </div>
+            </div>
+
+
+              
+
+
+
+            <div class="variant-group">
+            
+            
+            <div class="form-row">
+              <div class="form-group half" style="flex: 0.4 !important;">
+                <div class="variant-image-upload-container" >
+<div class="variant-image-upload">
+            <div class="upload-icon">
+              <i class="fas fa-cloud-upload-alt"></i>
+            </div>
+
+          </div>
+          
+                </div>
+              </div>
+              <div class="variant-user-content-with-header">
+              <div class="variant-header">
+                          <div class="variant-header-left">
+              <i class="fa-solid fa-bars-staggered"></i>
+                          <h3> Variant 1</h3> <i class="fa-solid fa-chevron-up"></i>
+              </div>
+              <div class="variant-actions">
+                <a href="#" class="link-text">Edit variant</a>
+                <button class="delete-btn"><i class="fas fa-trash"></i></button>
+              </div>
+            </div>
+                            <div class="variant-user-content">
+              <div class="form-group half" >
+                 <div class="variant-price-container">
+<div class="select-container">
+                  <select class="form-control">
+                    <option value="color" selected="">Color</option>
+                  </select>
+                </div>
+
+                </div>
+              </div>
+
+              <div class="form-group half" >
+                 <div class="variant-price-container">
+<div class="select-container">
+                  <select class="form-control">
+                    <option value="color" selected="">Color</option>
+                  </select>
+                </div>
+
+                </div>
+              </div>
+
+              <div class="form-group half" >
+                 <div class="variant-price-container">
+<div class="sku-container">
+<input type="text" id="sale-price" class="form-control" value="SKU">
+                </div>
+
+                </div>
+              </div>
+
+
+              <div class="form-group half" >
+                <div class="variant-price-container">
+<div class="input-group sale-price-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">$</span>
+                </div>
+                <input type="text" id="sale-price" class="form-control" value="3,599">
+              </div>
+</div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+            
+
+
+
+          <div class="variant-group">
+            
+            
+          <div class="form-row">
+
+            <div class="variant-user-content-with-header">
+            <div class="variant-header">
+                        <div class="variant-header-left">
+            <i class="fa-solid fa-bars-staggered"></i>
+                        <h3> Variant 1</h3> <i class="fa-solid fa-chevron-up"></i>
+            </div>
+            <div class="variant-actions">
+              <a href="#" class="link-text">Edit variant</a>
+              <button class="delete-btn"><i class="fas fa-trash"></i></button>
+            </div>
+          </div>
+                          <div class="variant-user-content">
+            <div class="form-group half" >
+               <div class="variant-price-container">
+<div class="select-container">
+                <select class="form-control">
+                  <option value="color" selected="">Color</option>
+                </select>
+              </div>
+
+              </div>
+            </div>
+
+            <div class="form-group half" >
+               <div class="variant-price-container">
+<div class="select-container">
+                <select class="form-control">
+                  <option value="color" selected="">Color</option>
+                </select>
+              </div>
+
+              </div>
+            </div>
+
+            <div class="form-group half" >
+               <div class="variant-price-container">
+<div class="sku-container">
+<input type="text" id="sale-price" class="form-control" value="SKU">
+              </div>
+
+              </div>
+            </div>
+
+
+            <div class="form-group half" >
+              <div class="variant-price-container">
+<div class="input-group sale-price-group">
+              <div class="input-group-prepend">
+                <span class="input-group-text">$</span>
+              </div>
+              <input type="text" id="sale-price" class="form-control" value="3,599">
+            </div>
+</div></div>
+              </div>
+            </div>
+                          <div class="form-group half" style="flex: 0.4 !important;">
+              <div class="variant-image-upload-container" >
+<div class="variant-image-upload">
+          <div class="upload-icon">
+            <i class="fas fa-cloud-upload-alt"></i>
+          </div>
+
+        </div>
+        
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+
+              
+              <div class="add-more-container">
+                <button class="btn btn-add"><i class="fas fa-plus"></i> Add Variant</button>
+              </div>
+            </div>
+          </section>
+
+          
+          <!-- Shipping & Logistics Section -->
+          <section class="product-section toggle-section">
+            <div class="section-header-with-toggle">
+              <h2>Shipping & Logistics</h2>
+              <div class="toggle-container">
+                <span class="toggle-label">This product require shipping</span>
+                <label class="toggle-switch">
+                  <input type="checkbox" checked class="section-toggle">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+            
+            <div class="section-content">
+              <div class="form-row">
+                <div class="form-group half">
+                  <label for="shipping-weight">Shipping Weight (kg)</label>
+
+
+                  <div class="select-container shipping-weight">
+                  <input type="text" class="form-control" value="200">
+                    <select id="shipping-weight" class="form-control">
+                      <option value="grams" selected>Grams</option>
+                                            <option value="grams" selected>KG</option>
+                    </select>
+                  </div>
+
+
+                </div>
+                <div class="form-group half">
+                  <label for="shipping-class">Shipping Class</label>
+                  <div class="select-container">
+                    <select id="shipping-class" class="form-control">
+                      <option value="heavy" selected>Heavy</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="form-row">
+                <div class="form-group third">
+                  <label for="length">Length</label>
+<div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">cm</span>
+                    </div>
+                    <input type="text" class="form-control" value="2,989">
+                  </div>
+                </div>
+                <div class="form-group third">
+                  <label for="breadth">Breadth</label>
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">cm</span>
+                    </div>
+                    <input type="text" class="form-control" value="2,989">
+                  </div>
+                </div>
+                <div class="form-group third">
+                  <label for="width">Width</label>
+<div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">cm</span>
+                    </div>
+                    <input type="text" class="form-control" value="2,989">
+                  </div>
+                </div>
+              </div>
+              
+              <div class="add-more-container">
+                <a href="#" class="link-text">Add customes shipping information</a>
+              </div>
+            </div>
+          </section>
+
+
+
+          <!-- Product Video Section 
+          <section class="product-section toggle-section">
+            <div class="section-header-with-toggle">
+              <h2>Product video</h2>
+              <div class="toggle-container">
+                <label class="toggle-switch">
+                  <input type="checkbox" checked class="section-toggle">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+            
+            <div class="section-content">
+              <div class="form-group"><div class="form-row-top-input">
+                <label for="product-short-description">Video link</label>
+                </div>
+                <input type="text" id="product-short-description" class="form-control" rows="3" placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ">
+              </div>
+
+                          <div class="product-images-container">
+              <div class="product-image-upload">
+                <div class="upload-icon">
+                  <i class="fas fa-cloud-upload-alt"></i>
+                </div>
+                <div class="upload-text">Drop your thumbnail video image here</div>
+                <div class="upload-subtext">or select <a href="#">Click to browse</a></div>
+              </div>
+              
+              <div class="product-image-preview">
+                <img src="img/appsimg/macbook-pro.png" alt="MacBook Pro" class="main-preview-image">
+              </div>
+            </div>
+              
+            </div>
+          </section>-->
+
+
+
+
+          
+          <!-- Additional Info Section -->
+          <section class="product-section toggle-section">
+            <div class="section-header-with-toggle">
+              <h2>Aditional info</h2>
+              <div class="toggle-container">
+                <label class="toggle-switch">
+                  <input type="checkbox" checked class="section-toggle">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+            
+            <div class="section-content">
+              <div class="form-group"><div class="form-row-top-input">
+                <label for="product-short-description">Product short description</label>
+                <div class="char-count">111 out of 160 max recommended characters.</div>
+                </div>
+                <textarea id="product-short-description" class="form-control" rows="3" placeholder="Max 160 characters"></textarea>
+              </div>
+              
+              <div class="form-group">
+                <label for="after-purchase-note">After Purchase note</label>
+                <textarea id="after-purchase-note" class="form-control" rows="5"></textarea>
+              </div>
+            </div>
+          </section>
+          
+
+
+
+
+          <!-- Upsale & Crosssell Section -->
+          <section class="product-section toggle-section">
+            <div class="section-header-with-toggle">
+              <h2>Upsale & Crosssell</h2>
+              <div class="toggle-container">
+                <span class="toggle-label">Product has upsale & crosssell</span>
+                <label class="toggle-switch">
+                  <input type="checkbox" checked class="section-toggle">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+            
+            <div class="section-content">
+              
+              
+              <div class="upsale-group">
+                              
+                <div class="form-row">
+                  
+                  <div class="form-group half" >
+                    <label>Upsale</label>
+                    <div class="tags-container">
+                      <div class="tag">
+<div class="products-list-avatar" style="background-color: transparent;">
+          <img src="img/appsimg/router.png" alt="Product" style="width: 42px; height: 42px; object-fit: contain;">
+        </div>
+                        <span>Space Black nume produs mai lung sa vedem cum se vede</span>
+                        <button class="remove-tag"><i class="fas fa-times"></i></button>
+                      </div>
+                      <div class="tag">
+                        <div class="products-list-avatar" style="background-color: transparent;">
+          <img src="img/appsimg/camera.png" alt="Product" style="width: 42px; height: 42px; object-fit: contain;">
+        </div>
+                        <span>Silver</span>
+                        <button class="remove-tag"><i class="fas fa-times"></i></button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="crosssell-group">
+                
+                
+                <div class="form-row">
+                  
+                  <div class="form-group half">
+                    <label>Crosssell</label>
+                    <div class="tags-container">
+                      <div class="tag">
+                        <div class="products-list-avatar" style="background-color: transparent;">
+          <img src="img/appsimg/router.png" alt="Product" style="width: 42px; height: 42px; object-fit: contain;">
+        </div>
+                        <span>512GB</span>
+                        <button class="remove-tag"><i class="fas fa-times"></i></button>
+                      </div>
+                      <div class="tag">
+                        <span>1TB</span>
+                        <button class="remove-tag"><i class="fas fa-times"></i></button>
+                      </div>
+                      <div class="tag">
+                        <span>2TB</span>
+                        <button class="remove-tag"><i class="fas fa-times"></i></button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+             
+            </div>
+          </section>
+
+
+
+
+          <!-- Snippet Preview Section -->
+          <section class="product-section">
+            <div class="section-header-with-link">
+              <h2>Snippet Preview</h2>
+              <a href="#" class="link-text">Social Media Post Customizer</a>
+            </div>
+            
+            <div class="section-content">
+              <div class="snippet-preview">
+                              <div class="snippet-site-title-url">Street-wear.ro</div>
+                <div class="snippet-url">https://street-wear.ro/produs/tricouri-altfel/tricouri-destepte/its-about-time/</div>
+                <h3 class="snippet-title">It's about time – Tricouri & Hanorace Personalizate – Street-wear.ro</h3>
+                <p class="snippet-description">Este timpul... sau este despre timp... Tricouri si hanorace personalizate de artisti romani - Calitate premium!</p>
+              </div>
+            </div>
+          </section>
+        </div>
+        
+        <!-- Right Column - Publishing Options (1/3 width) -->
+        <div class="product-product-publish-column">
+          <h2 class="sidebar-title">Publishing Settings</h2>
+          <div class="publishing-options-section">
+          
+          <div class="publish-section">
+          <div class="form-row-top-input">
+            <label class="publish-label">Status</label>
+            <div class="schedule-publish-btn">Schedule</div>
+            </div>
+            <div class="select-container">
+              <select class="form-control">
+                <option value="active" selected style="color: #333 !important;">Active</option>
+                <option value="draft" style="color: #333 !important;">Draft</option>
+                <option value="archived" style="color: #333 !important;">Staff Review</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="publish-section">
+            <label class="publish-label">Schedule publishing</label>
+            <div class="date-picker-container">
+              <input type="text" class="form-control date-input" value="05-01-2025">
+              <button class="calendar-button">
+                <i class="fas fa-calendar-alt"></i>
+              </button>
+            </div>
+          </div>
+
+
+
+
+
+</div>
+
+          <div class="publish-section featured-product">
+            <div class="featured-product-content">
+              <div class="star-icon">★</div>
+              <span>This is a featured product</span>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+
+
+          <div class="publish-section-toggle">
+            <input type="checkbox" id="selling-type-toggle" class="section-toggle-input" checked>
+            <div class="publish-section-header">
+              <h3>Language</h3>
+              <label class="toggle-switch" for="selling-type-toggle">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            
+            <div class="publish-section-content">
+<div class="publish-section">  
+ <div class="form-row-top-input">
+            <label class="publish-label">Language</label>
+                        <div class="schedule-publish-btn">Generate with A.I.</div>
+
+            </div>
+            <div class="select-container">
+              <select class="form-control">
+                <option value="active" selected="" style="color: #333 !important;">English</option>
+                                <option value="draft" style="color: #333 !important;">Spanish</option>
+                <option value="draft" style="color: #333 !important;">French</option>
+                <option value="archived" style="color: #333 !important;">German</option>
+              </select>
+            </div>
+          </div>
+<div class="translation-buttons-section">
+<button class="btn btn-secondary">Manual translation</button>
+<button class="btn btn-primary">Generate with A.I.</button>
+</div>
+          
+              </div>
+            </div>
+          
+
+
+          
+
+
+          <div class="publish-section-toggle">
+              <input type="checkbox" id="additional-toggle" class="section-toggle-input" checked>
+            <div class="publish-section-header">
+              <h3>Additional</h3>
+              <label class="toggle-switch" for="additional-toggle">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            
+            <div class="publish-section-content">
+              <div class="profit-calculator">
+                <div class="calc-row">
+                  <label>Custom badge</label>
+                  <div class="input-group">
+
+                    <input type="text" class="form-control" value="HOT">
+                  </div>
+                </div>
+                
+                
+                <div class="calc-row">
+                  <label>Margin</label>
+                  <div class="input-group">
+                    <input type="text" class="form-control" value="800 x 800" disabled>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+
+<div class="publish-section-toggle">
+            <input type="checkbox" id="visibility-toggle" class="section-toggle-input" checked>
+            <div class="publish-section-header">
+              <h3>Visibility</h3>
+              <label class="toggle-switch" for="visibility-toggle">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            
+            <div class="publish-section-content">
+<div class="publish-section">  
+ <div class="form-row-top-input">
+            <label class="publish-label">Selling type</label>
+            </div>
+            <div class="select-container">
+              <select class="form-control">
+                <option value="active" selected="" style="color: #333 !important;">Both in-store and online</option>
+                                <option value="draft" style="color: #333 !important;">Online selling only</option>
+                <option value="draft" style="color: #333 !important;">In-store selling only/option>
+              </select>
+            </div>
+          </div>
+
+
+          <div class="publish-section">  
+ <div class="form-row-top-input">
+            <label class="publish-label">Visibility</label>
+            </div>
+            <div class="select-container">
+              <select class="form-control">
+                <option value="active" selected="" style="color: #333 !important;">Shop and search results</option>
+                                <option value="draft" style="color: #333 !important;">Shop only</option>
+                <option value="draft" style="color: #333 !important;">Search results only</option>
+                <option value="archived" style="color: #333 !important;">Hidden</option>
+              </select>
+            </div>
+          </div>
+
+
+
+          <div class="publish-section">  
+ <div class="form-row-top-input">
+            <label class="publish-label">Markets</label>
+            </div>
+            <div class="select-container">
+              <select class="form-control">
+                <option value="active" selected="" style="color: #333 !important;">All over the world</option>
+                                <option value="draft" style="color: #333 !important;">Continental (Europe)</option>
+                <option value="draft" style="color: #333 !important;">National (Romania)</option>
+                <option value="archived" style="color: #333 !important;">Judet (Constanta)</option>
+                                <option value="archived" style="color: #333 !important;">Local (Constanta area)</option>
+
+              </select>
+            </div>
+          </div>
+
+
+          <div class="publish-section">  
+ <div class="form-row-top-input">
+            <label class="publish-label">Language</label>
+                        <div class="schedule-publish-btn">Generate with A.I.</div>
+
+            </div>
+            <div class="select-container">
+              <select class="form-control">
+                <option value="active" selected="" style="color: #333 !important;">English</option>
+                                <option value="draft" style="color: #333 !important;">Spanish</option>
+                <option value="draft" style="color: #333 !important;">French</option>
+                <option value="archived" style="color: #333 !important;">German</option>
+              </select>
+            </div>
+          </div>
+          
+
+
+          
+
+          
+              </div>
+            </div>
+
+
+
+
+
+          
+          <div class="publish-section-toggle">
+            <input type="checkbox" id="profit-calculator-toggle" class="section-toggle-input" checked>
+            <div class="publish-section-header">
+              <h3>Profit calculator</h3>
+              <label class="toggle-switch" for="profit-calculator-toggle">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            
+            <div class="publish-section-content">
+              <div class="profit-calculator">
+                <div class="calc-row">
+                  <label>Cost per item</label>
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">$</span>
+                    </div>
+                    <input type="text" class="form-control" value="2,989">
+                  </div>
+                </div>
+                
+                <div class="calc-row">
+                  <label>Profit</label>
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">$</span>
+                    </div>
+                    <input type="text" class="form-control" value="200" disabled>
+                  </div>
+                </div>
+                
+                <div class="calc-row">
+                  <label>Margin</label>
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">$</span>
+                    </div>
+                    <input type="text" class="form-control" value="8.3%" disabled>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="publish-section-toggle">
+            <input type="checkbox" id="example-toggle" class="section-toggle-input">
+            <div class="publish-section-header">
+              <h3>Example of closed item</h3>
+              <label class="toggle-switch" for="example-toggle">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            
+            <div class="publish-section-content">
+              <!-- Content would go here when toggle is on -->
+              <p>This content is hidden when the toggle is off.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  }
+
+  // Note: The toggle functionality is now handled by the initializeProductSectionToggles function in app.js
+  // This ensures we don't have duplicate functions causing conflicts
+
+  // Initialize product section toggles for both columns
+  function initializeProductSectionToggles() {
+    console.log('Initializing product section toggles');
+
+    // Handle toggles in product-main-column
+    const mainColumnToggles = document.querySelectorAll('.product-main-column .section-toggle');
+    mainColumnToggles.forEach(toggle => {
+      const toggleSection = toggle.closest('.toggle-section');
+      const sectionContent = toggleSection.querySelector('.section-content');
+
+      // Set initial state (all on by default except pricing)
+      if (toggleSection.querySelector('h2').textContent.trim().toLowerCase() === 'pricing') {
+        toggle.checked = false;
+        if (sectionContent) sectionContent.style.display = 'none';
+      } else {
+        toggle.checked = true;
+        if (sectionContent) sectionContent.style.display = 'block';
+      }
+
+      // Add event listener
+      toggle.addEventListener('change', () => {
+        if (sectionContent) {
+          sectionContent.style.display = toggle.checked ? 'block' : 'none';
+        }
+      });
+    });
+
+    // Handle toggles in product-product-publish-column (already working, but adding for consistency)
+    const publishColumnToggles = document.querySelectorAll('.product-product-publish-column .section-toggle-input');
+    publishColumnToggles.forEach(toggle => {
+      const toggleSection = toggle.closest('.publish-section-toggle');
+      const sectionContent = toggleSection.querySelector('.publish-section-content');
+
+      // Set initial state based on checked attribute
+      if (sectionContent) {
+        sectionContent.style.display = toggle.checked ? 'block' : 'none';
+      }
+
+      // Add event listener
+      toggle.addEventListener('change', () => {
+        if (sectionContent) {
+          sectionContent.style.display = toggle.checked ? 'block' : 'none';
+        }
+      });
+    });
+    
+    // Initialize category dropdown
+    initializeCategoryDropdown();
+  }
   
+  // Initialize the category dropdown functionality
+  function initializeCategoryDropdown() {
+    const categorySelect = document.getElementById('category');
+    const categoryDropdown = document.querySelector('.category-dropdown');
+    const selectContainer = categorySelect ? categorySelect.closest('.select-container') : null;
+    
+    if (!categorySelect || !categoryDropdown || !selectContainer) return;
+    
+    // Ensure dropdown is initially hidden
+    categoryDropdown.style.display = 'none';
+    categoryDropdown.classList.remove('show');
+    
+    // Prevent the native dropdown from showing
+    categorySelect.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+    });
+    
+    // Show dropdown when clicking on the select container
+    selectContainer.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      if (categoryDropdown.classList.contains('show')) {
+        categoryDropdown.style.opacity = '0';
+        setTimeout(() => {
+          categoryDropdown.classList.remove('show');
+          categoryDropdown.style.display = 'none';
+        }, 200);
+      } else {
+        // Position the dropdown
+        categoryDropdown.classList.add('show');
+        categoryDropdown.style.display = 'block';
+        categoryDropdown.style.opacity = '0';
+        
+        // Force reflow
+        categoryDropdown.offsetHeight;
+        
+        // Animate in
+        categoryDropdown.style.transition = 'opacity 0.2s ease-out';
+        categoryDropdown.style.opacity = '1';
+      }
+    });
+    
+    // Handle tab switching
+    const tabs = categoryDropdown.querySelectorAll('.category-tab');
+    tabs.forEach(tab => {
+      tab.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        
+        // In a real implementation, you would show/hide categories based on the selected tab
+        // For this demo, we'll just keep all categories visible
+      });
+    });
+    
+    // Handle option selection
+    const options = categoryDropdown.querySelectorAll('.category-dropdown-option');
+    options.forEach(option => {
+      option.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        // Update the checkbox
+        const checkbox = option.querySelector('input[type="checkbox"]');
+        checkbox.checked = !checkbox.checked;
+        
+        // Update the selected state visually
+        if (checkbox.checked) {
+          option.classList.add('selected');
+          
+          // Update the select value
+          const selectedOption = categorySelect.querySelector('option');
+          if (selectedOption) {
+            selectedOption.textContent = option.textContent.trim();
+          }
+        } else {
+          option.classList.remove('selected');
+        }
+      });
+    });
+    
+    // Create add new category form HTML
+    const addCategoryFormHTML = `
+      <div class="add-category-form">
+        <div class="form-group">
+          <label for="new-category-name">Category name</label>
+          <input type="text" id="new-category-name" class="form-control" placeholder="Enter category name">
+        </div>
+        <div class="form-group">
+          <label for="parent-category">Parent category</label>
+          <div class="select-container">
+            <select id="parent-category" class="form-control">
+              <option value="" selected style="color: #333;" >— Parent Brand —</option>
+              <option value="artisti" style="color: #333;">Artisti</option>
+              <option value="editabile" style="color: #333;">Editabile</option>
+            </select>
+          </div>
+        </div>
+        <div class="add-category-actions">
+          <button class="btn-cancel">Cancel</button>
+          <button class="btn-add-category">Add Category</button>
+        </div>
+      </div>
+    `;
+    
+    // Define the add category handler function separately so we can reuse it
+    function handleAddCategoryClick(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      // Check if form is already added
+      const existingForm = categoryDropdown.querySelector('.add-category-form');
+      if (existingForm) {
+        // Form already exists, just show it
+        existingForm.style.display = 'block';
+        return;
+      }
+      
+      // Add the form to the dropdown
+      const footer = categoryDropdown.querySelector('.category-dropdown-footer');
+      footer.innerHTML = addCategoryFormHTML;
+      
+      // Increase the dropdown height to accommodate the form
+      categoryDropdown.style.maxHeight = '500px';
+      
+      // Handle cancel button
+      const cancelBtn = footer.querySelector('.btn-cancel');
+      cancelBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        // Restore the original footer content
+        footer.innerHTML = '<a href="#" class="add-category-link">+ Add new category</a>';
+        
+        // Reset the dropdown height
+        categoryDropdown.style.maxHeight = '400px';
+        
+        // Re-attach the event listener to the new add category link
+        const newAddCategoryLink = footer.querySelector('.add-category-link');
+        if (newAddCategoryLink) {
+          newAddCategoryLink.addEventListener('click', handleAddCategoryClick);
+        }
+      });
+      
+      // Handle add category button
+      const addCategoryBtn = footer.querySelector('.btn-add-category');
+      addCategoryBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const categoryName = footer.querySelector('#new-category-name').value;
+        const parentCategory = footer.querySelector('#parent-category').value;
+        
+        if (!categoryName) {
+          alert('Please enter a category name');
+          return;
+        }
+        
+        // In a real implementation, you would add the category to the database
+        // For this demo, we'll just add it to the dropdown
+        const optionsContainer = categoryDropdown.querySelector('.category-options-container');
+        const newOption = document.createElement('div');
+        newOption.className = 'category-dropdown-option' + (parentCategory ? ' category-child' : '');
+        newOption.innerHTML = `<input type="checkbox"> ${categoryName}`;
+        
+        // Add the new option to the options container
+        optionsContainer.appendChild(newOption);
+        
+        // Add event listener to the new option
+        newOption.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          
+          const checkbox = newOption.querySelector('input[type="checkbox"]');
+          checkbox.checked = !checkbox.checked;
+          
+          if (checkbox.checked) {
+            newOption.classList.add('selected');
+            
+            // Update the select value
+            const selectedOption = categorySelect.querySelector('option');
+            if (selectedOption) {
+              selectedOption.textContent = newOption.textContent.trim();
+            }
+          } else {
+            newOption.classList.remove('selected');
+          }
+        });
+        
+        // Restore the original footer content
+        footer.innerHTML = '<a href="#" class="add-category-link">+ Add new category</a>';
+        
+        // Reset the dropdown height
+        categoryDropdown.style.maxHeight = '400px';
+        
+        // Re-attach the event listener to the new add category link
+        const newAddCategoryLink = footer.querySelector('.add-category-link');
+        if (newAddCategoryLink) {
+          newAddCategoryLink.addEventListener('click', handleAddCategoryClick);
+        }
+      });
+    }
+    
+    // Handle add new category link
+    const addCategoryLink = categoryDropdown.querySelector('.add-category-link');
+    if (addCategoryLink) {
+      addCategoryLink.addEventListener('click', handleAddCategoryClick);
+    }
+    
+    // Prevent dropdown from closing when clicking inside it
+    categoryDropdown.addEventListener('click', (e) => {
+      e.stopPropagation();
+    });
+    
+    // Close dropdown only when clicking outside
+    document.addEventListener('click', (e) => {
+      if (categoryDropdown.classList.contains('show') && 
+          !categoryDropdown.contains(e.target) && 
+          !selectContainer.contains(e.target)) {
+        categoryDropdown.style.opacity = '0';
+        setTimeout(() => {
+          categoryDropdown.classList.remove('show');
+          categoryDropdown.style.display = 'none';
+        }, 200);
+      }
+    });
+  }
+
+  // Make sure toggles and dropdowns are initialized when product content is loaded
+  document.addEventListener('DOMContentLoaded', function () {
+    // If the function exists in the global scope (from app.js), call it
+    if (typeof initializeProductSectionToggles === 'function') {
+      initializeProductSectionToggles();
+    }
+    
+    // Initialize category dropdown
+    initializeCategoryDropdown();
+  });
+
+
+
+
+
+
+  function showProductsMoreOptions(targetElement, product) {
+    // Create more options panel
+    const morePanel = document.createElement('div');
+    morePanel.className = 'orders-more-panel';
+    morePanel.innerHTML = `
+      <div class="more-panel-header">
+        <div class="more-panel-title">Products Options</div>
+        <button class="more-panel-close"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="more-panel-content">
+        <button class="more-panel-option ${product.favorite ? 'active' : ''}" data-action="favorite">
+          <i class="fas fa-star"></i> ${product.favorite ? 'Remove from Favorites' : 'Add to Favorites'}
+        </button>
+        <button class="more-panel-option" data-action="print">
+          <i class="fas fa-print"></i> Print Order
+        </button>
+        <button class="more-panel-option" data-action="export">
+          <i class="fas fa-file-export"></i> Export Order
+        </button>
+        <button class="more-panel-option" data-action="duplicate">
+          <i class="fas fa-copy"></i> Duplicate Order
+        </button>
+      </div>
+    `;
+
+    // Position the panel
+    const rect = targetElement.getBoundingClientRect();
+    morePanel.style.position = 'absolute';
+    morePanel.style.top = `${rect.bottom + window.scrollY + 5}px`;
+    morePanel.style.right = `${window.innerWidth - rect.right - window.scrollX}px`;
+    document.body.appendChild(morePanel);
+
+    // Animation
+    morePanel.style.opacity = '0';
+    morePanel.style.transform = 'scale(0.95)';
+    morePanel.classList.add('more-panel-anim-in');
+
+    // Handle close button
+    const closeButton = morePanel.querySelector('.more-panel-close');
+    if (closeButton) {
+      closeButton.addEventListener('click', function hideMorePanel(ev) {
+        morePanel.classList.remove('more-panel-anim-in');
+        morePanel.classList.add('more-panel-anim-out');
+
+        morePanel.addEventListener('animationend', function handler() {
+          morePanel.removeEventListener('animationend', handler);
+          morePanel.remove();
+        });
+      });
+    }
+
+    // Handle click outside
+    const handleOutsideClick = (e) => {
+      if (!morePanel.contains(e.target) && e.target !== targetElement) {
+        morePanel.classList.remove('more-panel-anim-in');
+        morePanel.classList.add('more-panel-anim-out');
+
+        morePanel.addEventListener('animationend', function handler() {
+          morePanel.removeEventListener('animationend', handler);
+          morePanel.remove();
+          document.removeEventListener('click', handleOutsideClick, true);
+        });
+      }
+    };
+
+    // Delay adding the click handler to prevent immediate closing
+    setTimeout(() => {
+      document.addEventListener('click', handleOutsideClick, true);
+    }, 100);
+
+    // Handle options
+    const options = morePanel.querySelectorAll('.more-panel-option');
+    options.forEach(option => {
+      option.addEventListener('click', () => {
+        const action = option.getAttribute('data-action');
+
+        if (action === 'favorite') {
+          // Toggle favorite status
+          order.favorite = !order.favorite;
+          renderProductsList(product.id);
+          renderProductsContent(product);
+
+          // Close panel
+          morePanel.classList.remove('more-panel-anim-in');
+          morePanel.classList.add('more-panel-anim-out');
+          morePanel.addEventListener('animationend', function handler() {
+            morePanel.removeEventListener('animationend', handler);
+            morePanel.remove();
+            document.removeEventListener('click', handleOutsideClick, true);
+          });
+        } else {
+          // For other actions, just show a notification
+          alert(`Action: ${action} - This feature is not implemented in the demo`);
+        }
+      });
+    });
+  }
+
+  function getAddProductsFormHTML() {
+    return `
+      <div class="add-orders-form">
+        <div class="form-header">
+          <h3>Add New Order</h3>
+          <button class="form-close"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="form-body">
+          <div class="form-group">
+            <label for="order-number">Order Number</label>
+            <input type="text" id="order-number" placeholder="Order Number" value="ORD-${Math.floor(10000 + Math.random() * 90000)}">
+          </div>
+          <div class="form-group">
+            <label for="customer-name">Customer Name</label>
+            <input type="text" id="customer-name" placeholder="Customer Name">
+          </div>
+          <div class="form-group">
+            <label for="order-email">Email</label>
+            <input type="email" id="order-email" placeholder="Email Address">
+          </div>
+          <div class="form-group">
+            <label for="order-phone">Phone</label>
+            <input type="tel" id="order-phone" placeholder="Phone Number">
+          </div>
+          <div class="form-group">
+            <label for="order-status">Status</label>
+            <select id="order-status">
+              <option value="Pending">Pending</option>
+              <option value="Processing">Processing</option>
+              <option value="Shipped">Shipped</option>
+              <option value="Completed">Completed</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="order-total">Total Amount</label>
+            <input type="text" id="order-total" placeholder="Total Amount">
+          </div>
+          <div class="form-group">
+            <label for="order-items">Items Count</label>
+            <input type="number" id="order-items" placeholder="Number of Items">
+          </div>
+          <div class="form-group">
+            <label for="order-notes">Notes</label>
+            <textarea id="order-notes" placeholder="Additional Notes"></textarea>
+          </div>
+        </div>
+        <div class="form-footer">
+          <button class="cancel-button">Cancel</button>
+          <button class="save-button">Save Order</button>
+        </div>
+      </div>
+    `;
+  }
+
+  function showEditProductsForm(order, parentElement) {
+    const formContainer = document.createElement('div');
+    formContainer.className = 'add-orders-overlay';
+    formContainer.innerHTML = `
+      <div class="add-orders-form">
+        <div class="form-header">
+          <h3>Edit Order</h3>
+          <button class="form-close"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="form-body">
+          <div class="form-group">
+            <label for="edit-order-number">Order Number</label>
+            <input type="text" id="edit-order-number" value="${order.orderNumber}">
+          </div>
+          <div class="form-group">
+            <label for="edit-customer-name">Customer Name</label>
+            <input type="text" id="edit-customer-name" value="${order.customerName}">
+          </div>
+          <div class="form-group">
+            <label for="edit-order-email">Email</label>
+            <input type="email" id="edit-order-email" value="${order.email}">
+          </div>
+          <div class="form-group">
+            <label for="edit-order-phone">Phone</label>
+            <input type="tel" id="edit-order-phone" value="${order.phone}">
+          </div>
+          <div class="form-group">
+            <label for="edit-order-status">Status</label>
+            <select id="edit-order-status">
+              <option value="Pending" ${order.status === 'Pending' ? 'selected' : ''}>Pending</option>
+              <option value="Processing" ${order.status === 'Processing' ? 'selected' : ''}>Processing</option>
+              <option value="Shipped" ${order.status === 'Shipped' ? 'selected' : ''}>Shipped</option>
+              <option value="Completed" ${order.status === 'Completed' ? 'selected' : ''}>Completed</option>
+              <option value="Cancelled" ${order.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="edit-order-total">Total Amount</label>
+            <input type="text" id="edit-order-total" value="${order.totalAmount}">
+          </div>
+          <div class="form-group">
+            <label for="edit-order-items">Items Count</label>
+            <input type="number" id="edit-order-items" value="${order.itemsCount}">
+          </div>
+          <div class="form-group">
+            <label for="edit-order-notes">Notes</label>
+            <textarea id="edit-order-notes">${order.notes || ''}</textarea>
+          </div>
+        </div>
+        <div class="form-footer">
+          <button class="cancel-button">Cancel</button>
+          <button class="save-button">Save Changes</button>
+        </div>
+      </div>
+    `;
+
+    parentElement.appendChild(formContainer);
+
+    // Animation
+    formContainer.style.opacity = '0';
+    setTimeout(() => {
+      formContainer.style.opacity = '1';
+    }, 10);
+
+    // Handle close button
+    const closeButton = formContainer.querySelector('.form-close');
+    if (closeButton) {
+      closeButton.addEventListener('click', function hidePanel(ev) {
+        formContainer.style.opacity = '0';
+        setTimeout(() => {
+          formContainer.remove();
+        }, 300);
+      });
+    }
+
+    // Handle cancel button
+    const cancelButton = formContainer.querySelector('.cancel-button');
+    if (cancelButton) {
+      cancelButton.addEventListener('click', () => {
+        formContainer.style.opacity = '0';
+        setTimeout(() => {
+          formContainer.remove();
+        }, 300);
+      });
+    }
+
+    // Handle save button
+    const saveButton = formContainer.querySelector('.save-button');
+    if (saveButton) {
+      saveButton.addEventListener('click', () => {
+        // Update order with form values
+        product.orderNumber = formContainer.querySelector('#edit-order-number').value;
+        product.customerName = formContainer.querySelector('#edit-customer-name').value;
+        product.email = formContainer.querySelector('#edit-order-email').value;
+        product.phone = formContainer.querySelector('#edit-order-phone').value;
+        product.status = formContainer.querySelector('#edit-order-status').value;
+        product.totalAmount = formContainer.querySelector('#edit-order-total').value;
+        product.itemsCount = formContainer.querySelector('#edit-order-items').value;
+        product.notes = formContainer.querySelector('#edit-order-notes').value;
+
+        // Update first letter if customer name changed
+        const firstName = order.customerName.split(' ')[0];
+        const firstLetter = firstName.charAt(0).toUpperCase();
+        if (order.letter !== firstLetter) {
+          order.letter = firstLetter;
+
+          // Rebuild grouped orders
+          const groupedProducts = products.reduce((acc, product) => {
+            if (!acc[product.letter]) acc[product.letter] = [];
+            acc[product.letter].push(product);
+            return acc;
+          }, {});
+        }
+
+        // Update UI
+        renderProductsList(product.id);
+        renderProductsContent(product);
+
+        // Close form
+        formContainer.style.opacity = '0';
+        setTimeout(() => {
+          formContainer.remove();
+        }, 300);
+      });
+    }
+  }
+
+  function isMobileProductsApp() {
+    return window.innerWidth <= 767 && windowElement.querySelector('.products-selected-mode');
+  }
+
+  function showProductsContentPanel() {
+    if (isMobileProductsApp() && windowMainContent) {
+      // Force a reflow before adding the class to ensure smooth transition
+      windowMainContent.offsetHeight;
+
+      // Add animation class FIRST
+      windowMainContent.classList.add('animate-content-transition');
+
+      // Make sure content is visible before transition starts
+      const contentSection = windowMainContent.querySelector('.products-content-section');
+      if (contentSection) {
+        contentSection.style.zIndex = '2';
+        contentSection.style.visibility = 'visible';
+      }
+
+      // Then add the class that triggers transform
+      windowMainContent.classList.add('show-products-content');
+
+      // Remove animation class after transition completes
+      setTimeout(() => {
+        windowMainContent.classList.remove('animate-content-transition');
+      }, 350);
+    }
+  }
+
+  function updateProductsListToolbar(selectedId) {
+    const tableHeader = windowElement.querySelector('.products-list-table-header');
+    const searchSort = windowElement.querySelector('.products-list-toolbar-searchsort1');
+    if (!isMobileProductsApp()) {
+      if (typeof selectedId === 'undefined' || selectedId === null) {
+        // No order selected: show table header, hide search/sort
+        if (tableHeader) tableHeader.style.display = '';
+        if (searchSort) searchSort.style.display = 'none';
+      } else {
+        // Order selected: show search/sort, hide table header
+        if (tableHeader) tableHeader.style.display = 'none';
+        if (searchSort) searchSort.style.display = '';
+      }
+    } else {
+      // On mobile, always show search/sort, hide table header
+      if (tableHeader) tableHeader.style.display = 'none';
+      if (searchSort) searchSort.style.display = '';
+    }
+  }
+
+  // Patch renderProductsList to handle mobile view properly
+  const origRenderProductsList = renderProductsList;
+  renderProductsList = function (selectedId) {
+    updateProductsListToolbar(selectedId);
+    origRenderProductsList(selectedId);
+    const selectedProduct = products.find(p => p.id === selectedId);
+
+    if (isMobileProductsApp() && typeof selectedId === 'number' && selectedProduct) {
+      // Render content first, then show panel
+      renderProductsContent(selectedProduct);
+      // Use requestAnimationFrame to ensure content is rendered before transition
+      requestAnimationFrame(() => {
+        showProductsContentPanel();
+      });
+    } else if (selectedProduct) {
+      // On desktop, just render content
+      renderProductsContent(selectedProduct);
+    }
+  };
+
+  // On resize, update layout
+  window.addEventListener('resize', function () {
+    if (!isMobileProductsApp() && windowMainContent) {
+      windowMainContent.classList.remove('show-products-content');
+      // Reset layout when switching from mobile to desktop
+      if (productsContentSection && productsContent && productsContent.querySelector('.products-content-wrapper')) {
+        // If an order is already selected
+        productsContentSection.style.visibility = 'visible';
+        productsContentSection.style.display = '';
+        if (productsListSection) productsListSection.style.width = '320px';
+      } else {
+        // If no order is selected
+        initializeProductsAppLayout();
+      }
+    }
+  });
+
+  // Add mobile back button to toolbar if it doesn't exist
+  const productsToolbar = windowElement.querySelector('.products-content-section .window-toolbar');
+  if (productsToolbar && !productsToolbar.querySelector('.products-back-button')) {
+    const backButton = document.createElement('button');
+    backButton.className = 'toolbar-button products-back-button';
+    backButton.title = 'Back';
+    backButton.innerHTML = '<i class="fas fa-arrow-left"></i><span>Back</span>';
+    backButton.addEventListener('click', () => {
+      showProductsListPanel();
+    });
+
+    // Insert at the beginning of the toolbar
+    const toolbarLeft = productsToolbar.querySelector('.toolbar-buttons-left');
+    if (toolbarLeft) {
+      toolbarLeft.insertBefore(backButton, toolbarLeft.firstChild);
+    }
+  }
+
+  function showProductsListPanel() {
+    if (isMobileProductsApp() && windowMainContent) {
+      // Force a reflow before removing the class to ensure smooth transition
+      windowMainContent.offsetHeight;
+
+      // Add animation class FIRST
+      windowMainContent.classList.add('animate-content-transition');
+
+      // Then remove the class that controls transform
+      windowMainContent.classList.remove('show-products-content');
+
+      // Remove animation class after transition completes
+      setTimeout(() => {
+        windowMainContent.classList.remove('animate-content-transition');
+      }, 350);
+
+      // Reset z-index after animation completes
+      const contentSection = windowMainContent.querySelector('.products-content-section');
+      if (contentSection) {
+        setTimeout(() => {
+          if (!windowMainContent.classList.contains('show-products-content')) {
+            contentSection.style.zIndex = '';
+            contentSection.style.visibility = '';
+          }
+        }, 350);
+      }
+    } else if (!isMobileProductsApp()) {
+      // On desktop, reset the layout
+      if (productsContentSection) {
+        productsContentSection.style.visibility = 'hidden';
+        productsContentSection.style.display = 'none';
+      }
+
+      if (productsListSection) {
+        productsListSection.style.width = '100%';
+        productsListSection.classList.add('table-mode');
+        productsListSection.classList.remove
+      }
+
+      // Show table header
+      const tableHeader = windowElement.querySelector('.products-list-table-header');
+      if (tableHeader) {
+        tableHeader.style.display = '';
+      }
+
+      // Render the products list without a selected order
+      renderProductsList();
+    }
+  }
+
+  // Initial render
+  renderProductsList();
+  initializeProductsAppLayout();
+
+  // Setup back button for mobile view
+  const existingBackButton = windowElement.querySelector('.products-back-button');
+  if (existingBackButton) {
+    existingBackButton.addEventListener('click', () => {
+      showProductsListPanel();
+    });
+  }
+
+
+  // Setup compose button to add new product
+  const composeBtn = windowElement.querySelector('.compose-btn');
+  if (composeBtn) {
+    composeBtn.addEventListener('click', () => {
+      // Generate a unique window ID for each add product window
+      let addProductWindowCount = 1;
+      while (openWindows[`add-product-window-${addProductWindowCount}`]) {
+        addProductWindowCount++;
+      }
+      const windowId = `add-product-window-${addProductWindowCount}`;
+
+      // Create the window from template
+      const addProductWindow = createWindowFromTemplate('add-product-window', windowId, false);
+      if (!addProductWindow) return;
+      
+      // Add simple opening animation
+      addProductWindow.classList.add('window-anim-open');
+
+      // Inject the add product form HTML
+      const content = addProductWindow.querySelector('.add-product-window-content');
+      if (content) {
+        content.innerHTML = getAddProductsFormHTML();
+
+        // Add CSS for the new form
+        const styleElement = document.createElement('style');
+        styleElement.textContent = `
+          .add-products-form {
+            width: 100%;
+            height: 100%;
+            background-color: #121212;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+          }
+          
+          .form-container {
+            display: flex;
+            overflow-y: auto;
+            padding: 20px;
+            gap: 20px;
+            flex: 1;
+          }
+          
+          .form-section {
+            flex: 1;
+            padding: 20px;
+          }
+          
+          .form-section h2 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+          }
+          
+          .form-group {
+            margin-bottom: 20px;
+          }
+          
+          .form-row {
+            display: flex;
+            gap: 20px;
+          }
+          
+          .form-group.half {
+            flex: 1;
+          }
+          
+          .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: white;
+            font-weight: 500;
+          }
+          
+          .input-container {
+            position: relative;
+          }
+          
+
+          
+          .dropdown-arrow {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #888;
+          }
+          
+          .info-circle {
+            color: #888;
+            margin-left: 5px;
+          }
+          
+          .helper-text {
+            margin-top: 5px;
+            color: #888;
+            font-size: 14px;
+          }
+          
+          .rich-text-editor {
+            border: 1px solid #333;
+            border-radius: 5px;
+            overflow: hidden;
+          }
+          
+
+          
+
+          
+
+          
+          .editor-select {
+            background-color: #1e1e1e;
+            color: white;
+            border: 1px solid #333;
+            padding: 5px;
+            margin-left: 10px;
+          }
+          
+          textarea.form-control {
+            min-height: 150px;
+            resize: vertical;
+            border-top: none;
+            border-radius: 0 0 5px 5px;
+          }
+          
+          .radio-group {
+            margin-bottom: 20px;
+          }
+          
+          .radio-container {
+            display: block;
+            position: relative;
+            padding-left: 30px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            color: white;
+          }
+          
+          .radio-container input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+          }
+          
+          .radio-custom {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 20px;
+            width: 20px;
+            background-color: #1e1e1e;
+            border: 1px solid #333;
+            border-radius: 50%;
+          }
+          
+          .radio-container input:checked ~ .radio-custom:after {
+            content: "";
+            position: absolute;
+            display: block;
+            top: 5px;
+            left: 5px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: white;
+          }
+          
+          .product-image-container {
+            width: 100%;
+            height: 200px;
+            background-color: #1e1e1e;
+            border: 1px solid #333;
+            border-radius: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 10px;
+          }
+          
+          .product-image-preview {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+          }
+          
+          .image-thumbnails {
+            display: flex;
+            gap: 10px;
+          }
+          
+          .image-thumbnail {
+            width: 80px;
+            height: 80px;
+            background-color: #1e1e1e;
+            border: 1px solid #333;
+            border-radius: 5px;
+          }
+          
+          .form-footer {
+            padding: 15px 20px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            border-top: 1px solid #333;
+          }
+          
+          .cancel-button {
+            padding: 10px 20px;
+            background-color: transparent;
+            border: 1px solid #555;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+          }
+          
+          .save-button {
+            padding: 10px 20px;
+            background-color: #3498db;
+            border: none;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+          }
+        `;
+        document.head.appendChild(styleElement);
+
+        // Handle cancel button
+        const cancelButton = content.querySelector('.cancel-button');
+        if (cancelButton) {
+          cancelButton.addEventListener('click', () => {
+            // Use standard window close animation
+            const standardCloseBtn = addProductWindow.querySelector('.window-close');
+            if (standardCloseBtn) {
+              standardCloseBtn.click();
+            } else {
+              // Fallback: manual close with animation
+              addProductWindow.classList.remove('window-anim-open', 'window-anim-maximize', 'window-anim-close');
+              addProductWindow.classList.add('window-anim-close');
+              addProductWindow.addEventListener('animationend', function handler(ev) {
+                if (ev.animationName === 'windowClose') {
+                  if (addProductWindow.parentNode) addProductWindow.parentNode.removeChild(addProductWindow);
+                  if (openWindows[windowId]) delete openWindows[windowId];
+                  styleElement.remove();
+                }
+              }, { once: true });
+            }
+          });
+        }
+
+        // Handle save button
+        const saveButton = content.querySelector('.save-button');
+        if (saveButton) {
+          saveButton.addEventListener('click', () => {
+            // Get form values
+            const productName = content.querySelector('#product-name').value;
+            const category = content.querySelector('#product-category').value;
+            const price = content.querySelector('#product-price').value;
+            const brand = content.querySelector('#product-brand').value;
+            const description = content.querySelector('#product-description').value;
+
+            // Get selected visibility status
+            let status = 'Published';
+            const visibilityRadios = content.querySelectorAll('input[name="visibility"]');
+            for (const radio of visibilityRadios) {
+              if (radio.checked) {
+                if (radio.value === 'published') {
+                  status = 'Published';
+                } else if (radio.value === 'schedule') {
+                  status = 'Schedule';
+                } else if (radio.value === 'hidden') {
+                  status = 'Hidden';
+                }
+                break;
+              }
+            }
+
+            if (!productName) {
+              alert('Product name is required');
+              return;
+            }
+
+            // Create new product object
+            const newProduct = {
+              id: products.length + 1,
+              productSKU: 'PRD-' + Math.floor(10000 + Math.random() * 90000),
+              productName,
+              category,
+              brand,
+              description,
+              price,
+              salePrice: '',
+              stock: 0,
+              status,
+              notes: '',
+              type: 'eCommerce',
+              favorite: false,
+              letter: productName.charAt(0).toUpperCase(),
+              icon: 'fa-box-open',
+              color: '#' + Math.floor(Math.random() * 16777215).toString(16),
+              creationDate: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+              lastUpdate: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+              tags: [],
+              attributes: [],
+              variations: [],
+              isNew: true
+            };
+
+            // Add to products array
+            products.push(newProduct);
+
+            // Rebuild grouped products
+            groupedProducts = products.reduce((acc, product) => {
+              // Ensure letter is set based on product name
+              if (!product.letter && product.productName) {
+                product.letter = product.productName.charAt(0).toUpperCase();
+              }
+
+              // Add to appropriate group
+              if (product.letter) {
+                if (!acc[product.letter]) acc[product.letter] = [];
+                acc[product.letter].push(product);
+              }
+              return acc;
+            }, {});
+
+            // Update UI
+            renderProductsList(newProduct.id);
+            renderProductsContent(newProduct);
+
+            // Close window with animation
+            const standardCloseBtn = addProductWindow.querySelector('.window-close');
+            if (standardCloseBtn) {
+              standardCloseBtn.click();
+            } else {
+              // Fallback: manual close with animation
+              addProductWindow.classList.remove('window-anim-open', 'window-anim-maximize', 'window-anim-close');
+              addProductWindow.classList.add('window-anim-close');
+              addProductWindow.addEventListener('animationend', function handler(ev) {
+                if (ev.animationName === 'windowClose') {
+                  if (addProductWindow.parentNode) addProductWindow.parentNode.removeChild(addProductWindow);
+                  if (openWindows[windowId]) delete openWindows[windowId];
+                  styleElement.remove();
+                }
+              }, { once: true });
+            }
+          });
+        }
+      }
+
+      // Register the window in openWindows
+      const iconClass = 'fa-plus-circle';
+      const iconBgClass = 'green-icon';
+      const appTitle = 'Add New Product';
+      openWindows[windowId] = {
+        element: addProductWindow,
+        name: 'add-product',
+        title: appTitle,
+        iconClass: iconClass,
+        iconBgClass: iconBgClass,
+        appTitle: appTitle
+      };
+      makeWindowActive(addProductWindow);
+      // Call renderPinnedTaskbarIcons to immediately update the taskbar
+      renderPinnedTaskbarIcons();
+    });
+  }
+
+  // Apply search functionality
+  const searchInput = windowElement.querySelector('.orders-search-input');
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      const searchTerm = e.target.value.toLowerCase();
+
+      if (!searchTerm) {
+        renderOrdersList();
+        return;
+      }
+
+      // Filter orders based on search term
+      const filteredOrders = orders.filter(order =>
+        (order.orderNumber && order.orderNumber.toLowerCase().includes(searchTerm)) ||
+        (order.customerName && order.customerName.toLowerCase().includes(searchTerm)) ||
+        (order.firstName && order.firstName.toLowerCase().includes(searchTerm)) ||
+        (order.lastName && order.lastName.toLowerCase().includes(searchTerm)) ||
+        (order.email && order.email.toLowerCase().includes(searchTerm)) ||
+        (order.status && order.status.toLowerCase().includes(searchTerm)) ||
+        (order.company && order.company.toLowerCase().includes(searchTerm)) ||
+        (order.notes && order.notes.toLowerCase().includes(searchTerm))
+      );
+
+      // Group filtered orders by letter
+      const filteredGrouped = filteredOrders.reduce((acc, order) => {
+        if (!acc[order.letter]) acc[order.letter] = [];
+        acc[order.letter].push(order);
+        return acc;
+      }, {});
+
+      // Save original grouped orders
+      const originalGrouped = Object.assign({}, groupedOrders);
+
+      // Temporarily replace grouped orders with filtered results
+      Object.keys(groupedOrders).forEach(key => {
+        delete groupedOrders[key];
+      });
+
+      Object.keys(filteredGrouped).forEach(key => {
+        groupedOrders[key] = filteredGrouped[key];
+      });
+
+      // Render filtered list
+      renderOrdersList();
+
+      // Restore original grouped orders
+      Object.keys(groupedOrders).forEach(key => {
+        delete groupedOrders[key];
+      });
+
+      Object.keys(originalGrouped).forEach(key => {
+        groupedOrders[key] = originalGrouped[key];
+      });
+    });
+  }
 }
 
 
@@ -1303,7 +15525,7 @@ function setupAppStore(windowElement) {
     });
   });
 
- 
+
 }
 
 
@@ -1605,6 +15827,217 @@ document.addEventListener('DOMContentLoaded', function () {
       seen.add(appId);
     }
   });
+  
+  // --- Handle window resize for taskbar text mode ---
+  function updateTaskbarTextMode() {
+    // Only update if we're in text mode
+    if (document.querySelector('.taskbar.taskbar-text-mode')) {
+      // Force re-render of taskbar icons
+      renderPinnedTaskbarIcons();
+    }
+  }
+  
+  // Add resize event listener
+  window.addEventListener('resize', updateTaskbarTextMode);
+  
+  // --- Apply saved taskbar style if any ---
+  function applyTaskbarStyle() {
+    const savedTaskbarStyle = localStorage.getItem('taskbarStyle');
+    if (savedTaskbarStyle) {
+      const taskbarAppIcons = document.querySelector('.taskbar-app-icons');
+      const taskbar = document.querySelector('.taskbar');
+      const startButton = document.getElementById('start-button');
+      
+      if (taskbarAppIcons && taskbar && startButton) {
+        switch (savedTaskbarStyle) {
+          case 'windows11':
+            // Windows 11 style
+            taskbarAppIcons.classList.remove('taskbar-icons-left');
+            taskbar.classList.remove('taskbar-text-mode');
+            
+            // Move the start button inside the app icons container at the beginning
+            // for proper Windows 11 centered alignment
+            if (startButton.parentElement !== taskbarAppIcons) {
+              taskbarAppIcons.insertBefore(startButton, taskbarAppIcons.firstChild);
+            }
+            
+            // Add Windows 11 style class to taskbar
+            taskbar.classList.add('taskbar-windows11-style');
+            
+            // Fix start menu positioning for Windows 11 style
+            if (typeof toggleStartMenu === 'function' && !window.originalToggleStartMenu) {
+              window.originalToggleStartMenu = toggleStartMenu;
+              window.toggleStartMenu = function(e) {
+                const startMenu = document.getElementById('start-menu');
+                if (startMenu) {
+                  if (document.querySelector('.taskbar').classList.contains('taskbar-windows11-style')) {
+                    const startButtonWin11 = document.getElementById('start-button');
+                    if (startButtonWin11) {
+                      const startButtonRect = startButtonWin11.getBoundingClientRect();
+                      startMenu.style.left = startButtonRect.left + 'px';
+                    }
+                  } else {
+                    startMenu.style.left = '';
+                  }
+                }
+                return window.originalToggleStartMenu.apply(this, arguments);
+              };
+            }
+            break;
+          case 'left':
+            // Left alignment
+            taskbarAppIcons.classList.add('taskbar-icons-left');
+            taskbar.classList.remove('taskbar-windows11-style');
+            taskbar.classList.remove('taskbar-text-mode');
+            
+            // Ensure proper order of elements in taskbar
+            const searchContainer = document.querySelector('.search-container');
+            if (searchContainer) {
+              // Make sure start button is first
+              taskbar.insertBefore(startButton, taskbar.firstChild);
+              
+              // Make sure search container is after start button
+              if (searchContainer.previousElementSibling !== startButton) {
+                taskbar.insertBefore(searchContainer, startButton.nextSibling);
+              }
+              
+              // Make sure app icons container is after search container
+              taskbar.insertBefore(taskbarAppIcons, searchContainer.nextSibling);
+            }
+            
+            // Reset start menu positioning
+            const startMenu = document.getElementById('start-menu');
+            if (startMenu) {
+              startMenu.style.left = '';
+            }
+            
+            // Restore original toggleStartMenu if needed
+            if (window.originalToggleStartMenu) {
+              window.toggleStartMenu = window.originalToggleStartMenu;
+              window.originalToggleStartMenu = null;
+            }
+            break;
+            
+          case 'text':
+            // Icons and text mode
+            taskbarAppIcons.classList.add('taskbar-icons-left');
+            taskbar.classList.remove('taskbar-windows11-style');
+            taskbar.classList.add('taskbar-text-mode');
+            
+            // Ensure proper order of elements in taskbar
+            const searchContainerText = document.querySelector('.search-container');
+            if (searchContainerText) {
+              // Make sure start button is first
+              taskbar.insertBefore(startButton, taskbar.firstChild);
+              
+              // Make sure search container is after start button
+              if (searchContainerText.previousElementSibling !== startButton) {
+                taskbar.insertBefore(searchContainerText, startButton.nextSibling);
+              }
+              
+              // Make sure app icons container is after search container
+              taskbar.insertBefore(taskbarAppIcons, searchContainerText.nextSibling);
+            }
+            
+            // Reset start menu positioning
+            const startMenuText = document.getElementById('start-menu');
+            if (startMenuText) {
+              startMenuText.style.left = '';
+            }
+            
+            // Restore original toggleStartMenu if needed
+            if (window.originalToggleStartMenu) {
+              window.toggleStartMenu = window.originalToggleStartMenu;
+              window.originalToggleStartMenu = null;
+            }
+            
+            // Force re-render of taskbar icons to include text
+            renderPinnedTaskbarIcons();
+            break;
+          default:
+            // Default style
+            taskbarAppIcons.classList.remove('taskbar-icons-left');
+            taskbar.classList.remove('taskbar-windows11-style');
+            
+            // Ensure proper order of elements in taskbar
+            const defaultSearchContainer = document.querySelector('.search-container');
+            if (defaultSearchContainer) {
+              // Make sure start button is first
+              taskbar.insertBefore(startButton, taskbar.firstChild);
+              
+              // Make sure search container is after start button
+              if (defaultSearchContainer.previousElementSibling !== startButton) {
+                taskbar.insertBefore(defaultSearchContainer, startButton.nextSibling);
+              }
+              
+              // Make sure app icons container is after search container
+              taskbar.insertBefore(taskbarAppIcons, defaultSearchContainer.nextSibling);
+            }
+            
+            // Reset start menu positioning
+            const defaultStartMenu = document.getElementById('start-menu');
+            if (defaultStartMenu) {
+              defaultStartMenu.style.left = '';
+            }
+            
+            // Restore original toggleStartMenu if needed
+            if (window.originalToggleStartMenu) {
+              window.toggleStartMenu = window.originalToggleStartMenu;
+              window.originalToggleStartMenu = null;
+            }
+            break;
+        }
+      }
+    }
+  }
+
+  // --- Utility function to ensure start button exists for Windows 11 style ---
+  function ensureStartButtonForWindows11Style() {
+    // Only proceed if we need to restore Windows 11 style
+    if (localStorage.getItem('taskbarStyle') !== 'windows11') return;
+    
+    const taskbar = document.querySelector('.taskbar');
+    const taskbarAppIcons = document.querySelector('.taskbar-app-icons');
+    let startButton = document.getElementById('start-button');
+    
+    if (!taskbar || !taskbarAppIcons) return;
+    
+    // If start button is missing, recreate it
+    if (!startButton) {
+      if (window._savedStartButtonHTML) {
+        // Create from saved HTML
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = window._savedStartButtonHTML;
+        startButton = tempDiv.firstChild;
+        taskbar.appendChild(startButton);
+      } else {
+        // Create a new start button as fallback
+        startButton = document.createElement('div');
+        startButton.className = 'start-button';
+        startButton.id = 'start-button';
+        startButton.innerHTML = '<i class="fas fa-th"></i>';
+        taskbar.appendChild(startButton);
+        
+        // Add click event listener
+        startButton.addEventListener('click', function() {
+          if (typeof toggleStartMenu === 'function') {
+            toggleStartMenu();
+          }
+        });
+      }
+    }
+    
+    // Ensure start button is in the correct position for Windows 11 style
+    if (startButton && startButton.parentElement !== taskbarAppIcons) {
+      taskbarAppIcons.insertBefore(startButton, taskbarAppIcons.firstChild);
+    }
+    
+    // Ensure taskbar has Windows 11 style class
+    taskbar.classList.add('taskbar-windows11-style');
+    
+    // Mark that we've restored the start button
+    localStorage.removeItem('restore_windows11_style');
+  }
 
   // --- Dynamically create the Taskbar ---
   function createTaskbar() {
@@ -1691,6 +16124,9 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
   createTaskbar();
+  
+  // Apply saved taskbar style after a short delay to ensure DOM is ready
+  setTimeout(applyTaskbarStyle, 100);
 
 
 
@@ -2033,7 +16469,9 @@ document.addEventListener('DOMContentLoaded', function () {
       'photoshop-sm': app => `<div class="widget"><div class="widget-header"><span>${app.name}</span></div><div class="widget-content"><div class="big-number">Photo</div><div class="widget-subtitle">Edit images</div></div></div>`,
       'calendar-sm': app => `<div class="widget"><div class="widget-header"><span>${app.name}</span></div><div class="widget-content"><div class="big-number">Calendar</div><div class="widget-subtitle">Your events</div></div></div>`,
       'notes': app => `<div class="widget"><div class="widget-header"><span>${app.name}</span></div><div class="widget-content"><div class="big-number">Notes</div><div class="widget-subtitle">Sticky notes</div></div></div>`,
-      'email-app': app => `<div class="widget"><div class="widget-header"><span>${app.name}</span></div><div class="widget-content"><div class="big-number">Notes</div><div class="widget-subtitle">Sticky notes</div></div></div>`
+      'email-app': app => `<div class="widget"><div class="widget-header"><span>${app.name}</span></div><div class="widget-content"><div class="big-number">Notes</div><div class="widget-subtitle">Sticky notes</div></div></div>`,
+      'point-of-sale-app': app => `<div class="widget"><div class="widget-header"><span>${app.name}</span></div><div class="widget-content"><div class="big-number">Notes</div><div class="widget-subtitle">Sticky notes</div></div></div>`
+
       // Add more mappings as needed
     };
 
@@ -2059,11 +16497,11 @@ document.addEventListener('DOMContentLoaded', function () {
   generateWidgets();
 
 
-  
+
 
 
 });
-  
+
 
 
 
@@ -2093,119 +16531,119 @@ function updateVolumeUI(value) {
 
 
 
-  // Volume Panel: Live percentage and volume control
-  function setupVolumePanelListeners() {
-    const volumeSlider = document.getElementById('browser-volume-slider');
-    const volumePercent = document.getElementById('volume-percentage');
-    // Try to find a global <audio> element (if you have one)
-    const audio = document.querySelector('audio');
+// Volume Panel: Live percentage and volume control
+function setupVolumePanelListeners() {
+  const volumeSlider = document.getElementById('browser-volume-slider');
+  const volumePercent = document.getElementById('volume-percentage');
+  // Try to find a global <audio> element (if you have one)
+  const audio = document.querySelector('audio');
 
-    if (volumeSlider && volumePercent) {
-      const updateVolume = () => {
-        const value = parseInt(volumeSlider.value, 10);
-        volumePercent.textContent = value + '%';
-        updateVolumeUI(value);
-        if (audio) {
-          audio.volume = value / 100;
-        }
-      };
-      volumeSlider.addEventListener('input', updateVolume);
-      // Set initial value
-      updateVolume();
-    }
-  }
-
-  document.addEventListener('DOMContentLoaded', function () {
-    
-
-    // Define the populateContextMenu function globally
-    window.populateContextMenu = function (menuItems, x, y) {
-      const contextMenu = document.getElementById('context-menu');
-      if (!contextMenu) {
-        console.error('Context menu element not found.');
-        return;
+  if (volumeSlider && volumePercent) {
+    const updateVolume = () => {
+      const value = parseInt(volumeSlider.value, 10);
+      volumePercent.textContent = value + '%';
+      updateVolumeUI(value);
+      if (audio) {
+        audio.volume = value / 100;
       }
-
-      // Clear existing menu items
-      contextMenu.innerHTML = '';
-
-      // Populate menu items
-      menuItems.forEach(item => {
-        if (item.type === 'separator') {
-          const separator = document.createElement('div');
-          separator.className = 'context-menu-separator';
-          contextMenu.appendChild(separator);
-        } else {
-          const menuItem = document.createElement('div');
-          menuItem.className = 'context-menu-item';
-          menuItem.innerHTML = `<i class="fas ${item.icon}"></i><span>${item.label}</span>`;
-          menuItem.addEventListener('click', () => {
-            if (typeof window.executeContextMenuAction === 'function') {
-              window.executeContextMenuAction(item.action);
-            }
-          });
-          contextMenu.appendChild(menuItem);
-        }
-      });
-
-      // Position and display the context menu
-      contextMenu.style.left = `${x}px`;
-      contextMenu.style.top = `${y}px`;
-      contextMenu.classList.remove('hidden');
     };
+    volumeSlider.addEventListener('input', updateVolume);
+    // Set initial value
+    updateVolume();
+  }
+}
 
-    // Ensure the context menu is hidden when clicking outside
-    document.addEventListener('click', (e) => {
-      const contextMenu = document.getElementById('context-menu');
-      if (contextMenu && !contextMenu.contains(e.target)) {
-        contextMenu.classList.add('hidden');
+document.addEventListener('DOMContentLoaded', function () {
+
+
+  // Define the populateContextMenu function globally
+  window.populateContextMenu = function (menuItems, x, y) {
+    const contextMenu = document.getElementById('context-menu');
+    if (!contextMenu) {
+      console.error('Context menu element not found.');
+      return;
+    }
+
+    // Clear existing menu items
+    contextMenu.innerHTML = '';
+
+    // Populate menu items
+    menuItems.forEach(item => {
+      if (item.type === 'separator') {
+        const separator = document.createElement('div');
+        separator.className = 'context-menu-separator';
+        contextMenu.appendChild(separator);
+      } else {
+        const menuItem = document.createElement('div');
+        menuItem.className = 'context-menu-item';
+        menuItem.innerHTML = `<i class="fas ${item.icon}"></i><span>${item.label}</span>`;
+        menuItem.addEventListener('click', () => {
+          if (typeof window.executeContextMenuAction === 'function') {
+            window.executeContextMenuAction(item.action);
+          }
+        });
+        contextMenu.appendChild(menuItem);
       }
     });
 
-    
-    setupVolumePanelListeners();
-    setNotificationsBtnOpacity();
+    // Position and display the context menu
+    contextMenu.style.left = `${x}px`;
+    contextMenu.style.top = `${y}px`;
+    contextMenu.classList.remove('hidden');
+  };
 
-    // Fix: Always attach close button event after DOM is ready
-    const volumePanel = document.getElementById('volume-panel');
-    const closeBtn = document.getElementById('close-volume-panel');
-    const volumeBtn = document.getElementById('volume-btn');
-    if (closeBtn && volumePanel) {
-      closeBtn.addEventListener('click', () => {
-        volumePanel.classList.remove('visible');
-        setTimeout(() => {
-          volumePanel.style.display = 'none';
-        }, 350);
-      });
+  // Ensure the context menu is hidden when clicking outside
+  document.addEventListener('click', (e) => {
+    const contextMenu = document.getElementById('context-menu');
+    if (contextMenu && !contextMenu.contains(e.target)) {
+      contextMenu.classList.add('hidden');
     }
+  });
 
-    // --- Mute/unmute logic for BOTH icons in the panel ---
-    const browserVolumeSlider = document.getElementById('browser-volume-slider');
-    // Icon in the slider panel
-    const panelIcon = volumePanel ? volumePanel.querySelector('.volume-slider-panel i') : null;
-    // Icon in the volume-panel-box (music section)
-    const boxIcon = volumePanel ? volumePanel.querySelector('.music-panel-box i.fas.fa-volume-up, .music-panel-box i.fas.fa-volume-mute') : null;
 
-    function handleMuteUnmuteClick() {
-      if (!browserVolumeSlider) return;
-      if (!isMuted) {
-        previousVolume = browserVolumeSlider.value;
-        browserVolumeSlider.value = 0;
-        browserVolumeSlider.dispatchEvent(new Event('input', { bubbles: true }));
-      } else {
-        browserVolumeSlider.value = previousVolume;
-        browserVolumeSlider.dispatchEvent(new Event('input', { bubbles: true }));
-      }
-    }
+  setupVolumePanelListeners();
+  setNotificationsBtnOpacity();
 
-    if (panelIcon) {
-      panelIcon.style.cursor = 'pointer';
-      panelIcon.addEventListener('click', handleMuteUnmuteClick);
+  // Fix: Always attach close button event after DOM is ready
+  const volumePanel = document.getElementById('volume-panel');
+  const closeBtn = document.getElementById('close-volume-panel');
+  const volumeBtn = document.getElementById('volume-btn');
+  if (closeBtn && volumePanel) {
+    closeBtn.addEventListener('click', () => {
+      volumePanel.classList.remove('visible');
+      setTimeout(() => {
+        volumePanel.style.display = 'none';
+      }, 350);
+    });
+  }
+
+  // --- Mute/unmute logic for BOTH icons in the panel ---
+  const browserVolumeSlider = document.getElementById('browser-volume-slider');
+  // Icon in the slider panel
+  const panelIcon = volumePanel ? volumePanel.querySelector('.volume-slider-panel i') : null;
+  // Icon in the volume-panel-box (music section)
+  const boxIcon = volumePanel ? volumePanel.querySelector('.music-panel-box i.fas.fa-volume-up, .music-panel-box i.fas.fa-volume-mute') : null;
+
+  function handleMuteUnmuteClick() {
+    if (!browserVolumeSlider) return;
+    if (!isMuted) {
+      previousVolume = browserVolumeSlider.value;
+      browserVolumeSlider.value = 0;
+      browserVolumeSlider.dispatchEvent(new Event('input', { bubbles: true }));
+    } else {
+      browserVolumeSlider.value = previousVolume;
+      browserVolumeSlider.dispatchEvent(new Event('input', { bubbles: true }));
     }
-    if (boxIcon) {
-      boxIcon.style.cursor = 'pointer';
-      boxIcon.addEventListener('click', handleMuteUnmuteClick);
-    }
+  }
+
+  if (panelIcon) {
+    panelIcon.style.cursor = 'pointer';
+    panelIcon.addEventListener('click', handleMuteUnmuteClick);
+  }
+  if (boxIcon) {
+    boxIcon.style.cursor = 'pointer';
+    boxIcon.addEventListener('click', handleMuteUnmuteClick);
+  }
 
   // --- Playlist button logic: always attach after DOMContentLoaded ---
   const musicPanel = volumePanel ? volumePanel.querySelector('.music-panel-box') : null;
@@ -2381,6 +16819,7 @@ function createAppLauncherTopBar() {
   profileBtn.style.padding = '5px 15px';
   profileBtn.style.fontSize = '14px';
   profileBtn.style.fontWeight = '500';
+  profileBtn.style.gap = '15px';
   profileBtn.style.cursor = 'pointer';
   profileBtn.style.display = 'flex';
   profileBtn.style.alignItems = 'center';
@@ -2611,27 +17050,49 @@ function attachTaskbarIconListeners(cloneBtn) {
         function isFullscreen() {
           return document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
         }
-        function requestFullscreen(elem) {
-          if (elem.requestFullscreen) {
-            elem.requestFullscreen();
-          } else if (elem.webkitRequestFullscreen) {
-            elem.webkitRequestFullscreen();
-          } else if (elem.mozRequestFullScreen) {
-            elem.mozRequestFullScreen();
-          } else if (elem.msRequestFullscreen) {
-            elem.msRequestFullscreen();
+        function requestFullscreen(elem, fromUserGesture = false) {
+          try {
+            // Only proceed if this is from a user gesture or if we're in a click handler
+            if (!fromUserGesture) {
+              console.warn('Fullscreen request not from user gesture');
+              if (typeof showShortTopNotification === 'function') {
+                showShortTopNotification('Fullscreen must be triggered by user interaction');
+              }
+              return Promise.reject('Not from user gesture');
+            }
+            
+            if (elem.requestFullscreen) {
+              return elem.requestFullscreen();
+            } else if (elem.webkitRequestFullscreen) {
+              return elem.webkitRequestFullscreen();
+            } else if (elem.mozRequestFullScreen) {
+              return elem.mozRequestFullScreen();
+            } else if (elem.msRequestFullscreen) {
+              return elem.msRequestFullscreen();
+            }
+          } catch (err) {
+            console.warn('Fullscreen request failed:', err);
+            if (typeof showShortTopNotification === 'function') {
+              showShortTopNotification('Fullscreen must be triggered by user interaction');
+            }
           }
+          return Promise.reject('No fullscreen API available');
         }
         function exitFullscreen() {
-          if (document.exitFullscreen) {
-            document.exitFullscreen();
-          } else if (document.webkitExitFullscreen) {
-            document.webkitExitFullscreen();
-          } else if (document.mozCancelFullScreen) {
-            document.mozCancelFullScreen();
-          } else if (document.msExitFullscreen) {
-            document.msExitFullscreen();
+          try {
+            if (document.exitFullscreen) {
+              return document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) {
+              return document.webkitExitFullscreen();
+            } else if (document.mozCancelFullScreen) {
+              return document.mozCancelFullScreen();
+            } else if (document.msExitFullscreen) {
+              return document.msExitFullscreen();
+            }
+          } catch (err) {
+            console.warn('Exit fullscreen failed:', err);
           }
+          return Promise.resolve();
         }
         function updateFullscreenIcon() {
           if (fullscreenIcon) {
@@ -2644,10 +17105,17 @@ function attachTaskbarIconListeners(cloneBtn) {
             }
           }
         }
+        
+        // This is a click handler, so we can pass true to indicate it's from a user gesture
         if (isFullscreen()) {
-          exitFullscreen();
+          exitFullscreen().catch(err => console.warn('Exit fullscreen error:', err));
         } else {
-          requestFullscreen(document.documentElement);
+          requestFullscreen(document.documentElement, true).catch(err => {
+            console.warn('Request fullscreen error:', err);
+            if (err !== 'No fullscreen API available' && typeof showShortTopNotification === 'function') {
+              showShortTopNotification('Fullscreen request failed');
+            }
+          });
         }
         setTimeout(updateFullscreenIcon, 100); // update icon after state change
       }
@@ -3015,7 +17483,11 @@ const startMenuApps = [
   { id: 'notes', name: 'Notes', iconClass: 'far fa-clipboard', iconBgClass: 'pink-icon', category: 'PRODUCTIVITY' },
   { id: 'app-launcher', name: 'App launcher', iconClass: 'fa-th', iconBgClass: 'teal-icon', category: 'SYSTEM APPS' },
   { id: 'wallet', name: 'Wallet', iconClass: 'fa-wallet', iconBgClass: 'pink-icon', category: 'SYSTEM APPS' },
-  { id: 'email-app', name: 'Email', iconClass: 'fa-envelope', iconBgClass: 'orange-icon', category: 'SYSTEM APPS' }
+  { id: 'email-app', name: 'Email', iconClass: 'fa-envelope', iconBgClass: 'orange-icon', category: 'SYSTEM APPS' },
+  { id: 'contact-app', name: 'Contacts', iconClass: 'fa-address-book', iconBgClass: 'blue-icon', category: 'SYSTEM APPS' },
+  { id: 'products-manager', name: 'Products', iconClass: 'fa-box', iconBgClass: 'purple-icon', category: 'SYSTEM APPS' },
+  { id: 'orders-manager', name: 'Orders', iconClass: 'fa-shopping-cart', iconBgClass: 'teal-icon', category: 'SYSTEM APPS' },
+  { id: 'point-of-sale-app', name: 'POS', iconClass: 'fa-shopping-cart', iconBgClass: 'teal-icon', category: 'SYSTEM APPS' }
 ];
 
 let startMenuAppSortMode = 'category'; // 'category' or 'alphabet'
@@ -3053,7 +17525,7 @@ function generateDesktopIcons() {
 
 document.addEventListener('DOMContentLoaded', function () {
   generateDesktopIcons();
-  
+
 
   // DOM Elements
   startButton = document.getElementById('start-button');
@@ -3189,7 +17661,28 @@ document.addEventListener('DOMContentLoaded', function () {
       iconEl.classList.remove('anim-in', 'anim-out');
       iconEl.setAttribute('data-app', appName);
       iconEl.setAttribute('title', appTitle);
-      iconEl.innerHTML = `<div class="icon-container ${details.iconBgClass}"><i class="fas ${details.iconClass}"></i></div>`;
+      
+      // Check if we're in text mode
+      const isTextMode = document.querySelector('.taskbar').classList.contains('taskbar-text-mode');
+      
+      if (isTextMode && window.innerWidth > 768) { // Only show text on desktop mode
+        // For pinned apps, only show text if the app is open
+        const isOpenApp = openWin && openWin.element;
+        
+        if (isOpenApp) {
+          iconEl.innerHTML = `
+            <div class="icon-container ${details.iconBgClass}">
+              <i class="fas ${details.iconClass}"></i>
+            </div>
+            <span class="taskbar-app-text">${appTitle}</span>
+          `;
+        } else {
+          // For closed pinned apps, don't show text
+          iconEl.innerHTML = `<div class="icon-container ${details.iconBgClass}"><i class="fas ${details.iconClass}"></i></div>`;
+        }
+      } else {
+        iconEl.innerHTML = `<div class="icon-container ${details.iconBgClass}"><i class="fas ${details.iconClass}"></i></div>`;
+      }
       iconEl.addEventListener('click', function () {
         const currentOpenWin = Object.values(openWindows).find(w => w.name === appName && w.element);
         if (currentOpenWin && currentOpenWin.element) {
@@ -3234,8 +17727,22 @@ document.addEventListener('DOMContentLoaded', function () {
       const iconEl = document.createElement('div');
       iconEl.className = 'taskbar-app-icon opened-app';
       iconEl.setAttribute('data-window-id', winObj.element.id);
+      iconEl.setAttribute('data-app-name', appName);
       iconEl.setAttribute('title', appTitle);
-      iconEl.innerHTML = `<div class="icon-container ${iconBgClass}"><i class="fas ${iconClass}"></i></div>`;
+      
+      // Check if we're in text mode
+      const isTextMode = document.querySelector('.taskbar').classList.contains('taskbar-text-mode');
+      
+      if (isTextMode && window.innerWidth > 768) { // Only show text on desktop mode
+        iconEl.innerHTML = `
+          <div class="icon-container ${iconBgClass}">
+            <i class="fas ${iconClass}"></i>
+          </div>
+          <span class="taskbar-app-text">${appTitle}</span>
+        `;
+      } else {
+        iconEl.innerHTML = `<div class="icon-container ${iconBgClass}"><i class="fas ${iconClass}"></i></div>`;
+      }
       iconEl.addEventListener('click', function () {
         const windowToFocus = winObj.element;
         if (windowToFocus) {
@@ -3263,7 +17770,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // After rendering, update the active state
     updateTaskbarActiveState();
   }
-window.renderPinnedTaskbarIcons = renderPinnedTaskbarIcons;
+  window.renderPinnedTaskbarIcons = renderPinnedTaskbarIcons;
   // On load, render pinned icons
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', renderPinnedTaskbarIcons);
@@ -3556,7 +18063,7 @@ window.renderPinnedTaskbarIcons = renderPinnedTaskbarIcons;
     });
   }
 
-  
+
 
 
   // --- Desktop Icon Order Persistence ---
@@ -3670,7 +18177,21 @@ window.renderPinnedTaskbarIcons = renderPinnedTaskbarIcons;
         desktopIconsContainer.style.display = 'none';
         desktopIconsContainer.style.pointerEvents = 'none';
       }
-      if (taskbar) taskbar.style.display = 'none';
+      
+      // Save current taskbar style classes before hiding the taskbar
+      if (taskbar) {
+        // Save current classes to restore them later
+        window._previousTaskbarClasses = {
+          hasTextMode: taskbar.classList.contains('taskbar-text-mode'),
+          hasWindows11Style: taskbar.classList.contains('taskbar-windows11-style')
+        };
+        
+        // Remove style classes before hiding
+        taskbar.classList.remove('taskbar-text-mode');
+        taskbar.classList.remove('taskbar-windows11-style');
+        taskbar.style.display = 'none';
+      }
+      
       // Hide widgets and toggle
       if (widgetsScreen) widgetsScreen.style.display = 'none';
       if (widgetsToggleBtn) widgetsToggleBtn.style.display = 'none';
@@ -3877,6 +18398,24 @@ window.renderPinnedTaskbarIcons = renderPinnedTaskbarIcons;
 
       // Restore taskbar
       if (taskbar) {
+        // First, restore the previous taskbar style classes if they were saved
+        if (window._previousTaskbarClasses) {
+          if (window._previousTaskbarClasses.hasTextMode) {
+            taskbar.classList.add('taskbar-text-mode');
+          }
+          if (window._previousTaskbarClasses.hasWindows11Style) {
+            taskbar.classList.add('taskbar-windows11-style');
+          }
+          // Clear the saved classes
+          window._previousTaskbarClasses = null;
+        } else {
+          // Fallback: Re-apply the saved taskbar style from localStorage
+          const savedTaskbarStyle = localStorage.getItem('taskbarStyle');
+          if (savedTaskbarStyle && typeof applyTaskbarStyle === 'function') {
+            applyTaskbarStyle();
+          }
+        }
+        
         taskbar.style.display = '';
         taskbar.classList.add('anim-slide-up');
         taskbar.addEventListener('animationend', function handler() {
@@ -3932,6 +18471,11 @@ window.renderPinnedTaskbarIcons = renderPinnedTaskbarIcons;
       document.body.classList.remove('easy-mode'); // FIX: Remove easy-mode
       if (appLauncherBtn) appLauncherBtn.style.display = '';
       if (widgetsToggleBtn) widgetsToggleBtn.style.display = '';
+      
+      // Re-render taskbar icons to ensure proper display based on taskbar style
+      if (typeof renderPinnedTaskbarIcons === 'function') {
+        renderPinnedTaskbarIcons();
+      }
       // --- Restore window headers and size for all open windows ---
       for (const id in openWindows) {
         const winObj = openWindows[id];
@@ -4412,6 +18956,8 @@ window.renderPinnedTaskbarIcons = renderPinnedTaskbarIcons;
         windowElement = createWindowFromTemplate('sitebuilder', windowId, true);
         appTitle = 'Sitebuilder';
         // Optionally add a delayedContentLoader if needed for sitebuilder
+        delayedContentLoader = () => setupSiteBuilderApp(windowElement);
+
         break;
       case 'calculator':
       case 'calculator-sm':
@@ -4434,6 +18980,26 @@ window.renderPinnedTaskbarIcons = renderPinnedTaskbarIcons;
         appTitle = 'Email';
         delayedContentLoader = () => setupEmailApp(windowElement);
         break;
+        case 'point-of-sale-app':
+          windowElement = createWindowFromTemplate('point-of-sale-app', windowId, true);
+          appTitle = 'POS';
+          delayedContentLoader = () => setupPointOfSaleApp(windowElement);
+          break;
+      case 'orders-manager':
+        windowElement = createWindowFromTemplate('orders-manager', windowId, true);
+        appTitle = 'Orders Manager';
+        delayedContentLoader = () => setupOrdersManager(windowElement);
+        break;
+      case 'products-manager':
+        windowElement = createWindowFromTemplate('products-manager', windowId, true);
+        appTitle = 'Products Manager';
+        delayedContentLoader = () => setupProductsManager(windowElement);
+        break;
+      case 'contact-app':
+        windowElement = createWindowFromTemplate('contact-app', windowId, true);
+        appTitle = 'Contacts';
+        delayedContentLoader = () => setupContactsApp(windowElement);
+        break;
       default:
         const title = appTitle || appName.charAt(0).toUpperCase() + appName.slice(1).replace(/-/g, ' ');
         windowElement = createGenericWindow(title, finalIconClass, finalIconBgClass, windowId, true);
@@ -4443,51 +19009,99 @@ window.renderPinnedTaskbarIcons = renderPinnedTaskbarIcons;
       // --- iOS-like open from icon effect ---
       let contentInjected = false;
       if (iconRect) {
-      // Instantly place window at icon's position/scale, then animate to center
-      requestAnimationFrame(() => {
-        // Get window's final rect (after centering)
-        const winRect = windowElement.getBoundingClientRect();
-        const scaleX = iconRect.width / winRect.width;
-        const scaleY = iconRect.height / winRect.height;
-        const iconCenterX = iconRect.left + iconRect.width / 2;
-        const iconCenterY = iconRect.top + iconRect.height / 2;
-        const winCenterX = winRect.left + winRect.width / 2;
-        const winCenterY = winRect.top + winRect.height / 2;
-        const translateX = iconCenterX - winCenterX;
-        const translateY = iconCenterY - winCenterY;
-        // Set initial transform (window appears at icon)
-        windowElement.style.transformOrigin = 'center center';
-        windowElement.style.transition = 'none';
-        windowElement.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scaleX}, ${scaleY})`;
-        // Next frame, animate to normal
+        // Instantly place window at icon's position/scale, then animate to center
         requestAnimationFrame(() => {
-          windowElement.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)';
-          windowElement.style.transform = 'translate(0,0) scale(1,1)';
-          // Inject/load content for all apps now (before animation ends)
-          if (delayedContentLoader && !contentInjected) {
-            delayedContentLoader();
-            contentInjected = true;
-          }
-          // Clean up after animation
-          setTimeout(() => {
-            windowElement.style.transition = '';
-            windowElement.style.transform = '';
-          }, 370);
-        });
-      });
-      } else {
-        // Fallback: use the normal open animation
-        windowElement.classList.add('window-anim-open');
-        windowElement.addEventListener('animationend', function handler(e) {
-          if (e.animationName === 'windowOpenIOS') {
-            windowElement.classList.remove('window-anim-open');
-            windowElement.removeEventListener('animationend', handler);
+          // Get window's final rect (after centering)
+          const winRect = windowElement.getBoundingClientRect();
+          const scaleX = iconRect.width / winRect.width;
+          const scaleY = iconRect.height / winRect.height;
+          const iconCenterX = iconRect.left + iconRect.width / 2;
+          const iconCenterY = iconRect.top + iconRect.height / 2;
+          const winCenterX = winRect.left + winRect.width / 2;
+          const winCenterY = winRect.top + winRect.height / 2;
+          const translateX = iconCenterX - winCenterX;
+          const translateY = iconCenterY - winCenterY;
+          // Set initial transform (window appears at icon)
+          windowElement.style.transformOrigin = 'center center';
+          windowElement.style.transition = 'none';
+          windowElement.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scaleX}, ${scaleY})`;
+          // Next frame, animate to normal
+          requestAnimationFrame(() => {
+            windowElement.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)';
+            windowElement.style.transform = 'translate(0,0) scale(1,1)';
+            // Inject/load content for all apps now (before animation ends)
             if (delayedContentLoader && !contentInjected) {
               delayedContentLoader();
               contentInjected = true;
             }
-          }
+            // Clean up after animation
+            setTimeout(() => {
+              windowElement.style.transition = '';
+              windowElement.style.transform = '';
+            }, 370);
+          });
         });
+      } else {
+        // Fallback: try to find app icon for animation
+        let fallbackIconRect = null;
+        const desktopIcon = document.querySelector(`.desktop-icon[data-app="${appName}"]`);
+        const startMenuIcon = document.querySelector(`.app-grid-item[data-app="${appName}"], .start-menu-app-item[data-app="${appName}"]`);
+        
+        if (desktopIcon) {
+          fallbackIconRect = desktopIcon.getBoundingClientRect();
+        } else if (startMenuIcon) {
+          fallbackIconRect = startMenuIcon.getBoundingClientRect();
+        }
+        
+        if (fallbackIconRect) {
+          // Use the same animation as when iconRect is available
+          requestAnimationFrame(() => {
+            const winRect = windowElement.getBoundingClientRect();
+            const scaleX = fallbackIconRect.width / winRect.width;
+            const scaleY = fallbackIconRect.height / winRect.height;
+            const iconCenterX = fallbackIconRect.left + fallbackIconRect.width / 2;
+            const iconCenterY = fallbackIconRect.top + fallbackIconRect.height / 2;
+            const winCenterX = winRect.left + winRect.width / 2;
+            const winCenterY = winRect.top + winRect.height / 2;
+            const translateX = iconCenterX - winCenterX;
+            const translateY = iconCenterY - winCenterY;
+            
+            windowElement.style.transformOrigin = 'center center';
+            windowElement.style.transition = 'none';
+            windowElement.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scaleX}, ${scaleY})`;
+            windowElement.style.opacity = '0.3';
+            
+            requestAnimationFrame(() => {
+              windowElement.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s cubic-bezier(0.4,0,0.2,1)';
+              windowElement.style.transform = 'translate(0,0) scale(1,1)';
+              windowElement.style.opacity = '1';
+              
+              if (delayedContentLoader && !contentInjected) {
+                delayedContentLoader();
+                contentInjected = true;
+              }
+              
+              setTimeout(() => {
+                windowElement.style.transition = '';
+                windowElement.style.transform = '';
+                windowElement.style.opacity = '';
+              }, 370);
+            });
+          });
+        } else {
+          // Last resort: use the CSS animation from center
+          windowElement.classList.add('window-anim-open');
+          windowElement.addEventListener('animationend', function handler(e) {
+            if (e.animationName === 'windowOpenIOS') {
+              windowElement.classList.remove('window-anim-open');
+              windowElement.removeEventListener('animationend', handler);
+              if (delayedContentLoader && !contentInjected) {
+                delayedContentLoader();
+                contentInjected = true;
+              }
+            }
+          });
+        }
       }
       // ---
       const taskbarIcon = createTaskbarIcon(windowId, appName, finalIconClass, appTitle);
@@ -4631,6 +19245,10 @@ window.renderPinnedTaskbarIcons = renderPinnedTaskbarIcons;
     setupWindowControls(windowElement);
     windowsContainer.appendChild(windowElement);
     positionWindowCenter(windowElement);
+    
+    // Don't apply standard animation here - let openApp handle animations
+    // windowElement.classList.add('window-anim-open');
+    
     // If delayContent, remove or hide main content for now (if needed)
     if (delayContent) {
       // For iframe-based apps, set iframe src to blank and store real src in data-src
@@ -4687,6 +19305,10 @@ window.renderPinnedTaskbarIcons = renderPinnedTaskbarIcons;
     setupWindowControls(windowElement);
     windowsContainer.appendChild(windowElement);
     positionWindowCenter(windowElement);
+    
+    // Don't apply standard animation here - let openApp handle animations
+    // windowElement.classList.add('window-anim-open');
+    
     // --- PATCH: Ensure sidebar overlay and menu toggle exist ---
     ensureSidebarElements(windowElement);
     // --- PATCH: Call global sidebar logic ---
@@ -4995,13 +19617,13 @@ window.renderPinnedTaskbarIcons = renderPinnedTaskbarIcons;
             }
           }, 500);
         }
-        
+
         // At the top of the file, after other globals:
         window._allPopoutWindows = window._allPopoutWindows || [];
-        
+
         // In the popoutButton click handler, after 'if (!popoutWin) return;':
         window._allPopoutWindows.push(popoutWin);
-        
+
         // In the logout button event handler:
         const logOutButton = document.querySelector('.start-menu-logout-button') || document.querySelector('.logout-button');
         if (logOutButton) {
@@ -5010,7 +19632,7 @@ window.renderPinnedTaskbarIcons = renderPinnedTaskbarIcons;
             handleLogout();
           });
         }
-        
+
       });
     }
     windowElement.addEventListener('mousedown', function (e) {
@@ -5090,38 +19712,52 @@ window.renderPinnedTaskbarIcons = renderPinnedTaskbarIcons;
     }, 350);
   }
 
+
+
   function animateWindowFromTaskbar(windowElement, taskbarIcon, callback) {
     if (!windowElement || !taskbarIcon) {
       if (callback) callback();
       return;
     }
-    // Get window and icon positions
-    const winRect = windowElement.getBoundingClientRect();
+    // Get icon position first
     const iconRect = taskbarIcon.getBoundingClientRect();
-    // Calculate center points
-    const winCenterX = winRect.left + winRect.width / 2;
-    const winCenterY = winRect.top + winRect.height / 2;
     const iconCenterX = iconRect.left + iconRect.width / 2;
     const iconCenterY = iconRect.top + iconRect.height / 2;
-    // Calculate translation
+    
+    // Get window's final position (after it's positioned but before animation)
+    const winRect = windowElement.getBoundingClientRect();
+    const winCenterX = winRect.left + winRect.width / 2;
+    const winCenterY = winRect.top + winRect.height / 2;
+    
+    // Calculate translation from icon to window center
     const translateX = iconCenterX - winCenterX;
     const translateY = iconCenterY - winCenterY;
+    
     // Calculate scale (shrink to icon size)
     const scale = Math.max(0.18, Math.min(iconRect.width / winRect.width, iconRect.height / winRect.height));
-    // Start at icon position/scale
+    
+    // Start at icon position/scale with no transition
     windowElement.style.transition = 'none';
     windowElement.style.transformOrigin = 'center center';
     windowElement.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
-    // Force reflow
+    windowElement.style.opacity = '0.3';
+    
+    // Force reflow to ensure the initial transform is applied
     void windowElement.offsetWidth;
-    // Animate to normal (no opacity)
-    windowElement.style.transition = 'transform 0.45s cubic-bezier(0.23, 1, 0.32, 1)';
-    windowElement.style.transform = 'translate(0,0) scale(1)';
-    setTimeout(() => {
-      windowElement.style.transition = '';
-      windowElement.style.transform = '';
-      if (callback) callback();
-    }, 450);
+    
+    // Animate to normal position with transition
+    requestAnimationFrame(() => {
+      windowElement.style.transition = 'transform 0.45s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.45s cubic-bezier(0.23, 1, 0.32, 1)';
+      windowElement.style.transform = 'translate(0,0) scale(1)';
+      windowElement.style.opacity = '1';
+      
+      setTimeout(() => {
+        windowElement.style.transition = '';
+        windowElement.style.transform = '';
+        windowElement.style.opacity = '';
+        if (callback) callback();
+      }, 450);
+    });
   }
 
   function toggleMinimizeWindow(windowElement, taskbarIcon) {
@@ -5424,8 +20060,26 @@ window.renderPinnedTaskbarIcons = renderPinnedTaskbarIcons;
     iconEl.className = 'taskbar-app-icon';
     iconEl.classList.add('opened-app');
     iconEl.setAttribute('data-window-id', windowId);
-    iconEl.setAttribute('title', appTitle || appName.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()));
-    iconEl.innerHTML = `<div class="icon-container ${iconBgClass}"><i class="fas ${iconClass}"></i></div>`;
+    iconEl.setAttribute('data-app-name', appName);
+    
+    // Format the app title
+    const formattedAppTitle = appTitle || appName.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    iconEl.setAttribute('title', formattedAppTitle);
+    
+    // Check if we're in text mode
+    const isTextMode = document.querySelector('.taskbar').classList.contains('taskbar-text-mode');
+    
+    if (isTextMode && window.innerWidth > 768) { // Only show text on desktop mode
+      iconEl.innerHTML = `
+        <div class="icon-container ${iconBgClass}">
+          <i class="fas ${iconClass}"></i>
+        </div>
+        <span class="taskbar-app-text">${formattedAppTitle}</span>
+      `;
+    } else {
+      iconEl.innerHTML = `<div class="icon-container ${iconBgClass}"><i class="fas ${iconClass}"></i></div>`;
+    }
+    
     iconEl.addEventListener('click', function () {
       const targetWindowId = this.getAttribute('data-window-id');
       const windowToFocus = openWindows[targetWindowId] ? openWindows[targetWindowId].element : null;
@@ -5524,7 +20178,7 @@ window.renderPinnedTaskbarIcons = renderPinnedTaskbarIcons;
   // Patch maximize/restore/minimize logic to call updateAppLauncherTaskbarPosition
   // 1. After maximize/restore in setupWindowControls
   // 2. After minimize/restore in toggleMinimizeWindow
-  
+
 
 
 
@@ -5616,11 +20270,26 @@ window.renderPinnedTaskbarIcons = renderPinnedTaskbarIcons;
         green: '#176848',
         gray: '#435564',
       };
+
+      function lightenColor(color, percent) {
+        const num = parseInt(color.replace('#', ''), 16),
+          amt = Math.round(2.55 * percent),
+          R = (num >> 16) + amt,
+          G = (num >> 8 & 0x00FF) + amt,
+          B = (num & 0x0000FF) + amt;
+        return '#' + (0x1000000 + (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 +
+          (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 +
+          (B < 255 ? B < 1 ? 0 : B : 255)).toString(16).slice(1);
+      }
+
       function setAccentColor(colorKey) {
         let color = accentColorMap[colorKey] || accentColorMap['multicolor'];
+        // Set the main accent color
         document.documentElement.style.setProperty('--accent-color', color);
-        // Optionally update related accent variables for icons, etc.
-        // document.documentElement.style.setProperty('--blue-accent', ...), etc if needed
+        // Calculate and set the light variant (40% lighter)
+        const lightColor = lightenColor(color, 40);
+        document.documentElement.style.setProperty('--accent-color-light', lightColor);
+
         localStorage.setItem('accentColor', colorKey);
         // Update active border for color swatches
         accentSwatches.forEach(s => s.classList.remove('active'));
@@ -5889,6 +20558,9 @@ window.renderPinnedTaskbarIcons = renderPinnedTaskbarIcons;
       const current = parseFloat(currentOperand);
       if (isNaN(prev) || isNaN(current)) return;
 
+      // Store the expression for history before computing
+      const expression = `${previousOperand} ${getDisplayOperation(operation)} ${currentOperand}`;
+
       switch (operation) {
         case 'add':
           computation = prev + current;
@@ -5912,18 +20584,23 @@ window.renderPinnedTaskbarIcons = renderPinnedTaskbarIcons;
         default:
           return;
       }
-      currentOperand = String(computation);
+      
+      let result = String(computation);
       // Limit decimal places for display if necessary, e.g., to 8
-      if (currentOperand.includes('.')) {
-        const parts = currentOperand.split('.');
+      if (result.includes('.')) {
+        const parts = result.split('.');
         if (parts[1] && parts[1].length > 8) {
-          currentOperand = parseFloat(currentOperand).toFixed(8);
+          result = parseFloat(result).toFixed(8);
         }
       }
-      if (currentOperand.length > 16) { // Handle potential overflow
-        currentOperand = parseFloat(currentOperand).toExponential(8);
+      if (result.length > 16) { // Handle potential overflow
+        result = parseFloat(result).toExponential(8);
       }
 
+      // Add to history before updating display
+      addToHistory(expression, result);
+      
+      currentOperand = result;
       operation = null;
       previousOperand = '';
       displayNeedsReset = true;
@@ -6012,6 +20689,66 @@ window.renderPinnedTaskbarIcons = renderPinnedTaskbarIcons;
       displayNeedsReset = true;
     }
 
+    // History functionality
+    let calculationHistory = [];
+    const historyContainer = calculatorWindowElement.querySelector('#calc-history-list');
+    
+    function addToHistory(expression, result) {
+      const historyItem = {
+        expression: expression,
+        result: result,
+        timestamp: new Date()
+      };
+      
+      calculationHistory.unshift(historyItem); // Add to beginning of array
+      
+      // Limit history to 50 items
+      if (calculationHistory.length > 50) {
+        calculationHistory = calculationHistory.slice(0, 50);
+      }
+      
+      updateHistoryDisplay();
+    }
+    
+    function updateHistoryDisplay() {
+      if (!historyContainer) return;
+      
+      if (calculationHistory.length === 0) {
+        historyContainer.innerHTML = '<p>There\'s no history yet</p>';
+        return;
+      }
+      
+      let historyHTML = '';
+      calculationHistory.forEach((item, index) => {
+        historyHTML += `
+          <div class="history-item" data-index="${index}">
+            <div class="history-expression">${item.expression}</div>
+            <div class="history-result">${item.result}</div>
+          </div>
+        `;
+      });
+      
+      historyContainer.innerHTML = historyHTML;
+      
+      // Add click listeners to history items
+      historyContainer.querySelectorAll('.history-item').forEach(item => {
+        item.addEventListener('click', () => {
+          const index = parseInt(item.dataset.index);
+          const historyItem = calculationHistory[index];
+          if (historyItem) {
+            currentOperand = historyItem.result;
+            displayNeedsReset = true;
+            updateDisplay();
+          }
+        });
+      });
+    }
+    
+    function clearHistory() {
+      calculationHistory = [];
+      updateHistoryDisplay();
+    }
+
     // Memory functions
     function memoryClear() { memoryValue = 0; console.log("Memory Cleared"); }
     function memoryRecall() { currentOperand = String(memoryValue); displayNeedsReset = true; console.log("Memory Recalled:", memoryValue); }
@@ -6020,60 +20757,282 @@ window.renderPinnedTaskbarIcons = renderPinnedTaskbarIcons;
     function memoryStore() { memoryValue = parseFloat(currentOperand) || 0; console.log("Memory Store:", memoryValue); }
 
 
+    // Function to handle calculator operations (shared by button clicks and keyboard)
+    function handleCalculatorInput(action, value) {
+      if (action === 'decimal') {
+        inputDecimal();
+      } else if (action === 'negate') {
+        negate();
+      } else if (action === 'percent') {
+        percent();
+      } else if (action === 'inverse') {
+        inverse();
+      } else if (action === 'square') {
+        square();
+      } else if (action === 'sqrt') {
+        sqrt();
+      } else if (action === 'clear') {
+        clearAll();
+      } else if (action === 'clear-entry') {
+        clearEntry();
+      } else if (action === 'backspace') {
+        backspace();
+      } else if (action === 'equals') {
+        compute();
+      } else if (['add', 'subtract', 'multiply', 'divide'].includes(action)) {
+        chooseOperation(action);
+      } else if (value !== undefined) { // Number button
+        appendNumber(value);
+      } else if (action === 'memory-clear') {
+        memoryClear();
+      } else if (action === 'memory-recall') {
+        memoryRecall();
+      } else if (action === 'memory-add') {
+        memoryAdd();
+      } else if (action === 'memory-subtract') {
+        memorySubtract();
+      } else if (action === 'memory-store') {
+        memoryStore();
+      } else if (action === 'history') {
+        console.log("Calculator History button clicked (not implemented)");
+      }
+      updateDisplay();
+      // Highlight active operator
+      calculatorWindowElement.querySelectorAll('.calc-btn-operator').forEach(opBtn => {
+        opBtn.classList.remove('active-operator');
+        if (opBtn.dataset.action === operation) {
+          opBtn.classList.add('active-operator');
+        }
+      });
+    }
+
+    // Button click event listeners
     buttons.forEach(button => {
       button.addEventListener('click', () => {
         const action = button.dataset.action;
         const value = button.dataset.value;
-
-        if (action === 'decimal') {
-          inputDecimal();
-        } else if (action === 'negate') {
-          negate();
-        } else if (action === 'percent') {
-          percent();
-        } else if (action === 'inverse') {
-          inverse();
-        } else if (action === 'square') {
-          square();
-        } else if (action === 'sqrt') {
-          sqrt();
-        } else if (action === 'clear') {
-          clearAll();
-        } else if (action === 'clear-entry') {
-          clearEntry();
-        } else if (action === 'backspace') {
-          backspace();
-        } else if (action === 'equals') {
-          compute();
-        } else if (['add', 'subtract', 'multiply', 'divide'].includes(action)) {
-          chooseOperation(action);
-        } else if (value !== undefined) { // Number button
-          appendNumber(value);
-        } else if (action === 'memory-clear') {
-          memoryClear();
-        } else if (action === 'memory-recall') {
-          memoryRecall();
-        } else if (action === 'memory-add') {
-          memoryAdd();
-        } else if (action === 'memory-subtract') {
-          memorySubtract();
-        } else if (action === 'memory-store') {
-          memoryStore();
-        } else if (action === 'history') {
-          console.log("Calculator History button clicked (not implemented)");
-        }
-        updateDisplay();
-        // Highlight active operator
-        calculatorWindowElement.querySelectorAll('.calc-btn-operator').forEach(opBtn => {
-          opBtn.classList.remove('active-operator');
-          if (opBtn.dataset.action === operation) {
-            opBtn.classList.add('active-operator');
-          }
-        });
-
+        handleCalculatorInput(action, value);
       });
     });
+
+    // Keyboard event listener for numpad and calculator keys
+    function handleKeydown(e) {
+      // Only handle keyboard input when calculator window is focused/active
+      if (!calculatorWindowElement.classList.contains('active')) {
+        return;
+      }
+
+      let action = null;
+      let value = null;
+
+      switch(e.key) {
+        // Numbers
+        case '0':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+          value = e.key;
+          break;
+        
+        // Operations
+        case '+':
+          action = 'add';
+          break;
+        case '-':
+          action = 'subtract';
+          break;
+        case '*':
+          action = 'multiply';
+          break;
+        case '/':
+          action = 'divide';
+          e.preventDefault(); // Prevent browser search
+          break;
+        
+        // Special keys
+        case 'Enter':
+        case '=':
+          action = 'equals';
+          e.preventDefault();
+          break;
+        case '.':
+        case ',': // Some keyboards use comma for decimal
+          action = 'decimal';
+          break;
+        case 'Backspace':
+          action = 'backspace';
+          break;
+        case 'Delete':
+          action = 'clear-entry';
+          break;
+        case 'Escape':
+          action = 'clear';
+          break;
+        case '%':
+          action = 'percent';
+          break;
+        
+        // Numpad specific keys
+        case 'NumpadAdd':
+          action = 'add';
+          break;
+        case 'NumpadSubtract':
+          action = 'subtract';
+          break;
+        case 'NumpadMultiply':
+          action = 'multiply';
+          break;
+        case 'NumpadDivide':
+          action = 'divide';
+          e.preventDefault();
+          break;
+        case 'NumpadEnter':
+          action = 'equals';
+          e.preventDefault();
+          break;
+        case 'NumpadDecimal':
+          action = 'decimal';
+          break;
+        case 'Numpad0':
+        case 'Numpad1':
+        case 'Numpad2':
+        case 'Numpad3':
+        case 'Numpad4':
+        case 'Numpad5':
+        case 'Numpad6':
+        case 'Numpad7':
+        case 'Numpad8':
+        case 'Numpad9':
+          value = e.key.replace('Numpad', '');
+          break;
+        
+        default:
+          return; // Don't handle other keys
+      }
+
+      // Handle the input if we found a matching key
+      if (action !== null || value !== null) {
+        e.preventDefault();
+        handleCalculatorInput(action, value);
+        
+        // Add visual feedback for pressed key
+        const button = findButtonForInput(action, value);
+        if (button) {
+          button.classList.add('calc-btn-pressed');
+          setTimeout(() => {
+            button.classList.remove('calc-btn-pressed');
+          }, 150);
+        }
+      }
+    }
+
+    // Helper function to find the corresponding button for visual feedback
+    function findButtonForInput(action, value) {
+      if (value !== null) {
+        return calculatorWindowElement.querySelector(`[data-value="${value}"]`);
+      }
+      if (action !== null) {
+        return calculatorWindowElement.querySelector(`[data-action="${action}"]`);
+      }
+      return null;
+    }
+
+    // Add keyboard event listener
+    document.addEventListener('keydown', handleKeydown);
+
+    // Also add a direct event listener to the calculator window for better focus handling
+    calculatorWindowElement.addEventListener('keydown', handleKeydown);
+
+    // Clean up event listeners when window is closed
+    calculatorWindowElement.addEventListener('window-closed', () => {
+      document.removeEventListener('keydown', handleKeydown);
+      calculatorWindowElement.removeEventListener('keydown', handleKeydown);
+    });
+
+    // Setup pin button functionality to toggle history/memory panel
+    const pinButton = calculatorWindowElement.querySelector('#calc-pin-btn');
+    const historyMemoryPanel = calculatorWindowElement.querySelector('.calculator-history-memory-panel');
+    
+    if (pinButton && historyMemoryPanel) {
+      // Initially hide the panel and adjust window size
+      historyMemoryPanel.style.width = '0px';
+      historyMemoryPanel.style.minWidth = '0px';
+      historyMemoryPanel.style.overflow = 'hidden';
+      historyMemoryPanel.style.transition = 'width 0.3s ease, min-width 0.3s ease';
+      historyMemoryPanel.style.padding = '0';
+      
+      // Adjust calculator window width to exclude the panel
+      const originalWidth = calculatorWindowElement.style.width || '520px';
+      calculatorWindowElement.style.width = '310px'; // Width without panel
+      
+      let isPanelVisible = false;
+      
+      pinButton.addEventListener('click', () => {
+        if (isPanelVisible) {
+          // Hide panel
+          historyMemoryPanel.style.width = '0px';
+          historyMemoryPanel.style.minWidth = '0px';
+          historyMemoryPanel.style.padding = '0';
+          calculatorWindowElement.style.width = '310px';
+          calculatorWindowElement.style.transition = 'width 0.3s ease, min-width 0.3s ease';
+          pinButton.classList.remove('active');
+          isPanelVisible = false;
+        } else {
+          // Show panel
+            historyMemoryPanel.style.width = '195px';
+            historyMemoryPanel.style.minWidth = '195px';
+          historyMemoryPanel.style.padding = '0 12px 12px 12px';
+          calculatorWindowElement.style.width = '520px';
+          calculatorWindowElement.style.transition = 'width 0.3s ease, min-width 0.3s ease';
+          pinButton.classList.add('active');
+          isPanelVisible = true;
+        }
+      });
+    }
+
     clearAll(); // Initialize display
+    updateHistoryDisplay(); // Initialize history display
+    
+    // Setup tab switching for history/memory panel
+    const historyTab = calculatorWindowElement.querySelector('[data-tab="history"]');
+    const memoryTab = calculatorWindowElement.querySelector('[data-tab="memory"]');
+    const historyContent = calculatorWindowElement.querySelector('.calc-history-content');
+    const memoryContent = calculatorWindowElement.querySelector('.calc-memory-content');
+    
+    if (historyTab && memoryTab && historyContent && memoryContent) {
+      historyTab.addEventListener('click', () => {
+        historyTab.classList.add('active');
+        memoryTab.classList.remove('active');
+        historyContent.classList.remove('hidden');
+        memoryContent.classList.add('hidden');
+      });
+      
+      memoryTab.addEventListener('click', () => {
+        memoryTab.classList.add('active');
+        historyTab.classList.remove('active');
+        memoryContent.classList.remove('hidden');
+        historyContent.classList.add('hidden');
+      });
+    }
+    
+    // Add right-click context menu for history clearing
+    if (historyContainer) {
+      historyContainer.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        if (calculationHistory.length > 0) {
+          const confirmed = confirm('Clear all calculation history?');
+          if (confirmed) {
+            clearHistory();
+          }
+        }
+      });
+    }
   }
 
   function globalOnIconMouseMove(e) {
@@ -6348,7 +21307,7 @@ window.renderPinnedTaskbarIcons = renderPinnedTaskbarIcons;
       let isTextInput = false;
       // Check for text selection in input, textarea, contenteditable, or normal text
       if ((target.tagName === 'INPUT' && !target.readOnly && !target.disabled) ||
-          (target.tagName === 'TEXTAREA' && !target.readOnly && !target.disabled)) {
+        (target.tagName === 'TEXTAREA' && !target.readOnly && !target.disabled)) {
         isTextInput = true;
         hasSelection = target.selectionStart !== target.selectionEnd;
       } else if (target.isContentEditable && !target.readOnly && !target.disabled) {
@@ -6371,7 +21330,7 @@ window.renderPinnedTaskbarIcons = renderPinnedTaskbarIcons;
           (target.isContentEditable && window.getSelection && !window.getSelection().isCollapsed) ||
           (!isTextInput && !target.isContentEditable && window.getSelection && window.getSelection().toString().length > 0)
         );
-        
+
         menuItems.push({ label: 'Cut', action: 'text-cut', icon: 'fa-scissors', disabled: !isTextInput || !hasTextSelection });
         menuItems.push({ label: 'Copy', action: 'text-copy', icon: 'fa-copy', disabled: !hasTextSelection });
         menuItems.push({ label: 'Paste', action: 'text-paste', icon: 'fa-clipboard', disabled: false });
@@ -6983,9 +21942,9 @@ window.renderPinnedTaskbarIcons = renderPinnedTaskbarIcons;
               icon.setAttribute('data-app', appName);
               icon.setAttribute('data-created', new Date().toISOString()); // Set creation date
               icon.innerHTML = `
-              <div class="icon-container ${details.iconBgClass}"><i class="fas ${details.iconClass}"></i></div>
-              <span>${appTitle}</span>
-            `;
+                <div class="icon-container ${details.iconBgClass}"><i class="fas ${details.iconClass}"></i></div>
+                <span>${appTitle}</span>
+              `;
               // --- Find first available grid slot ---
               if (window.innerWidth > 1023) {
                 // Use grid logic
@@ -7116,7 +22075,21 @@ window.renderPinnedTaskbarIcons = renderPinnedTaskbarIcons;
                 desktopIconsContainer.style.display = 'none';
                 desktopIconsContainer.style.pointerEvents = 'none';
               }
-              if (taskbar) taskbar.style.display = 'none';
+              
+              // Save current taskbar style classes before hiding the taskbar
+              if (taskbar) {
+                // Save current classes to restore them later
+                window._previousTaskbarClasses = {
+                  hasTextMode: taskbar.classList.contains('taskbar-text-mode'),
+                  hasWindows11Style: taskbar.classList.contains('taskbar-windows11-style')
+                };
+                
+                // Remove style classes before hiding
+                taskbar.classList.remove('taskbar-text-mode');
+                taskbar.classList.remove('taskbar-windows11-style');
+                taskbar.style.display = 'none';
+              }
+              
               if (widgetsScreen) widgetsScreen.style.display = 'none';
               if (widgetsToggleBtn) widgetsToggleBtn.style.display = 'none';
               // Remove any previous app-launcher-desktop if present
@@ -7244,6 +22217,8 @@ window.renderPinnedTaskbarIcons = renderPinnedTaskbarIcons;
             }
             break;
           }
+
+
           case 'minimize-app': {
             // Minimize the window associated with the taskbar icon
             if (currentContextMenuTarget && currentContextMenuTarget.classList.contains('taskbar-app-icon')) {
@@ -7708,37 +22683,171 @@ window.renderPinnedTaskbarIcons = renderPinnedTaskbarIcons;
         menuItems.push({ type: 'separator' });
         menuItems.push({ label: 'Add to favorites', action: 'add-to-favorites', icon: 'fa-star' });
         menuItems.push({ label: 'Convert to task', action: 'convert-to-task', icon: 'fa-tasks' });
-        menuItems.push({ label: 'Move to folder', action: 'move-to-folder', icon: 'fa-folder-open', subItems: [
-          { label: 'Folder name', action: 'move-to-folder-name', icon: 'fa-folder-open' },
-          { label: 'Another folder', action: 'move-to-another-folder', icon: 'fa-folder-open' },
-          { type: 'separator' },
-          { label: 'Create new folder', action: 'create-new-folder', icon: 'fa-folder-plus' },
-        ] });
-        menuItems.push({ label: 'Add a label', action: 'add-a-label', icon: 'fa-tag', subItems: [
-          { label: 'To Do', action: 'add-a-label-to-do', icon: 'fa-tag' },
-          { label: 'Important', action: 'add-a-label-important', icon: 'fa-tag' },
-          { label: 'Work', action: 'add-a-label-work', icon: 'fa-tag' },
-          { label: 'Personal', action: 'add-a-label-personal', icon: 'fa-tag' },
-          { type: 'separator' },
-          { label: 'Create new label', action: 'create-new-label', icon: 'fa-tag' },
-        ] });
+        menuItems.push({
+          label: 'Move to folder', action: 'move-to-folder', icon: 'fa-folder-open', subItems: [
+            { label: 'Folder name', action: 'move-to-folder-name', icon: 'fa-folder-open' },
+            { label: 'Another folder', action: 'move-to-another-folder', icon: 'fa-folder-open' },
+            { type: 'separator' },
+            { label: 'Create new folder', action: 'create-new-folder', icon: 'fa-folder-plus' },
+          ]
+        });
+        menuItems.push({
+          label: 'Add a label', action: 'add-a-label', icon: 'fa-tag', subItems: [
+            { label: 'To Do', action: 'add-a-label-to-do', icon: 'fa-tag' },
+            { label: 'Important', action: 'add-a-label-important', icon: 'fa-tag' },
+            { label: 'Work', action: 'add-a-label-work', icon: 'fa-tag' },
+            { label: 'Personal', action: 'add-a-label-personal', icon: 'fa-tag' },
+            { type: 'separator' },
+            { label: 'Create new label', action: 'create-new-label', icon: 'fa-tag' },
+          ]
+        });
         menuItems.push({ type: 'separator' });
-        menuItems.push({ label: 'Block sender', action: 'block-sender', icon: 'fa-shield-virus' });
+        menuItems.push({ label: 'Block sender', action: 'block-sender', icon: 'fa-user-shield' });
         menuItems.push({ label: 'Mark as SPAM', action: 'mark-as-spam', icon: 'fa-shield-virus' });
         menuItems.push({ type: 'separator' });
         menuItems.push({ label: 'Delete', action: 'delete', icon: 'fa-trash' });
-
-
-
-
-        
       } else if (e.target.closest('.window-sidebar .sidebar-section .sidebar-item ')) {
         currentContextMenuTarget = e.target.closest('.sidebar-item');
         menuItems.push({ label: 'Open', action: 'open-file', icon: 'fa-folder-open' });
         menuItems.push({ label: 'Open in new window', action: 'open-in-new-window', icon: 'fa-window-restore' });
         menuItems.push({ type: 'separator' });
         menuItems.push({ label: 'Get info', action: 'get-info', icon: 'fa-info-circle' });
+      } else if (e.target.closest('.contact-app-window .contact-list-item ')) {
+        currentContextMenuTarget = e.target.closest('.contact-list-item');
+        menuItems.push({ label: 'Open contact', action: 'open-contact-details', icon: 'fa-user' });
+        menuItems.push({ label: 'Open in new window', action: 'open-contact-in-new-window', icon: 'fa-user-plus' });
+        menuItems.push({ label: 'View all orders', action: 'view-all-orders', icon: 'fa-box' });
+        menuItems.push({ type: 'separator' });
+        menuItems.push({ label: 'Login as this user', action: 'login-as-contact-user', icon: 'fa-user-shield' });
+        menuItems.push({ type: 'separator' });
+        menuItems.push({ label: 'Add to favorites', action: 'add-to-favorites', icon: 'fa-star' });
+        menuItems.push({
+          label: 'Add to group', action: 'add-to-group', icon: 'fa-users', subItems: [
+            { label: 'Group 1 ', action: 'add-to-group-1', icon: 'fa-users' },
+            { label: 'Group 2', action: 'add-to-group-2', icon: 'fa-users' },
+            { label: 'Group 3', action: 'add-to-group-3', icon: 'fa-users' },
+            { type: 'separator' },
+            { label: 'Create new group', action: 'create-new-group', icon: 'fa-plus' },
+          ]
+        });
+        menuItems.push({
+          label: 'Add label', action: 'add-label', icon: 'fa-tag', subItems: [
+            { label: 'To Do', action: 'add-label-to-do', icon: 'fa-tag' },
+            { label: 'Important', action: 'add-label-important', icon: 'fa-tag' },
+            { label: 'Work', action: 'add-label-work', icon: 'fa-tag' },
+            { label: 'Personal', action: 'add-label-personal', icon: 'fa-tag' },
+            { type: 'separator' },
+            { label: 'Create new label', action: 'create-new-label', icon: 'fa-tag' },
+          ]
+        });
+        menuItems.push({ label: 'Add note', action: 'add-note', icon: 'fa-sticky-note' });
+        menuItems.push({ type: 'separator' });
+        menuItems.push({
+          label: 'Send', action: 'send-email', icon: 'fa-envelope', subItems: [
+            { label: 'Compose new email', action: 'compose-new-email', icon: 'fa-plus' },
+            { label: 'Compose SMS', action: 'compose-sms', icon: 'fa-sms' },
+            { label: 'Send WhatsApp', action: 'send-whatsapp', icon: 'fa-whatsapp' },
+            { type: 'separator' },
+            { label: 'All emails from contact', action: 'emails-from-contact', icon: 'fa-at' },
+          ]
+        });
+        menuItems.push({
+          label: 'Copy', action: 'copy-contact-data', icon: 'fa-copy', subItems: [
+            { label: 'Copy email address', action: 'copy-contact-email', icon: 'fa-envelope' },
+            { label: 'Copy phone number', action: 'copy-contact-phone', icon: 'fa-phone' },
+            { type: 'separator' },
+            { label: 'Copy contact info', action: 'copy-all-contact-info', icon: 'fa-copy' },
+          ]
+        });
+        menuItems.push({ type: 'separator' });
+        menuItems.push({ label: 'Block account', action: 'block-account', icon: 'fa-user-slash' });
+        menuItems.push({ label: 'Delete contact', action: 'delete-contact', icon: 'fa-trash' });
+      } else if (e.target.closest('.products-manager-window .products-list-item')) {
+        currentContextMenuTarget = e.target.closest('.products-list-item');
+        menuItems.push({ label: 'Edit Product', action: 'open-product-editor', icon: 'fa-box' });
+        menuItems.push({ label: 'Edit in new window', action: 'open-product-editor-in-new-window', icon: 'fa-box' });
+        menuItems.push({
+          label: 'Status', action: 'change-product-status', icon: 'fa-users', subItems: [
+            { label: 'Active', action: 'change-product-status-active', icon: 'fa-users' },
+            { label: 'Draft', action: 'change-product-status-draft', icon: 'fa-users' },
 
+            { type: 'separator' },
+            { label: 'Staff Review', action: 'change-product-status-staff-review', icon: 'fa-users' },
+          ]
+        });
+        menuItems.push({
+          label: 'Stock', action: 'change-product-status', icon: 'fa-users', subItems: [
+            { label: 'In stock', action: 'change-product-status-active', icon: 'fa-users' },
+            { label: 'Out of stock', action: 'change-product-status-draft', icon: 'fa-users' },
+            { type: 'separator' },
+            { label: 'Backorder', action: 'change-product-status-staff-review', icon: 'fa-users' },
+          ]
+        });
+        menuItems.push({ type: 'separator' });
+        menuItems.push({ label: 'Preview Product', action: 'preview-product', icon: 'fa-eye' });
+        menuItems.push({ label: 'Add / Remove Featured Product', action: 'add-remove-featured-product', icon: 'fa-star' });
+        menuItems.push({ type: 'separator' });
+        menuItems.push({ label: 'Sales report', action: 'view-sales-report', icon: 'fa-chart-line' });
+        menuItems.push({ label: 'SEO Settings', action: 'product-seo-settings', icon: 'fa-box' });
+        menuItems.push({ label: 'Create Ads Campaign', action: 'create-ads-campaign', icon: 'fa-box' });
+        menuItems.push({ label: 'Create Newsletter', action: 'create-newsletter', icon: 'fa-envelope' });
+        menuItems.push({ type: 'separator' });
+        menuItems.push({ label: 'Delete Product', action: 'delete-product', icon: 'fa-trash' });
+
+
+      } else if (e.target.closest('.orders-manager-window .orders-list-item ')) {
+        currentContextMenuTarget = e.target.closest('.orders-list-item');
+        menuItems.push({ label: 'Open order', action: 'open-order-details', icon: 'fa-box' });
+        menuItems.push({ label: 'Open in new window', action: 'open-order-in-new-window', icon: 'fa-box' });
+        menuItems.push({ type: 'separator' });
+        menuItems.push({ label: 'All orders from contact', action: 'view-all-orders-from-contact', icon: 'fa-box' });
+        menuItems.push({ label: 'View contact', action: 'view-contact', icon: 'fa-user-shield' });
+        menuItems.push({ type: 'separator' });
+        menuItems.push({
+          label: 'Change order status', action: 'change-order-status', icon: 'fa-users', subItems: [
+            { label: 'Cancel order', action: 'change-order-status-canceled', icon: 'fa-users' },
+            { label: 'On hold', action: 'change-order-status-on-hold', icon: 'fa-users' },
+            { label: 'Pending', action: 'change-order-status-pending', icon: 'fa-users' },
+            { label: 'In progress', action: 'change-order-status-in-progress', icon: 'fa-users' },
+            { label: 'Completed', action: 'change-order-status-completed', icon: 'fa-users' },
+            { type: 'separator' },
+            { label: 'Refunded', action: 'change-order-status-refunded', icon: 'fa-plus' },
+          ]
+        });
+
+
+        menuItems.push({
+          label: 'Add label', action: 'add-label', icon: 'fa-tag', subItems: [
+            { label: 'To Do', action: 'add-label-to-do', icon: 'fa-tag' },
+            { label: 'Important', action: 'add-label-important', icon: 'fa-tag' },
+            { label: 'Work', action: 'add-label-work', icon: 'fa-tag' },
+            { label: 'Personal', action: 'add-label-personal', icon: 'fa-tag' },
+            { type: 'separator' },
+            { label: 'Create new label', action: 'create-new-label', icon: 'fa-tag' },
+          ]
+        });
+        menuItems.push({ label: 'Add order note', action: 'add-note', icon: 'fa-sticky-note' });
+        menuItems.push({ type: 'separator' });
+        menuItems.push({
+          label: 'Send', action: 'send-email', icon: 'fa-envelope', subItems: [
+            { label: 'Compose new email', action: 'compose-new-email', icon: 'fa-plus' },
+            { label: 'Compose SMS', action: 'compose-sms', icon: 'fa-sms' },
+            { label: 'Send WhatsApp', action: 'send-whatsapp', icon: 'fa-whatsapp' },
+            { type: 'separator' },
+            { label: 'All emails from contact', action: 'emails-from-contact', icon: 'fa-at' },
+          ]
+        });
+        menuItems.push({
+          label: 'Copy', action: 'copy-contact-data', icon: 'fa-copy', subItems: [
+            { label: 'Copy email address', action: 'copy-contact-email', icon: 'fa-envelope' },
+            { label: 'Copy phone number', action: 'copy-contact-phone', icon: 'fa-phone' },
+            { type: 'separator' },
+            { label: 'Copy contact info', action: 'copy-all-contact-info', icon: 'fa-copy' },
+          ]
+        });
+        menuItems.push({ type: 'separator' });
+        menuItems.push({ label: 'Block account', action: 'block-account', icon: 'fa-user-slash' });
+        menuItems.push({ label: 'Delete order', action: 'delete-order', icon: 'fa-trash' });
       } else if (e.target.closest('.window-main-content .window-app-content')) {
         currentContextMenuTarget = e.target.closest('.window-app-content');
         menuItems.push({
@@ -7922,6 +23031,8 @@ window.renderPinnedTaskbarIcons = renderPinnedTaskbarIcons;
       if (menuItems.length > 0) populateContextMenu(menuItems, e.clientX, e.clientY);
     });
   }
+
+
 
 
   function populateContextMenu(menuItems, x, y) {
@@ -8137,6 +23248,212 @@ window.renderPinnedTaskbarIcons = renderPinnedTaskbarIcons;
   function executeContextMenuAction(action) {
     if (!currentContextMenuTarget) return;
     switch (action) {
+      case 'taskbar-icons-middle-alignment':
+        // Default style - center alignment
+        const taskbarAppIcons = document.querySelector('.taskbar-app-icons');
+        if (taskbarAppIcons) {
+          // Remove any existing alignment classes
+          taskbarAppIcons.classList.remove('taskbar-icons-left');
+          document.querySelector('.taskbar').classList.remove('taskbar-windows11-style');
+          document.querySelector('.taskbar').classList.remove('taskbar-text-mode');
+          
+          // Ensure proper order of elements in taskbar
+          const startButton = document.getElementById('start-button');
+          const searchContainer = document.querySelector('.search-container');
+          const taskbar = document.querySelector('.taskbar');
+          
+          if (startButton && taskbar && searchContainer) {
+            // Make sure start button is first
+            taskbar.insertBefore(startButton, taskbar.firstChild);
+            
+            // Make sure search container is after start button
+            if (searchContainer.previousElementSibling !== startButton) {
+              taskbar.insertBefore(searchContainer, startButton.nextSibling);
+            }
+            
+            // Make sure app icons container is after search container
+            taskbar.insertBefore(taskbarAppIcons, searchContainer.nextSibling);
+          }
+          // Reset any start menu positioning
+          const startMenu = document.getElementById('start-menu');
+          if (startMenu) {
+            startMenu.style.left = '';
+          }
+          // Restore original toggleStartMenu if it was modified
+          if (window.originalToggleStartMenu) {
+            window.toggleStartMenu = window.originalToggleStartMenu;
+          }
+          // Save the preference
+          localStorage.setItem('taskbarStyle', 'default');
+          if (typeof showShortTopNotification === 'function') {
+            showShortTopNotification('Taskbar style set to Default');
+          }
+          
+          // Force re-render of taskbar icons
+          renderPinnedTaskbarIcons();
+        }
+        break;
+        
+      case 'taskbar-windows11-alignment':
+        // Windows 11 style - center alignment with start button positioned absolutely
+        const taskbarAppIconsWin11 = document.querySelector('.taskbar-app-icons');
+        if (taskbarAppIconsWin11) {
+          // Remove left alignment if present
+          taskbarAppIconsWin11.classList.remove('taskbar-icons-left');
+          // Remove text mode if present
+          document.querySelector('.taskbar').classList.remove('taskbar-text-mode');
+          
+          // Get the taskbar and start button
+          const taskbar = document.querySelector('.taskbar');
+          const startButtonWin11 = document.getElementById('start-button');
+          
+          if (taskbar && startButtonWin11) {
+            // First, make sure the start button is in its original position
+            // outside of the app icons container to preserve its context menu
+            if (startButtonWin11.parentElement !== taskbar) {
+              taskbar.insertBefore(startButtonWin11, taskbarAppIconsWin11);
+            }
+            
+            // Add Windows 11 style class to taskbar
+            taskbar.classList.add('taskbar-windows11-style');
+            
+            // Fix the start menu position when in Windows 11 style
+            if (typeof toggleStartMenu === 'function') {
+              // Save the original function if not already saved
+              if (!window.originalToggleStartMenu) {
+                window.originalToggleStartMenu = toggleStartMenu;
+              }
+              
+              window.toggleStartMenu = function(e) {
+                const startMenu = document.getElementById('start-menu');
+                if (startMenu) {
+                  // Position the start menu under the start button in Windows 11 style
+                  if (document.querySelector('.taskbar').classList.contains('taskbar-windows11-style')) {
+                    const startButtonWin11 = document.getElementById('start-button');
+                    if (startButtonWin11) {
+                      const startButtonRect = startButtonWin11.getBoundingClientRect();
+                      startMenu.style.left = startButtonRect.left + 'px';
+                    }
+                  } else {
+                    startMenu.style.left = ''; // Reset to default for other styles
+                  }
+                }
+                // Call the original function
+                return window.originalToggleStartMenu.apply(this, arguments);
+              };
+            }
+          }
+          
+          // Save the preference
+          localStorage.setItem('taskbarStyle', 'windows11');
+          if (typeof showShortTopNotification === 'function') {
+            showShortTopNotification('Taskbar style set to Windows 11');
+          }
+          
+          // Force re-render of taskbar icons
+          renderPinnedTaskbarIcons();
+        }
+        break;
+        
+      case 'taskbar-icons-left-alignment':
+        // Left alignment - exactly like default but with left-aligned icons
+        const taskbarAppIconsLeft = document.querySelector('.taskbar-app-icons');
+        if (taskbarAppIconsLeft) {
+          // Add left alignment class
+          taskbarAppIconsLeft.classList.add('taskbar-icons-left');
+          // Remove Windows 11 style if present
+          document.querySelector('.taskbar').classList.remove('taskbar-windows11-style');
+          // Remove text-mode class if present
+          document.querySelector('.taskbar').classList.remove('taskbar-text-mode');
+          
+          // Ensure proper order of elements in taskbar
+          const startButtonLeft = document.getElementById('start-button');
+          const searchContainer = document.querySelector('.search-container');
+          const taskbarLeft = document.querySelector('.taskbar');
+          
+          if (startButtonLeft && taskbarLeft && searchContainer) {
+            // Make sure start button is first
+            taskbarLeft.insertBefore(startButtonLeft, taskbarLeft.firstChild);
+            
+            // Make sure search container is after start button
+            if (searchContainer.previousElementSibling !== startButtonLeft) {
+              taskbarLeft.insertBefore(searchContainer, startButtonLeft.nextSibling);
+            }
+            
+            // Make sure app icons container is after search container
+            taskbarLeft.insertBefore(taskbarAppIconsLeft, searchContainer.nextSibling);
+          }
+          // Reset any start menu positioning
+          const startMenu = document.getElementById('start-menu');
+          if (startMenu) {
+            startMenu.style.left = '';
+          }
+          // Restore original toggleStartMenu if it was modified
+          if (window.originalToggleStartMenu) {
+            window.toggleStartMenu = window.originalToggleStartMenu;
+          }
+          // Save the preference
+          localStorage.setItem('taskbarStyle', 'left');
+          if (typeof showShortTopNotification === 'function') {
+            showShortTopNotification('Taskbar icons aligned to the left');
+          }
+          
+          // Force re-render of taskbar icons
+          renderPinnedTaskbarIcons();
+        }
+        break;
+        
+      case 'taskbar-icons-and-text-apps':
+        // Icons and text - like left alignment but with app names displayed
+        const taskbarAppIconsText = document.querySelector('.taskbar-app-icons');
+        if (taskbarAppIconsText) {
+          // Add left alignment class
+          taskbarAppIconsText.classList.add('taskbar-icons-left');
+          // Remove Windows 11 style if present
+          document.querySelector('.taskbar').classList.remove('taskbar-windows11-style');
+          // Add text-mode class
+          document.querySelector('.taskbar').classList.add('taskbar-text-mode');
+          
+          // Ensure proper order of elements in taskbar
+          const startButtonText = document.getElementById('start-button');
+          const searchContainer = document.querySelector('.search-container');
+          const taskbarText = document.querySelector('.taskbar');
+          
+          if (startButtonText && taskbarText && searchContainer) {
+            // Make sure start button is first
+            taskbarText.insertBefore(startButtonText, taskbarText.firstChild);
+            
+            // Make sure search container is after start button
+            if (searchContainer.previousElementSibling !== startButtonText) {
+              taskbarText.insertBefore(searchContainer, startButtonText.nextSibling);
+            }
+            
+            // Make sure app icons container is after search container
+            taskbarText.insertBefore(taskbarAppIconsText, searchContainer.nextSibling);
+          }
+          
+          // Reset any start menu positioning
+          const startMenu = document.getElementById('start-menu');
+          if (startMenu) {
+            startMenu.style.left = '';
+          }
+          
+          // Restore original toggleStartMenu if it was modified
+          if (window.originalToggleStartMenu) {
+            window.toggleStartMenu = window.originalToggleStartMenu;
+          }
+          
+          // Save the preference
+          localStorage.setItem('taskbarStyle', 'text');
+          if (typeof showShortTopNotification === 'function') {
+            showShortTopNotification('Taskbar icons and text mode enabled');
+          }
+          
+          // Force re-render of taskbar icons to include text
+          renderPinnedTaskbarIcons();
+        }
+        break;
+        
       case 'open-app':
         if (currentContextMenuTarget.matches('.desktop-icon')) {
           if (window.innerWidth <= MOBILE_BREAKPOINT) {
@@ -8345,6 +23662,11 @@ window.renderPinnedTaskbarIcons = renderPinnedTaskbarIcons;
       case 'desktop-mode':
         switchToDesktopMode();
         return;
+      case 'widgets-mode':
+        if (typeof window.switchToWidgetMode === 'function') {
+          window.switchToWidgetMode();
+        }
+        return;
       case 'toggle-search-taskbar':
         const searchBar = document.querySelector('.taskbar .search-container');
         if (searchBar) {
@@ -8480,7 +23802,7 @@ window.renderPinnedTaskbarIcons = renderPinnedTaskbarIcons;
 
   // Add App launcher desktop icon if not present
   document.addEventListener('DOMContentLoaded', function () {
-    
+
     // Add App launcher icon to desktop
     if (desktopIconsContainer && !document.querySelector('.desktop-icon[data-app="app-launcher"]')) {
       const appLauncherIcon = document.createElement('div');
@@ -8492,7 +23814,7 @@ window.renderPinnedTaskbarIcons = renderPinnedTaskbarIcons;
       `;
       desktopIconsContainer.appendChild(appLauncherIcon);
     }
-    
+
   });
   // --- App launcher window logic and event listener ---
   function openAppLauncherWindow(iconElementForAnim) {
@@ -8706,7 +24028,7 @@ window.renderPinnedTaskbarIcons = renderPinnedTaskbarIcons;
     footer.appendChild(logoutBtn);
     overlay.appendChild(footer);
 
-    
+
     // Keyboard navigation state
     let selectedAppIndex = 0;
 
@@ -8731,7 +24053,8 @@ window.renderPinnedTaskbarIcons = renderPinnedTaskbarIcons;
         appItem.getAttribute('data-app'),
         appItem.querySelector('span').textContent,
         appItem.querySelector('i').className.split(' ').find(cls => cls.startsWith('fa-')),
-        appItem.className.split(' ').find(cls => cls.endsWith('-icon') || ['orange', 'blue', 'red', 'teal', 'purple', 'gray'].includes(cls))
+        appItem.className.split(' ').find(cls => cls.endsWith('-icon') || ['orange', 'blue', 'red', 'teal', 'purple', 'gray'].includes(cls)),
+        appItem
       );
       closeLauncher();
     }
@@ -8891,7 +24214,7 @@ window.renderPinnedTaskbarIcons = renderPinnedTaskbarIcons;
     });
   }
 
-  
+
 
 
   // --- Bulletproof: Attach ResizeObserver to all .window elements ---
@@ -8991,14 +24314,14 @@ function attachWidgetsToggleBtnListener() {
 
 document.addEventListener('DOMContentLoaded', function () {
   attachWidgetsToggleBtnListener();
-  
+
 });
 
 
 
 
 document.addEventListener('DOMContentLoaded', function () {
-  
+
   const aiChatBtn = document.getElementById('ai-chat-btn');
   const aiChatWindow = document.getElementById('ai-chat-window');
   let aiChatVisible = false;
@@ -9037,7 +24360,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 document.addEventListener('DOMContentLoaded', function () {
-  
+
   // GLOBAL SEARCH OVERLAY LOGIC
   const globalSearchBtn = document.getElementById('global-search-btn');
   const globalSearchOverlay = document.getElementById('global-search-overlay');
@@ -9167,7 +24490,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 document.addEventListener('DOMContentLoaded', function () {
-  
+
   const notificationsBtn = document.getElementById('notifications-btn');
   const notificationsPanel = document.getElementById('notifications-panel');
   let notificationsVisible = false;
@@ -9334,42 +24657,69 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     });
   }
-  
+
 });
 
 
 
 
 document.addEventListener('DOMContentLoaded', function () {
-  
+
   const fullscreenBtn = document.getElementById('fullscreen-btn');
   if (fullscreenBtn) {
     const fullscreenIcon = fullscreenBtn.querySelector('i');
     function isFullscreen() {
       return document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
     }
-    function requestFullscreen(elem) {
-      if (elem.requestFullscreen) {
-        elem.requestFullscreen();
-      } else if (elem.webkitRequestFullscreen) {
-        elem.webkitRequestFullscreen();
-      } else if (elem.mozRequestFullScreen) {
-        elem.mozRequestFullScreen();
-      } else if (elem.msRequestFullscreen) {
-        elem.msRequestFullscreen();
+    
+    // Modified to handle errors properly and ensure user gesture
+    function requestFullscreen(elem, fromUserGesture = false) {
+      try {
+        // Only proceed if this is from a user gesture
+        if (!fromUserGesture) {
+          console.warn('Fullscreen request not from user gesture');
+          if (typeof showShortTopNotification === 'function') {
+            showShortTopNotification('Fullscreen must be triggered by user interaction');
+          }
+          return Promise.reject('Not from user gesture');
+        }
+        
+        if (elem.requestFullscreen) {
+          return elem.requestFullscreen();
+        } else if (elem.webkitRequestFullscreen) {
+          return elem.webkitRequestFullscreen();
+        } else if (elem.mozRequestFullScreen) {
+          return elem.mozRequestFullScreen();
+        } else if (elem.msRequestFullscreen) {
+          return elem.msRequestFullscreen();
+        }
+      } catch (err) {
+        console.warn('Fullscreen request failed:', err);
+        // Show a notification to the user
+        if (typeof showShortTopNotification === 'function') {
+          showShortTopNotification('Fullscreen must be triggered by user interaction');
+        }
       }
+      return Promise.reject('No fullscreen API available');
     }
+    
     function exitFullscreen() {
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
-      } else if (document.webkitExitFullscreen) {
-        document.webkitExitFullscreen();
-      } else if (document.mozCancelFullScreen) {
-        document.mozCancelFullScreen();
-      } else if (document.msExitFullscreen) {
-        document.msExitFullscreen();
+      try {
+        if (document.exitFullscreen) {
+          return document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+          return document.webkitExitFullscreen();
+        } else if (document.mozCancelFullScreen) {
+          return document.mozCancelFullScreen();
+        } else if (document.msExitFullscreen) {
+          return document.msExitFullscreen();
+        }
+      } catch (err) {
+        console.warn('Exit fullscreen failed:', err);
       }
+      return Promise.resolve();
     }
+    
     function updateFullscreenIcon() {
       if (isFullscreen()) {
         fullscreenIcon.classList.remove('fa-expand');
@@ -9379,13 +24729,30 @@ document.addEventListener('DOMContentLoaded', function () {
         fullscreenIcon.classList.add('fa-expand');
       }
     }
-    fullscreenBtn.addEventListener('click', function () {
-      if (isFullscreen()) {
-        exitFullscreen();
+    
+    // Direct user interaction handler
+    fullscreenBtn.addEventListener('click', function(event) {
+      // Ensure this is a direct user click
+      if (event.isTrusted) {
+        if (isFullscreen()) {
+          exitFullscreen().catch(err => console.warn('Exit fullscreen error:', err));
+        } else {
+          requestFullscreen(document.documentElement, true).catch(err => {
+            console.warn('Request fullscreen error:', err);
+            // Only show notification for real errors, not when we already showed one
+            if (err !== 'No fullscreen API available' && typeof showShortTopNotification === 'function') {
+              showShortTopNotification('Fullscreen request failed');
+            }
+          });
+        }
       } else {
-        requestFullscreen(document.documentElement);
+        console.warn('Ignoring non-trusted fullscreen event');
+        if (typeof showShortTopNotification === 'function') {
+          showShortTopNotification('Fullscreen must be triggered by user interaction');
+        }
       }
     });
+    
     document.addEventListener('fullscreenchange', updateFullscreenIcon);
     document.addEventListener('webkitfullscreenchange', updateFullscreenIcon);
     document.addEventListener('mozfullscreenchange', updateFullscreenIcon);
@@ -9396,7 +24763,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 document.addEventListener('DOMContentLoaded', function () {
-  
+
   const widgetsScreen = document.getElementById('widgets-screen');
   function enableWidgetsScreenScroll() {
     if (!widgetsScreen) return;
@@ -9409,7 +24776,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
   enableWidgetsScreenScroll();
   window.addEventListener('resize', enableWidgetsScreenScroll);
-  
+
 });
 
 
@@ -9745,7 +25112,7 @@ function setupMobileSidebarForWindow(windowElement) {
   }
 
   // Only attach sidebar handler if menuToggle is in menu mode
-  menuToggle.onclick = function() {
+  menuToggle.onclick = function () {
     if (menuToggle.getAttribute('data-mode') !== 'menu') return;
     const isShowing = !sidebar.classList.contains('show');
     sidebar.classList.toggle('show');
@@ -9760,7 +25127,7 @@ function setupMobileSidebarForWindow(windowElement) {
     }
   };
 
-  overlay.onclick = function() {
+  overlay.onclick = function () {
     sidebar.classList.remove('show');
     overlay.classList.remove('show');
     setBlockInteraction(false);
@@ -9772,7 +25139,7 @@ function setupMobileSidebarForWindow(windowElement) {
   // Close sidebar on item click for mobile
   const sidebarItems = sidebar.querySelectorAll('.sidebar-item');
   sidebarItems.forEach(item => {
-    item.onclick = function() {
+    item.onclick = function () {
       if (window.innerWidth <= 767) {
         sidebar.classList.remove('show');
         overlay.classList.remove('show');
@@ -9841,7 +25208,7 @@ function setNotificationsBtnOpacity() {
 
 // Also call setNotificationsBtnOpacity on DOMContentLoaded to initialize.
 document.addEventListener('DOMContentLoaded', function () {
-  
+
   setNotificationsBtnOpacity();
 });
 
@@ -9944,41 +25311,175 @@ function showConfirmDialog({ title, message, iconClass, okText = "OK", cancelTex
 }
 
 
-//add display none delay to sidebar spans menu items
-document.addEventListener('DOMContentLoaded', function() {
-  // Select all collapsed sidebars (if any)
-  var sidebars = document.querySelectorAll('.window-sidebar.sidebar-collapsed');
-  if (!sidebars.length) return; // No sidebar found, exit safely
 
-  sidebars.forEach(function(sidebar) {
-    // Defensive: only proceed if sidebar is not null
-    if (!sidebar) return;
-    var sidebarSpans =  sidebar.querySelectorAll(
-      '.sidebar-item span, .sidebar-section h4, .email-app-window .compose-btn span, .mailbox-email, .mailbox-name'
-    );
 
-    // On mouse enter, show spans (for transition)
-    sidebar.addEventListener('mouseenter', function() {
-      sb._hoverEnter();
+
+
+// --- PER-APP SIDEBAR TOGGLE LOGIC ---
+// Independent sidebar toggle for each app window
+(function () {
+  // Helper function to apply sidebar state to a specific window
+  function applySidebarToggleToWindow(windowElement, isChecked) {
+    console.log('Applying sidebar toggle state to window:', windowElement.id, isChecked);
+    const sidebars = windowElement.querySelectorAll('.window-sidebar, .settings-sidebar, .app-store-sidebar');
+    sidebars.forEach(sb => {
+      if (isChecked) {
+        // When toggle is ON: always keep sidebar collapsed
+        sb.setAttribute('data-user-collapsed', 'true');
+        if (sb._hoverLeave) sb._hoverLeave();
+        sb.classList.remove('sidebar-hovered');
+      } else {
+        // When toggle is OFF: follow responsive breakpoints
+        sb.removeAttribute('data-user-collapsed');
+      }
     });
 
-    // On mouse leave, hide spans (for transition)
-    sidebar.addEventListener('mouseleave', function() {
-      sb._hoverLeave();
-    });
+    // Update the sidebar state through updateSidebarForWindow
+    if (typeof window.updateSidebarForWindow === 'function') {
+      window.updateSidebarForWindow(windowElement);
+    }
+  }
 
-    // Initialize collapsed state (if not hovered)
-    if (!sidebar.classList.contains('sidebar-hovered')) {
-      sidebarSpans.forEach(span => {
-        span.style.opacity = '0';
-        span.style.width = '0';
-        span.style.marginLeft = '0';
-        span.style.pointerEvents = 'none';
+  // Function to set up toggle for a specific window
+  function setupToggleForWindow(toggle, windowElement) {
+    if (!windowElement || !toggle) return;
+
+    // Get window ID for storing the toggle state
+    const windowId = windowElement.id || windowElement.getAttribute('data-app-name') || 'unknown-window';
+
+    // Set initial state from localStorage or default to false
+    const savedState = localStorage.getItem(`sidebar-toggle-${windowId}`);
+    if (savedState !== null) {
+      toggle.checked = savedState === 'true';
+      applySidebarToggleToWindow(windowElement, toggle.checked);
+    }
+
+    // Add change listener
+    toggle.addEventListener('change', function () {
+      const isChecked = toggle.checked;
+
+      // Save state in localStorage for this specific window
+      localStorage.setItem(`sidebar-toggle-${windowId}`, isChecked ? 'true' : 'false');
+
+      // Apply sidebar state to this window only
+      applySidebarToggleToWindow(windowElement, isChecked);
+    });
+  }
+
+  // Patch the createWindowFromTemplate function to handle new windows
+  if (typeof window.createWindowFromTemplate === 'function') {
+    const originalCreateWindow = window.createWindowFromTemplate;
+    window.createWindowFromTemplate = function () {
+      const win = originalCreateWindow.apply(this, arguments);
+
+      // Setup toggle for the new window after a short delay
+      setTimeout(function () {
+        if (!win) return;
+
+        // Find all toggles in the new window
+        const toggles = win.querySelectorAll('input.window-sidebar-toggle');
+        toggles.forEach(toggle => {
+          setupToggleForWindow(toggle, win);
+        });
+      }, 0);
+
+      return win;
+    };
+  }
+
+  // Initialize all toggles when the DOM is loaded
+  document.addEventListener('DOMContentLoaded', function () {
+    console.log('DOM loaded, initializing per-app sidebar toggles');
+
+    function initToggles() {
+      const toggles = document.querySelectorAll('input.window-sidebar-toggle');
+      console.log('Found toggle count:', toggles.length);
+
+
+
+      // Set up each toggle with its parent window
+      toggles.forEach(toggle => {
+        const windowElement = toggle.closest('.window');
+        if (windowElement) {
+          setupToggleForWindow(toggle, windowElement);
+        }
       });
+
+      // Set up a MutationObserver to watch for new toggles being added
+      const observer = new MutationObserver(function (mutations) {
+        mutations.forEach(mutation => {
+          if (mutation.addedNodes && mutation.addedNodes.length > 0) {
+            mutation.addedNodes.forEach(node => {
+              if (node.nodeType === Node.ELEMENT_NODE) {
+                // Check if this node contains toggle elements
+                const newToggles = node.querySelectorAll ?
+                  node.querySelectorAll('input.window-sidebar-toggle') : [];
+
+                if (newToggles.length > 0) {
+                  newToggles.forEach(toggle => {
+                    const windowElement = toggle.closest('.window');
+                    if (windowElement) {
+                      setupToggleForWindow(toggle, windowElement);
+                    }
+                  });
+                }
+              }
+            });
+          }
+        });
+      });
+
+      // Start observing the document
+      observer.observe(document.body, { childList: true, subtree: true });
+    }
+
+    // Start initialization
+    initToggles();
+  });
+})();
+
+// --- Point of Sale Order Item Toggle Function ---
+function toggleOrderItem(element) {
+  // Prevent event bubbling if clicking on buttons, inputs, or expanded content
+  if (event && (
+    event.target.tagName === 'BUTTON' || 
+    event.target.tagName === 'INPUT' ||
+    event.target.closest('.pos-item-expanded-content')
+  )) {
+    return;
+  }
+  
+  // Close all other expanded items first
+  const allItems = document.querySelectorAll('.pos-order-item');
+  allItems.forEach(item => {
+    if (item !== element && item.classList.contains('expanded')) {
+      item.classList.remove('expanded');
     }
   });
-});
+  
+  // Toggle the clicked item
+  element.classList.toggle('expanded');
+}
 
-
-
-
+// --- Point of Sale Remove Order Item Function ---
+function removeOrderItem(button) {
+  // Prevent event bubbling
+  if (event) {
+    event.stopPropagation();
+  }
+  
+  // Find the parent order item
+  const orderItem = button.closest('.pos-order-item');
+  
+  if (orderItem) {
+    // Add a fade-out animation
+    orderItem.style.transition = 'all 0.3s ease';
+    orderItem.style.opacity = '0';
+    orderItem.style.transform = 'translateX(100%)';
+    
+    // Remove the item after animation completes
+    setTimeout(() => {
+      orderItem.remove();
+    }, 300);
+  }
+}

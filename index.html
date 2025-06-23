@@ -7,10 +7,14 @@
 
   <title>OS Dashboard - SaaS</title>
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/product-content.css">
   <!-- Font Awesome for icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
+
+
+ 
 
    <!-- Volume Panel -->
    <div id="volume-panel" class="volume-panel">
@@ -61,7 +65,7 @@
             <div class="mobile-profile-top-bar-header">
               <div class="mobile-profile-top-bar-header-left">
                 <img src="img/avatar.png" alt="Site Logo" class="site-logo-round">
-                <span>Andrei</span>
+                <span>Michael Muchmore</span>
               </div>
               <div class="mobile-profile-header-right">
                 <button class="toolbar-search-btn" title="Search"><i class="fas fa-search"></i></button>
@@ -399,6 +403,13 @@
                 <div class="file-icon">
                   <i class="fas fa-folder"></i>
                 </div>
+                <div class="file-name">Desktop</div>
+                <div class="file-info">3 GB</div>
+              </div>
+              <div class="file-item folder">
+                <div class="file-icon">
+                  <i class="fas fa-folder"></i>
+                </div>
                 <div class="file-name">Website</div>
                 <div class="file-info">13 GB</div>
               </div>
@@ -449,7 +460,7 @@
             <div class="window-statusbar">
               <div class="status-left">
                 <label class="toggle-switch" id="window-sidebar-toggle-label" style="margin-right: 14px;">
-                  <input type="checkbox" id="window-sidebar-toggle">
+                  <input type="checkbox" class="window-sidebar-toggle" id="window-sidebar-toggle">
                   <span class="slider"></span>
                 </label>
                 21 items
@@ -568,7 +579,7 @@
               </div>
 
               <div class="setting-row">
-                <label for="highlight-color">Highlight color</label>
+                <label class="highlight-color">Highlight color</label>
                 <div class="select-wrapper">
                   <select id="highlight-color">
                     <option value="accent">Accent Color</option>
@@ -579,7 +590,7 @@
               </div>
 
               <div class="setting-row">
-                <label for="sidebar-icon-size">Sidebar icon size</label>
+                <label class="sidebar-icon-size">Sidebar icon size</label>
                 <div class="select-wrapper">
                   <select id="sidebar-icon-size">
                     <option value="small">Small</option>
@@ -591,7 +602,7 @@
               </div>
 
               <div class="setting-row">
-                <label for="allow-wallpaper-tinting">Allow wallpaper tinting in windows</label>
+                <label class="allow-wallpaper-tinting">Allow wallpaper tinting in windows</label>
                 <label class="toggle-switch">
                   <input type="checkbox" id="allow-wallpaper-tinting" checked>
                   <span class="slider round"></span>
@@ -603,15 +614,15 @@
                 <div class="radio-group">
                   <div class="radio-option">
                     <input type="radio" id="scroll-auto" name="show-scrollbars" value="auto" checked>
-                    <label for="scroll-auto">Automatically based on mouse or trackpad</label>
+                    <label class="scroll-auto">Automatically based on mouse or trackpad</label>
                   </div>
                   <div class="radio-option">
                     <input type="radio" id="scroll-scrolling" name="show-scrollbars" value="scrolling">
-                    <label for="scroll-scrolling">When scrolling</label>
+                    <label class="scroll-scrolling">When scrolling</label>
                   </div>
                   <div class="radio-option">
                     <input type="radio" id="scroll-always" name="show-scrollbars" value="always">
-                    <label for="scroll-always">Always</label>
+                    <label class="scroll-always">Always</label>
                   </div>
                 </div>
               </div>
@@ -621,11 +632,11 @@
                 <div class="radio-group">
                   <div class="radio-option">
                     <input type="radio" id="click-next-page" name="scrollbar-click" value="next" checked>
-                    <label for="click-next-page">Jump to the next page</label>
+                    <label class="click-next-page">Jump to the next page</label>
                   </div>
                   <div class="radio-option">
                     <input type="radio" id="click-spot" name="scrollbar-click" value="spot">
-                    <label for="click-spot">Jump to the spot that's clicked</label>
+                    <label class="click-spot">Jump to the spot that's clicked</label>
                   </div>
                 </div>
               </div>
@@ -879,11 +890,28 @@
               </div>
               <div class="sidebar-item">
                 <div class="sidebar-item-menu">
-                  <i class="fas fa-globe"></i>
-                  <span>Website</span>
+                  <i class="fas fa-file-pen"></i>
+                  <span>Staff Review</span>
+                </div>
+              </div>
+              <div class="sidebar-item">
+                <div class="sidebar-item-menu">
+                  <i class="fas fa-file-pen"></i>
+                  <span>Drafts</span>
+                </div>
+              </div>
+              <div class="sidebar-item">
+                <div class="sidebar-item-menu">
+                  <i class="fas fa-trash"></i>
+                  <span>Trash</span>
                 </div>
               </div>
             </div>
+
+
+
+
+
             
             <div class="sidebar-section drives-section">
               <div class="sidebar-section-header"><h4>Global Settings</h4></div>
@@ -907,10 +935,18 @@
               </div>
               <div class="sidebar-item">
                 <div class="sidebar-item-menu">
-                  <i class="fas fa-file-invoice"></i>
-                  <span>Billing & Invoices</span>
+                  <i class="fa-solid fa-table-columns"></i>
+                  <span>Sidebars</span>
                 </div>
               </div>
+
+              <div class="sidebar-item">
+                <div class="sidebar-item-menu">
+                  <i class="fas fa-language"></i>
+                  <span>Translations</span>
+                </div>
+              </div>
+
             </div>
 
             <div class="sidebar-section drives-section">
@@ -962,15 +998,609 @@
           </div>
             
             <main class="window-main-content sitebuilder-content">
+              <div class="window-toolbar">
+                <div class="toolbar-buttons-left">
+                  <label class="toggle-switch" id="window-sidebar-toggle-label" style="margin-right: 14px;">
+                    <input type="checkbox" class="window-sidebar-toggle" id="window-sidebar-toggle">
+                    <span class="slider"></span>
+                  </label>
+                  <div class="select-container language-select-container">
+                    <select class="form-control">
+                      <option value="active" selected="" style="color: #333 !important;">All Languages</option>
+                      <option value="draft" style="color: #333 !important;">English</option>
+                      <option value="archived" style="color: #333 !important;">Spanish</option>
+                      <option value="archived" style="color: #333 !important;">French</option>
+                      <option value="archived" style="color: #333 !important;">German</option>
+                      <option value="archived" style="color: #333 !important;">Italian</option>
+                      <option value="archived" style="color: #333 !important;">Portuguese</option>
+                      <option value="archived" style="color: #333 !important;">Russian</option>
+                      <option value="archived" style="color: #333 !important;">Chinese</option>
+                    </select>
+                  </div>
+                  <div class="select-container language-select-container">
+                    <select class="form-control">
+                      <option value="active" selected="" style="color: #333 !important; background-color: #fff !important; border: 1px solid #e0e0e0 !important;" disabled>Group by</option>
+                      <option value="draft" style="color: #333 !important;">Name</option>
+                      <option value="archived" style="color: #333 !important;">ID</option>
+                      <option value="draft" style="color: #333 !important;">Type</option>
+                      <option value="archived" style="color: #333 !important;">Status</option>
+                      <option value="archived" style="color: #333 !important;">Language</option>
+
+                    </select>
+                  </div>
+                  <button class="toolbar-button" title="Generate SEO"><i class="fas fa-search"></i><span>Generate SEO</span></button>
+                  <button class="toolbar-button" title="Generate Sitemap"><i class="fas fa-sitemap"></i><span>Sitemap</span></button>
+                </div>
+                <div class="toolbar-buttons-right">
+                  <button class="toolbar-button" title="Move"><i class="fas fa-folder-open"></i> <span>Move</span></button>
+                  <button class="toolbar-button" title="Spam"><i class="fas fa-shield-virus"></i> <span>Spam</span></button>
+                  <button class="toolbar-button" title="Delete"><i class="fas fa-trash"></i> <span>Delete</span></button>
+                  
+                  <button class="btn add-new-page-btn">Add new page</button>
+                  <button class="toolbar-button mailmore-btn" title="More"><i class="fas fa-ellipsis-h"></i></button>
+                </div>
+              </div>
               <div class="sitebuilder-main-content">
 
+
                 <!-- Sitebuilder main content goes here -->
-                dsadas
-                <section id="sitebuilder-sections"></section>
-              </div>
-            </main>
-          </div>
-        
+                <div class="sitebuilder-dashboard-content">
+                    <div class="sitebuilder-dashboard-header">
+                        <h1>Home Pages</h1>
+                    </div>
+                    <div class="sitebuilder-iteam-content">
+                    <div class="page-card featured">
+                        <div class="page-preview">
+                            <img src="img/featured1.jpg" alt="Homepage">
+                        </div>
+                        <div class="page-info"><div class="page-info-header-container">
+                          <div class="page-info-header">
+                            <h2>Homepage</h2>
+                          </div>
+                            <div class="page-meta">
+                                <span class="last-edited">Last edited 2022/01/19 at 4:27 pm</span>
+                                <span class="edited-by">by <strong>Argenti</strong></span>
+                            </div></div>
+                            <div class="page-actions">
+                                <button class="action-btn view-btn"><i class="fas fa-eye"></i></button>
+
+
+                                <button class="action-btn settings-btn"><i class="fas fa-gear"></i></button>
+                                <button class="action-btn edit-btn">Edit <i class="fas fa-chevron-down"></i></button>
+                            </div>
+                        </div>
+                      </div>
+
+                        
+                        <div class="page-actions-row">
+                          <div class="page-actions-row-left">
+                          <button class="page-action-btn"><i class="fas fa-pencil"></i> Edit</button>
+                            <button class="page-action-btn"><i class="fas fa-paint-brush"></i> Design</button>
+                            <button class="page-action-btn"><i class="fas fa-code"></i> Advanced</button>
+                            <button class="page-action-btn"><i class="fas fa-copy"></i> Duplicate</button>
+                            <button class="page-action-btn"><i class="fas fa-eye"></i> View</button>
+                          </div>
+                          <div class="page-actions-row-right">
+                            <button class="page-action-btn"><i class="fas fa-florin-sign"></i>Import Figma Design</button>
+                            <button class="page-action-btn delete-btn"><i class="fas fa-trash"></i></button>
+                          </div>
+                        </div>
+                    </div>
+                    
+                    <div class="section-divider">
+                        <h2>Published</h2>
+                    </div>
+
+
+                    
+                    
+                  <div class="sitebuilder-iteam-content">
+                    <div class="page-card">
+                        <div class="page-icon">
+                            <i class="fas fa-sheet-plastic"></i>
+                        </div>
+                        <div class="page-info">
+                          <div class="page-info-header">
+                            <h2>Portfolio</h2>
+                          </div>
+                            <div class="page-meta">
+                                <span class="published-url">mywebsite.com/portfolio/</span>
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                          <div class="page-card-language-flag-container" style="margin-right: 30px; font-size: 12px;" >
+                            <span>ID: #25690-RO</span>
+                            </div>
+                          <div class="page-card-language-flag-container">
+                            <img src="img/ro.jpg" alt="Romania" class="page-card-language-flag">
+                            <span>RO</span>
+                            </div>
+                            <button class="action-btn settings-btn"><i class="fas fa-gear"></i></button>
+                            <button class="action-btn edit-btn">Edit <i class="fas fa-chevron-down"></i></button>
+
+
+                        </div>
+                    </div>
+                    
+                    <div class="page-actions-row">
+                      <div class="page-actions-row-left">
+                      <button class="page-action-btn"><i class="fas fa-pencil"></i> Edit</button>
+                        <button class="page-action-btn"><i class="fas fa-paint-brush"></i> Design</button>
+                        <button class="page-action-btn"><i class="fas fa-code"></i> Advanced</button>
+                        <button class="page-action-btn"><i class="fas fa-copy"></i> Duplicate</button>
+                        <button class="page-action-btn"><i class="fas fa-eye"></i> View</button>
+                      </div>
+                      <div class="page-actions-row-right">
+                        <button class="page-action-btn"><i class="fas fa-florin-sign"></i>Import Figma Design</button>
+                        <button class="page-action-btn delete-btn"><i class="fas fa-trash"></i></button>
+                      </div>
+                    </div>
+                    </div>
+
+
+                     
+                  <div class="sitebuilder-iteam-content">
+                    <div class="page-card">
+                        <div class="page-icon">
+                            <i class="fas fa-sheet-plastic"></i>
+                        </div>
+                        <div class="page-info">
+                          <div class="page-info-header">
+                            <h2>Portfolio</h2>
+                          </div>
+                            <div class="page-meta">
+                                <span class="published-url">mywebsite.com/portfolio/</span>
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                          <div class="page-card-language-flag-container" style="margin-right: 30px; font-size: 12px;">
+                            <span>ID: #25690-EN</span>
+                            </div>
+                          <div class="page-card-language-flag-container">
+                          <img src="img/en.jpg" alt="Romania" class="page-card-language-flag">
+                          <span>EN</span>
+                          </div>
+                            <button class="action-btn settings-btn"><i class="fas fa-gear"></i></button>
+                            <button class="action-btn edit-btn">Edit <i class="fas fa-chevron-down"></i></button>
+
+
+                        </div>
+                    </div>
+                    
+                    <div class="page-actions-row">
+                      <div class="page-actions-row-left">
+                      <button class="page-action-btn"><i class="fas fa-pencil"></i> Edit</button>
+                        <button class="page-action-btn"><i class="fas fa-paint-brush"></i> Design</button>
+                        <button class="page-action-btn"><i class="fas fa-code"></i> Advanced</button>
+                        <button class="page-action-btn"><i class="fas fa-copy"></i> Duplicate</button>
+                        <button class="page-action-btn"><i class="fas fa-eye"></i> View</button>
+                      </div>
+                      <div class="page-actions-row-right">
+                        <button class="page-action-btn"><i class="fas fa-florin-sign"></i>Import Figma Design</button>
+                        <button class="page-action-btn delete-btn"><i class="fas fa-trash"></i></button>
+                      </div>
+                    </div>
+                    </div>
+
+ 
+                    <div class="sitebuilder-iteam-content draft-page-card">
+                      <div class="page-card">
+                          <div class="page-icon">
+                            <i class="fa-solid fa-file-signature"></i>
+                          </div>
+                          <div class="page-info">
+                            <div class="page-info-header">
+                              <h2>Portfolio</h2>
+                              <span class="published-page-address">• Draft</span>
+                            </div>
+                              <div class="page-meta">
+                                  <span class="published">Not published</span>
+                              </div>
+                          </div>
+                          <div class="card-actions">
+                            <div class="page-card-language-flag-container" style="margin-right: 30px; font-size: 12px;" >
+                            <span>ID: #25690-RO</span>
+                            </div>
+                          <div class="page-card-language-flag-container">
+                            <img src="img/ro.jpg" alt="Romania" class="page-card-language-flag">
+                            <span>RO</span>
+                            </div>
+                            <button class="action-btn settings-btn"><i class="fas fa-gear"></i></button>
+                            <button class="action-btn edit-btn">Edit <i class="fas fa-chevron-down"></i></button>
+
+  
+                          </div>
+                      </div>
+                      
+                      <div class="page-actions-row">
+                        <div class="page-actions-row-left">
+                        <button class="page-action-btn"><i class="fas fa-pencil"></i> Edit</button>
+                          <button class="page-action-btn"><i class="fas fa-paint-brush"></i> Design</button>
+                          <button class="page-action-btn"><i class="fas fa-code"></i> Advanced</button>
+                          <button class="page-action-btn"><i class="fas fa-copy"></i> Duplicate</button>
+                          <button class="page-action-btn"><i class="fas fa-eye"></i> View</button>
+                        </div>
+                        <div class="page-actions-row-right">
+                          <button class="page-action-btn"><i class="fas fa-florin-sign"></i>Import Figma Design</button>
+                          <button class="page-action-btn delete-btn"><i class="fas fa-trash"></i></button>
+                        </div>
+                      </div>
+                      </div>
+
+
+                      
+                    <div class="sitebuilder-iteam-content team-review-page-card">
+                      <div class="page-card">
+                          <div class="page-icon">
+                            <i class="fa-solid fa-file-circle-check"></i>
+                          </div>
+                          <div class="page-info">
+                            <div class="page-info-header">
+                              <h2>Portfolio</h2>
+                              <span class="published-page-address">• Staff review</span>
+                            </div>
+                              <div class="page-meta">
+                                  <span class="published">Staff review: Approved</span>
+                              </div>
+                          </div>
+                          <div class="card-actions">
+                            <div class="page-card-language-flag-container" style="margin-right: 30px; font-size: 12px;" >
+                            <span>ID: #25690-RO</span>
+                            </div>
+                          <div class="page-card-language-flag-container">
+                            <img src="img/ro.jpg" alt="Romania" class="page-card-language-flag">
+                            <span>RO</span>
+                            </div>
+                            <button class="action-btn settings-btn"><i class="fas fa-gear"></i></button>
+                            <button class="action-btn edit-btn">Edit <i class="fas fa-chevron-down"></i></button>
+
+  
+                          </div>
+                      </div>
+                      
+                      <div class="page-actions-row">
+                        <div class="page-actions-row-left">
+                        <button class="page-action-btn"><i class="fas fa-pencil"></i> Edit</button>
+                          <button class="page-action-btn"><i class="fas fa-paint-brush"></i> Design</button>
+                          <button class="page-action-btn"><i class="fas fa-code"></i> Advanced</button>
+                          <button class="page-action-btn"><i class="fas fa-copy"></i> Duplicate</button>
+                          <button class="page-action-btn"><i class="fas fa-eye"></i> View</button>
+                        </div>
+                        <div class="page-actions-row-right">
+                          <button class="page-action-btn"><i class="fas fa-florin-sign"></i>Import Figma Design</button>
+                          <button class="page-action-btn delete-btn"><i class="fas fa-trash"></i></button>
+                        </div>
+                      </div>
+                      </div>
+
+
+
+
+                      <div class="sitebuilder-iteam-content auto-generated-page-card">
+                        <div class="page-card">
+                            <div class="page-icon">
+                                <i class="fas fa-file-circle-exclamation"></i>
+                            </div>
+                            <div class="page-info">
+                              <div class="page-info-header">
+                                <h2>Portfolio</h2>
+                                <span class="published-page-address">Missing page</span>
+                              </div>
+                                <div class="page-meta">
+                                    <span class="published">Missing page for English language</span>
+                                </div>
+                            </div>
+                            <div class="card-actions">
+                              <div class="page-card-language-flag-container" style="margin-right: 30px; font-size: 12px;" >
+                              <span>ID: #25690-EN</span>
+                              </div>
+                            <div class="page-card-language-flag-container">
+                              <img src="img/en.jpg" alt="English" class="page-card-language-flag">
+                              <span>EN</span>
+                              </div>
+                              <button class="action-btn settings-btn"><i class="fas fa-circle-plus"></i><span style="margin-left: 10px;">Create Page</span></button>
+  
+    
+                            </div>
+                        </div>
+                        
+                        <div class="page-actions-row">
+                          <div class="page-actions-row-left">
+                          <button class="page-action-btn"><i class="fas fa-pencil"></i> Edit</button>
+                            <button class="page-action-btn"><i class="fas fa-paint-brush"></i> Design</button>
+                            <button class="page-action-btn"><i class="fas fa-code"></i> Advanced</button>
+                            <button class="page-action-btn"><i class="fas fa-copy"></i> Duplicate</button>
+                            <button class="page-action-btn"><i class="fas fa-eye"></i> View</button>
+                          </div>
+                          <div class="page-actions-row-right">
+                            <button class="page-action-btn"><i class="fas fa-florin-sign"></i>Import Figma Design</button>
+                            <button class="page-action-btn delete-btn"><i class="fas fa-trash"></i></button>
+                          </div>
+                        </div>
+                        </div>
+  
+  
+
+
+                      <div class="section-divider">
+                        <h2>Drafts</h2>
+                    </div>
+
+
+                    
+                    
+                  <div class="sitebuilder-iteam-content">
+                    <div class="page-card">
+                        <div class="page-icon">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <div class="page-info">
+                          <div class="page-info-header">
+                            <h2>Portfolio</h2>
+                          </div>
+                            <div class="page-meta">
+                                <span class="published-url">mywebsite.com/portfolio/</span>
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                          <div class="page-card-language-flag-container" style="margin-right: 30px; font-size: 12px;" >
+                            <span>ID: #25690-RO</span>
+                            </div>
+                          <div class="page-card-language-flag-container">
+                            <img src="img/ro.jpg" alt="Romania" class="page-card-language-flag">
+                            <span>RO</span>
+                            </div>
+                            <button class="action-btn settings-btn"><i class="fas fa-gear"></i></button>
+                            <button class="action-btn edit-btn">Edit <i class="fas fa-chevron-down"></i></button>
+
+                        </div>
+                    </div>
+                    
+                    <div class="page-actions-row">
+                      <div class="page-actions-row-left">
+                      <button class="page-action-btn"><i class="fas fa-pencil"></i> Edit</button>
+                        <button class="page-action-btn"><i class="fas fa-paint-brush"></i> Design</button>
+                        <button class="page-action-btn"><i class="fas fa-code"></i> Advanced</button>
+                        <button class="page-action-btn"><i class="fas fa-copy"></i> Duplicate</button>
+                        <button class="page-action-btn"><i class="fas fa-eye"></i> View</button>
+                      </div>
+                      <div class="page-actions-row-right">
+                        <button class="page-action-btn"><i class="fas fa-florin-sign"></i>Import Figma Design</button>
+                        <button class="page-action-btn delete-btn"><i class="fas fa-trash"></i></button>
+                      </div>
+                    </div>
+                    </div>
+
+
+                     
+                  <div class="sitebuilder-iteam-content">
+                    <div class="page-card">
+                        <div class="page-icon">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <div class="page-info">
+                          <div class="page-info-header">
+                            <h2>Portfolio</h2>
+                            <span class="published-url">mywebsite.com/portfolio/</span>
+                          </div>
+                            <div class="page-meta">
+                              <span class="published-url">mywebsite.com/portfolio/</span>
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                          <div class="page-card-language-flag-container" style="margin-right: 30px; font-size: 12px;" >
+                            <span>ID: #25690-RO</span>
+                            </div>
+                          <div class="page-card-language-flag-container">
+                            <img src="img/ro.jpg" alt="Romania" class="page-card-language-flag">
+                            <span>RO</span>
+                            </div>
+                            <button class="action-btn settings-btn"><i class="fas fa-gear"></i></button>
+                            <button class="action-btn edit-btn">Edit <i class="fas fa-chevron-down"></i></button>
+
+                        </div>
+                    </div>
+                    
+                    <div class="page-actions-row">
+                      <div class="page-actions-row-left">
+                      <button class="page-action-btn"><i class="fas fa-pencil"></i> Edit</button>
+                        <button class="page-action-btn"><i class="fas fa-paint-brush"></i> Design</button>
+                        <button class="page-action-btn"><i class="fas fa-code"></i> Advanced</button>
+                        <button class="page-action-btn"><i class="fas fa-copy"></i> Duplicate</button>
+                        <button class="page-action-btn"><i class="fas fa-eye"></i> View</button>
+                      </div>
+                      <div class="page-actions-row-right">
+                        <button class="page-action-btn"><i class="fas fa-florin-sign"></i>Import Figma Design</button>
+                        <button class="page-action-btn delete-btn"><i class="fas fa-trash"></i></button>
+                      </div>
+                    </div>
+                    </div>
+
+ 
+                    <div class="sitebuilder-iteam-content">
+                      <div class="page-card">
+                          <div class="page-icon">
+                              <i class="fas fa-file-alt"></i>
+                          </div>
+                          <div class="page-info">
+                            <div class="page-info-header">
+                              <h2>Portfolio</h2>
+                             
+                            </div>
+                              <div class="page-meta">
+                                  <span class="published-url">mywebsite.com/portfolio/</span>
+                              </div>
+                          </div>
+                          <div class="card-actions">
+                            <div class="page-card-language-flag-container" style="margin-right: 30px; font-size: 12px;" >
+                            <span>ID: #25690-RO</span>
+                            </div>
+                          <div class="page-card-language-flag-container">
+                            <img src="img/ro.jpg" alt="Romania" class="page-card-language-flag">
+                            <span>RO</span>
+                            </div>
+                            <button class="action-btn settings-btn"><i class="fas fa-gear"></i></button>
+                            <button class="action-btn edit-btn">Edit <i class="fas fa-chevron-down"></i></button>
+  
+                          </div>
+                      </div>
+                      
+                      <div class="page-actions-row">
+                        <div class="page-actions-row-left">
+                        <button class="page-action-btn"><i class="fas fa-pencil"></i> Edit</button>
+                          <button class="page-action-btn"><i class="fas fa-paint-brush"></i> Design</button>
+                          <button class="page-action-btn"><i class="fas fa-code"></i> Advanced</button>
+                          <button class="page-action-btn"><i class="fas fa-copy"></i> Duplicate</button>
+                          <button class="page-action-btn"><i class="fas fa-eye"></i> View</button>
+                        </div>
+                        <div class="page-actions-row-right">
+                          <button class="page-action-btn"><i class="fas fa-florin-sign"></i>Import Figma Design</button>
+                          <button class="page-action-btn delete-btn"><i class="fas fa-trash"></i></button>
+                        </div>
+                      </div>
+                      </div>
+
+
+
+
+                      <div class="section-divider">
+                        <h2>Staff reviews</h2>
+                    </div>
+
+
+                    
+                    
+                  <div class="sitebuilder-iteam-content">
+                    <div class="page-card">
+                        <div class="page-icon">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <div class="page-info">
+                          <div class="page-info-header">
+                            <h2>Portfolio</h2>
+                          </div>
+                            <div class="page-meta">
+                                <span class="published-url">mywebsite.com/portfolio/</span>
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                          <div class="page-card-language-flag-container" style="margin-right: 30px; font-size: 12px;" >
+                            <span>ID: #25690-RO</span>
+                            </div>
+                          <div class="page-card-language-flag-container">
+                            <img src="img/ro.jpg" alt="Romania" class="page-card-language-flag">
+                            <span>RO</span>
+                            </div>
+                            <button class="action-btn settings-btn"><i class="fas fa-gear"></i></button>
+                            <button class="action-btn edit-btn">Edit <i class="fas fa-chevron-down"></i></button>
+
+                        </div>
+                    </div>
+                    
+                    <div class="page-actions-row">
+                      <div class="page-actions-row-left">
+                      <button class="page-action-btn"><i class="fas fa-pencil"></i> Edit</button>
+                        <button class="page-action-btn"><i class="fas fa-paint-brush"></i> Design</button>
+                        <button class="page-action-btn"><i class="fas fa-code"></i> Advanced</button>
+                        <button class="page-action-btn"><i class="fas fa-copy"></i> Duplicate</button>
+                        <button class="page-action-btn"><i class="fas fa-eye"></i> View</button>
+                      </div>
+                      <div class="page-actions-row-right">
+                        <button class="page-action-btn"><i class="fas fa-florin-sign"></i>Import Figma Design</button>
+                        <button class="page-action-btn delete-btn"><i class="fas fa-trash"></i></button>
+                      </div>
+                    </div>
+                    </div>
+
+
+                     
+                  <div class="sitebuilder-iteam-content">
+                    <div class="page-card">
+                        <div class="page-icon">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <div class="page-info">
+                          <div class="page-info-header">
+                            <h2>Portfolio</h2>
+                          </div>
+                            <div class="page-meta">
+                                <span class="published-url">mywebsite.com/portfolio/</span>
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                          <div class="page-card-language-flag-container" style="margin-right: 30px; font-size: 12px;" >
+                            <span>ID: #25690-RO</span>
+                            </div>
+                          <div class="page-card-language-flag-container">
+                            <img src="img/ro.jpg" alt="Romania" class="page-card-language-flag">
+                            <span>RO</span>
+                            </div>
+                            <button class="action-btn settings-btn"><i class="fas fa-gear"></i></button>
+                            <button class="action-btn edit-btn">Edit <i class="fas fa-chevron-down"></i></button>
+
+                        </div>
+                    </div>
+                    
+                    <div class="page-actions-row">
+                      <div class="page-actions-row-left">
+                      <button class="page-action-btn"><i class="fas fa-pencil"></i> Edit</button>
+                        <button class="page-action-btn"><i class="fas fa-paint-brush"></i> Design</button>
+                        <button class="page-action-btn"><i class="fas fa-code"></i> Advanced</button>
+                        <button class="page-action-btn"><i class="fas fa-copy"></i> Duplicate</button>
+                        <button class="page-action-btn"><i class="fas fa-eye"></i> View</button>
+                      </div>
+                      <div class="page-actions-row-right">
+                        <button class="page-action-btn"><i class="fas fa-florin-sign"></i>Import Figma Design</button>
+                        <button class="page-action-btn delete-btn"><i class="fas fa-trash"></i></button>
+                      </div>
+                    </div>
+                    </div>
+
+ 
+                    <div class="sitebuilder-iteam-content">
+                      <div class="page-card">
+                          <div class="page-icon">
+                              <i class="fas fa-file-alt"></i>
+                          </div>
+                          <div class="page-info">
+                            <div class="page-info-header">
+                              <h2>Portfolio</h2>
+                            </div>
+                              <div class="page-meta">
+                                  <span class="published-url">mywebsite.com/portfolio/</span>
+                              </div>
+                          </div>
+                          <div class="card-actions">
+                            <div class="page-card-language-flag-container" style="margin-right: 30px; font-size: 12px;" >
+                              <span>ID: #25690-RO</span>
+                              </div>
+                            <div class="page-card-language-flag-container">
+                              <img src="img/ro.jpg" alt="Romania" class="page-card-language-flag">
+                              <span>RO</span>
+                              </div>
+                              <button class="action-btn settings-btn"><i class="fas fa-gear"></i></button>
+                              <button class="action-btn edit-btn">Edit <i class="fas fa-chevron-down"></i></button>
+  
+                          </div>
+                      </div>
+                      
+                      <div class="page-actions-row">
+                        <div class="page-actions-row-left">
+                        <button class="page-action-btn"><i class="fas fa-pencil"></i> Edit</button>
+                          <button class="page-action-btn"><i class="fas fa-paint-brush"></i> Design</button>
+                          <button class="page-action-btn"><i class="fas fa-code"></i> Advanced</button>
+                          <button class="page-action-btn"><i class="fas fa-copy"></i> Duplicate</button>
+                          <button class="page-action-btn"><i class="fas fa-eye"></i> View</button>
+                        </div>
+                        <div class="page-actions-row-right">
+                          <button class="page-action-btn"><i class="fas fa-florin-sign"></i>Import Figma Design</button>
+                          <button class="page-action-btn delete-btn"><i class="fas fa-trash"></i></button>
+                        </div>
+                      </div>
+                      </div>
+
+
+
       </div>
     </template>
     <!-- End of Sitebuilder Template -->
@@ -997,14 +1627,16 @@
         <!-- Calculator Specific Content -->
         <div class="calculator-body">
           <!-- New Inner Header for Calculator Type & Keep on Top -->
-          <div class="calculator-app-header">
-            <button class="calc-header-btn" id="calc-menu-btn"><i class="fas fa-bars"></i></button>
-            <span class="calc-type-title">Standard</span>
-            <button class="calc-header-btn" id="calc-pin-btn"><i class="fas fa-thumbtack"></i></button>
-          </div>
+
 
           <div class="calculator-main-content">
+            
             <div class="calculator-input-area">
+              <div class="calculator-app-header">
+                <button class="calc-header-btn" id="calc-menu-btn"><i class="fas fa-bars"></i></button>
+                <span class="calc-type-title">Standard</span>
+                <button class="calc-header-btn" id="calc-pin-btn"><i class="fas fa-thumbtack"></i></button>
+              </div>
               <div class="calculator-display">
                 <div class="calculator-history" id="calc-history"></div>
                 <div class="calculator-current-input" id="calc-current-input">0</div>
@@ -1057,15 +1689,12 @@
             <div class="calculator-history-memory-panel">
               <div class="calc-panel-tabs">
                 <button class="calc-panel-tab active" data-tab="history">History</button>
-                <button class="calc-panel-tab" data-tab="memory">Memory</button>
               </div>
               <div class="calc-panel-content">
                 <div class="calc-history-content" id="calc-history-list">
                   <p>There's no history yet.</p>
                 </div>
-                <div class="calc-memory-content hidden" id="calc-memory-list">
-                  <p>There's nothing saved in memory.</p>
-                </div>
+
               </div>
             </div>
           </div>
@@ -1196,7 +1825,7 @@
         <section class="email-list-section ">
           <div class="window-toolbar">
             <label class="toggle-switch" id="window-sidebar-toggle-label" style="margin-right: 14px;">
-              <input type="checkbox" id="window-sidebar-toggle">
+              <input type="checkbox" class="window-sidebar-toggle" id="window-sidebar-toggle">
               <span class="slider"></span>
             </label>
             <div class="email-list-header">
@@ -1213,7 +1842,7 @@
           <div class="window-toolbar" >
             <div class="toolbar-buttons-left" >
               <button class="toolbar-button" title="Reply"><i class="fas fa-reply"></i><span>Reply</span></button>
-              <button class="toolbar-button" title="Reply All"><i class="fas fa-reply-all"></i><span>Replay all</span></button>
+              <button class="toolbar-button" title="Reply All"><i class="fas fa-reply-all"></i><span>Reply all</span></button>
               <button class="toolbar-button" title="Forward"><i class="fas fa-share"></i><span>Forward</span></button>
 
             </div>
@@ -1282,6 +1911,1224 @@
 </template>
 
 
+<!-- Point of sale POS App Template -->
+<template id="point-of-sale-app-template">
+  <div class="window point-of-sale-app-window">
+    <div class="window-header">
+      <button class="menu-toggle"><i class="fas fa-bars"></i></button>
+      <div class="window-title">
+        <div class="window-icon pink-icon">
+          <i class="fas fa-envelope"></i>
+        </div>
+        <span>POS</span>
+      </div>
+      <div class="window-controls">
+        <button class="window-minimize" title="Minimize"><i class="fas fa-minus"></i></button>
+        <button class="window-popout" title="Pop out"><i class="fas fa-up-right-from-square"></i></button>
+        <button class="window-maximize" title="Maximize"><i class="fas fa-expand"></i></button>
+        <button class="window-close" title="Close"><i class="fas fa-times"></i></button>
+      </div>
+    </div>
+    <div class="window-content point-of-sale-app-content" style="display: flex; height: 100%;">
+      <!-- Sidebar -->
+      <div class="sidebar-overlay"></div>
+      <div class="window-sidebar">
+        <div class="sidebar-section">
+          <div class="point-of-sale-sidebar-header">
+            <div class="mailbox-name-chevrone"><div class="mailbox-name">Andrei Antoniadis </div><i class='fas fa-chevron-down'></i></div>
+            <div class="mailbox-point-of-sale">contact@mydomain.com</div>
+          </div>
+          <button class="compose-btn"><i class="fas fa-plus"></i><span>Compose</span></button>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-section-header"><h4>Inbox </h4> <i class="fas fa-redo"></i></div>
+          <div class="sidebar-item active">
+            <div class="sidebar-item-menu"><i class="fas fa-cart-plus"></i><span>Products</span></div>
+            <span class="sidebar-badge">4,851</span>
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-table"></i><span>Groups (Tables)</span></div>
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-calendar-alt"></i><span>Bookings</span></div>
+            <span class="sidebar-badge">3</span>
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-calendar-alt"></i><span>Appointments</span></div>
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-ticket-alt"></i><span>Tickets</span></div>
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-trash"></i><span>Trash</span></div>
+          </div>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-section-header"><h4>Folders </h4> <i class="fas fa-folder-plus"></i></div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-folder"></i><span>Folder name</span></div>
+            <span class="sidebar-badge">851</span>
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-folder"></i><span>Another folder</span></div>
+            <span class="sidebar-badge">3</span>
+          </div>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-section-header"><h4>Labels </h4> <i class="fas fa-tag"></i></div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-tag"></i><span>To Do</span></div>
+            <span class="sidebar-badge">74</span>
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-tag"></i><span>Important</span></div>
+            <span class="sidebar-badge">12</span>
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-tag"></i><span>Work</span></div>
+            <span class="sidebar-badge">6</span>
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-tag"></i><span>Personal</span></div>
+            <span class="sidebar-badge">8</span>
+          </div>
+        </div>
+        <div class="sidebar-section meta-info-section">
+          <div class="meta-info-section-text">Create more point-of-sale accounts in <a href="#" style="color:#FF6B6B;">settings</a> app.</div>
+
+        </div>
+      </div>
+      <!-- Main Content Split -->
+      <div class="window-main-content" style="display: flex; flex: 1; height: 100%;">
+
+        <!-- point-of-sale Content -->
+        <section class="point-of-sale-content-section" >
+          <div class="window-toolbar" >
+            <label class="toggle-switch" id="window-sidebar-toggle-label" style="margin-right: 14px;">
+              <input type="checkbox" class="window-sidebar-toggle" id="window-sidebar-toggle">
+              <span class="slider"></span>
+            </label>
+            <div class="point-of-sale-list-header">
+              <div class="point-of-sale-list-header-left">
+                <i class="fas fa-search"></i>
+                <input type="text" class="point-of-sale-search" placeholder="Search...">
+              </div>
+              <div class="point-of-sale-list-header-right">
+                <div class="pos-autoscan-barcode"><input type="checkbox" class="point-of-sale-list-sort-checkbox" id="point-of-sale-list-sort-checkbox"> Auto add scanned bar codes</div>
+                <div class="point-of-sale-list-sort">Sort <i class="fas fa-chevron-down" style="font-size:12px;"></i></div>
+                <div class="point-of-sale-list-sort">View <i class="fas fa-chevron-down" style="font-size:12px;"></i></div>
+
+              </div>
+              </div>
+            
+          </div>
+          <div class="point-of-sale-content" >
+            <!-- Opened point-of-sale content will be injected here by JS -->
+            <div style="color: #8A8A9E; text-align: center; margin-top: 10px;">
+              
+
+
+              <div class="pos-section">
+                <div class="section-header">
+                  <h2>Drinks</h2>
+                  <a href="#">See All</a>
+                </div>
+                <div class="pos-iteams-grid">
+              
+                  <div class="pos-single-item-grid" data-app-section="Edit Photos and Images" data-app-index="0">
+                    <div class="pos-single-item-grid-content ">
+                      <div class="pos-item-image">
+                        <img src="img/appsimg/camera.png" alt="Product" class="item-image">
+                      </div>
+                      <div class="pos-additem-details">
+                        <h3>Masina de tuns iarba si parul de la Bosch</h3>
+                        <p class="pos-iteam-price-description"><i class="fas fa-gear"></i> <span>100 lei</span> </p>
+                      </div>
+                    </div>
+                  </div>
+
+
+                  <div class="pos-single-item-grid" data-app-section="Edit Photos and Images" data-app-index="0">
+                    <div class="pos-single-item-grid-content ">
+                      <div class="pos-item-image">
+                        <img src="img/appsimg/camera.png" alt="Product" class="item-image">
+                      </div>
+                      <div class="pos-additem-details">
+                        <h3>Calculator super performant care este de 100 lei</h3>
+                        <p class="pos-iteam-price-description"><i class="fas fa-gear"></i> <span>100 lei</span> </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="pos-single-item-grid" data-app-section="Edit Photos and Images" data-app-index="0">
+                    <div class="pos-single-item-grid-content ">
+                      <div class="pos-item-image">
+                        <img src="img/appsimg/camera.png" alt="Product" class="item-image">
+                      </div>
+                      <div class="pos-additem-details">
+                        <h3>Affinity Photo</h3>
+                        <p class="pos-iteam-price-description"><i class="fas fa-gear"></i> <span>100 lei</span> </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="pos-single-item-grid" data-app-section="Edit Photos and Images" data-app-index="0">
+                    <div class="pos-single-item-grid-content ">
+                      <div class="pos-item-image">
+                        <img src="img/appsimg/camera.png" alt="Product" class="item-image">
+                      </div>
+                      <div class="pos-additem-details">
+                        <h3>Affinity Photo</h3>
+                        <p class="pos-iteam-price-description"><i class="fas fa-gear"></i> <span>100 lei</span> </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="pos-single-item-grid" data-app-section="Edit Photos and Images" data-app-index="0">
+                    <div class="pos-single-item-grid-content ">
+                      <div class="pos-item-image">
+                        <img src="img/appsimg/camera.png" alt="Product" class="item-image">
+                      </div>
+                      <div class="pos-additem-details">
+                        <h3>Affinity Photo</h3>
+                        <p class="pos-iteam-price-description"><i class="fas fa-gear"></i> <span>100 lei</span> </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="pos-single-item-grid" data-app-section="Edit Photos and Images" data-app-index="0">
+                    <div class="pos-single-item-grid-content ">
+                      <div class="pos-item-image">
+                        <img src="img/appsimg/camera.png" alt="Product" class="item-image">
+                      </div>
+                      <div class="pos-additem-details">
+                        <h3>Affinity Photo</h3>
+                        <p class="pos-iteam-price-description"><i class="fas fa-gear"></i> <span>100 lei</span> </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="pos-single-item-grid" data-app-section="Edit Photos and Images" data-app-index="0">
+                    <div class="pos-single-item-grid-content ">
+                      <div class="pos-item-image">
+                        <img src="img/appsimg/camera.png" alt="Product" class="item-image">
+                      </div>
+                      <div class="pos-additem-details">
+                        <h3>Affinity Photo</h3>
+                        <p class="pos-iteam-price-description"><i class="fas fa-gear"></i> <span>100 lei</span> </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="pos-single-item-grid" data-app-section="Edit Photos and Images" data-app-index="0">
+                    <div class="pos-single-item-grid-content ">
+                      <div class="pos-item-image">
+                        <img src="img/appsimg/camera.png" alt="Product" class="item-image">
+                      </div>
+                      <div class="pos-additem-details">
+                        <h3>Affinity Photo</h3>
+                        <p class="pos-iteam-price-description"><i class="fas fa-gear"></i> <span>100 lei</span> </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="pos-single-item-grid" data-app-section="Edit Photos and Images" data-app-index="0">
+                    <div class="pos-single-item-grid-content ">
+                      <div class="pos-item-image">
+                        <img src="img/appsimg/camera.png" alt="Product" class="item-image">
+                      </div>
+                      <div class="pos-additem-details">
+                        <h3>Affinity Photo</h3>
+                        <p class="pos-iteam-price-description"><i class="fas fa-gear"></i> <span>100 lei</span> </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="pos-single-item-grid" data-app-section="Edit Photos and Images" data-app-index="0">
+                    <div class="pos-single-item-grid-content ">
+                      <div class="pos-item-image">
+                        <img src="img/appsimg/camera.png" alt="Product" class="item-image">
+                      </div>
+                      <div class="pos-additem-details">
+                        <h3>Affinity Photo</h3>
+                        <p class="pos-iteam-price-description"><i class="fas fa-gear"></i> <span>100 lei</span> </p>
+                      </div>
+                    </div>
+                  </div>
+
+
+
+
+
+
+
+
+
+
+
+                </div>
+              </div>
+
+
+
+            </div>
+            
+          </div>
+        
+        </section>
+
+                <!-- point-of-sale Current Order -->
+                <section class="point-of-sale-current-order-section ">
+                  <div class="window-toolbar">
+                    <div class="toolbar-buttons-left" >
+                      <div class="point-of-sale-current-order-header-item"><h3>New Order</h3> <i class="fas fa-chevron-down"></i></div>
+        
+                    </div>
+                    <div class="toolbar-buttons-right">
+                      <button class="toolbar-button" title="Save"><i class="fas fa-save"></i> <span>Save</span></button>
+                      <button class="toolbar-button" title="Delete"><i class="fas fa-trash"></i> <span>Delete</span></button>
+                      <button class="toolbar-button mailmore-btn" title="More"><i class="fas fa-ellipsis-h"></i></button>
+                    </div>
+                  </div>
+                  <div class="point-of-sale-current-order-content">
+                    <!-- Order Items Section (Scrollable) -->
+                    <div class="pos-order-items-container">
+                      <div class="pos-order-item" onclick="toggleOrderItem(this)">
+                        <div class="pos-item-main-row">
+                          <div class="pos-item-image">
+                            <img src="img/appsimg/camera.png" alt="Product" class="item-image">
+                          </div>
+                          <div class="pos-item-details">
+                            <div class="pos-item-name">Denumire</div>
+                            <div class="pos-item-price">50 lei</div>
+                          </div>
+                          <div class="pos-item-quantity">
+                            <button class="qty-btn qty-decrease" title="Decrease"><i class="fas fa-minus"></i></button>
+                            <span class="qty-value">1</span>
+                            <button class="qty-btn qty-increase" title="Increase"><i class="fas fa-plus"></i></button>
+                          </div>
+                          <button class="pos-item-remove-btn" onclick="removeOrderItem(this)" title="Remove item">
+                            <i class="fas fa-xmark"></i>
+                          </button>
+                        </div>
+                        
+                        <!-- Expanded Content -->
+                        <div class="pos-item-expanded-content">
+                          <div class="pos-item-options-row">
+                            <!-- Quantity Section -->
+                            <div class="pos-item-quantity-section">
+                              <div class="pos-item-quantity-label">Quantity</div>
+                              <div class="pos-item-quantity-controls">
+                                <button class="qty-btn qty-decrease" title="Decrease"><i class="fas fa-minus"></i></button>
+                                <span class="qty-value">1</span>
+                                <button class="qty-btn qty-increase" title="Increase"><i class="fas fa-plus"></i></button>
+                              </div>
+                            </div>
+                            
+                            <!-- Discount Section -->
+                            <div class="pos-item-discount-section">
+                              <div class="pos-item-discount-label">Discount</div>
+                              <div class="pos-item-discount-controls">
+                                <input type="number" class="pos-discount-input" value="0" min="0" max="100">
+                                <span class="pos-discount-type">%</span>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <!-- Action Buttons -->
+                          <div class="pos-item-actions">
+                            <button class="pos-item-action-btn">Note</button>
+                            <button class="pos-item-action-btn">Duplicate</button>
+                            <button class="pos-item-action-btn pos-item-apply-btn">Apply</button>
+                          </div>
+                        </div>
+                      </div>
+        
+                      <div class="pos-order-item" onclick="toggleOrderItem(this)">
+                        <div class="pos-item-main-row">
+                          <div class="pos-item-image">
+                            <img src="img/appsimg/macbook-pro.png" alt="Product" class="item-image">
+                          </div>
+                          <div class="pos-item-details">
+                            <div class="pos-item-name">Denumire</div>
+                            <div class="pos-item-personalization">50 lei</div>
+                          </div>
+                          <div class="pos-item-price">
+                            <div class="pos-item-main-price">50 lei</div>
+                            <div class="pos-item-price-discount">-10%</div>
+                          </div>
+                          <button class="pos-item-remove-btn" onclick="removeOrderItem(this)" title="Remove item">
+                            <i class="fas fa-xmark"></i>
+                          </button>
+                        </div>
+                        
+                        <!-- Expanded Content -->
+                        <div class="pos-item-expanded-content">
+                          <div class="pos-item-options-row">
+                            <!-- Quantity Section -->
+                            <div class="pos-item-quantity-section">
+                              <div class="pos-item-quantity-label">Quantity</div>
+                              <div class="pos-item-quantity-controls">
+                                <button class="qty-btn qty-decrease" title="Decrease"><i class="fas fa-minus"></i></button>
+                                <span class="qty-value">1</span>
+                                <button class="qty-btn qty-increase" title="Increase"><i class="fas fa-plus"></i></button>
+                              </div>
+                            </div>
+                            
+                            <!-- Discount Section -->
+                            <div class="pos-item-discount-section">
+                              <div class="pos-item-discount-label">Discount</div>
+                              <div class="pos-item-discount-controls">
+                                <input type="number" class="pos-discount-input" value="0" min="0" max="100">
+                                <span class="pos-discount-type">%</span>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <!-- Action Buttons -->
+                          <div class="pos-item-actions">
+                            <button class="pos-item-action-btn">Note</button>
+                            <button class="pos-item-action-btn">Duplicate</button>
+                            <button class="pos-item-action-btn danger">Remove</button>
+                          </div>
+                        </div>
+                      </div>
+        
+                      <div class="pos-order-item" onclick="toggleOrderItem(this)">
+                        <div class="pos-item-main-row">
+                          <div class="pos-item-image">
+                            <img src="img/appsimg/router.png" alt="Product" class="item-image">
+                          </div>
+                          <div class="pos-item-details">
+                            <div class="pos-item-name">Denumire</div>
+                            <div class="pos-item-personalization">50 lei</div>
+                          </div>
+                          <div class="pos-item-price">
+                            <div class="pos-item-main-price">50 lei</div>
+                            <div class="pos-item-price-discount">-10%</div>
+                          </div>
+                          <button class="pos-item-remove-btn" onclick="removeOrderItem(this)" title="Remove item">
+                            <i class="fas fa-xmark"></i>
+                          </button>
+                        </div>
+                        
+                        <!-- Expanded Content -->
+                        <div class="pos-item-expanded-content">
+                          <div class="pos-item-options-row">
+                            <!-- Quantity Section -->
+                            <div class="pos-item-quantity-section">
+                              <div class="pos-item-quantity-label">Quantity</div>
+                              <div class="pos-item-quantity-controls">
+                                <button class="qty-btn qty-decrease" title="Decrease"><i class="fas fa-minus"></i></button>
+                                <span class="qty-value">1</span>
+                                <button class="qty-btn qty-increase" title="Increase"><i class="fas fa-plus"></i></button>
+                              </div>
+                            </div>
+                            
+                            <!-- Discount Section -->
+                            <div class="pos-item-discount-section">
+                              <div class="pos-item-discount-label">Discount</div>
+                              <div class="pos-item-discount-controls">
+                                <input type="number" class="pos-discount-input" value="0" min="0" max="100">
+                                <span class="pos-discount-type">%</span>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <!-- Action Buttons -->
+                          <div class="pos-item-actions">
+                            <button class="pos-item-action-btn">Edit</button>                    
+                            <button class="pos-item-action-btn">Note</button>
+                            <button class="pos-item-action-btn">Duplicate</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+        
+                    <!-- Order Summary Footer -->
+                    <div class="pos-order-footer">
+                      <!-- Discount Section -->
+                      <div class="pos-discount-section">
+                        <div class="pos-discount-label">Discount fix</div>
+                        <div class="pos-discount-value">500 lei</div>
+                      </div>
+        
+                      <!-- Total Section -->
+                      <div class="pos-total-section">
+                        <div class="pos-total-row">
+                          <span class="pos-total-label">Total</span>
+                          <span class="pos-total-amount">5525 lei</span>
+                        </div>
+                        <div class="pos-subtotal-row">
+                          <span class="pos-subtotal-label">4524 fara TVA • 1547 TVA</span>
+                        </div>
+                      </div>
+        
+                      <!-- Payment Methods -->
+                      <div class="pos-payment-methods">
+                        <button class="pos-payment-btn pos-payment-cash">
+                          <i class="fas fa-money-bill"></i>
+                          <span>Cash</span>
+                        </button>
+                        <button class="pos-payment-btn pos-payment-card">
+                          <i class="fas fa-credit-card"></i>
+                          <span>Card</span>
+                        </button>
+                        <button class="pos-payment-btn pos-payment-ticket">
+                          <i class="fas fa-ticket-alt"></i>
+                          <span>Ticket</span>
+                        </button>
+                        <button class="pos-payment-btn pos-payment-delivery">
+                          <i class="fas fa-truck"></i>
+                          <span>Delivery</span>
+                        </button>
+                      </div>
+        
+                      <!-- Action Buttons -->
+                      <div class="pos-action-buttons">
+                        <button class="pos-action-btn pos-checkout-btn">
+                          <i class="fas fa-plus"></i>
+                          <span>Incaseaza</span>
+                        </button>
+                      </div>
+        
+                      <!-- Bottom Action Buttons -->
+                      <div class="pos-bottom-actions">
+                        <button class="pos-bottom-btn">Vezi ultimul bon</button>
+                        <button class="pos-bottom-btn">Storno</button>
+                        <button class="pos-bottom-btn">Discount</button>
+                      </div>
+                    </div>
+        
+                  </div>
+        
+                </section>
+      </div>
+ 
+    </div>
+  </div>
+</template>
+
+<!-- Compose Window Template -->
+<template id="compose-window-template">
+  <div class="window compose-window">
+    <div class="window-header">
+      <div class="window-title">
+        <div class="window-icon blue-icon">
+          <i class="fas fa-pen"></i>
+        </div>
+        <span>Compose point-of-sale</span>
+      </div>
+      <div class="window-controls">
+        <button class="window-minimize" title="Minimize"><i class="fas fa-minus"></i></button>
+        <button class="window-popout" title="Pop out"><i class="fas fa-up-right-from-square"></i></button>
+        <button class="window-maximize" title="Maximize"><i class="fas fa-expand"></i></button>
+        <button class="window-close" title="Close"><i class="fas fa-times"></i></button>
+      </div>
+    </div>
+    <div class="window-content compose-window-content" style="display: flex; flex-direction: column; height: 100%;">
+      <!-- Compose form will be injected here by JS -->
+    </div>
+  </div>
+</template>
+
+<!-- point-of-sale Content Popout Window Template -->
+<template id="point-of-sale-content-window-template">
+  <div class="window point-of-sale-app-window point-of-sale-content-window">
+    <div class="window-header">
+      <div class="window-title">
+        <div class="window-icon blue-icon">
+          <i class="fas fa-envelope-open"></i>
+        </div>
+        <span>point-of-sale from ${point-of-sale.sender}</span>
+      </div>
+      <div class="window-controls">
+        <button class="window-minimize" title="Minimize"><i class="fas fa-minus"></i></button>
+        <button class="window-popout" title="Pop out"><i class="fas fa-up-right-from-square"></i></button>
+        <button class="window-maximize" title="Maximize"><i class="fas fa-expand"></i></button>
+        <button class="window-close" title="Close"><i class="fas fa-times"></i></button>
+      </div>
+    </div>
+    <div class="window-content point-of-sale-content-body" style="height:100%;width:100%;overflow:auto;">
+      <!-- point-of-sale content will be injected here -->
+    </div>
+  </div>
+</template>
+
+
+
+
+<!-- Contacts App Template -->
+<template id="contact-app-template">
+  <div class="window contact-app-window">
+    <div class="window-header">
+      <button class="menu-toggle"><i class="fas fa-bars"></i></button>
+      <div class="window-title">
+        <div class="window-icon green-icon">
+          <i class="fas fa-address-book"></i>
+        </div>
+        <span>Contacts</span>
+      </div>
+      <div class="window-controls">
+        <button class="window-minimize" title="Minimize"><i class="fas fa-minus"></i></button>
+        <button class="window-popout" title="Pop out"><i class="fas fa-up-right-from-square"></i></button>
+        <button class="window-maximize" title="Maximize"><i class="fas fa-expand"></i></button>
+        <button class="window-close" title="Close"><i class="fas fa-times"></i></button>
+      </div>
+    </div>
+    <div class="window-content contact-app-content" style="display: flex; height: 100%;">
+      <!-- Sidebar -->
+      <div class="sidebar-overlay"></div>
+      <div class="window-sidebar">
+        <div class="sidebar-section">
+          <button class="compose-btn"><i class="fas fa-plus"></i><span>Add Contact</span></button>
+ 
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-section-header"><h4>Contacts </h4> <i class="fas fa-redo"></i></div>
+          <div class="sidebar-item active">
+            <div class="sidebar-item-menu"><i class="fas fa-address-book"></i><span>All Contacts</span></div>
+            <span class="sidebar-badge">142K</span>
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-star"></i><span>Starred</span></div>
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-user-check"></i><span>Registered</span></div>
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-user-times"></i><span>Not registered</span></div>
+            <span class="sidebar-badge">2</span>
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-box"></i><span>In progress</span></div>
+            <span class="sidebar-badge">22</span>
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-face-meh"></i><span>No orders</span></div>
+            <span class="sidebar-badge">22</span>
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-user-slash"></i><span>Blocked</span></div>
+            <span class="sidebar-badge">7</span>
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-trash"></i><span>Trash</span></div>
+            <span class="sidebar-badge">2</span>
+          </div>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-section-header"><h4>Groups </h4> <i class="fas fa-users"></i></div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-users"></i><span>Group 1</span></div>
+            <span class="sidebar-badge">12</span>
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-users"></i><span>Group 2</span></div>
+            <span class="sidebar-badge">8</span>
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-users"></i><span>Group 3</span></div>
+            <span class="sidebar-badge">15</span>
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-users"></i><span>Group 4</span></div>
+            <span class="sidebar-badge">7</span>
+          </div>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-section-header"><h4>Labels </h4> <i class="fas fa-tag"></i></div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-tag"></i><span>Work</span></div>
+            <span class="sidebar-badge">12</span>
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-tag"></i><span>Family</span></div>
+            <span class="sidebar-badge">8</span>
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-tag"></i><span>Friends</span></div>
+            <span class="sidebar-badge">15</span>
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-tag"></i><span>Business</span></div>
+            <span class="sidebar-badge">7</span>
+          </div>
+        </div>
+
+      </div>
+      <!-- Main Content Split -->
+      <div class="window-main-content" style="display: flex; flex: 1; height: 100%;">
+        <!-- Contact List -->
+        <section class="contact-list-section ">
+          <div class="window-toolbar contact-list-toolbar-searchsort">
+            <label class="toggle-switch" id="window-sidebar-toggle-label" style="margin-right: 14px;">
+              <input type="checkbox" class="window-sidebar-toggle" id="window-sidebar-toggle">
+              <span class="slider"></span>
+            </label>
+            <div class="contact-list-header">
+              <i class="fas fa-search"></i>
+              <input type="text" class="contact-search" placeholder="Search..." style="width: 100%; padding: 6px 4px; border-radius: 6px; border: none; font-size: 14px;">
+              <div class="email-list-sort">Sort <i class='fas fa-chevron-down' style='font-size:12px;'></i><i class="fas fa-ellipsis-h"></i></div>
+            </div>
+          </div>
+          <div class="window-toolbar contact-list-table-header" style="display:none;">
+            <div class="contact-list-table-header-row">
+              <div style="width: 25px; min-width: 25px; display: flex; justify-content: center; margin-right: 10px;"><input type="checkbox" id="contact-select-all-box" name="contact-select-all-box"></div>
+              <div class="contact-list-header-item" >First name</div>
+              <div class="contact-list-header-item" >Last name</div>
+              <div class="contact-list-header-item" >Registered</div>
+              <div class="contact-list-header-item" >Last order</div>
+              <div class="contact-list-header-item" >Last visit</div>
+              <div class="contact-list-header-item" >City</div>
+              <div class="contact-list-header-item" ">Country</div>
+              <div class="contact-list-header-item" ">Phone</div>
+              <div class="contact-list-header-item-orders" >Orders</div>
+              <div class="contact-list-header-item-total-spent" >Total spent</div>
+              <div style="width: 20px; min-width: 20px;"></div>
+              <div class="window-statusbar">
+                <div class="status-left">
+                 <!-- <label class="toggle-switch" id="window-sidebar-toggle-label" style="margin-right: 14px;">
+                    <input type="checkbox" class="window-sidebar-toggle" id="window-sidebar-toggle">
+                    <span class="slider"></span>
+                  </label>-->
+                  142.768 contacts
+                </div>
+                <div class="status-right">$ 257.578 total spent</div>
+              </div>
+            </div>
+          </div>
+          <ul class="contact-list" style="flex: 1 1 auto; overflow-y: auto; min-height: 0; list-style: none; margin: 0; padding: 0;">
+            <!-- Contact items will be injected here by JS -->
+          </ul>
+        </section>
+        <!-- Contact Content -->
+        <section class="contact-content-section" >
+          <div class="window-toolbar" >
+            <div class="toolbar-buttons-left" >
+              <button class="toolbar-button" title="Edit"><i class="fas fa-edit"></i><span>Edit</span></button>
+              <button class="toolbar-button" title="Share"><i class="fas fa-share-alt"></i><span>Share</span></button>
+              <button class="toolbar-button" title="Email"><i class="fas fa-envelope"></i><span>Email</span></button>
+            </div>
+            <div class="toolbar-buttons-right">
+              <button class="toolbar-button" title="Group"><i class="fas fa-users"></i> <span>Group</span></button>
+              <button class="toolbar-button" title="Favorite"><i class="fas fa-star"></i> <span>Favorite</span></button>
+              <button class="toolbar-button" title="Delete"><i class="fas fa-trash"></i> <span>Delete</span></button>
+              <button class="toolbar-button mailmore-btn" title="More"><i class="fas fa-ellipsis-h"></i></button>
+            </div>
+          </div>
+          <div class="contact-content" >
+            <!-- Opened contact content will be injected here by JS -->
+            <div style="color: #8A8A9E; text-align: center; margin-top: 80px;">Select a contact to view</div>
+          </div>
+        </section>
+      </div>
+ 
+    </div>
+  </div>
+</template>
+
+<!-- Add Contact Window Template -->
+<template id="add-contact-window-template">
+  <div class="window add-contact-window">
+    <div class="window-header">
+      <div class="window-title">
+        <div class="window-icon green-icon">
+          <i class="fas fa-user-plus"></i>
+        </div>
+        <span>Add new contact</span>
+      </div>
+      <div class="window-controls">
+        <button class="window-minimize" title="Minimize"><i class="fas fa-minus"></i></button>
+        <button class="window-popout" title="Pop out"><i class="fas fa-up-right-from-square"></i></button>
+        <button class="window-maximize" title="Maximize"><i class="fas fa-expand"></i></button>
+        <button class="window-close" title="Close"><i class="fas fa-times"></i></button>
+      </div>
+    </div>
+    <div class="window-content add-contact-window-content" style="display: flex; flex-direction: column; height: 100%;">
+      <!-- Add contact form will be injected here by JS -->
+    </div>
+  </div>
+</template>
+
+<!-- Contact Detail Popout Window Template -->
+<template id="contact-detail-window-template">
+  <div class="window contact-app-window contact-detail-window">
+    <div class="window-header">
+      <div class="window-title">
+        <div class="window-icon green-icon">
+          <i class="fas fa-address-card"></i>
+        </div>
+        <span>Contact: ${contact.name}</span>
+      </div>
+      <div class="window-controls">
+        <button class="window-minimize" title="Minimize"><i class="fas fa-minus"></i></button>
+        <button class="window-popout" title="Pop out"><i class="fas fa-up-right-from-square"></i></button>
+        <button class="window-maximize" title="Maximize"><i class="fas fa-expand"></i></button>
+        <button class="window-close" title="Close"><i class="fas fa-times"></i></button>
+      </div>
+    </div>
+    <div class="window-content contact-detail-body" style="height:100%;width:100%;overflow:auto;">
+      <!-- Contact detail content will be injected here -->
+    
+    </div>
+
+  </div>
+</template>
+
+
+<!-- Orders Manager Template -->
+<template id="orders-manager-template">
+  <div class="window orders-manager-window">
+    <div class="window-header">
+      <button class="menu-toggle"><i class="fas fa-bars"></i></button>
+      <div class="window-title">
+        <div class="window-icon green-icon">
+          <i class="fas fa-address-book"></i>
+        </div>
+        <span>Orders</span>
+      </div>
+      <div class="window-controls">
+        <button class="window-minimize" title="Minimize"><i class="fas fa-minus"></i></button>
+        <button class="window-popout" title="Pop out"><i class="fas fa-up-right-from-square"></i></button>
+        <button class="window-maximize" title="Maximize"><i class="fas fa-expand"></i></button>
+        <button class="window-close" title="Close"><i class="fas fa-times"></i></button>
+      </div>
+    </div>
+    <div class="window-content orders-manager-content" style="display: flex; height: 100%;">
+      <!-- Sidebar -->
+      <div class="sidebar-overlay"></div>
+      <div class="window-sidebar">
+        <div class="sidebar-section">
+            <button class="compose-btn"><i class="fas fa-plus"></i><span>Add Order</span></button>
+ 
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-section-header"><h4>Orders </h4> <i class="fas fa-redo"></i></div>
+          <div class="sidebar-item active">
+            <div class="sidebar-item-menu"><i class="fas fa-box"></i><span>All orders</span></div>
+            <span class="sidebar-badge">42</span>
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-square-check"></i><span>Completed</span></div>
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-money-bill-wave"></i><span>Pending payments</span></div>
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-boxes-packing"></i><span>Processing</span></div>
+            <span class="sidebar-badge">5</span>
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-hand"></i><span>On hold</span></div>
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-box-open"></i><span>Pending</span></div>
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-store-slash"></i><span>Cancelled</span></div>
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-hand-holding-dollar"></i><span>Refunded</span></div>
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-store-slash"></i><span>Failed</span></div>
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-floppy-disk"></i><span>Draft</span></div>
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-trash-can"></i><span>Trash</span></div>
+          </div>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-section-header"><h4>Fitler by type </h4></div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-cart-shopping"></i><span>eCommerce</span></div>
+            <span class="sidebar-badge">12</span>
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-clipboard-check"></i><span>Subscription</span></div>
+            <span class="sidebar-badge">8</span>
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-calendar-check"></i><span>Bookings</span></div>
+            <span class="sidebar-badge">15</span>
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-calendar-days"></i><span>Appointments</span></div>
+            <span class="sidebar-badge">7</span>
+          </div>
+        </div>
+   
+
+      </div>
+      <!-- Main Content Split -->
+      <div class="window-main-content" style="display: flex; flex: 1; height: 100%;">
+        <!-- Orders List -->
+        <section class="orders-list-section ">
+          <div class="window-toolbar orders-list-toolbar-searchsort">
+            <label class="toggle-switch" id="window-sidebar-toggle-label" style="margin-right: 14px;">
+              <input type="checkbox" class="window-sidebar-toggle" id="window-sidebar-toggle">
+              <span class="slider"></span>
+            </label>
+            <div class="orders-list-header">
+              <i class="fas fa-search"></i>
+              <input type="text" class="contact-search" placeholder="Search..." style="width: 100%; padding: 6px 4px; border-radius: 6px; border: none; font-size: 14px;">
+              <div class="email-list-sort">Sort <i class='fas fa-chevron-down' style='font-size:12px;'></i><i class="fas fa-ellipsis-h"></i></div>
+            </div>
+          </div>
+          <div class="window-toolbar orders-list-table-header" style="display:none;">
+            <div class="orders-list-table-header-row">
+              <div style="width: 29px; min-width: 29px;"></div>
+              <div class="orders-list-header-item" style="flex: 1; gap: 10px; display: flex; align-items: center;"  ><input type="checkbox" id="orders-select-all-box" name="orders-select-all-box" /> Order ID</div>
+              <div class="orders-list-header-item" style="flex: 1.6;" >Contact name</div>
+              <div class="orders-list-header-item" >Date</div>
+              <div class="orders-list-header-item" >Status</div>
+              <div class="orders-list-header-item" >Type</div>
+              <div class="orders-list-header-item" >Payment</div>
+              <div class="orders-list-header-item" ">Shipping</div>
+              <div class="order-list-header-item-total-spent" >Total</div>
+              <div style="width: 20px; min-width: 20px;"></div>
+              <div class="window-statusbar">
+                <div class="status-left">
+                 <!-- <label class="toggle-switch" id="window-sidebar-toggle-label" style="margin-right: 14px;">
+                    <input type="checkbox" class="window-sidebar-toggle" id="window-sidebar-toggle">
+                    <span class="slider"></span>
+                  </label>-->
+                  142.768 contacts
+                </div>
+                <div class="status-right">$ 257.578 total spent</div>
+              </div>
+            </div>
+          </div>
+          <ul class="orders-list" style="flex: 1 1 auto; overflow-y: auto; min-height: 0; list-style: none; margin: 0; padding: 0;">
+            <!-- Contact items will be injected here by JS -->
+          </ul>
+        </section>
+        <!-- Orders Content -->
+        <section class="orders-content-section" >
+          <div class="window-toolbar" >
+            <div class="toolbar-buttons-left" >
+              <button class="toolbar-button" title="Notes"><i class="fas fa-clipboard-list"></i><span>Add Note</span></button>
+              <button class="toolbar-button" title="Shipping"><i class="fas fa-shipping-fast"></i><span>Shipping</span></button>
+              <button class="toolbar-button" title="Invoice"><i class="fas fa-file-invoice"></i><span>Invoice</span></button>
+              <button class="toolbar-button" title="Order log"><i class="fas fa-history"></i><span>Order log</span></button>
+              <button class="toolbar-button" title="Refund"><i class="fas fa-money-bill-wave"></i><span>Refund</span></button>
+
+            </div>
+            <div class="toolbar-buttons-right">
+  
+   
+              <div class="order-assign">
+                <span>Assign agent</span>
+                <button class="assign-agent-btn">Alina Caramitru <i class="fas fa-chevron-down"></i></button>
+              </div>
+              <button class="toolbar-button delete-button"><i class="fas fa-trash"></i></button>
+            </div>
+          </div>
+          <div class="orders-content" >
+            
+          </div>
+        </section>
+      </div>
+ 
+    </div>
+  </div>
+</template>
+
+<!-- Add Order Window Template -->
+<template id="add-order-window-template">
+  <div class="window add-order-window">
+    <div class="window-header">
+      <div class="window-title">
+        <div class="window-icon green-icon">
+          <i class="fas fa-user-plus"></i>
+        </div>
+        <span>Add new order</span>
+      </div>
+      <div class="window-controls">
+        <button class="window-minimize" title="Minimize"><i class="fas fa-minus"></i></button>
+        <button class="window-popout" title="Pop out"><i class="fas fa-up-right-from-square"></i></button>
+        <button class="window-maximize" title="Maximize"><i class="fas fa-expand"></i></button>
+        <button class="window-close" title="Close"><i class="fas fa-times"></i></button>
+      </div>
+    </div>
+    <div class="window-content add-order-window-content" style="display: flex; flex-direction: column; height: 100%;">
+      <!-- Add order form will be injected here by JS -->
+    </div>
+  </div>
+</template>
+
+<!-- Orders Content Popout Window Template -->
+<template id="orders-content-window-template">
+  <div class="window orders-manager-window orders-content-window">
+    <div class="window-header">
+      <div class="window-title">
+        <div class="window-icon green-icon">
+          <i class="fas fa-shopping-bag"></i>
+        </div>
+        <span>Order Details</span>
+      </div>
+      <div class="window-controls">
+        <button class="window-minimize" title="Minimize"><i class="fas fa-minus"></i></button>
+        <button class="window-popout" title="Pop out"><i class="fas fa-up-right-from-square"></i></button>
+        <button class="window-maximize" title="Maximize"><i class="fas fa-expand"></i></button>
+        <button class="window-close" title="Close"><i class="fas fa-times"></i></button>
+      </div>
+    </div>
+    <div class="window-content orders-content-body" style="height:100%;width:100%;overflow:auto;">
+      <!-- Order content will be injected here -->
+    </div>
+  </div>
+</template>
+
+<!-- Order Detail Popout Window Template -->
+<template id="order-detail-window-template">
+  <div class="window orders-manager-window order-detail-window">
+    <div class="window-header">
+      <div class="window-title">
+        <div class="window-icon green-icon">
+          <i class="fas fa-address-card"></i>
+        </div>
+        <span>Order Details</span>
+      </div>
+      <div class="window-controls">
+        <button class="window-minimize" title="Minimize"><i class="fas fa-minus"></i></button>
+        <button class="window-popout" title="Pop out"><i class="fas fa-up-right-from-square"></i></button>
+        <button class="window-maximize" title="Maximize"><i class="fas fa-expand"></i></button>
+        <button class="window-close" title="Close"><i class="fas fa-times"></i></button>
+      </div>
+    </div>
+    <div class="window-content order-detail-body" style="height:100%;width:100%;overflow:auto;">
+      <!-- Order detail content will be injected here -->
+    </div>
+  </div>
+</template>
+
+
+
+<!-- Products Manager Template -->
+<template id="products-manager-template">
+  <div class="window products-manager-window">
+    <div class="window-header">
+      <button class="menu-toggle"><i class="fas fa-bars"></i></button>
+      <div class="window-title">
+        <div class="window-icon green-icon">
+          <i class="fas fa-address-book"></i>
+        </div>
+        <span>Products</span>
+      </div>
+      <div class="window-controls">
+        <button class="window-minimize" title="Minimize"><i class="fas fa-minus"></i></button>
+        <button class="window-popout" title="Pop out"><i class="fas fa-up-right-from-square"></i></button>
+        <button class="window-maximize" title="Maximize"><i class="fas fa-expand"></i></button>
+        <button class="window-close" title="Close"><i class="fas fa-times"></i></button>
+      </div>
+    </div>
+    <div class="window-content products-manager-content" style="display: flex; height: 100%;">
+      <!-- Sidebar -->
+      <div class="sidebar-overlay"></div>
+      <div class="window-sidebar">
+        <div class="sidebar-section">
+            <button class="compose-btn"><i class="fas fa-plus"></i><span>Add Product</span></button>
+ 
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-section-header"><h4>Products </h4> <i class="fas fa-redo"></i></div>
+          <div class="sidebar-item active">
+            <div class="sidebar-item-menu"><i class="fas fa-box"></i><span>All products</span></div>
+            <span class="sidebar-badge">42</span>
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-star"></i><span>Featured</span></div>
+            <span class="sidebar-badge">42</span>
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-square-check"></i><span>Published</span></div>
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-file-pen"></i><span>Drafts</span></div>
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-user-check"></i><span>Staff Review</span></div>
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-arrow-trend-down"></i><span>Low Stock</span></div>
+          </div>
+
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-trash-can"></i><span>Trash</span></div>
+          </div>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-section-header"><h4>Fitler by type </h4></div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-cart-shopping"></i><span>Categories</span></div>
+            <span class="sidebar-badge">12</span>
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-clipboard-check"></i><span>Brands</span></div>
+            <span class="sidebar-badge">8</span>
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-calendar-check"></i><span>Tags</span></div>
+            <span class="sidebar-badge">15</span>
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-calendar-days"></i><span>Attributes</span></div>
+            <span class="sidebar-badge">7</span>
+          </div>
+		            <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-calendar-days"></i><span>Variations</span></div>
+            <span class="sidebar-badge">7</span>
+          </div>
+
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-boxes-packing"></i><span>Inventory</span></div>
+          </div>
+        </div>
+		          <div class="sidebar-section">
+          <div class="sidebar-section-header"><h4>Fitler by type </h4></div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-cart-shopping"></i><span>eCommerce</span></div>
+            <span class="sidebar-badge">12</span>
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-clipboard-check"></i><span>Subscription</span></div>
+            <span class="sidebar-badge">8</span>
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-calendar-check"></i><span>Bookings</span></div>
+            <span class="sidebar-badge">15</span>
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-calendar-days"></i><span>Appointments</span></div>
+            <span class="sidebar-badge">7</span>
+          </div>
+        </div>
+        
+   
+
+      </div>
+      <!-- Main Content Split -->
+      <div class="window-main-content" style="display: flex; flex: 1; height: 100%;">
+        <!-- Products List -->
+        <section class="products-list-section">
+          <div class="window-toolbar products-list-toolbar-searchsort">
+            <label class="toggle-switch" id="window-sidebar-toggle-label" style="margin-right: 14px;">
+              <input type="checkbox" class="window-sidebar-toggle" id="window-sidebar-toggle">
+              <span class="slider"></span>
+            </label>
+            <div class="products-list-header">
+              <i class="fas fa-search"></i>
+              <input type="text" class="contact-search" placeholder="Search..." style="width: 100%; padding: 6px 4px; border-radius: 6px; border: none; font-size: 14px;">
+              <div class="email-list-sort">Sort <i class='fas fa-chevron-down' style='font-size:12px;'></i><i class="fas fa-ellipsis-h"></i></div>
+            </div>
+          </div>
+          <div class="window-toolbar products-list-table-header" style="display:none;">
+            <div class="products-list-table-header-row">
+              <div style="width: 29px; min-width: 29px;"></div>
+              <div class="products-list-header-item" style="flex: 1; gap: 10px; display: flex; align-items: center;"  ><input type="checkbox" id="products-select-all-box" name="products-select-all-box" /> product ID</div>
+              <div class="products-list-header-item" style="flex: 2.5;" >Product</div>
+              <div class="products-list-header-item" >Brand</div>
+              <div class="products-list-header-item" >Status</div>
+              <div class="products-list-header-item" >Type</div>
+              <div class="products-list-header-item" >Category</div>
+              <div class="products-list-header-item" >Tags</div>
+              <div class="products-list-header-item" ">Added date</div>
+              <div class="products-list-header-item" style="flex: 0.3;">Stock</div>
+              <div class="products-list-header-item" style="flex: 0.3;">Sales</div>
+              <div class="product-list-header-item-total-spent" >Price</div>
+              <div style="width: 29px; min-width: 29px;"></div>
+              <div class="window-statusbar">
+                <div class="status-left">
+                 <!-- <label class="toggle-switch" id="window-sidebar-toggle-label" style="margin-right: 14px;">
+                    <input type="checkbox" class="window-sidebar-toggle" id="window-sidebar-toggle">
+                    <span class="slider"></span>
+                  </label>-->
+                  142.768 contacts
+                </div>
+                <div class="status-right">$ 257.578 total spent</div>
+              </div>
+            </div>
+          </div>
+          <ul class="products-list" style="flex: 1 1 auto; overflow-y: auto; min-height: 0; list-style: none; margin: 0; padding: 0;">
+            <!-- Contact items will be injected here by JS -->
+          </ul>
+        </section>
+        <!-- products Content -->
+        <section class="products-content-section" >
+          <div class="window-toolbar" >
+            <div class="toolbar-buttons-left" >
+              <button class="toolbar-button" title="Notes"><i class="fas fa-eye"></i><span>Preview Product</span></button>
+              <button class="toolbar-button" title="Screen Options"><i class="fas fa-ellipsis-h"></i><span>Screen Options</span></button>
+              <button class="toolbar-button products-delete-button"><i class="fas fa-trash"></i></button>
+            </div>
+            <div class="toolbar-buttons-right">
+              <div class="header-actions">
+                <button class="btn btn-secondary discard-btn">Discard</button>
+                <button class="btn btn-primary">Save changes</button>
+              </div>
+            </div>
+          </div>
+          <div class="products-content" >
+            
+          </div>
+        </section>
+      </div>
+ 
+    </div>
+  </div>
+</template>
+
+<!-- Add product Window Template -->
+<template id="add-product-window-template">
+  <div class="window add-product-window">
+    <div class="window-header">
+      <div class="window-title">
+        <div class="window-icon green-icon">
+          <i class="fas fa-user-plus"></i>
+        </div>
+        <span>Add new product</span>
+      </div>
+      <div class="window-controls">
+        <button class="window-minimize" title="Minimize"><i class="fas fa-minus"></i></button>
+        <button class="window-popout" title="Pop out"><i class="fas fa-up-right-from-square"></i></button>
+        <button class="window-maximize" title="Maximize"><i class="fas fa-expand"></i></button>
+        <button class="window-close" title="Close"><i class="fas fa-times"></i></button>
+      </div>
+    </div>
+    <div class="window-content add-product-window-content" style="display: flex; flex-direction: column; height: 100%;">
+      <!-- Add product form will be injected here by JS -->
+    </div>
+  </div>
+</template>
+
+<!-- Products Content Popout Window Template -->
+<template id="products-content-window-template">
+  <div class="window products-manager-window products-content-window">
+    <div class="window-header">
+      <div class="window-title">
+        <div class="window-icon green-icon">
+          <i class="fas fa-shopping-bag"></i>
+        </div>
+        <span>Products Details</span>
+      </div>
+      <div class="window-controls">
+        <button class="window-minimize" title="Minimize"><i class="fas fa-minus"></i></button>
+        <button class="window-popout" title="Pop out"><i class="fas fa-up-right-from-square"></i></button>
+        <button class="window-maximize" title="Maximize"><i class="fas fa-expand"></i></button>
+        <button class="window-close" title="Close"><i class="fas fa-times"></i></button>
+      </div>
+    </div>
+    <div class="window-content products-content-body" style="height:100%;width:100%;overflow:auto;">
+      <!-- Products content will be injected here -->
+    </div>
+  </div>
+</template>
+
+
 
 
     <!-- Generic Window Template for All Standard Apps -->
@@ -1309,7 +3156,7 @@
   <div id="ai-chat-window" class="ai-chat-window" style="display: none;">
     <div class="ai-chat-header">
       <button class="ai-menu-toggle" aria-label="Menu"><i class="fas fa-bars"></i></button>
-      <div class="ai-chat-title"><i class="fas fa-robot"></i> <span> Alien Itelligence</span></div>
+      <div class="ai-chat-title"><i class="fas fa-robot"></i> <span> Alien Intelligence</span></div>
       <button id="ai-chat-close-btn" class="panel-close-btn" aria-label="Close chat"><i class="fas fa-times"></i></button>
       
     </div>
