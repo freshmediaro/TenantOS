@@ -4066,6 +4066,14 @@ function setupEmailApp(windowElement) {
 
 //Point of Sale App Content
 function setupPointOfSaleApp(windowElement) {
+  console.log('Setting up Point of Sale App');
+  
+  // Initialize POS number pad functionality with a delay to ensure DOM is ready
+  setTimeout(() => {
+    console.log('Initializing POS number pad...');
+    initializePOSApp(windowElement);
+  }, 100);
+  
   // Sidebar: do NOT set content here. Sidebar content is defined in index.html template using the generic sidebar structure.
   // Only update dynamic values (like unread counts, user name, etc.) here if needed.
 
@@ -4254,10 +4262,6 @@ function setupPointOfSaleApp(windowElement) {
 
       <div class="booking-toolbar-content">
         <div class="booking-toolbar-left">
-              <label class="toggle-switch" id="booking-sidebar-toggle-label" style="margin-right: 14px;">
-        <input type="checkbox" class="window-sidebar-toggle" id="booking-sidebar-toggle">
-        <span class="slider"></span>
-      </label>
          <div class="point-of-sale-list-header-left">
                 <i class="fas fa-search"></i>
                 <input type="text" class="point-of-sale-search" placeholder="Search...">
@@ -4275,12 +4279,12 @@ function setupPointOfSaleApp(windowElement) {
             <span class="current-period">February 2025</span>
             <button class="period-nav-btn" id="next-period"><i class="fas fa-chevron-right"></i></button>
           </div>
-        </div>
+        
         <div class="booking-toolbar-right">
           <div class="booking-sort">Sort <i class="fas fa-chevron-down" style="font-size:12px;"></i></div>
           <div class="booking-view">View <i class="fas fa-chevron-down" style="font-size:12px;"></i></div>
         </div>
-      </div>
+      </div></div>
     `;
     
     // Create booking content - matching the structure of point-of-sale-content
@@ -4290,6 +4294,27 @@ function setupPointOfSaleApp(windowElement) {
     
     section.appendChild(toolbar);
     section.appendChild(content);
+    
+    // Create and add statusbar
+    const statusbar = document.createElement('div');
+    statusbar.className = 'window-statusbar';
+    statusbar.innerHTML = `
+      <div class="status-left">
+      <label class="toggle-switch" id="booking-sidebar-toggle-label" style="margin-right: 14px;">
+        <input type="checkbox" class="window-sidebar-toggle" id="booking-sidebar-toggle">
+        <span class="slider"></span>
+      </label>
+        <span>Booking Calendar</span>
+        <span class="status-separator">•</span>
+        <span>February 2025</span>
+      </div>
+      <div class="status-right">
+        <span>5 rooms available</span>
+        <span class="status-separator">•</span>
+        <span>12 bookings</span>
+      </div>
+    `;
+    section.appendChild(statusbar);
     
     // Attach event handlers
     setTimeout(() => {
@@ -4347,7 +4372,7 @@ function setupPointOfSaleApp(windowElement) {
         <div class="booking-order-items-container">
 
         <div class="booking-check-availability-header">
-<h3 style="margin: 10px;">Check availability</h3> <i class="fas fa-xmark"></i>
+<h3>Check availability</h3> <i class="fas fa-xmark"></i>
 </div>
                 <div class="booking-checkin-checkout-header">
             <div class="booking-order-checkin">
@@ -4532,6 +4557,26 @@ xxxx
 
         <!-- Order Summary Footer -->
         <div class="pos-order-footer">
+          <!-- Number Pad (Hidden by default) -->
+          <div class="pos-number-pad" id="pos-number-pad-booking" style="display: none;">
+            <div class="number-pad-grid">
+              <button class="number-pad-btn" data-number="1">1</button>
+              <button class="number-pad-btn" data-number="2">2</button>
+              <button class="number-pad-btn" data-number="3">3</button>
+              <button class="number-pad-btn" data-number="4">4</button>
+              <button class="number-pad-btn" data-number="5">5</button>
+              <button class="number-pad-btn" data-number="6">6</button>
+              <button class="number-pad-btn" data-number="7">7</button>
+              <button class="number-pad-btn" data-number="8">8</button>
+              <button class="number-pad-btn" data-number=".">.</button>
+              <button class="number-pad-btn" data-number="9">9</button>
+              <button class="number-pad-btn" data-number="0">0</button>
+              <button class="number-pad-btn number-pad-confirm" data-action="confirm">
+                <i class="fas fa-check"></i>
+              </button>
+            </div>
+          </div>
+          
           <!-- Discount Section -->
           <div class="pos-discount-section">
             <div class="pos-discount-label">Discount fix</div>
@@ -4591,7 +4636,8 @@ xxxx
     section.innerHTML = `
       <div class="window-toolbar">
         <div class="toolbar-buttons-left">
-          <div class="point-of-sale-current-order-header-item"><h3>Contact Info</h3> <i class="fas fa-chevron-down"></i></div>
+<button class="pos-back-to-booking-btn" style="margin-right: 10px;"><i class="fas fa-chevron-left"></i></button>
+          <div class="point-of-sale-current-order-header-item"><h3>Contact Info</h3> </div>
         </div>
         <div class="toolbar-buttons-right">
           <button class="toolbar-button" title="Save"><i class="fas fa-address-card"></i> </button>
@@ -4740,13 +4786,13 @@ xxxx
           <div class="settings-group-header">
         <h3>Billing to company?</h3> 
 
-        <div class="toggle-switch">
+        <div class="toggle-switch toggle-switch-L">
                 <input type="checkbox" class="section-toggle">
                 <span class="toggle-slider"></span>
               </div>
         </div>
 
-        <div class="publishing-options-section" style="display: block; height: 359px;">
+        <div class="publishing-options-section" style="display: block; height: 100%;">
           <div class="settings-item">
             <label>Company Name</label>
             <input type="text" class="settings-input" value="Company Name SRL">
@@ -4806,7 +4852,7 @@ xxxx
 
 
         <div class="settings-item" style="margin-top: 40px;">
-        <label>ID or Passport</label>
+        <h3>ID or Passport</h3>
         <div class="settings-image-upload">
           <i class="fas fa-camera"></i>
           <span>Take photo of ID or Passport</span>
@@ -4826,6 +4872,26 @@ xxxx
 
         <!-- Order Summary Footer -->
         <div class="pos-order-footer">
+          <!-- Number Pad (Hidden by default) -->
+          <div class="pos-number-pad" id="pos-number-pad-customer" style="display: none;">
+            <div class="number-pad-grid">
+              <button class="number-pad-btn" data-number="1">1</button>
+              <button class="number-pad-btn" data-number="2">2</button>
+              <button class="number-pad-btn" data-number="3">3</button>
+              <button class="number-pad-btn" data-number="4">4</button>
+              <button class="number-pad-btn" data-number="5">5</button>
+              <button class="number-pad-btn" data-number="6">6</button>
+              <button class="number-pad-btn" data-number="7">7</button>
+              <button class="number-pad-btn" data-number="8">8</button>
+              <button class="number-pad-btn" data-number=".">.</button>
+              <button class="number-pad-btn" data-number="9">9</button>
+              <button class="number-pad-btn" data-number="0">0</button>
+              <button class="number-pad-btn number-pad-confirm" data-action="confirm">
+                <i class="fas fa-check"></i>
+              </button>
+            </div>
+          </div>
+          
           <!-- Discount Section -->
           <div class="pos-discount-section">
             <div class="pos-discount-label">Discount fix</div>
@@ -5159,6 +5225,7 @@ xxxx
     section.innerHTML = `
       <div class="window-toolbar">
         <div class="toolbar-buttons-left">
+        <button class="pos-back-to-booking-btn" style="margin-right: 10px;"><i class="fas fa-chevron-left"></i></button>
           <div class="point-of-sale-current-order-header-item"><h3>Booking #${bookingData.id}</h3> <i class="fas fa-chevron-down"></i></div>
         </div>
         <div class="toolbar-buttons-right">
@@ -5414,6 +5481,26 @@ xxxx
 
         <!-- Order Summary Footer -->
         <div class="pos-order-footer">
+          <!-- Number Pad (Hidden by default) -->
+          <div class="pos-number-pad" id="pos-number-pad-active" style="display: none;">
+            <div class="number-pad-grid">
+              <button class="number-pad-btn" data-number="1">1</button>
+              <button class="number-pad-btn" data-number="2">2</button>
+              <button class="number-pad-btn" data-number="3">3</button>
+              <button class="number-pad-btn" data-number="4">4</button>
+              <button class="number-pad-btn" data-number="5">5</button>
+              <button class="number-pad-btn" data-number="6">6</button>
+              <button class="number-pad-btn" data-number="7">7</button>
+              <button class="number-pad-btn" data-number="8">8</button>
+              <button class="number-pad-btn" data-number="9">9</button>
+              <button class="number-pad-btn" data-number=".">.</button>
+              <button class="number-pad-btn" data-number="0">0</button>
+              <button class="number-pad-btn number-pad-confirm" data-action="confirm">
+                <i class="fas fa-check"></i>
+              </button>
+            </div>
+          </div>
+          
           <!-- Total Section -->
           <div class="pos-total-section">
             <div class="pos-total-row">
@@ -5435,7 +5522,7 @@ xxxx
           
 
 <div class="pos-bottom-actions">
-            <button class="pos-back-to-booking-btn">Back to Booking</button>
+            <button class="pos-back-to-booking-btn">Back</button>
             <button class="pos-bottom-btn">Change Room</button>
             <button class="pos-bottom-btn">Change Date</button>
           </div>
@@ -5716,7 +5803,17 @@ xxxx
       { id: 6, name: 'Family Room 301', price: 180, type: 'Family', capacity: 6 },
       { id: 7, name: 'Standard Room 302', price: 100, type: 'Standard', capacity: 2 },
       { id: 8, name: 'Deluxe Room 303', price: 130, type: 'Deluxe', capacity: 2 },
-      { id: 9, name: 'Deluxe Room 304', price: 110, type: 'Deluxe', capacity: 2 }
+      { id: 9, name: 'Deluxe Room 304', price: 110, type: 'Deluxe', capacity: 2 },
+      { id: 10, name: 'Deluxe Room 305', price: 110, type: 'Deluxe', capacity: 2 },
+      { id: 11, name: 'Deluxe Room 306', price: 110, type: 'Family', capacity: 2 },
+      { id: 12, name: 'Deluxe Room 307', price: 110, type: 'Family', capacity: 2 },
+      { id: 13, name: 'Deluxe Room 308', price: 110, type: 'Standard', capacity: 2 },
+      { id: 14, name: 'Deluxe Room 309', price: 110, type: 'Standard', capacity: 2 },
+      { id: 15, name: 'Deluxe Room 310', price: 110, type: 'Standard', capacity: 2 },
+      { id: 16, name: 'Deluxe Room 311', price: 110, type: 'Suite', capacity: 2 },
+      { id: 17, name: 'Deluxe Room 312', price: 110, type: 'Suite', capacity: 2 },
+      { id: 18, name: 'Deluxe Room 323', price: 110, type: 'Deluxe', capacity: 2 }
+
     ];
 
     // Generate calendar days (February - April 2025)
@@ -6071,10 +6168,31 @@ xxxx
       }
     }, 100);
     
-    // Scroll event listener for period tracking
+    // Scroll event listener for period tracking and vertical sync
+    const roomsList = section.querySelector('.rooms-list');
+    let isScrollingSyncing = false;
+    
     if (calendarScrollArea) {
       calendarScrollArea.addEventListener('scroll', function() {
         updateCurrentPeriod(this.scrollLeft);
+        
+        // Synchronize vertical scrolling with rooms list
+        if (roomsList && !isScrollingSyncing) {
+          isScrollingSyncing = true;
+          roomsList.scrollTop = this.scrollTop;
+          setTimeout(() => { isScrollingSyncing = false; }, 10);
+        }
+      });
+    }
+    
+    // Add scroll synchronization from rooms list to calendar
+    if (roomsList) {
+      roomsList.addEventListener('scroll', function() {
+        if (calendarScrollArea && !isScrollingSyncing) {
+          isScrollingSyncing = true;
+          calendarScrollArea.scrollTop = this.scrollTop;
+          setTimeout(() => { isScrollingSyncing = false; }, 10);
+        }
       });
     }
     
@@ -15030,7 +15148,584 @@ const featured = [
 
 const appSections = [
   {
-    title: "Edit Photos and Images",
+    title: "Start selling online",
+    seeAll: "#",
+    apps: [
+      {
+        iconClass: "fa-cart-shopping",
+        iconBgClass: "blue-icon",
+        name: "eCommerce",
+        subtitle: "Sell online and in person, locally and globally, on desktop and mobile.",
+        price: "$49.99",
+        priceDescription: "One time payment",
+        author: "Alien Host"
+      },
+      {
+        iconClass: "fa-utensils",
+        iconBgClass: "purple-icon",
+        name: "Food Menu",
+        subtitle: "Online menu & food ordering for your restaurant and fastfood.",
+        price: "$49.99",
+        priceDescription: "In-app purchases",
+        author: "John Doe"
+      },
+      {
+        iconClass: "fa-hotel",
+        iconBgClass: "green-icon",
+        name: "Bookings",
+        subtitle: "Get rooms reservations online and in person, on desktop and mobile.",
+        price: "GET APP",
+        priceDescription: "Free",
+        author: "John Doe"
+      },
+      {
+        iconClass: "fa-ticket",
+        iconBgClass: "orange-icon",
+        name: "Tickets & Events",
+        subtitle: "Easily create events, sell tickets and manage guests.",
+        price: "GET APP",
+        priceDescription: "In-app purchases",
+        author: "John Doe"
+      },
+      {
+        iconClass: "fa-calendar-check",
+        iconBgClass: "red-icon",
+        name: "Appointments",
+        subtitle: "Get appointments & resevations and manage guests online.",
+        price: "$29.99",
+        priceDescription: "Monthly subscription",
+        author: "John Doe"
+      },
+      {
+        iconClass: "fa-taxi",
+        iconBgClass: "teal-icon",
+        name: "Taxi & Ride sharing",
+        subtitle: "Get car requests online and track and manage drivers.",
+        price: "INSTALLED",
+        priceDescription: "Monthly subscription",
+        author: "John Doe"
+      },
+      {
+        iconClass: "fa-mountain-sun",
+        iconBgClass: "gray-icon",
+        name: "Digital Products",
+        subtitle: "Sell your digitals online",
+        price: "$29.99",
+        priceDescription: "Monthly subscription",
+        author: "John Doe"
+      },
+      {
+        iconClass: "fa-user-check",
+        iconBgClass: "yellow-icon",
+        name: "Subscriptions",
+        subtitle: "Sell subscriptions to your fans",
+        price: "$9.99",
+        priceDescription: "One time payment",
+        author: "John Doe"
+      },
+      {
+        iconClass: "fa-hands-holding-circle",
+        iconBgClass: "pink-icon",
+        name: "Donations & Gifts",
+        subtitle: "Get donations & gifts",
+        price: "GET APP",
+        priceDescription: "In-app purchases",
+        author: "John Doe"
+      },
+      {
+        iconClass: "fa-gavel",
+        iconBgClass: "pink-icon",
+        name: "Auction & Bidding",
+        subtitle: "Sell your products like auctions and bidding.",
+        price: "GET APP",
+        priceDescription: "In-app purchases",
+        author: "John Doe"
+      }
+    ]
+  },
+  {
+    title: "Sell Channels",
+    seeAll: "#",
+    apps: [
+      {
+        iconClass: "fa-cash-register",
+        iconBgClass: "blue-icon",
+        name: "POS System",
+        subtitle: "Point of sale for your business to sell in person.",
+        price: "$49.99",
+        priceDescription: "One time payment",
+        author: "John Doe"
+      },
+      {
+        iconClass: "fa-users",
+        iconBgClass: "purple-icon",
+        name: "eCommerce Marketplaces",
+        subtitle: "Sell your products to marketplaces like Amazon, eBay, and Etsy.",
+        price: "$49.99",
+        priceDescription: "In-app purchases",
+        author: "John Doe"
+      },
+      {
+        iconClass: "fa-users",
+        iconBgClass: "purple-icon",
+        name: "Bookings Marketplaces",
+        subtitle: "Sync with Bookings.com, AirBNB, and other platforms.",
+        price: "$49.99",
+        priceDescription: "In-app purchases",
+        author: "John Doe"
+      },
+      {
+        iconClass: "fa-boxes-packing",
+        iconBgClass: "green-icon",
+        name: "Social Media Marketplaces",
+        subtitle: "Sell your products to social media platforms like Facebook, Instagram, and Twitter.",
+        price: "GET APP",
+        priceDescription: "Free",
+        author: "John Doe"
+      },
+      {
+        iconClass: "fa-money-bill",
+        iconBgClass: "orange-icon",
+        name: "Reseller & Drop Shipping",
+        subtitle: "Sell your products to resellers and drop shippers with a commission.",
+        price: "GET APP",
+        priceDescription: "In-app purchases",
+        author: "John Doe"
+      },
+      {
+        iconClass: "fa-user-tie",
+        iconBgClass: "red-icon",
+        name: "Affiliates",
+        subtitle: "Allow people to sell your products for you with a commission.",
+        price: "$29.99",
+        priceDescription: "Monthly subscription",
+        author: "John Doe"
+      },
+      {
+        iconClass: "fa-chart-line",
+        iconBgClass: "teal-icon",
+        name: "Mobile App",
+        subtitle: "Sell your products on mobile apps.",
+        price: "INSTALLED",
+        priceDescription: "Monthly subscription",
+        author: "John Doe"
+      }
+    ]
+  },
+  {
+    title: "Marketing",
+    seeAll: "#",
+    apps: [
+      {
+        iconClass: "fa-image",
+        iconBgClass: "blue-icon",
+        name: "Social Media Manager",
+        subtitle: "Manage all Social Media accounts from one place with A.i.",
+        price: "$49.99",
+        priceDescription: "One time payment",
+        author: "John Doe"
+      },
+      {
+        iconClass: "fa-magic",
+        iconBgClass: "purple-icon",
+        name: "Chat App",
+        subtitle: "Sync all chat channels in a single app and auto answear with A.I.",
+        price: "INSTALLED",
+        priceDescription: "In-app purchases",
+        author: "John Doe"
+      },
+      {
+        iconClass: "fa-robot",
+        iconBgClass: "green-icon",
+        name: "Ads Manager",
+        subtitle: "Manage all ads from different platforms in one place",
+        price: "GET APP",
+        priceDescription: "Free",
+        author: "John Doe"
+      },
+      {
+        iconClass: "fa-adjust",
+        iconBgClass: "orange-icon",
+        name: "SEO & LMO",
+        subtitle: "Advanced SEO settings for search engines and A.I. chats",
+        price: "GET APP",
+        priceDescription: "In-app purchases",
+        author: "John Doe"
+      },
+      {
+        iconClass: "fa-envelope",
+        iconBgClass: "red-icon",
+        name: "Email Marketing",
+        subtitle: "Create & manage email marketing campaings in a few clicks",
+        price: "$29.99",
+        priceDescription: "Monthly subscription",
+        author: "John Doe"
+      },
+      {
+        iconClass: "fa-water",
+        iconBgClass: "teal-icon",
+        name: "SMS Campaigns",
+        subtitle: "Create and manage bulk SMS campaings",
+        price: "INSTALLED",
+        priceDescription: "Monthly subscription",
+        author: "John Doe"
+      },
+      {
+        iconClass: "fa-user-edit",
+        iconBgClass: "gray-icon",
+        name: "Acorn 6 Image Editor",
+        subtitle: "Image editor for humans",
+        price: "$29.99",
+        priceDescription: "Monthly subscription",
+        author: "John Doe"
+      },
+      {
+        iconClass: "fa-sun",
+        iconBgClass: "yellow-icon",
+        name: "Flare 2",
+        subtitle: "Smart photo editing",
+        price: "$9.99",
+        priceDescription: "One time payment",
+        author: "John Doe"
+      },
+      {
+        iconClass: "fa-camera-retro",
+        iconBgClass: "pink-icon",
+        name: "RAW Power",
+        subtitle: "Photography",
+        price: "GET APP",
+        priceDescription: "In-app purchases",
+        author: "John Doe"
+      },
+      {
+        iconClass: "fa-paint-brush",
+        iconBgClass: "blue-icon",
+        name: "Pictorial",
+        subtitle: "Photography",
+        price: "$59.99",
+        priceDescription: "One time payment",
+        author: "John Doe"
+      }
+    ]
+  },
+  {
+    title: "Media & Productivity",
+    seeAll: "#",
+    apps: [
+      {
+        iconClass: "fa-image",
+        iconBgClass: "blue-icon",
+        name: "Photopea",
+        subtitle: "Edit photos in a Photoshop like interface",
+        price: "$49.99",
+        priceDescription: "One time payment",
+        author: "John Doe"
+      },
+      {
+        iconClass: "fa-magic",
+        iconBgClass: "purple-icon",
+        name: "ImageAI",
+        subtitle: "Create perfect images from your products with A.I.",
+        price: "$49.99",
+        priceDescription: "In-app purchases",
+        author: "John Doe"
+      },
+      {
+        iconClass: "fa-robot",
+        iconBgClass: "green-icon",
+        name: "Canva",
+        subtitle: "Fully automatic photo editor",
+        price: "GET APP",
+        priceDescription: "Free",
+        author: "John Doe"
+      },
+      {
+        iconClass: "fa-adjust",
+        iconBgClass: "orange-icon",
+        name: "Polarr Photo Editor",
+        subtitle: "Photography",
+        price: "GET APP",
+        priceDescription: "In-app purchases",
+        author: "John Doe"
+      },
+      {
+        iconClass: "fa-video",
+        iconBgClass: "red-icon",
+        name: "Video Pro",
+        subtitle: "Generate A.I. videos of your products to showcase online",
+        price: "$29.99",
+        priceDescription: "Monthly subscription",
+        author: "John Doe"
+      },
+      {
+        iconClass: "fa-water",
+        iconBgClass: "teal-icon",
+        name: "Video Editor",
+        subtitle: "Edit Videos like a pro",
+        price: "INSTALLED",
+        priceDescription: "Monthly subscription",
+        author: "John Doe"
+      },
+      {
+        iconClass: "fa-user-edit",
+        iconBgClass: "gray-icon",
+        name: "Suno",
+        subtitle: "Create beautifull music for your brand with A.I.",
+        price: "$29.99",
+        priceDescription: "Monthly subscription",
+        author: "John Doe"
+      },
+      {
+        iconClass: "fa-sun",
+        iconBgClass: "yellow-icon",
+        name: "Audio Editor",
+        subtitle: "Edit audio files, timp, extend, change voice, change text",
+        price: "$9.99",
+        priceDescription: "One time payment",
+        author: "John Doe"
+      },
+      {
+        iconClass: "fa-camera-retro",
+        iconBgClass: "pink-icon",
+        name: "Zoom",
+        subtitle: "Live conferences on zoom synced with your contacts",
+        price: "GET APP",
+        priceDescription: "In-app purchases",
+        author: "John Doe"
+      },
+      {
+        iconClass: "fa-paint-brush",
+        iconBgClass: "blue-icon",
+        name: "Tasks",
+        subtitle: "Create, edit and manage tasks for you and your team in a Trello style",
+        price: "$59.99",
+        priceDescription: "One time payment",
+        author: "John Doe"
+      },
+      {
+        iconClass: "fa-paint-brush",
+        iconBgClass: "blue-icon",
+        name: "Otter.ai",
+        subtitle: "Transcribing audio and video recordings, useful for meetings and lectures.",
+        price: "$59.99",
+        priceDescription: "One time payment",
+        author: "John Doe"
+      }
+      ,
+      {
+        iconClass: "fa-paint-brush",
+        iconBgClass: "blue-icon",
+        name: "Docs",
+        subtitle: "Edit documents online directly in cloud.",
+        price: "$59.99",
+        priceDescription: "One time payment",
+        author: "John Doe"
+      },
+      {
+        iconClass: "fa-paint-brush",
+        iconBgClass: "blue-icon",
+        name: "Excel",
+        subtitle: "Edit excel files directly in cloud.",
+        price: "$59.99",
+        priceDescription: "One time payment",
+        author: "John Doe"
+      }
+    ]
+  },
+  {
+    title: "Category",
+    seeAll: "#",
+    apps: [
+      {
+        iconClass: "fa-image",
+        iconBgClass: "blue-icon",
+        name: "Affinity Photo",
+        subtitle: "Redefining photo editing",
+        price: "$49.99",
+        priceDescription: "One time payment",
+        author: "John Doe"
+      },
+      {
+        iconClass: "fa-magic",
+        iconBgClass: "purple-icon",
+        name: "Luminar 2018: Pro photo editor",
+        subtitle: "Perfect photos in less time",
+        price: "$49.99",
+        priceDescription: "In-app purchases",
+        author: "John Doe"
+      },
+      {
+        iconClass: "fa-robot",
+        iconBgClass: "green-icon",
+        name: "Photolemur 2",
+        subtitle: "Fully automatic photo editor",
+        price: "GET APP",
+        priceDescription: "Free",
+        author: "John Doe"
+      },
+      {
+        iconClass: "fa-adjust",
+        iconBgClass: "orange-icon",
+        name: "Polarr Photo Editor",
+        subtitle: "Photography",
+        price: "GET APP",
+        priceDescription: "In-app purchases",
+        author: "John Doe"
+      },
+      {
+        iconClass: "fa-video",
+        iconBgClass: "red-icon",
+        name: "Anamorphic Pro",
+        subtitle: "Photography",
+        price: "$29.99",
+        priceDescription: "Monthly subscription",
+        author: "John Doe"
+      },
+      {
+        iconClass: "fa-water",
+        iconBgClass: "teal-icon",
+        name: "Hydra - HDR Photo Editor",
+        subtitle: "Create beautiful HDR images",
+        price: "INSTALLED",
+        priceDescription: "Monthly subscription",
+        author: "John Doe"
+      },
+      {
+        iconClass: "fa-user-edit",
+        iconBgClass: "gray-icon",
+        name: "Acorn 6 Image Editor",
+        subtitle: "Image editor for humans",
+        price: "$29.99",
+        priceDescription: "Monthly subscription",
+        author: "John Doe"
+      },
+      {
+        iconClass: "fa-sun",
+        iconBgClass: "yellow-icon",
+        name: "Flare 2",
+        subtitle: "Smart photo editing",
+        price: "$9.99",
+        priceDescription: "One time payment",
+        author: "John Doe"
+      },
+      {
+        iconClass: "fa-camera-retro",
+        iconBgClass: "pink-icon",
+        name: "RAW Power",
+        subtitle: "Photography",
+        price: "GET APP",
+        priceDescription: "In-app purchases",
+        author: "John Doe"
+      },
+      {
+        iconClass: "fa-paint-brush",
+        iconBgClass: "blue-icon",
+        name: "Pictorial",
+        subtitle: "Photography",
+        price: "$59.99",
+        priceDescription: "One time payment",
+        author: "John Doe"
+      }
+    ]
+  },
+  {
+    title: "Category",
+    seeAll: "#",
+    apps: [
+      {
+        iconClass: "fa-image",
+        iconBgClass: "blue-icon",
+        name: "Affinity Photo",
+        subtitle: "Redefining photo editing",
+        price: "$49.99",
+        priceDescription: "One time payment",
+        author: "John Doe"
+      },
+      {
+        iconClass: "fa-magic",
+        iconBgClass: "purple-icon",
+        name: "Luminar 2018: Pro photo editor",
+        subtitle: "Perfect photos in less time",
+        price: "$49.99",
+        priceDescription: "In-app purchases",
+        author: "John Doe"
+      },
+      {
+        iconClass: "fa-robot",
+        iconBgClass: "green-icon",
+        name: "Photolemur 2",
+        subtitle: "Fully automatic photo editor",
+        price: "GET APP",
+        priceDescription: "Free",
+        author: "John Doe"
+      },
+      {
+        iconClass: "fa-adjust",
+        iconBgClass: "orange-icon",
+        name: "Polarr Photo Editor",
+        subtitle: "Photography",
+        price: "GET APP",
+        priceDescription: "In-app purchases",
+        author: "John Doe"
+      },
+      {
+        iconClass: "fa-video",
+        iconBgClass: "red-icon",
+        name: "Anamorphic Pro",
+        subtitle: "Photography",
+        price: "$29.99",
+        priceDescription: "Monthly subscription",
+        author: "John Doe"
+      },
+      {
+        iconClass: "fa-water",
+        iconBgClass: "teal-icon",
+        name: "Hydra - HDR Photo Editor",
+        subtitle: "Create beautiful HDR images",
+        price: "INSTALLED",
+        priceDescription: "Monthly subscription",
+        author: "John Doe"
+      },
+      {
+        iconClass: "fa-user-edit",
+        iconBgClass: "gray-icon",
+        name: "Acorn 6 Image Editor",
+        subtitle: "Image editor for humans",
+        price: "$29.99",
+        priceDescription: "Monthly subscription",
+        author: "John Doe"
+      },
+      {
+        iconClass: "fa-sun",
+        iconBgClass: "yellow-icon",
+        name: "Flare 2",
+        subtitle: "Smart photo editing",
+        price: "$9.99",
+        priceDescription: "One time payment",
+        author: "John Doe"
+      },
+      {
+        iconClass: "fa-camera-retro",
+        iconBgClass: "pink-icon",
+        name: "RAW Power",
+        subtitle: "Photography",
+        price: "GET APP",
+        priceDescription: "In-app purchases",
+        author: "John Doe"
+      },
+      {
+        iconClass: "fa-paint-brush",
+        iconBgClass: "blue-icon",
+        name: "Pictorial",
+        subtitle: "Photography",
+        price: "$59.99",
+        priceDescription: "One time payment",
+        author: "John Doe"
+      }
+    ]
+  },
+  {
+    title: "Category",
     seeAll: "#",
     apps: [
       {
@@ -15574,6 +16269,7 @@ function clearAllNotifications() {
           if (cardsToRemove === 0) {
             notifications.length = 0;
             renderNotificationsPanel();
+            renderNotificationsScreen(); // Also render the mobile notifications screen
             if (typeof updateNotificationsBadge === 'function') updateNotificationsBadge();
             const toastContainer = document.getElementById('os-toast-container');
             if (toastContainer) {
@@ -15586,12 +16282,99 @@ function clearAllNotifications() {
   } else {
     notifications.length = 0;
     renderNotificationsPanel();
+    renderNotificationsScreen(); // Also render the mobile notifications screen
     if (typeof updateNotificationsBadge === 'function') updateNotificationsBadge();
     const toastContainer = document.getElementById('os-toast-container');
     if (toastContainer) {
       Array.from(toastContainer.children).forEach(child => child.remove());
     }
   }
+}
+
+function renderNotificationsScreen() {
+  const notificationsScreen = document.getElementById('notifications-screen');
+  if (!notificationsScreen) return;
+  
+  // Add the mobile-notifications-screen class
+  notificationsScreen.classList.add('mobile-notifications-screen');
+  
+  let notificationsContent = notificationsScreen.querySelector('.notifications-panel-content');
+  if (!notificationsContent) {
+    notificationsContent = document.createElement('div');
+    notificationsContent.className = 'notifications-panel-content';
+    notificationsScreen.appendChild(notificationsContent);
+  }
+  
+  notificationsContent.innerHTML = '';
+  
+  // Header
+  const headerRow = document.createElement('div');
+  headerRow.className = 'notifications-header';
+  headerRow.innerHTML = `
+      <div class="notif-title"><i class="fas fa-bell"></i> <span> Notifications</span></div>
+    `;
+  notificationsContent.appendChild(headerRow);
+  
+  // Section label (only if notifications exist)
+  if (notifications.length > 0) {
+    const sectionLabel = document.createElement('div');
+    sectionLabel.className = 'notif-section-label';
+    sectionLabel.innerHTML = 'Today <span class="notif-clear">Clear all</span>';
+    notificationsContent.appendChild(sectionLabel);
+  }
+  
+  // List
+  const todayList = document.createElement('div');
+  todayList.className = 'notif-list';
+  notifications.forEach((notif, idx) => {
+    const card = document.createElement('div');
+    card.className = 'notif-card' + (notif.unread ? ' unread' : '');
+    card.dataset.notifId = notif.id;
+    card.innerHTML = `
+      <button class="notif-delete-btn" title="Delete notification">&times;</button>
+      <div class="notif-icon-bg ${notif.iconBgClass}"><i class="fas ${notif.iconClass}"></i></div>
+      <div class="notif-content">
+        <div class="notif-main-row">
+          <span class="notif-main-title">${notif.title}</span>
+        </div>
+        <div class="notif-desc">${notif.desc}</div>
+        <div class="notif-meta">${notif.meta}</div>
+      </div>
+      <img class="notif-avatar" src="${notif.avatar}" />
+    `;
+    todayList.appendChild(card);
+  });
+  notificationsContent.appendChild(todayList);
+  
+  if (notifications.length === 0) {
+    const emptyMsg = document.createElement('div');
+    emptyMsg.className = 'no-notifications-msg';
+    emptyMsg.textContent = 'No new notifications';
+    emptyMsg.style.cssText = 'display: flex; align-items: center; justify-content: center; height: 100%; color: #888; font-size: 1.15rem; font-weight: 500; text-align: center; margin-top: 60px;';
+    notificationsContent.appendChild(emptyMsg);
+  }
+  
+  // Add event listeners for clear all and delete buttons
+  const clearAllBtn = notificationsContent.querySelector('.notif-clear');
+  if (clearAllBtn) {
+    clearAllBtn.addEventListener('click', clearAllNotifications);
+  }
+  
+  const deleteButtons = notificationsContent.querySelectorAll('.notif-delete-btn');
+  deleteButtons.forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      const card = this.closest('.notif-card');
+      const notifId = card.dataset.notifId;
+      const notifIndex = notifications.findIndex(n => n.id === notifId);
+      if (notifIndex !== -1) {
+        notifications.splice(notifIndex, 1);
+        renderNotificationsScreen();
+        renderNotificationsPanel(); // Also update the panel if it exists
+        if (typeof updateNotificationsBadge === 'function') updateNotificationsBadge();
+      }
+    });
+  });
 }
 
 function renderNotificationsPanel() {
@@ -15661,6 +16444,7 @@ function renderNotificationsPanel() {
   }
   if (typeof enableNotificationSwipeToDelete === 'function') enableNotificationSwipeToDelete();
   if (typeof updateNotificationsBadge === 'function') updateNotificationsBadge();
+  renderNotificationsScreen(); // Also render the mobile notifications screen
   // Clear the lastAddedNotificationId after rendering
   lastAddedNotificationId = null;
 }
@@ -15691,6 +16475,7 @@ function addNotification({
   notifications.unshift({ id, title, desc, meta, iconClass, iconBgClass, avatar, unread });
   lastAddedNotificationId = id;
   renderNotificationsPanel();
+  renderNotificationsScreen(); // Also render the mobile notifications screen
   // FLIP animation for existing notifications
   if (panelOpen) {
     const notifCards = notificationsPanel.querySelectorAll('.notif-card');
@@ -16454,8 +17239,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const widgetTemplates = {
       'my-files': app => `<div class="widget"><div class="widget-header"><span>${app.name}</span></div><div class="widget-content notification-widget"><div class="big-number">23</div><div class="widget-subtitle">No more events today</div></div></div>`,
       'this-pc': app => `<div class="widget"><div class="widget-header"><span>${app.name}</span></div><div class="widget-content disk-space-widget"><div class="big-number">23%</div><div class="progress-bar"><div class="progress" style="width: 23%"></div></div><div class="widget-subtitle">15 GB / 50 GB</div></div></div>`,
-      'web-files': app => `<div class="widget"><div class="widget-content email-widget"><div class="widget-icon"><i class="fas fa-headphones"></i></div><div class="widget-data"><div class="big-number">23</div><div class="widget-subtitle">Unread emails</div></div></div></div>`,
-      'trash-sm': app => `<div class="widget"><div class="widget-content messages-widget"><div class="widget-icon"><i class="fas fa-dollar-sign"></i></div><div class="widget-data"><div class="big-number">23</div><div class="widget-subtitle">Unread messages</div></div></div></div>`,
+      'web-files': app => `<div class="widget" style="width: 46%; float: right;"><div class="widget-content email-widget"><div class="widget-icon"><i class="fas fa-headphones"></i></div><div class="widget-data"><div class="big-number">23</div><div class="widget-subtitle">Unread emails</div></div></div></div>`,
+      'trash-sm': app => `<div class="widget" style="width: 46%;"><div class="widget-content messages-widget"><div class="widget-icon"><i class="fas fa-dollar-sign"></i></div><div class="widget-data"><div class="big-number">23</div><div class="widget-subtitle">Unread messages</div></div></div></div>`,
       'settings-sm': app => `<div class="widget"><div class="widget-header"><span>${app.name}</span></div><div class="widget-content"><div class="big-number">Settings</div><div class="widget-subtitle">Configure your system</div></div></div>`,
       'site-builder-sm': app => `<div class="widget"><div class="widget-header"><span>${app.name}</span></div><div class="widget-content"><div class="big-number">Site</div><div class="widget-subtitle">Build your website</div></div></div>`,
       'app-store-sm': app => `<div class="widget"><div class="widget-header"><span>${app.name}</span></div><div class="widget-content"><div class="big-number">Store</div><div class="widget-subtitle">Find new apps</div></div></div>`,
@@ -16467,7 +17252,7 @@ document.addEventListener('DOMContentLoaded', function () {
       'wordpad': app => `<div class="widget"><div class="widget-header"><span>${app.name}</span></div><div class="widget-content"><div class="big-number">Wordpad</div><div class="widget-subtitle">Rich text notes</div></div></div>`,
       'calculator-sm': app => `<div class="widget"><div class="widget-header"><span>${app.name}</span></div><div class="widget-content"><div class="big-number">Calc</div><div class="widget-subtitle">Calculator</div></div></div>`,
       'photoshop-sm': app => `<div class="widget"><div class="widget-header"><span>${app.name}</span></div><div class="widget-content"><div class="big-number">Photo</div><div class="widget-subtitle">Edit images</div></div></div>`,
-      'calendar-sm': app => `<div class="widget"><div class="widget-header"><span>${app.name}</span></div><div class="widget-content"><div class="big-number">Calendar</div><div class="widget-subtitle">Your events</div></div></div>`,
+      'calendar-app': app => `<div class="widget"><div class="widget-header"><span>${app.name}</span></div><div class="widget-content"><div class="big-number">Calendar</div><div class="widget-subtitle">Your events</div></div></div>`,
       'notes': app => `<div class="widget"><div class="widget-header"><span>${app.name}</span></div><div class="widget-content"><div class="big-number">Notes</div><div class="widget-subtitle">Sticky notes</div></div></div>`,
       'email-app': app => `<div class="widget"><div class="widget-header"><span>${app.name}</span></div><div class="widget-content"><div class="big-number">Notes</div><div class="widget-subtitle">Sticky notes</div></div></div>`,
       'point-of-sale-app': app => `<div class="widget"><div class="widget-header"><span>${app.name}</span></div><div class="widget-content"><div class="big-number">Notes</div><div class="widget-subtitle">Sticky notes</div></div></div>`
@@ -17479,7 +18264,7 @@ const startMenuApps = [
   { id: 'wordpad', name: 'Wordpad', iconClass: 'fa-file-alt', iconBgClass: 'pink-icon', category: 'DOCS' },
   { id: 'calculator-sm', name: 'Calculator', iconClass: 'fa-calculator', iconBgClass: 'gray-icon', category: 'PRODUCTIVITY' },
   { id: 'photoshop-sm', name: 'Photoshop', iconClass: 'fa-palette', iconBgClass: 'blue-icon', category: 'PRODUCTIVITY' },
-  { id: 'calendar-sm', name: 'Calendar', iconClass: 'fa-calendar-alt', iconBgClass: 'purple-icon', category: 'PRODUCTIVITY' },
+  { id: 'calendar-app', name: 'Calendar', iconClass: 'fa-calendar-alt', iconBgClass: 'purple-icon', category: 'PRODUCTIVITY' },
   { id: 'notes', name: 'Notes', iconClass: 'far fa-clipboard', iconBgClass: 'pink-icon', category: 'PRODUCTIVITY' },
   { id: 'app-launcher', name: 'App launcher', iconClass: 'fa-th', iconBgClass: 'teal-icon', category: 'SYSTEM APPS' },
   { id: 'wallet', name: 'Wallet', iconClass: 'fa-wallet', iconBgClass: 'pink-icon', category: 'SYSTEM APPS' },
@@ -18990,6 +19775,11 @@ document.addEventListener('DOMContentLoaded', function () {
         appTitle = 'Orders Manager';
         delayedContentLoader = () => setupOrdersManager(windowElement);
         break;
+        case 'calendar-app':
+          windowElement = createWindowFromTemplate('calendar-app', windowId, true);
+          appTitle = 'Calendar';
+          delayedContentLoader = () => setupCalendarApp(windowElement);
+          break;
       case 'products-manager':
         windowElement = createWindowFromTemplate('products-manager', windowId, true);
         appTitle = 'Products Manager';
@@ -20408,8 +21198,24 @@ document.addEventListener('DOMContentLoaded', function () {
         // Set panel title in header
         titlePanelTitle.textContent = label;
         windowTitle.classList.add('show-detail');
-        // Fill panel options
-        panel.querySelector('.settings-mobile-options').innerHTML = getSectionOptionsHTML(section);
+        
+        // Instead of using getSectionOptionsHTML, clone the desktop content
+        const desktopContent = settingsWindowElement.querySelector(`.settings-section-content.${section}-content`);
+        const panelContent = panel.querySelector('.settings-mobile-options');
+        
+        if (desktopContent) {
+          // Clone the desktop content and adapt it for mobile
+          const clonedContent = desktopContent.cloneNode(true);
+          // Clear the panel and add the cloned content
+          panelContent.innerHTML = '';
+          panelContent.appendChild(clonedContent);
+          // Add mobile-specific class for styling
+          clonedContent.classList.add('mobile-adapted-content');
+        } else {
+          // Fallback to simple content if desktop content not found
+          panelContent.innerHTML = `<li><span>No content available for ${label}</span></li>`;
+        }
+        
         // Slide to panel
         mobileContainer.classList.add('show-panel');
         windowEl.classList.add('show-panel');
@@ -20443,58 +21249,8 @@ document.addEventListener('DOMContentLoaded', function () {
     // ...existing code...
   }
 
-  // Returns HTML for each section's options (customize as needed)
-  function getSectionOptionsHTML(section) {
-    switch (section) {
-      case 'wifi':
-        return `
-          <li><label>Wi-Fi</label><input type="checkbox" checked></li>
-          <li><label>Network Name</label><span>MyWiFi</span></li>
-        `;
-      case 'appearance':
-        return `
-          <li><label>Theme</label>
-            <select>
-              <option>Light</option>
-              <option selected>Dark</option>
-              <option>Auto</option>
-            </select>
-          </li>
-          <li><label>Accent Color</label>
-            <select>
-              <option>Blue</option>
-              <option>Purple</option>
-              <option>Pink</option>
-              <option>Red</option>
-              <option>Orange</option>
-              <option>Yellow</option>
-              <option>Green</option>
-              <option>Gray</option>
-            </select>
-          </li>
-        `;
-      case 'notifications':
-        return `<li><label>Allow Notifications</label><input type="checkbox" checked></li>`;
-      case 'sound':
-        return `<li><label>Volume</label><input type="range" min="0" max="100" value="80"></li>`;
-      case 'bluetooth':
-        return `<li><label>Bluetooth</label><input type="checkbox"></li>`;
-      case 'network':
-        return `<li><label>Network</label><span>Ethernet</span></li>`;
-      case 'focus':
-        return `<li><label>Focus Mode</label><input type="checkbox"></li>`;
-      case 'screentime':
-        return `<li><label>Screen Time</label><span>2h 30m today</span></li>`;
-      case 'general':
-        return `<li><label>About</label><span>Device Info</span></li>`;
-      case 'family':
-        return `<li><label>Family Sharing</label><input type="checkbox"></li>`;
-      case 'suggestions':
-        return `<li><label>Suggestions</label><span>2 new</span></li>`;
-      default:
-        return `<li><span>No options for this section yet.</span></li>`;
-    }
-  }
+  // REMOVED: getSectionOptionsHTML function - no longer needed
+  // Mobile now uses the same content as desktop by cloning the desktop sections
 
   function setupCalculatorApp(calculatorWindowElement) {
     const displayHistory = calculatorWindowElement.querySelector('#calc-history');
@@ -25483,3 +26239,3426 @@ function removeOrderItem(button) {
     }, 300);
   }
 }
+
+// --- Calendar App Setup Function ---
+function setupCalendarApp(windowElement) {
+  console.log('Setting up Calendar App');
+  
+  if (!windowElement) {
+    console.error('Calendar app window element not found');
+    return;
+  }
+
+  // Initialize mini calendar
+  initializeMiniCalendar(windowElement);
+  
+  // Initialize main calendar view
+  initializeMainCalendar(windowElement);
+  
+  // Set default view to week
+  switchCalendarView(windowElement, 'week');
+  
+  // Setup calendar navigation
+  setupCalendarNavigation(windowElement);
+  
+  // Setup view selector (Month/Week/Day/Agenda)
+  setupViewSelector(windowElement);
+  
+  // Setup calendar search functionality
+  setupCalendarSearch(windowElement);
+  
+  // Setup scroll synchronization
+  setupScrollSynchronization(windowElement);
+  
+  // Setup event creation
+  setupEventCreation(windowElement);
+  
+  // Setup event management
+  setupEventManagement(windowElement);
+  
+  // Initialize existing events
+  initializeExistingEvents(windowElement);
+  
+  // Setup current time indicator
+  setupCurrentTimeIndicator(windowElement);
+  
+  // Setup sidebar functionality
+  setupCalendarSidebar(windowElement);
+  
+  // Make calendar focusable for keyboard events
+  const mainCalendar = windowElement.querySelector('.main-calendar-container');
+  if (mainCalendar) {
+    mainCalendar.setAttribute('tabindex', '0');
+  }
+  
+  // Scroll to today's column when app opens
+  scrollToTodayColumn(windowElement);
+  
+  console.log('Calendar App setup completed');
+}
+
+// --- Mini Calendar Initialization ---
+function initializeMiniCalendar(windowElement) {
+  const miniCalendar = windowElement.querySelector('.mini-calendar');
+  if (!miniCalendar) return;
+  
+  const currentDate = new Date();
+  renderMiniCalendar(miniCalendar, currentDate);
+  
+  // Setup mini calendar navigation
+  const prevBtn = miniCalendar.querySelector('.mini-calendar-nav[data-direction="prev"]');
+  const nextBtn = miniCalendar.querySelector('.mini-calendar-nav[data-direction="next"]');
+  
+  if (prevBtn) {
+    prevBtn.addEventListener('click', () => {
+      currentDate.setMonth(currentDate.getMonth() - 1);
+      renderMiniCalendar(miniCalendar, currentDate);
+    });
+  }
+  
+  if (nextBtn) {
+    nextBtn.addEventListener('click', () => {
+      currentDate.setMonth(currentDate.getMonth() + 1);
+      renderMiniCalendar(miniCalendar, currentDate);
+    });
+  }
+}
+
+// --- Main Calendar Initialization ---
+function initializeMainCalendar(windowElement) {
+  const mainCalendar = windowElement.querySelector('.main-calendar-container');
+  if (!mainCalendar) return;
+  
+  const currentDate = new Date();
+  renderMainCalendar(mainCalendar, currentDate, 'month');
+}
+
+// --- Calendar Navigation Setup ---
+function setupCalendarNavigation(windowElement) {
+  const toolbar = windowElement.querySelector('.window-toolbar');
+  if (!toolbar) return;
+  
+  // Setup navigation buttons
+  const prevBtn = toolbar.querySelector('[data-calendar-nav="prev"]');
+  const nextBtn = toolbar.querySelector('[data-calendar-nav="next"]');
+  const todayBtn = toolbar.querySelector('[data-calendar-nav="today"]');
+  
+  if (prevBtn) {
+    prevBtn.addEventListener('click', () => {
+      // Navigate to previous period
+      navigateCalendar(windowElement, -1);
+    });
+  }
+  
+  if (nextBtn) {
+    nextBtn.addEventListener('click', () => {
+      // Navigate to next period
+      navigateCalendar(windowElement, 1);
+    });
+  }
+  
+  if (todayBtn) {
+    todayBtn.addEventListener('click', () => {
+      // Navigate to today
+      navigateCalendarToToday(windowElement);
+    });
+  }
+}
+
+// --- View Selector Setup ---
+function setupViewSelector(windowElement) {
+  const viewSelector = windowElement.querySelector('.view-selector');
+  if (!viewSelector) return;
+  
+  const viewButtons = viewSelector.querySelectorAll('.view-btn');
+  
+  viewButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      console.log('View button clicked:', btn.textContent);
+      
+      // Remove active class from all buttons
+      viewButtons.forEach(b => b.classList.remove('active'));
+      
+      // Add active class to clicked button
+      btn.classList.add('active');
+      
+      // Switch calendar view
+      const viewType = btn.dataset.view || btn.textContent.toLowerCase();
+      console.log('Switching to view:', viewType);
+      switchCalendarView(windowElement, viewType);
+    });
+  });
+}
+
+// --- Calendar Search Setup ---
+function setupCalendarSearch(windowElement) {
+  const searchInput = windowElement.querySelector('.calendarapp-search');
+  if (!searchInput) return;
+  
+  searchInput.addEventListener('input', (e) => {
+    const searchTerm = e.target.value.toLowerCase();
+    filterCalendarEvents(windowElement, searchTerm);
+  });
+}
+
+// --- Helper Functions ---
+function renderMiniCalendar(miniCalendar, date) {
+  const monthHeader = miniCalendar.querySelector('.mini-calendar-month');
+  if (monthHeader) {
+    monthHeader.textContent = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  }
+  
+  const grid = miniCalendar.querySelector('.mini-calendar-grid');
+  if (!grid) return;
+  
+  // Clear existing days
+  grid.innerHTML = '';
+  
+  // Get first day of month and number of days
+  const firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
+  const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+  const startDate = new Date(firstDay);
+  startDate.setDate(startDate.getDate() - firstDay.getDay());
+  
+  // Generate 42 days (6 weeks)
+  for (let i = 0; i < 42; i++) {
+    const currentDate = new Date(startDate);
+    currentDate.setDate(startDate.getDate() + i);
+    
+    const dayElement = document.createElement('div');
+    dayElement.className = 'mini-calendar-day';
+    dayElement.textContent = currentDate.getDate();
+    
+    if (currentDate.getMonth() !== date.getMonth()) {
+      dayElement.classList.add('other-month');
+    }
+    
+    if (isToday(currentDate)) {
+      dayElement.classList.add('today');
+    }
+    
+    grid.appendChild(dayElement);
+  }
+}
+
+function renderMainCalendar(mainCalendar, date, viewType) {
+  // Implementation for rendering the main calendar view
+  console.log('Rendering main calendar:', viewType, date);
+}
+
+function navigateCalendar(windowElement, direction) {
+  // Implementation for calendar navigation
+  console.log('Navigating calendar:', direction);
+}
+
+function navigateCalendarToToday(windowElement) {
+  // Implementation for navigating to today
+  console.log('Navigating to today');
+  scrollToTodayColumn(windowElement);
+}
+
+function switchCalendarView(windowElement, viewType) {
+  console.log('Switching calendar view to:', viewType);
+  
+  const mainCalendar = windowElement.querySelector('.main-calendar-container');
+  if (!mainCalendar) return;
+  
+  // Remove any existing view classes
+  mainCalendar.classList.remove('week-view', 'month-view', 'day-view', 'agenda-view');
+  
+  // Add the new view class
+  mainCalendar.classList.add(`${viewType}-view`);
+  
+  switch(viewType) {
+    case 'agenda':
+      renderAgendaView(windowElement);
+      break;
+    case 'week':
+      renderWeekView(windowElement);
+      break;
+    case 'month':
+      renderMonthView(windowElement);
+      break;
+    case 'day':
+      renderDayView(windowElement);
+      break;
+    default:
+      console.log('Unknown view type:', viewType);
+  }
+}
+
+// --- Agenda View Renderer ---
+function renderAgendaView(windowElement) {
+  const mainCalendar = windowElement.querySelector('.main-calendar-container');
+  if (!mainCalendar) return;
+  
+  // Create agenda view structure
+  mainCalendar.innerHTML = `
+    <!-- Calendar Categories Column (replaces time column) -->
+    <div class="calendar-categories-column">
+      <div class="calendar-categories-header">Calendars</div>
+      <div class="calendar-categories-body">
+        <div class="category-slot" data-calendar="personal">
+          <i class="fas fa-circle" style="color: #4285f4;"></i>
+          <span>Personal</span>
+        </div>
+        <div class="category-slot" data-calendar="work">
+          <i class="fas fa-circle" style="color: #ea4335;"></i>
+          <span>Work</span>
+        </div>
+        <div class="category-slot" data-calendar="family">
+          <i class="fas fa-circle" style="color: #34a853;"></i>
+          <span>Family</span>
+        </div>
+        <div class="category-slot" data-calendar="holidays">
+          <i class="fas fa-circle" style="color: #fbbc04;"></i>
+          <span>Holidays</span>
+        </div>
+        <div class="category-slot" data-calendar="birthdays">
+          <i class="fas fa-circle" style="color: #9c27b0;"></i>
+          <span>Birthdays</span>
+        </div>
+        <div class="category-slot" data-calendar="team-events">
+          <i class="fas fa-circle" style="color: #ff9800;"></i>
+          <span>Team Events</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Calendar Scroll Area -->
+    <div class="calendar-scroll-area agenda-scroll-area">
+      <div class="calendar-header agenda-header">
+        <div class="calendar-hours-row">
+          <!-- 24 hours from 6 AM to 5 AM (next day) -->
+          <div class="calendar-hour-header">6 AM</div>
+          <div class="calendar-hour-header">7 AM</div>
+          <div class="calendar-hour-header">8 AM</div>
+          <div class="calendar-hour-header">9 AM</div>
+          <div class="calendar-hour-header">10 AM</div>
+          <div class="calendar-hour-header">11 AM</div>
+          <div class="calendar-hour-header">12 PM</div>
+          <div class="calendar-hour-header">1 PM</div>
+          <div class="calendar-hour-header">2 PM</div>
+          <div class="calendar-hour-header">3 PM</div>
+          <div class="calendar-hour-header">4 PM</div>
+          <div class="calendar-hour-header">5 PM</div>
+          <div class="calendar-hour-header">6 PM</div>
+          <div class="calendar-hour-header">7 PM</div>
+          <div class="calendar-hour-header">8 PM</div>
+          <div class="calendar-hour-header">9 PM</div>
+          <div class="calendar-hour-header">10 PM</div>
+          <div class="calendar-hour-header">11 PM</div>
+          <div class="calendar-hour-header">12 AM</div>
+          <div class="calendar-hour-header">1 AM</div>
+          <div class="calendar-hour-header">2 AM</div>
+          <div class="calendar-hour-header">3 AM</div>
+          <div class="calendar-hour-header">4 AM</div>
+          <div class="calendar-hour-header">5 AM</div>
+        </div>
+      </div>
+
+      <!-- Calendar Body -->
+      <div class="calendar-body agenda-body">
+        <div class="calendar-categories-grid">
+          <!-- Personal Calendar Row -->
+          <div class="calendar-category-row" data-calendar="personal">
+            <div class="calendar-hour-slot"></div> <!-- 6 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 7 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 8 AM -->
+            <div class="calendar-hour-slot">       <!-- 9 AM -->
+              <!-- Sample event -->
+              <div class="calendar-event event-blue agenda-event" style="left: 0%; width: 50%;" 
+                   data-event-id="personal_1" data-calendar="personal" data-start-time="9" data-end-time="10" data-title="Morning Meeting">
+                <div class="event-title">Morning Meeting</div>
+                <div class="event-time">9:00 AM - 10:00 AM</div>
+              </div>
+            </div>
+            <div class="calendar-hour-slot"></div> <!-- 10 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 11 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 12 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 1 PM -->
+            <div class="calendar-hour-slot">       <!-- 2 PM -->
+              <!-- Sample event -->
+              <div class="calendar-event event-blue agenda-event" style="left: 0%; width: 100%;" 
+                   data-event-id="personal_2" data-calendar="personal" data-start-time="14" data-end-time="16" data-title="Lunch Break">
+                <div class="event-title">Lunch Break</div>
+                <div class="event-time">2:00 PM - 4:00 PM</div>
+              </div>
+            </div>
+            <div class="calendar-hour-slot"></div> <!-- 3 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 4 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 5 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 6 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 7 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 8 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 9 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 10 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 11 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 12 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 1 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 2 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 3 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 4 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 5 AM -->
+          </div>
+          
+          <!-- Work Calendar Row -->
+          <div class="calendar-category-row" data-calendar="work">
+            <div class="calendar-hour-slot"></div> <!-- 6 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 7 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 8 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 9 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 10 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 11 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 12 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 1 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 2 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 3 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 4 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 5 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 6 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 7 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 8 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 9 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 10 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 11 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 12 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 1 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 2 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 3 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 4 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 5 AM -->
+          </div>
+          
+          <!-- Family Calendar Row -->
+          <div class="calendar-category-row" data-calendar="family">
+            <div class="calendar-hour-slot"></div> <!-- 6 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 7 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 8 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 9 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 10 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 11 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 12 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 1 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 2 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 3 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 4 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 5 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 6 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 7 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 8 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 9 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 10 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 11 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 12 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 1 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 2 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 3 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 4 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 5 AM -->
+          </div>
+          
+          <!-- Holidays Calendar Row -->
+          <div class="calendar-category-row" data-calendar="holidays">
+            <div class="calendar-hour-slot"></div> <!-- 6 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 7 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 8 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 9 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 10 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 11 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 12 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 1 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 2 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 3 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 4 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 5 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 6 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 7 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 8 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 9 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 10 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 11 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 12 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 1 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 2 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 3 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 4 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 5 AM -->
+          </div>
+          
+          <!-- Birthdays Calendar Row -->
+          <div class="calendar-category-row" data-calendar="birthdays">
+            <div class="calendar-hour-slot"></div> <!-- 6 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 7 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 8 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 9 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 10 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 11 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 12 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 1 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 2 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 3 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 4 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 5 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 6 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 7 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 8 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 9 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 10 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 11 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 12 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 1 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 2 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 3 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 4 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 5 AM -->
+          </div>
+          
+          <!-- Team Events Calendar Row -->
+          <div class="calendar-category-row" data-calendar="team-events">
+            <div class="calendar-hour-slot"></div> <!-- 6 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 7 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 8 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 9 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 10 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 11 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 12 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 1 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 2 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 3 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 4 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 5 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 6 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 7 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 8 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 9 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 10 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 11 PM -->
+            <div class="calendar-hour-slot"></div> <!-- 12 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 1 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 2 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 3 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 4 AM -->
+            <div class="calendar-hour-slot"></div> <!-- 5 AM -->
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  // Setup agenda-specific event creation
+  setupAgendaEventCreation(windowElement);
+  
+  // Setup event selection for existing agenda events
+  setupAgendaEventSelection(windowElement);
+  
+  console.log('Agenda view rendered');
+}
+
+// --- Week View Renderer (restore original structure) ---
+function renderWeekView(windowElement) {
+  const mainCalendar = windowElement.querySelector('.main-calendar-container');
+  if (!mainCalendar) return;
+  
+  // Restore the original week view structure
+  mainCalendar.innerHTML = `
+    <!-- Fixed Time Column -->
+    <div class="calendar-time-column">
+      <div class="calendar-time-column-header"></div>
+      <div class="calendar-time-column-body">
+        <div class="time-slot">6 AM</div>
+        <div class="time-slot">7 AM</div>
+        <div class="time-slot">8 AM</div>
+        <div class="time-slot">9 AM</div>
+        <div class="time-slot">10 AM</div>
+        <div class="time-slot">11 AM</div>
+        <div class="time-slot">12 PM</div>
+        <div class="time-slot">1 PM</div>
+        <div class="time-slot">2 PM</div>
+        <div class="time-slot">3 PM</div>
+        <div class="time-slot">4 PM</div>
+        <div class="time-slot">5 PM</div>
+        <div class="time-slot">6 PM</div>
+        <div class="time-slot">7 PM</div>
+        <div class="time-slot">8 PM</div>
+        <div class="time-slot">9 PM</div>
+        <div class="time-slot">10 PM</div>
+        <div class="time-slot">11 PM</div>
+        <div class="time-slot">12 AM</div>
+        <div class="time-slot">1 AM</div>
+        <div class="time-slot">2 AM</div>
+        <div class="time-slot">3 AM</div>
+        <div class="time-slot">4 AM</div>
+        <div class="time-slot">5 AM</div>
+      </div>
+    </div>
+
+    <!-- Calendar Scroll Area -->
+    <div class="calendar-scroll-area">
+      <div class="calendar-header">
+        <div class="calendar-days-row">
+          <!-- Week days will be generated dynamically -->
+        </div>
+      </div>
+
+      <!-- Calendar Body -->
+      <div class="calendar-body">
+        <div class="calendar-days-grid">
+          <!-- Day columns will be generated dynamically -->
+        </div>
+      </div>
+    </div>
+  `;
+  
+  // Generate current week
+  generateWeekView(windowElement);
+  
+  // Setup scroll synchronization for week view
+  setupScrollSynchronization(windowElement);
+  
+  console.log('Week view rendered');
+}
+
+// --- Month/Day View Renderers (placeholder implementations) ---
+function renderMonthView(windowElement) {
+  console.log('Month view not yet implemented');
+  // For now, fall back to week view
+  renderWeekView(windowElement);
+}
+
+function renderDayView(windowElement) {
+  console.log('Day view not yet implemented');
+  // For now, fall back to week view
+  renderWeekView(windowElement);
+}
+
+// --- Generate Week View ---
+function generateWeekView(windowElement) {
+  const calendarHeader = windowElement.querySelector('.calendar-days-row');
+  const calendarGrid = windowElement.querySelector('.calendar-days-grid');
+  
+  if (!calendarHeader || !calendarGrid) return;
+  
+  // Clear existing content
+  calendarHeader.innerHTML = '';
+  calendarGrid.innerHTML = '';
+  
+  // Get current date and start of week
+  const today = new Date();
+  const startOfWeek = new Date(today);
+  startOfWeek.setDate(today.getDate() - today.getDay()); // Sunday
+  
+  // Generate 7 days (week)
+  for (let i = 0; i < 7; i++) {
+    const currentDate = new Date(startOfWeek);
+    currentDate.setDate(startOfWeek.getDate() + i);
+    
+    const dayNames = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+    
+    // Create day header
+    const dayHeader = document.createElement('div');
+    dayHeader.className = 'calendar-day-header';
+    if (currentDate.toDateString() === today.toDateString()) {
+      dayHeader.classList.add('today');
+    }
+    dayHeader.innerHTML = `
+      <div class="day-name">${dayNames[i]}</div>
+      <div class="day-number">${currentDate.getDate()}</div>
+    `;
+    calendarHeader.appendChild(dayHeader);
+    
+    // Create day column
+    const dayColumn = document.createElement('div');
+    dayColumn.className = 'calendar-day-column';
+    dayColumn.dataset.dayIndex = i;
+    calendarGrid.appendChild(dayColumn);
+  }
+  
+  // Re-setup event creation for the new week view
+  setupEventCreation(windowElement);
+  
+  // Setup event management for existing events
+  setupEventManagement(windowElement);
+}
+
+// --- Agenda Event Creation Setup ---
+function setupAgendaEventCreation(windowElement) {
+  const categoryRows = windowElement.querySelectorAll('.calendar-category-row');
+  
+  categoryRows.forEach((row, rowIndex) => {
+    const calendar = row.dataset.calendar;
+    
+    let isCreating = false;
+    let startX = 0;
+    let initialStartX = 0;
+    let startSlotIndex = 0;
+    
+    // Add event listeners to the entire row for better range
+    row.addEventListener('mousedown', (e) => {
+      if (e.target.closest('.calendar-event') || e.target.closest('.calendar-event-creator') || isDragging) return;
+      
+      // Remove any existing event creator
+      removeCurrentEventCreator();
+      
+      isCreating = true;
+      
+      // Add visual feedback
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+      
+      // Calculate position within the row but use scroll area for width calculations
+      const rowRect = row.getBoundingClientRect();
+      const calendarScrollArea = row.closest('.calendar-scroll-area');
+      const scrollAreaRect = calendarScrollArea ? calendarScrollArea.getBoundingClientRect() : rowRect;
+      
+      // Position relative to row for event creator placement
+      const relativeXToRow = e.clientX - rowRect.left;
+      
+      // Use fixed slot width to match CSS (120px per hour slot)
+      const slotWidth = 120; // Fixed width matching CSS .calendar-hour-slot
+      
+      // Snap initial position to 15-minute intervals (30px per 15-minute slot)
+      const quarterSlotWidth = 30; // 15-minute interval width: 120px ÷ 4 = 30px
+      const rawStartX = Math.max(0, relativeXToRow);
+      startX = Math.round(rawStartX / quarterSlotWidth) * quarterSlotWidth;
+      initialStartX = startX;
+      
+      // Calculate which time slot we're starting in (15-minute intervals)
+      // Use the snapped position for accurate time slot calculation
+      // Note: startX is already relative to the row, no need to add offset for time calculation
+      const adjustedSnappedX = startX; // Use direct snapped position relative to row start
+      
+      // Calculate time slot (4 slots per hour, starting from 6 AM = slot 0)
+      // adjustedSnappedX is the position in pixels from the start of the row
+      // Each 30px represents a 15-minute slot, so divide by 30 to get slot index
+      const timeSlotFloat = adjustedSnappedX / quarterSlotWidth; // Direct conversion from pixels to 15-minute slots
+      startSlotIndex = Math.round(timeSlotFloat); // Use round for precise snapping
+      
+      console.log('Position calculation:', {
+        adjustedSnappedX,
+        slotWidth,
+        timeSlotFloat,
+        startSlotIndex,
+        expectedTime: formatTimeSlot(startSlotIndex)
+      });
+      
+      // Clamp to valid range (0 to 95 = 24 hours * 4 slots - 1)
+      const clampedTimeSlot = Math.max(0, Math.min(95, startSlotIndex));
+      const startTime = formatTimeSlot(clampedTimeSlot);
+      
+      // Check if there's already an event at this position
+      const minEventWidth = quarterSlotWidth; // 15 minutes
+      if (wouldAgendaEventCollide(row, startX, minEventWidth, null)) {
+        console.log('Cannot create agenda event here - collision detected');
+        return; // Don't create event if there's a collision
+      }
+      
+      // Create agenda event creator
+      currentEventCreator = createAgendaEventCreator(row, startX, startSlotIndex, calendar, startTime);
+      
+      // Add document listeners for better tracking
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      
+      e.preventDefault();
+    });
+    
+    // Use document-level mousemove for better range
+    function handleMouseMove(e) {
+      if (!isCreating || !currentEventCreator) return;
+      
+      // Use requestAnimationFrame for smoother updates
+      if (currentEventCreator.animationFrame) {
+        cancelAnimationFrame(currentEventCreator.animationFrame);
+      }
+      
+      currentEventCreator.animationFrame = requestAnimationFrame(() => {
+        updateEventCreatorPosition(e);
+      });
+    }
+    
+    function updateEventCreatorPosition(e) {
+      
+      // Calculate current position relative to row for positioning
+      const rowRect = row.getBoundingClientRect();
+      const calendarScrollArea = row.closest('.calendar-scroll-area');
+      const scrollAreaRect = calendarScrollArea ? calendarScrollArea.getBoundingClientRect() : rowRect;
+      
+      // Position relative to row for event creator placement
+      const relativeXToRow = e.clientX - rowRect.left;
+      
+      // Use fixed slot width to match CSS (120px per hour slot)
+      const slotWidth = 120; // Fixed width matching CSS .calendar-hour-slot
+      
+      // Allow dragging across the full scroll area width (24 hours * 120px each)
+      const maxRowX = 24 * slotWidth; // 24 hours * 120px = 2880px total width
+      const rawCurrentX = Math.max(0, Math.min(relativeXToRow, maxRowX));
+      
+      // Snap current position to 15-minute intervals for precise dragging (30px per 15-minute slot)
+      const quarterSlotWidth = 30; // 15-minute interval width: 120px ÷ 4 = 30px
+      const currentX = Math.round(rawCurrentX / quarterSlotWidth) * quarterSlotWidth;
+      
+      // Calculate width and left position with better responsiveness
+      let left, width;
+      
+      if (currentX >= initialStartX) {
+        // Dragging to the right
+        left = initialStartX;
+        width = currentX - initialStartX;
+      } else {
+        // Dragging to the left
+        left = currentX;
+        width = initialStartX - currentX;
+      }
+      
+      // Since currentX and initialStartX are already snapped, left and width should be aligned
+      // Ensure minimum width (15 minutes = 30px)
+      const minWidth = quarterSlotWidth; // 15 minutes = 30px
+      const finalWidth = Math.max(width, minWidth);
+      
+      // Ensure the event doesn't go beyond the row bounds
+      const adjustedWidth = Math.min(finalWidth, maxRowX - left);
+      const adjustedLeft = Math.max(0, Math.min(left, maxRowX - adjustedWidth));
+      
+      // Check for collisions with existing events and adjust width if needed
+      const maxAllowedWidth = getMaxAllowedAgendaWidth(row, adjustedLeft, adjustedWidth, currentEventCreator);
+      const finalAdjustedWidth = Math.min(adjustedWidth, maxAllowedWidth);
+      
+      // Update creator position (horizontal)
+      currentEventCreator.style.left = `${adjustedLeft}px`;
+      currentEventCreator.style.width = `${finalAdjustedWidth}px`;
+      
+      // Calculate time range based on position using time slots (15-minute intervals)
+      // Use positions relative to row start (no scroll area offset needed)
+      const adjustedLeftInScrollArea = adjustedLeft;
+      const adjustedRightInScrollArea = adjustedLeftInScrollArea + finalAdjustedWidth;
+      
+      // Convert positions to time slots (4 slots per hour)
+      // Each 30px represents a 15-minute slot, so divide by 30 to get slot index
+      const startTimeSlotFloat = adjustedLeftInScrollArea / quarterSlotWidth;
+      const endTimeSlotFloat = adjustedRightInScrollArea / quarterSlotWidth;
+      
+      // Round to 15-minute intervals for precise snapping and clamp to valid range
+      const startTimeSlot = Math.max(0, Math.min(95, Math.round(startTimeSlotFloat)));
+      const endTimeSlot = Math.max(startTimeSlot + 1, Math.min(96, Math.round(endTimeSlotFloat))); // Minimum 15 minutes (1 slot)
+      
+      const startTime = formatTimeSlot(startTimeSlot);
+      const endTime = formatTimeSlot(endTimeSlot);
+      
+      const timeDisplay = currentEventCreator.querySelector('.event-time-display');
+      if (timeDisplay) {
+        timeDisplay.textContent = `${startTime} - ${endTime}`;
+      }
+      
+      // Update event data for sidebar sync
+      if (currentEventCreator && currentEventCreator.eventData) {
+        currentEventCreator.eventData.startX = adjustedLeft;
+        currentEventCreator.eventData.width = finalAdjustedWidth;
+        currentEventCreator.eventData.startTimeSlot = startTimeSlot;
+        currentEventCreator.eventData.endTimeSlot = endTimeSlot;
+        currentEventCreator.eventData.calendar = calendar;
+      }
+      
+      // Sync with sidebar time inputs if sidebar is open
+      syncTimeInputsWithEventCreator(startTime, endTime);
+    }
+    
+    function handleMouseUp(e) {
+      if (!isCreating) return;
+      
+      isCreating = false;
+      
+      // Restore cursor and selection
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+      
+      // Remove document listeners
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      
+      if (currentEventCreator && currentEventCreator.eventData) {
+        // Prevent the click event from immediately hiding the sidebar
+        e.stopPropagation();
+        e.preventDefault();
+        
+        // Capture the eventData to prevent null reference
+        const eventData = { ...currentEventCreator.eventData };
+        
+        // Mark the event creator as "selected" so it doesn't get removed immediately
+        currentEventCreator.classList.add('selected-creator');
+        
+        // Show the add/edit event sidebar immediately
+        console.log('Showing sidebar for new event:', eventData);
+        showAddEditEventSidebar(eventData);
+      }
+    }
+    
+
+  });
+  
+  // Global click handler to remove event creator when clicking outside
+  windowElement.addEventListener('click', (e) => {
+    if (sidebarJustOpened) return; // Don't hide sidebar if it was just opened
+    
+    // Don't remove selected event creators
+    if (currentEventCreator && currentEventCreator.classList.contains('selected-creator')) {
+      return;
+    }
+    
+    if (!e.target.closest('.calendar-event-creator') && 
+        !e.target.closest('.calendar-category-row') &&
+        !e.target.closest('.calendarapp-add-edit-event-section') &&
+        !e.target.closest('.calendarapp-pay-for-event-section')) {
+      removeCurrentEventCreator();
+      hideAddEditEventSidebar();
+    }
+  });
+}
+
+// --- Helper Functions ---
+function formatHour(hour) {
+  const h = Math.floor(hour);
+  const m = Math.floor((hour - h) * 60);
+  const period = h >= 12 ? 'PM' : 'AM';
+  let displayHour = h;
+  
+  if (h === 0) {
+    displayHour = 12; // 12 AM
+  } else if (h > 12) {
+    displayHour = h - 12; // Convert to 12-hour format
+  } else if (h === 12) {
+    displayHour = 12; // 12 PM
+  }
+  
+  return `${displayHour}:${m.toString().padStart(2, '0')} ${period}`;
+}
+
+  function createAgendaEventCreator(row, startX, startSlotIndex, calendar, startTime) {
+    // Use fixed slot width to match CSS (120px per hour slot)
+    const slotWidth = 120; // Fixed width matching CSS .calendar-hour-slot
+    const quarterSlotWidth = 30; // 15-minute interval width: 120px ÷ 4 = 30px
+    const defaultWidth = quarterSlotWidth; // Start with 15-minute slot width
+  
+  const creator = document.createElement('div');
+  creator.className = 'calendar-event-creator agenda-event-creator';
+  creator.style.position = 'absolute';
+  creator.style.left = `${startX}px`;
+  creator.style.width = `${defaultWidth}px`;
+  creator.style.height = 'calc(100% - 8px)';
+  creator.style.top = '4px';
+  creator.style.zIndex = '1000';
+  creator.style.transition = 'none'; // Disable transition during creation for immediate response
+  
+  creator.innerHTML = `
+    <input type="text" class="event-creator-input" placeholder="New event" value="" />
+    <div class="event-time-display">${startTime}</div>
+    <div class="event-creator-actions">
+      <button class="event-creator-btn save">Save</button>
+      <button class="event-creator-btn cancel">Cancel</button>
+    </div>
+  `;
+  
+  // Store event data using time slots (15-minute intervals)
+  const startTimeSlot = startSlotIndex; // Already calculated as time slot index
+  const endTimeSlot = startTimeSlot + 1; // Default to 15 minutes (1 slot = 1 * 15 minutes)
+  
+  creator.eventData = {
+    startX: startX,
+    width: defaultWidth,
+    startSlotIndex: startSlotIndex,
+    startTimeSlot: startTimeSlot,
+    endTimeSlot: endTimeSlot,
+    calendar: calendar,
+    row: row
+  };
+  
+  row.appendChild(creator);
+  
+  // Focus the input and ensure it's empty
+  const input = creator.querySelector('.event-creator-input');
+  if (input) {
+    input.value = ''; // Ensure the input is empty for new events
+    setTimeout(() => input.focus(), 10);
+  }
+  
+  // Add event handlers for the creator buttons
+  const saveBtn = creator.querySelector('.event-creator-btn.save');
+  const cancelBtn = creator.querySelector('.event-creator-btn.cancel');
+  
+  if (saveBtn) {
+    saveBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      // Save the event
+      const title = input.value.trim() || 'New Event';
+      creator.eventData.title = title;
+      
+      // Show sidebar with a small delay to avoid conflicts
+      setTimeout(() => {
+        showAddEditEventSidebar(creator.eventData);
+      }, 10);
+    });
+  }
+  
+  if (cancelBtn) {
+    cancelBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      removeCurrentEventCreator();
+    });
+  }
+  
+  return creator;
+}
+
+// --- Agenda Event Selection Setup ---
+function setupAgendaEventSelection(windowElement) {
+  const agendaEvents = windowElement.querySelectorAll('.agenda-event');
+  
+  agendaEvents.forEach(event => {
+    event.addEventListener('click', (e) => {
+      e.stopPropagation();
+      selectEvent(event);
+    });
+    
+    // Add hover effects
+    event.addEventListener('mouseenter', () => {
+      event.style.transform = 'translateY(-1px)';
+      event.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.2)';
+    });
+    
+    event.addEventListener('mouseleave', () => {
+      if (!event.classList.contains('selected')) {
+        event.style.transform = '';
+        event.style.boxShadow = '';
+      }
+    });
+  });
+}
+
+function filterCalendarEvents(windowElement, searchTerm) {
+  // Implementation for filtering calendar events
+  console.log('Filtering calendar events:', searchTerm);
+}
+
+// --- Helper Functions for Event Management ---
+function removeCurrentEventCreator() {
+  if (currentEventCreator) {
+    // Only remove if it's not selected (being edited)
+    if (!currentEventCreator.classList.contains('selected-creator')) {
+      currentEventCreator.remove();
+      currentEventCreator = null;
+      
+      // Clear the title input field when removing event creator to prepare for new event
+      const titleInput = document.getElementById('event-title-input');
+      if (titleInput) {
+        titleInput.value = '';
+      }
+    }
+  }
+}
+
+function formatTimeSlot(timeSlot) {
+  // Each slot is 15 minutes, calendar starts at 6 AM
+  const totalMinutes = timeSlot * 15;
+  const hour = (Math.floor(totalMinutes / 60) + 6) % 24; // Add 6 hours offset for 6 AM start
+  const minutes = totalMinutes % 60;
+  const period = hour >= 12 ? 'PM' : 'AM';
+  const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+  const displayMinutes = minutes.toString().padStart(2, '0');
+  return `${displayHour}:${displayMinutes} ${period}`;
+}
+
+
+
+
+
+
+
+function selectEvent(eventElement) {
+  // Implementation for selecting an event
+  console.log('Selecting event:', eventElement);
+  
+  // Remove previous selections
+  const allEvents = document.querySelectorAll('.calendar-event');
+  allEvents.forEach(event => event.classList.remove('selected'));
+  
+  // Add selection to this event
+  eventElement.classList.add('selected');
+  
+  // Show event details in sidebar
+  const eventData = {
+    id: eventElement.dataset.eventId,
+    title: eventElement.dataset.title,
+    startTime: eventElement.dataset.startTime,
+    endTime: eventElement.dataset.endTime,
+    calendar: eventElement.dataset.calendar
+  };
+  
+  showAddEditEventSidebar(eventData);
+}
+
+function isToday(date) {
+  const today = new Date();
+  return date.toDateString() === today.toDateString();
+}
+
+// --- Scroll to Today Column ---
+function scrollToTodayColumn(windowElement) {
+  // Find the today column header
+  const todayHeader = windowElement.querySelector('.calendar-day-header.today');
+  if (!todayHeader) {
+    console.log('Today column not found');
+    return;
+  }
+  
+  // Find the calendar scroll area
+  const calendarScrollArea = windowElement.querySelector('.calendar-scroll-area');
+  if (!calendarScrollArea) {
+    console.log('Calendar scroll area not found');
+    return;
+  }
+  
+  // Calculate the position of the today column
+  const allHeaders = windowElement.querySelectorAll('.calendar-day-header');
+  let todayIndex = -1;
+  
+  allHeaders.forEach((header, index) => {
+    if (header.classList.contains('today')) {
+      todayIndex = index;
+    }
+  });
+  
+  if (todayIndex === -1) {
+    console.log('Today index not found');
+    return;
+  }
+  
+  // Calculate scroll position
+  // Each column is 200px wide (min-width from CSS)
+  const columnWidth = 200;
+  const scrollPosition = todayIndex * columnWidth;
+  
+  // Get the container width to center the today column
+  const containerWidth = calendarScrollArea.clientWidth;
+  const centeredScrollPosition = scrollPosition - (containerWidth / 2) + (columnWidth / 2);
+  
+  // Set scroll position directly to today column (no animation)
+  setTimeout(() => {
+    calendarScrollArea.scrollLeft = Math.max(0, centeredScrollPosition);
+  }, 50); // Small delay to ensure everything is rendered
+  
+  console.log(`Scrolling to today column at index ${todayIndex}, scroll position: ${centeredScrollPosition}`);
+}
+
+// --- Scroll Synchronization ---
+function setupScrollSynchronization(windowElement) {
+  const calendarScrollArea = windowElement.querySelector('.calendar-scroll-area');
+  const timeColumnBody = windowElement.querySelector('.calendar-time-column-body');
+  
+  if (!calendarScrollArea || !timeColumnBody) {
+    console.error('Calendar scroll elements not found', {
+      calendarScrollArea: !!calendarScrollArea,
+      timeColumnBody: !!timeColumnBody
+    });
+    return;
+  }
+  
+  console.log('Setting up calendar scroll synchronization');
+  
+  let isUpdating = false;
+  
+  // Sync vertical scrolling from calendar scroll area to time column
+  calendarScrollArea.addEventListener('scroll', () => {
+    if (isUpdating) return;
+    
+    isUpdating = true;
+    requestAnimationFrame(() => {
+      // Sync vertical scroll with time column
+      if (timeColumnBody.scrollTop !== calendarScrollArea.scrollTop) {
+        timeColumnBody.scrollTop = calendarScrollArea.scrollTop;
+      }
+      
+      isUpdating = false;
+    });
+  });
+  
+  // Sync vertical scrolling from time column to calendar scroll area
+  timeColumnBody.addEventListener('scroll', () => {
+    if (isUpdating) return;
+    
+    isUpdating = true;
+    requestAnimationFrame(() => {
+      if (calendarScrollArea.scrollTop !== timeColumnBody.scrollTop) {
+        calendarScrollArea.scrollTop = timeColumnBody.scrollTop;
+      }
+      isUpdating = false;
+    });
+  });
+  
+  console.log('Calendar scroll synchronization setup complete');
+}
+
+// --- Event Creation ---
+let currentEventCreator = null; // Global variable to track current creator
+
+function setupEventCreation(windowElement) {
+  const dayColumns = windowElement.querySelectorAll('.calendar-day-column');
+  
+  dayColumns.forEach((column, dayIndex) => {
+    let isCreating = false;
+    let startY = 0;
+    let initialStartY = 0;
+    
+    column.addEventListener('mousedown', (e) => {
+      if (e.target.closest('.calendar-event') || e.target.closest('.calendar-event-creator') || isDragging) return;
+      
+      // Remove any existing event creator
+      removeCurrentEventCreator();
+      
+      isCreating = true;
+      
+      // Add visual feedback
+      document.body.style.cursor = 'row-resize';
+      document.body.style.userSelect = 'none';
+      
+      // Use fixed slot height that matches CSS (60px per hour / 4 = 15px per 15-minute slot)
+      const timeSlotHeight = 60; // Each hour slot is 60px high (matches CSS .time-slot height)
+      const slotsPerHour = 4; // 15-minute intervals
+      const slotHeight = 15; // 15px per 15-minute slot (60px ÷ 4)
+      
+      // Calculate initial position and snap to 15-minute intervals
+      const rect = column.getBoundingClientRect();
+      const relativeY = e.clientY - rect.top;
+      const rawStartY = Math.max(0, relativeY);
+      startY = Math.round(rawStartY / slotHeight) * slotHeight; // Snap to 15-minute grid
+      initialStartY = startY;
+      
+      // Calculate time slot (in 15-minute intervals)
+      const timeSlot = Math.floor(startY / slotHeight);
+      const startTime = formatTimeSlot(timeSlot);
+      
+      // Check if there's already an event at this position
+      const minEventHeight = slotHeight; // 15 minutes
+      if (wouldEventCollide(column, startY, minEventHeight, null)) {
+        console.log('Cannot create event here - collision detected');
+        return; // Don't create event if there's a collision
+      }
+      
+      // Create event creator
+      currentEventCreator = createEventCreator(column, startY, dayIndex, startTime, slotHeight);
+      
+      // Add document listeners for better tracking
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      
+      e.preventDefault();
+    });
+    
+    // Use document-level mousemove for better range and responsiveness
+    function handleMouseMove(e) {
+      if (!isCreating || !currentEventCreator) return;
+      
+      // Use requestAnimationFrame for smoother updates
+      if (currentEventCreator.animationFrame) {
+        cancelAnimationFrame(currentEventCreator.animationFrame);
+      }
+      
+      currentEventCreator.animationFrame = requestAnimationFrame(() => {
+        updateEventCreatorPosition(e);
+      });
+    }
+    
+    function updateEventCreatorPosition(e) {
+      // Cache expensive DOM operations (calculate once per drag session)
+      if (!currentEventCreator.cachedData) {
+        // Use fixed slot height that matches CSS
+        const timeSlotHeight = 60; // Each hour slot is 60px high (matches CSS .time-slot height)
+        const slotsPerHour = 4; // 15-minute intervals
+        const slotHeight = 15; // 15px per 15-minute slot (60px ÷ 4)
+        const containerHeight = 1440; // Fixed height: 24 hours * 60px
+        const timeDisplay = currentEventCreator.querySelector('.event-time-display');
+        
+        currentEventCreator.cachedData = {
+          containerHeight,
+          slotHeight,
+          timeDisplay,
+          maxY: containerHeight
+        };
+      }
+      
+      const { containerHeight, slotHeight, timeDisplay, maxY } = currentEventCreator.cachedData;
+      
+      // Calculate current position relative to column and snap to grid
+      const rect = column.getBoundingClientRect(); // Fresh rect every frame for precise tracking
+      const relativeY = e.clientY - rect.top;
+      const rawCurrentY = Math.max(0, relativeY);
+      const currentY = Math.round(rawCurrentY / slotHeight) * slotHeight; // Snap to 15-minute grid
+      
+      // Calculate height and top position with snapping
+      const minHeight = slotHeight; // Minimum 15 minutes = 15px
+      
+      // Determine drag direction and calculate positions
+      let snappedTop, snappedHeight;
+      
+      if (currentY >= initialStartY) {
+        // Dragging down
+        snappedTop = initialStartY;
+        snappedHeight = Math.max(minHeight, currentY - initialStartY);
+      } else {
+        // Dragging up
+        snappedTop = currentY;
+        snappedHeight = Math.max(minHeight, initialStartY - currentY);
+      }
+      
+      // Ensure bounds
+      snappedTop = Math.max(0, Math.min(snappedTop, maxY - minHeight));
+      snappedHeight = Math.min(snappedHeight, maxY - snappedTop);
+      
+      // Check for collisions with existing events and adjust height if needed
+      const adjustedHeight = getMaxAllowedHeight(column, snappedTop, snappedHeight, currentEventCreator);
+      if (adjustedHeight !== snappedHeight) {
+        snappedHeight = adjustedHeight;
+        console.log('Height adjusted due to collision:', adjustedHeight);
+      }
+      
+      // Debug logging
+      console.log('Week drag calculation:', {
+        initialStartY,
+        currentY,
+        direction: currentY >= initialStartY ? 'down' : 'up',
+        snappedTop,
+        snappedHeight,
+        slotHeight
+      });
+      
+      console.log('Final week values:', {
+        snappedTop,
+        snappedHeight,
+        startTimeSlot: Math.round(snappedTop / slotHeight),
+        endTimeSlot: Math.round((snappedTop + snappedHeight) / slotHeight)
+      });
+      
+      // Update creator position with snapped values
+      currentEventCreator.style.top = `${snappedTop}px`;
+      currentEventCreator.style.height = `${snappedHeight - 2}px`; // Subtract 2px for gap
+      
+      // Always update time calculations during drag (remove throttling for debugging)
+      console.log('Updating time calculations for week view');
+      
+      // Calculate time display using snapped values
+        // Each 15px represents a 15-minute slot, so divide by 15 to get slot index
+        const startTimeSlot = Math.floor(snappedTop / slotHeight);
+        const endTimeSlot = Math.ceil((snappedTop + snappedHeight) / slotHeight);
+        
+        console.log('Time slot calculation:', {
+          snappedTop,
+          snappedHeight,
+          slotHeight,
+          startTimeSlot,
+          endTimeSlot,
+          heightInSlots: snappedHeight / slotHeight
+        });
+        
+        // Cache time formatting to avoid repeated calculations
+        const timeKey = `${startTimeSlot}-${endTimeSlot}`;
+        if (!currentEventCreator.timeCache) {
+          currentEventCreator.timeCache = {};
+        }
+        
+        let startTime, endTime;
+        if (currentEventCreator.timeCache[timeKey]) {
+          ({ startTime, endTime } = currentEventCreator.timeCache[timeKey]);
+        } else {
+          startTime = formatTimeSlot(startTimeSlot);
+          endTime = formatTimeSlot(endTimeSlot);
+          currentEventCreator.timeCache[timeKey] = { startTime, endTime };
+        }
+        
+        if (timeDisplay) {
+          timeDisplay.textContent = `${startTime} - ${endTime}`;
+          console.log('Week view time display updated:', startTime, '-', endTime);
+        }
+        
+        // Update event data for sidebar sync using snapped values
+        if (currentEventCreator && currentEventCreator.eventData) {
+          currentEventCreator.eventData.startY = snappedTop;
+          currentEventCreator.eventData.height = snappedHeight;
+          currentEventCreator.eventData.startTimeSlot = startTimeSlot;
+          currentEventCreator.eventData.endTimeSlot = endTimeSlot;
+          currentEventCreator.eventData.slotHeight = slotHeight; // Store for later use
+        }
+        
+        // Sync with sidebar time inputs if sidebar is open
+        console.log('Syncing sidebar with times:', startTime, endTime);
+        syncTimeInputsWithEventCreator(startTime, endTime);
+    }
+    
+    function handleMouseUp(e) {
+      if (!isCreating) return;
+      
+      isCreating = false;
+      
+      // Restore cursor and selection
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+      
+      // Remove document listeners
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      
+      if (currentEventCreator && currentEventCreator.eventData) {
+        // Prevent the click event from immediately hiding the sidebar
+        e.stopPropagation();
+        e.preventDefault();
+        
+        // Capture the eventData to prevent null reference
+        const eventData = { ...currentEventCreator.eventData };
+        
+        // Mark the event creator as "selected" so it doesn't get removed immediately
+        currentEventCreator.classList.add('selected-creator');
+        
+        // Show the add/edit event sidebar
+        console.log('Showing sidebar for new week event:', eventData);
+        showAddEditEventSidebar(eventData);
+      }
+    }
+  });
+  
+  // Global click handler to remove event creator when clicking outside
+  windowElement.addEventListener('click', (e) => {
+    if (sidebarJustOpened) return; // Don't hide sidebar if it was just opened
+    
+    if (!e.target.closest('.calendar-event-creator') && 
+        !e.target.closest('.calendar-day-column') &&
+        !e.target.closest('.calendarapp-add-edit-event-section') &&
+        !e.target.closest('.calendarapp-pay-for-event-section')) {
+      removeCurrentEventCreator();
+      hideAddEditEventSidebar();
+    }
+  });
+}
+
+function removeCurrentEventCreator() {
+  if (currentEventCreator) {
+    currentEventCreator.remove();
+    currentEventCreator = null;
+  }
+}
+
+// --- Event Dragging ---
+let draggedEvent = null;
+let dragOffset = { x: 0, y: 0 };
+let isDragging = false;
+let dragStartTime = 0;
+
+function setupEventDragging(eventElement) {
+  let mouseDownPos = null;
+  let isMouseDown = false;
+  let dragStarted = false;
+  const dragThreshold = 5; // pixels to move before starting drag
+  
+  eventElement.addEventListener('mousedown', (e) => {
+    isMouseDown = true;
+    dragStarted = false;
+    mouseDownPos = { x: e.clientX, y: e.clientY };
+    
+    // Add temporary listeners for mouse move and up
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+    
+    e.preventDefault();
+  });
+  
+  function handleMouseMove(e) {
+    if (!isMouseDown || dragStarted) return;
+    
+    // Calculate distance moved
+    const deltaX = Math.abs(e.clientX - mouseDownPos.x);
+    const deltaY = Math.abs(e.clientY - mouseDownPos.y);
+    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    
+    // Start dragging if moved beyond threshold
+    if (distance > dragThreshold) {
+      dragStarted = true;
+      startEventDrag(eventElement, mouseDownPos);
+    }
+  }
+  
+  function handleMouseUp(e) {
+    // Clean up temporary listeners
+    document.removeEventListener('mousemove', handleMouseMove);
+    document.removeEventListener('mouseup', handleMouseUp);
+    
+    if (isMouseDown && !dragStarted) {
+      // This was a click without drag - select the event and show sidebar
+      e.stopPropagation();
+      selectEvent(eventElement);
+    }
+    
+    isMouseDown = false;
+    dragStarted = false;
+    mouseDownPos = null;
+  }
+}
+
+function startEventDrag(eventElement, mousePos) {
+  if (isDragging) return;
+  
+  isDragging = true;
+  draggedEvent = eventElement;
+  dragStartTime = Date.now();
+  
+  // Remove event creator if it exists
+  removeCurrentEventCreator();
+  
+  // Calculate offset from mouse to event top-left
+  const eventRect = eventElement.getBoundingClientRect();
+  const column = eventElement.parentElement;
+  const columnRect = column.getBoundingClientRect();
+  
+  dragOffset.x = mousePos.x - eventRect.left;
+  dragOffset.y = mousePos.y - eventRect.top;
+  
+  // Add dragging class for visual feedback
+  eventElement.classList.add('dragging');
+  eventElement.style.zIndex = '50';
+  eventElement.style.pointerEvents = 'none';
+  
+  // Add global mouse move and up listeners
+  document.addEventListener('mousemove', handleEventDrag);
+  document.addEventListener('mouseup', endEventDrag);
+  
+  // Prevent text selection during drag
+  document.body.style.userSelect = 'none';
+}
+
+function wouldEventCollide(targetColumn, newTop, eventHeight, draggedEvent) {
+  // Get all events in the target column except the one being dragged
+  const otherEvents = Array.from(targetColumn.querySelectorAll('.calendar-event'))
+    .filter(event => event !== draggedEvent);
+  
+  const newBottom = newTop + eventHeight;
+  
+  // Check if the new position would overlap with any existing event
+  for (const event of otherEvents) {
+    const eventTop = parseInt(event.style.top);
+    const eventBottom = eventTop + parseInt(event.style.height) + 2; // Add gap
+    
+    // Check for overlap: events overlap if one starts before the other ends
+    const overlaps = (newTop < eventBottom) && (newBottom > eventTop);
+    
+    if (overlaps) {
+      return true; // Collision detected
+    }
+  }
+  
+  return false; // No collision
+}
+
+function getMaxAllowedHeight(column, startTop, requestedHeight, excludeElement) {
+  // Get all events in the column except the one being created/dragged
+  const otherEvents = Array.from(column.querySelectorAll('.calendar-event, .calendar-event-creator'))
+    .filter(event => event !== excludeElement);
+  
+  const requestedBottom = startTop + requestedHeight;
+  let maxAllowedBottom = requestedBottom;
+  
+  // Find the closest event that would block expansion
+  for (const event of otherEvents) {
+    const eventTop = parseInt(event.style.top);
+    const eventBottom = eventTop + parseInt(event.style.height) + 2; // Add gap
+    
+    // If this event starts after our start but before our requested end,
+    // we need to stop before it
+    if (eventTop >= startTop && eventTop < requestedBottom) {
+      maxAllowedBottom = Math.min(maxAllowedBottom, eventTop);
+    }
+  }
+  
+  // Calculate the maximum allowed height
+  const maxHeight = maxAllowedBottom - startTop;
+  const minHeight = 15; // Minimum 15 minutes
+  
+  return Math.max(minHeight, maxHeight);
+}
+
+function wouldAgendaEventCollide(targetRow, newLeft, eventWidth, draggedEvent) {
+  // Get all events in the target row except the one being dragged
+  const otherEvents = Array.from(targetRow.querySelectorAll('.calendar-event'))
+    .filter(event => event !== draggedEvent);
+  
+  const newRight = newLeft + eventWidth;
+  
+  // Check if the new position would overlap with any existing event
+  for (const event of otherEvents) {
+    const eventLeft = parseInt(event.style.left);
+    const eventRight = eventLeft + parseInt(event.style.width);
+    
+    // Check for overlap: events overlap if one starts before the other ends
+    const overlaps = (newLeft < eventRight) && (newRight > eventLeft);
+    
+    if (overlaps) {
+      return true; // Collision detected
+    }
+  }
+  
+  return false; // No collision
+}
+
+function getMaxAllowedAgendaWidth(row, startLeft, requestedWidth, excludeElement) {
+  // Get all events in the row except the one being created/dragged
+  const otherEvents = Array.from(row.querySelectorAll('.calendar-event, .calendar-event-creator'))
+    .filter(event => event !== excludeElement);
+  
+  const requestedRight = startLeft + requestedWidth;
+  let maxAllowedRight = requestedRight;
+  
+  // Find the closest event that would block expansion
+  for (const event of otherEvents) {
+    const eventLeft = parseInt(event.style.left);
+    const eventRight = eventLeft + parseInt(event.style.width);
+    
+    // If this event starts after our start but before our requested end,
+    // we need to stop before it
+    if (eventLeft >= startLeft && eventLeft < requestedRight) {
+      maxAllowedRight = Math.min(maxAllowedRight, eventLeft);
+    }
+  }
+  
+  // Calculate the maximum allowed width
+  const maxWidth = maxAllowedRight - startLeft;
+  const minWidth = 30; // Minimum 15 minutes
+  
+  return Math.max(minWidth, maxWidth);
+}
+
+function handleEventDrag(e) {
+  if (!isDragging || !draggedEvent) return;
+  
+  // Detect if we're in agenda view or week view
+  const isAgendaView = draggedEvent.closest('.calendar-category-row');
+  
+  if (isAgendaView) {
+    handleAgendaEventDrag(e);
+  } else {
+    handleWeekEventDrag(e);
+  }
+}
+
+function handleAgendaEventDrag(e) {
+  if (!isDragging || !draggedEvent) return;
+  
+  // Find the row under the mouse
+  const targetRow = draggedEvent.closest('.calendar-category-row');
+  if (!targetRow) return;
+  
+  // Calculate position within the target row
+  const rowRect = targetRow.getBoundingClientRect();
+  const relativeX = e.clientX - rowRect.left - dragOffset.x;
+  
+  // Use fixed slot width for consistent snapping (120px per hour / 4 = 30px per 15-minute slot)
+  const quarterSlotWidth = 30; // 15-minute interval width
+  
+  // Snap to 15-minute intervals
+  const snappedX = Math.max(0, Math.round(relativeX / quarterSlotWidth) * quarterSlotWidth);
+  
+  // Get the event's width for collision detection
+  const eventWidth = parseInt(draggedEvent.style.width);
+  
+  // Check for collisions with other events in the target row
+  if (!wouldAgendaEventCollide(targetRow, snappedX, eventWidth, draggedEvent)) {
+    // Move the event to the new position only if no collision
+    draggedEvent.style.left = `${snappedX}px`;
+  } else {
+    // Collision detected - don't move the event, keep it at current position
+    return;
+  }
+  
+  // Update time display
+  const startTimeSlot = Math.floor(snappedX / quarterSlotWidth);
+  const endTimeSlot = Math.floor((snappedX + eventWidth) / quarterSlotWidth);
+  
+  // Calculate minute-level precision for the new position
+  const startMinuteSlots = startTimeSlot * 15; // Convert 15-minute slots to minutes
+  const endMinuteSlots = endTimeSlot * 15;
+  
+  // Use minute-level precision for display if available
+  let startTime, endTime;
+  if (draggedEvent.dataset.startMinuteSlots !== undefined) {
+    // Event has minute-level precision, update with minute precision
+    startTime = minuteSlotsToTimeFormat(startMinuteSlots);
+    endTime = minuteSlotsToTimeFormat(endMinuteSlots);
+    
+    // Update minute-level data
+    draggedEvent.dataset.startMinuteSlots = startMinuteSlots;
+    draggedEvent.dataset.endMinuteSlots = endMinuteSlots;
+  } else {
+    // Use legacy 15-minute slot display
+    startTime = formatTimeSlot(startTimeSlot);
+    endTime = formatTimeSlot(endTimeSlot);
+  }
+  
+  const timeDisplay = draggedEvent.querySelector('.event-time');
+  if (timeDisplay) {
+    timeDisplay.textContent = `${startTime} - ${endTime}`;
+  }
+  
+  // Update data attributes
+  draggedEvent.dataset.startTime = startTimeSlot;
+  draggedEvent.dataset.endTime = endTimeSlot;
+  
+  // Sync with sidebar if it's open and this event is being edited
+  const addEditSection = document.querySelector('.calendarapp-add-edit-event-section');
+  if (addEditSection && addEditSection.classList.contains('slide-in')) {
+    syncTimeInputsWithEventCreator(startTime, endTime);
+  }
+}
+
+function handleWeekEventDrag(e) {
+  if (!isDragging || !draggedEvent) return;
+  
+  // Find the column under the mouse
+  const calendarContainer = draggedEvent.closest('.main-calendar-container');
+  const columns = calendarContainer.querySelectorAll('.calendar-day-column');
+  
+  let targetColumn = null;
+  let targetColumnIndex = -1;
+  
+  // Find which column the mouse is over
+  columns.forEach((column, index) => {
+    const rect = column.getBoundingClientRect();
+    if (e.clientX >= rect.left && e.clientX <= rect.right) {
+      targetColumn = column;
+      targetColumnIndex = index;
+    }
+  });
+  
+  if (!targetColumn) return;
+  
+  // Calculate position within the target column
+  const columnRect = targetColumn.getBoundingClientRect();
+  const scrollArea = targetColumn.parentElement.parentElement;
+  const relativeY = e.clientY - columnRect.top + scrollArea.scrollTop - dragOffset.y;
+  
+  // Use fixed slot height for consistent snapping (60px per hour / 4 = 15px per 15-minute slot)
+  const slotHeight = 15; // 15px per 15-minute slot
+  
+  // Snap to 15-minute intervals
+  const snappedY = Math.max(0, Math.round(relativeY / slotHeight) * slotHeight);
+  
+  // Get the event's height for collision detection
+  const eventHeight = parseInt(draggedEvent.style.height) + 2; // Add back the gap
+  
+  // Check for collisions with other events in the target column
+  if (!wouldEventCollide(targetColumn, snappedY, eventHeight, draggedEvent)) {
+    // Move the event to the new position only if no collision
+    if (draggedEvent.parentElement !== targetColumn) {
+      // Moving to a different column
+      targetColumn.appendChild(draggedEvent);
+      draggedEvent.dataset.dayIndex = targetColumnIndex;
+    }
+    
+    // Update position
+    draggedEvent.style.top = `${snappedY}px`;
+  } else {
+    // Collision detected - don't move the event, keep it at current position
+    return;
+  }
+  
+  // Update time display
+  const height = parseInt(draggedEvent.style.height);
+  const actualHeight = height + 2; // Add back the gap for time calculation
+  const startTimeSlot = Math.floor(snappedY / slotHeight);
+  const endTimeSlot = Math.floor((snappedY + actualHeight) / slotHeight);
+  
+  // Calculate minute-level precision for the new position
+  const startMinuteSlots = startTimeSlot * 15; // Convert 15-minute slots to minutes
+  const endMinuteSlots = endTimeSlot * 15;
+  
+  // Use minute-level precision for display if available
+  let startTime, endTime;
+  if (draggedEvent.dataset.startMinuteSlots !== undefined) {
+    // Event has minute-level precision, update with minute precision
+    startTime = minuteSlotsToTimeFormat(startMinuteSlots);
+    endTime = minuteSlotsToTimeFormat(endMinuteSlots);
+    
+    // Update minute-level data
+    draggedEvent.dataset.startMinuteSlots = startMinuteSlots;
+    draggedEvent.dataset.endMinuteSlots = endMinuteSlots;
+  } else {
+    // Use legacy 15-minute slot display
+    startTime = formatTimeSlot(startTimeSlot);
+    endTime = formatTimeSlot(endTimeSlot);
+  }
+  
+  const timeDisplay = draggedEvent.querySelector('.event-time');
+  if (timeDisplay) {
+    timeDisplay.textContent = `${startTime} - ${endTime}`;
+  }
+  
+  // Update data attributes
+  draggedEvent.dataset.startTime = startTimeSlot;
+  draggedEvent.dataset.endTime = endTimeSlot;
+  
+  // Sync with sidebar if it's open and this event is being edited
+  const addEditSection = document.querySelector('.calendarapp-add-edit-event-section');
+  if (addEditSection && addEditSection.classList.contains('slide-in')) {
+    syncTimeInputsWithEventCreator(startTime, endTime);
+  }
+}
+
+function endEventDrag(e) {
+  if (!isDragging || !draggedEvent) return;
+  
+  isDragging = false;
+  
+  // Remove dragging visual feedback
+  draggedEvent.classList.remove('dragging');
+  draggedEvent.style.zIndex = '';
+  draggedEvent.style.pointerEvents = '';
+  
+  // Remove global listeners
+  document.removeEventListener('mousemove', handleEventDrag);
+  document.removeEventListener('mouseup', endEventDrag);
+  
+  // Restore text selection
+  document.body.style.userSelect = '';
+  
+  // Clear drag state
+  draggedEvent = null;
+  dragOffset = { x: 0, y: 0 };
+}
+
+function cancelEventDrag() {
+  if (!isDragging || !draggedEvent) return;
+  
+  // Reset event to original position if we stored it
+  // For now, just end the drag
+  endEventDrag();
+}
+
+function createEventCreator(column, startY, dayIndex, startTime, slotHeight) {
+  const creator = document.createElement('div');
+  creator.className = 'calendar-event-creator';
+  creator.style.top = `${startY}px`;
+  creator.style.height = `${slotHeight - 2}px`; // Default to 15 minutes minus 2px gap (dynamic)
+  creator.style.transition = 'none'; // Disable transition during creation for immediate response
+  
+  // Calculate initial end time for time range display
+  const startTimeSlot = Math.floor(startY / slotHeight);
+  const endTimeSlot = startTimeSlot + 1; // Default to 15 minutes (1 slot)
+  const endTime = formatTimeSlot(endTimeSlot);
+  
+  // Show time range like agenda view
+  console.log('Creating week event creator with times:', startTime, '-', endTime);
+  creator.innerHTML = `
+    <div class="event-time-display" style="font-size: 10px; opacity: 0.8; margin-top: 2px;">${startTime} - ${endTime}</div>
+  `;
+  
+  column.appendChild(creator);
+  
+  // Store the event data for the sidebar
+  creator.eventData = {
+    column: column,
+    startY: startY,
+    dayIndex: dayIndex,
+    startTime: startTime,
+    height: slotHeight, // Initial height (15 minutes, dynamic)
+    startTimeSlot: startTimeSlot,
+    endTimeSlot: endTimeSlot,
+    slotHeight: slotHeight // Store for consistency
+  };
+  
+  // Prevent event bubbling to avoid triggering the global click handler
+  creator.addEventListener('click', (e) => {
+    e.stopPropagation();
+  });
+  
+  // Initial sync with sidebar if it's open
+  setTimeout(() => {
+    syncTimeInputsWithEventCreator(startTime, endTime);
+  }, 10);
+  
+  return creator;
+}
+
+function createCalendarEvent(column, title, top, height, startTimeSlot, endTimeSlot, dayIndex, startMinuteSlots = null, endMinuteSlots = null) {
+  const event = document.createElement('div');
+  event.className = 'calendar-event event-blue';
+  event.style.top = `${top}px`;
+  event.style.height = `${height - 4}px`; // Subtract 4px for gap
+  
+  // Use minute-level precision if available, otherwise fall back to 15-minute slots
+  let startTime, endTime;
+  if (startMinuteSlots !== null && endMinuteSlots !== null) {
+    startTime = minuteSlotsToTimeFormat(startMinuteSlots);
+    endTime = minuteSlotsToTimeFormat(endMinuteSlots);
+    
+    // Store minute-level data in dataset
+    event.dataset.startMinuteSlots = startMinuteSlots;
+    event.dataset.endMinuteSlots = endMinuteSlots;
+  } else {
+    startTime = formatTimeSlot(startTimeSlot);
+    endTime = formatTimeSlot(endTimeSlot);
+  }
+  
+  event.innerHTML = `
+    <div class="event-title">${title}</div>
+    <div class="event-time">${startTime} - ${endTime}</div>
+  `;
+  
+  // Add event data
+  event.dataset.eventId = generateEventId();
+  event.dataset.dayIndex = dayIndex;
+  event.dataset.startTime = startTimeSlot;
+  event.dataset.endTime = endTimeSlot;
+  event.dataset.title = title;
+  
+  column.appendChild(event);
+  
+  // Make event draggable (includes click handling)
+  setupEventDragging(event);
+  
+  return event;
+}
+
+function createAgendaEvent(row, title, left, width, startTimeSlot, endTimeSlot, calendar, startMinuteSlots = null, endMinuteSlots = null) {
+  const event = document.createElement('div');
+  event.className = 'calendar-event event-blue';
+  event.style.position = 'absolute';
+  event.style.left = `${left}px`;
+  event.style.width = `${width}px`;
+  event.style.height = 'calc(100% - 8px)';
+  event.style.top = '4px';
+  
+  // Use minute-level precision if available, otherwise fall back to 15-minute slots
+  let startTime, endTime;
+  if (startMinuteSlots !== null && endMinuteSlots !== null) {
+    startTime = minuteSlotsToTimeFormat(startMinuteSlots);
+    endTime = minuteSlotsToTimeFormat(endMinuteSlots);
+    
+    // Store minute-level data in dataset
+    event.dataset.startMinuteSlots = startMinuteSlots;
+    event.dataset.endMinuteSlots = endMinuteSlots;
+  } else {
+    startTime = formatTimeSlot(startTimeSlot);
+    endTime = formatTimeSlot(endTimeSlot);
+  }
+  
+  event.innerHTML = `
+    <div class="event-title">${title}</div>
+    <div class="event-time">${startTime} - ${endTime}</div>
+  `;
+  
+  // Add event data
+  event.dataset.eventId = generateEventId();
+  event.dataset.startTime = startTimeSlot;
+  event.dataset.endTime = endTimeSlot;
+  event.dataset.title = title;
+  event.dataset.calendar = calendar;
+  
+  row.appendChild(event);
+  
+  // Make event draggable (includes click handling)
+  setupEventDragging(event);
+  
+  return event;
+}
+
+function formatTimeSlot(slot) {
+  // Each slot is 15 minutes, calendar starts at 6 AM
+  const totalMinutes = slot * 15;
+  const hour = (Math.floor(totalMinutes / 60) + 6) % 24; // Add 6 hours offset for 6 AM start
+  const minutes = totalMinutes % 60;
+  const period = hour >= 12 ? 'PM' : 'AM';
+  const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+  const displayMinutes = minutes.toString().padStart(2, '0');
+  return `${displayHour}:${displayMinutes} ${period}`;
+}
+
+function generateEventId() {
+  return 'event_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+}
+
+// --- Event Management ---
+function setupEventManagement(windowElement) {
+  // Setup global click handler to deselect events and remove event creator
+  windowElement.addEventListener('click', (e) => {
+    if (!e.target.closest('.calendar-event') && !e.target.closest('.calendar-event-creator')) {
+      deselectAllEvents(windowElement);
+      // Don't remove event creator here as it's handled in setupEventCreation
+    }
+  });
+  
+  // Setup keyboard shortcuts
+  windowElement.addEventListener('keydown', (e) => {
+    const selectedEvent = windowElement.querySelector('.calendar-event.selected');
+    
+    if (e.key === 'Delete' && selectedEvent && !isDragging) {
+      deleteEvent(selectedEvent);
+          } else if (e.key === 'Escape') {
+        if (isDragging) {
+          // Cancel drag operation
+          cancelEventDrag();
+        } else {
+          deselectAllEvents(windowElement);
+          removeCurrentEventCreator(); // Also remove event creator on Escape
+        }
+      }
+  });
+}
+
+function selectEvent(eventElement) {
+  // Deselect all other events
+  const allEvents = eventElement.closest('.main-calendar-container').querySelectorAll('.calendar-event');
+  allEvents.forEach(event => event.classList.remove('selected'));
+  
+  // Select this event
+  eventElement.classList.add('selected');
+  
+  // Show sidebar with event data
+  const eventData = extractEventDataFromElement(eventElement);
+  if (eventData) {
+    // Create a temporary event creator for existing events to enable sync
+    createTemporaryEventCreator(eventData);
+    
+    showAddEditEventSidebar(eventData);
+    
+    // Populate the title field with existing event title
+    const titleInput = document.getElementById('event-title-input');
+    const titleElement = eventElement.querySelector('.event-title');
+    if (titleInput && titleElement) {
+      titleInput.value = titleElement.textContent;
+    }
+  }
+}
+
+function extractEventDataFromElement(eventElement) {
+  // Check if this is an agenda view event or week view event
+  const isAgendaEvent = eventElement.closest('.calendar-category-row');
+  
+  if (isAgendaEvent) {
+    // Agenda view event - extract horizontal positioning data
+    const row = eventElement.parentElement;
+    const left = parseInt(eventElement.style.left) || 0;
+    const width = parseInt(eventElement.style.width) || 30;
+    const calendar = row.dataset.calendar || 'personal';
+    
+    // Calculate time slots from horizontal position
+    const quarterSlotWidth = 30; // 15-minute interval width: 120px ÷ 4 = 30px
+    const startTimeSlot = Math.floor(left / quarterSlotWidth);
+    const endTimeSlot = Math.floor((left + width) / quarterSlotWidth);
+    
+    // Get title from the event element
+    const titleElement = eventElement.querySelector('.event-title');
+    const title = titleElement ? titleElement.textContent : '';
+    
+    // Check for minute-level data in dataset
+    const startMinuteSlots = eventElement.dataset.startMinuteSlots ? parseInt(eventElement.dataset.startMinuteSlots) : null;
+    const endMinuteSlots = eventElement.dataset.endMinuteSlots ? parseInt(eventElement.dataset.endMinuteSlots) : null;
+    
+    return {
+      row: row,
+      startX: left,
+      width: width,
+      startTimeSlot: startTimeSlot,
+      endTimeSlot: endTimeSlot,
+      startMinuteSlots: startMinuteSlots,
+      endMinuteSlots: endMinuteSlots,
+      startTime: formatTimeSlot(startTimeSlot),
+      endTime: formatTimeSlot(endTimeSlot),
+      calendar: calendar,
+      title: title
+    };
+  } else {
+    // Week view event - extract vertical positioning data
+    const column = eventElement.parentElement;
+    const dayIndex = parseInt(eventElement.dataset.dayIndex) || 0;
+    const top = parseInt(eventElement.style.top) || 0;
+    const height = parseInt(eventElement.style.height) + 2 || 60; // Add back the 2px gap
+    
+    // Use fixed slot height that matches CSS
+    const timeSlotHeight = 60; // Each hour slot is 60px high (matches CSS .time-slot height)
+    const slotsPerHour = 4; // 15-minute intervals
+    const slotHeight = 15; // 15px per 15-minute slot (60px ÷ 4)
+    
+    const startTimeSlot = Math.floor(top / slotHeight);
+    const endTimeSlot = Math.floor((top + height) / slotHeight);
+    
+    // Get title from the event element
+    const titleElement = eventElement.querySelector('.event-title');
+    const title = titleElement ? titleElement.textContent : '';
+    
+    // Check for minute-level data in dataset
+    const startMinuteSlots = eventElement.dataset.startMinuteSlots ? parseInt(eventElement.dataset.startMinuteSlots) : null;
+    const endMinuteSlots = eventElement.dataset.endMinuteSlots ? parseInt(eventElement.dataset.endMinuteSlots) : null;
+    
+    return {
+      column: column,
+      startY: top,
+      dayIndex: dayIndex,
+      height: height,
+      startTimeSlot: startTimeSlot,
+      endTimeSlot: endTimeSlot,
+      startMinuteSlots: startMinuteSlots,
+      endMinuteSlots: endMinuteSlots,
+      startTime: formatTimeSlot(startTimeSlot),
+      slotHeight: slotHeight,
+      title: title
+    };
+  }
+}
+
+function createTemporaryEventCreator(eventData) {
+  // Remove any existing event creator
+  removeCurrentEventCreator();
+  
+  // Create a temporary invisible event creator for sync purposes
+  const creator = document.createElement('div');
+  creator.className = 'calendar-event-creator';
+  creator.style.opacity = '0';
+  creator.style.pointerEvents = 'none';
+  creator.style.zIndex = '-1';
+  
+  const startTime = formatTimeSlot(eventData.startTimeSlot);
+  const endTime = formatTimeSlot(eventData.endTimeSlot);
+  
+  // Check if this is an agenda event or week event
+  if (eventData.row) {
+    // Agenda view event
+    creator.classList.add('agenda-event-creator');
+    creator.style.position = 'absolute';
+    creator.style.left = `${eventData.startX}px`;
+    creator.style.width = `${eventData.width}px`;
+    creator.style.height = 'calc(100% - 8px)';
+    creator.style.top = '4px';
+    
+    creator.innerHTML = `
+      <div class="event-time-display">${startTime} - ${endTime}</div>
+    `;
+    
+    // Add to row
+    eventData.row.appendChild(creator);
+  } else {
+    // Week view event
+    creator.style.top = `${eventData.startY}px`;
+    creator.style.height = `${eventData.height - 2}px`;
+    
+    creator.innerHTML = `
+      <div class="event-time-display">${startTime} - ${endTime}</div>
+    `;
+    
+    // Ensure slotHeight is included for week view
+    if (!eventData.slotHeight) {
+      const timeSlotHeight = 60; // Each hour slot is 60px high (matches CSS .time-slot height)
+      const slotsPerHour = 4; // 15-minute intervals
+      eventData.slotHeight = 15; // 15px per 15-minute slot (60px ÷ 4)
+    }
+    
+    // Add to column
+    eventData.column.appendChild(creator);
+  }
+  
+  // Store the event data
+  creator.eventData = eventData;
+  
+  // Set as current event creator
+  currentEventCreator = creator;
+}
+
+// --- Calendar Sidebar Functions ---
+let sidebarJustOpened = false;
+
+function showAddEditEventSidebar(eventData) {
+  console.log('showAddEditEventSidebar called with:', eventData);
+  
+  const calendarWindow = document.querySelector('.calendar-app-window');
+  if (!calendarWindow) {
+    console.log('Calendar window not found');
+    return;
+  }
+  
+  const addEditSection = calendarWindow.querySelector('.calendarapp-add-edit-event-section');
+  const payForEventSection = calendarWindow.querySelector('.calendarapp-pay-for-event-section');
+  
+  if (!addEditSection) {
+    console.log('Add/edit section not found');
+    return;
+  }
+  
+  // Set flag to prevent immediate hiding
+  sidebarJustOpened = true;
+  setTimeout(() => {
+    sidebarJustOpened = false;
+  }, 100);
+  
+  // Hide payment section
+  if (payForEventSection) {
+    payForEventSection.style.display = 'none';
+  }
+  
+  // Show and slide in the add/edit section
+  addEditSection.style.display = 'flex';
+  setTimeout(() => {
+    addEditSection.classList.add('slide-in');
+  }, 10);
+  
+  // Populate form with event data if provided
+  if (eventData) {
+    populateEventForm(eventData);
+    
+    // Set the title if available, otherwise clear it for new events
+    const titleInput = addEditSection.querySelector('#event-title-input');
+    if (titleInput) {
+      titleInput.value = eventData.title || ''; // Clear title for new events
+    }
+    
+    // Sync time inputs with current event creator
+    if (eventData.startTimeSlot !== undefined && eventData.endTimeSlot !== undefined) {
+      const startTime = formatTimeSlot(eventData.startTimeSlot);
+      const endTime = formatTimeSlot(eventData.endTimeSlot);
+      setTimeout(() => {
+        syncTimeInputsWithEventCreator(startTime, endTime);
+      }, 50);
+    }
+  }
+  
+  // Setup event listeners for the sidebar
+  setupAddEditEventSidebar(addEditSection);
+}
+
+function hideAddEditEventSidebar() {
+  const calendarWindow = document.querySelector('.calendar-app-window');
+  if (!calendarWindow) return;
+  
+  const addEditSection = calendarWindow.querySelector('.calendarapp-add-edit-event-section');
+  if (!addEditSection) return;
+  
+  // Slide out
+  addEditSection.classList.remove('slide-in');
+  
+  // Hide after animation
+  setTimeout(() => {
+    addEditSection.style.display = 'none';
+  }, 300);
+  
+  // Remove any current event creator (force removal even if selected)
+  if (currentEventCreator) {
+    currentEventCreator.remove();
+    currentEventCreator = null;
+  }
+}
+
+function showPayForEventSidebar() {
+  const calendarWindow = document.querySelector('.calendar-app-window');
+  if (!calendarWindow) return;
+  
+  const addEditSection = calendarWindow.querySelector('.calendarapp-add-edit-event-section');
+  const payForEventSection = calendarWindow.querySelector('.calendarapp-pay-for-event-section');
+  
+  if (!payForEventSection) return;
+  
+  // Hide add/edit section
+  if (addEditSection) {
+    addEditSection.classList.remove('slide-in');
+    setTimeout(() => {
+      addEditSection.style.display = 'none';
+    }, 300);
+  }
+  
+  // Show payment section after a delay
+  setTimeout(() => {
+    payForEventSection.style.display = 'flex';
+    setTimeout(() => {
+      payForEventSection.classList.add('slide-in');
+    }, 10);
+  }, 300);
+}
+
+function populateEventForm(eventData) {
+  if (!eventData) {
+    // If no event data, set default values (ensure times are within 6 AM - 6 AM range)
+    const now = new Date();
+    let defaultHour = now.getHours();
+    
+    // If current time is before 6 AM, default to 9 AM
+    if (defaultHour < 6) {
+      defaultHour = 9;
+    }
+    
+    const defaultStartTime = `${String(defaultHour).padStart(2, '0')}:00`;
+    const defaultEndTime = `${String(defaultHour + 1).padStart(2, '0')}:00`;
+    const defaultDate = now.toISOString().split('T')[0];
+    
+    const titleInput = document.getElementById('event-title-input');
+    const dateInput = document.getElementById('event-date-input');
+    const startTimeInput = document.getElementById('event-start-time-input');
+    const endTimeInput = document.getElementById('event-end-time-input');
+    
+    if (titleInput) titleInput.value = '';
+    if (dateInput) dateInput.value = defaultDate;
+    if (startTimeInput) startTimeInput.value = defaultStartTime;
+    if (endTimeInput) endTimeInput.value = defaultEndTime;
+    
+    if (titleInput) {
+      setTimeout(() => titleInput.focus(), 100);
+    }
+    return;
+  }
+  
+  // Calculate time from event data
+  let startTime, endTime, eventDate;
+  
+  // Check if we have minute-level precision data first
+  if (eventData.startMinuteSlots !== undefined && eventData.endMinuteSlots !== undefined) {
+    // Use minute-level precision data
+    startTime = minuteSlotsToTimeFormat(eventData.startMinuteSlots);
+    endTime = minuteSlotsToTimeFormat(eventData.endMinuteSlots);
+    
+    // For events with minute slots, use today's date
+    eventDate = new Date();
+  } else if (eventData.startTimeSlot !== undefined && eventData.endTimeSlot !== undefined) {
+    // Agenda view event - use time slot data (legacy 15-minute intervals)
+    startTime = formatTimeSlot(eventData.startTimeSlot);
+    endTime = formatTimeSlot(eventData.endTimeSlot);
+    
+    // For agenda view, use today's date
+    eventDate = new Date();
+  } else {
+    // Week view event - use slot-based data with dynamic slot height
+    const slotHeight = eventData.slotHeight || 15; // Use stored slot height or fallback to 15px
+    const startTimeSlot = Math.floor(eventData.startY / slotHeight);
+    const height = eventData.height || (slotHeight * 4); // Use stored height or default to 1 hour
+    const endTimeSlot = startTimeSlot + Math.floor(height / slotHeight);
+    
+    startTime = formatTimeSlot(startTimeSlot);
+    endTime = formatTimeSlot(endTimeSlot);
+    
+    // Get current date for the day column
+    const today = new Date();
+    eventDate = new Date(today);
+    
+    // Only add dayIndex if it's a valid number
+    if (typeof eventData.dayIndex === 'number' && !isNaN(eventData.dayIndex)) {
+      eventDate.setDate(today.getDate() + eventData.dayIndex);
+    }
+  }
+  
+  // Populate form fields
+  const titleInput = document.getElementById('event-title-input');
+  const dateInput = document.getElementById('event-date-input');
+  const startTimeInput = document.getElementById('event-start-time-input');
+  const endTimeInput = document.getElementById('event-end-time-input');
+  
+  // Clear title for new events (when no title is provided)
+  if (titleInput) titleInput.value = eventData.title || '';
+  
+  // Ensure eventDate is valid before using toISOString
+  if (dateInput && eventDate && !isNaN(eventDate.getTime())) {
+    dateInput.value = eventDate.toISOString().split('T')[0];
+  } else if (dateInput) {
+    // Fallback to today's date if eventDate is invalid
+    dateInput.value = new Date().toISOString().split('T')[0];
+  }
+  
+  if (startTimeInput) startTimeInput.value = convertTo24HourFormat(startTime);
+  if (endTimeInput) endTimeInput.value = convertTo24HourFormat(endTime);
+  
+  // Store the height in event data for future reference (only for week view)
+      if (eventData.startTimeSlot === undefined) {
+    // Week view - store slot-based data with dynamic slot height
+    const slotHeight = eventData.slotHeight || 15; // Use stored slot height or fallback to 15px
+    const height = eventData.height || (slotHeight * 4); // Use stored height or default to 1 hour
+    const startTimeSlot = Math.floor(eventData.startY / slotHeight);
+    const endTimeSlot = startTimeSlot + Math.floor(height / slotHeight);
+    
+    eventData.height = height;
+    eventData.startTimeSlot = startTimeSlot;
+    eventData.endTimeSlot = endTimeSlot;
+  }
+  
+  // Focus on title input
+  if (titleInput) {
+    setTimeout(() => titleInput.focus(), 100);
+  }
+}
+
+function setupAddEditEventSidebar(sidebarElement) {
+  // Avoid setting up listeners multiple times
+  if (sidebarElement.dataset.listenersSetup === 'true') {
+    return;
+  }
+  sidebarElement.dataset.listenersSetup = 'true';
+  
+  // Close button
+  const closeBtn = sidebarElement.querySelector('.calendarapp-close-event-sidebar');
+  if (closeBtn) {
+    closeBtn.addEventListener('click', hideAddEditEventSidebar);
+  }
+  
+  // Payment method buttons
+  const paymentBtns = sidebarElement.querySelectorAll('.calendarapp-payment-btn');
+  paymentBtns.forEach(btn => {
+    btn.addEventListener('click', function() {
+      // Remove active class from all buttons
+      paymentBtns.forEach(b => b.classList.remove('active'));
+      // Add active class to clicked button
+      this.classList.add('active');
+      
+      // If "Paid" is selected, show payment section
+      if (this.dataset.paymentType === 'paid') {
+        setTimeout(() => {
+          showPayForEventSidebar();
+        }, 500);
+      }
+    });
+  });
+  
+  // Schedule event button
+  const scheduleBtn = sidebarElement.querySelector('.calendarapp-schedule-event-btn');
+  if (scheduleBtn) {
+    scheduleBtn.addEventListener('click', function() {
+      const paymentType = sidebarElement.querySelector('.calendarapp-payment-btn.active')?.dataset.paymentType || 'free';
+      
+      if (paymentType === 'free') {
+        // Create the event directly
+        createEventFromSidebar();
+      } else {
+        // Show payment section
+        showPayForEventSidebar();
+      }
+    });
+  }
+  
+  // All day toggle
+  const allDayToggle = document.getElementById('all-day-toggle');
+  const startTimeInput = document.getElementById('event-start-time-input');
+  const endTimeInput = document.getElementById('event-end-time-input');
+  
+  if (allDayToggle && startTimeInput && endTimeInput) {
+    allDayToggle.addEventListener('change', function() {
+      if (this.checked) {
+        startTimeInput.disabled = true;
+        endTimeInput.disabled = true;
+        startTimeInput.style.opacity = '0.5';
+        endTimeInput.style.opacity = '0.5';
+      } else {
+        startTimeInput.disabled = false;
+        endTimeInput.disabled = false;
+        startTimeInput.style.opacity = '1';
+        endTimeInput.style.opacity = '1';
+      }
+    });
+  }
+  
+  // Time input sync with event creator
+  if (startTimeInput && endTimeInput) {
+    startTimeInput.addEventListener('input', syncEventCreatorWithTimeInputs);
+    endTimeInput.addEventListener('input', syncEventCreatorWithTimeInputs);
+    startTimeInput.addEventListener('change', syncEventCreatorWithTimeInputs);
+    endTimeInput.addEventListener('change', syncEventCreatorWithTimeInputs);
+  }
+  
+  // Calendar dropdown functionality
+  setupCalendarDropdown(sidebarElement);
+}
+
+function setupCalendarDropdown(sidebarElement) {
+  const dropdownContainer = sidebarElement.querySelector('.calendarapp-calendar-dropdown-container');
+  const dropdownBtn = sidebarElement.querySelector('.calendarapp-calendar-dropdown-btn');
+  const dropdownMenu = sidebarElement.querySelector('.calendarapp-calendar-dropdown-menu');
+  const selectedCalendar = sidebarElement.querySelector('.calendarapp-selected-calendar');
+  const calendarOptions = sidebarElement.querySelectorAll('.calendarapp-calendar-option');
+  
+  if (!dropdownContainer || !dropdownBtn || !dropdownMenu) return;
+  
+  // Toggle dropdown on button click
+  dropdownBtn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    
+    if (dropdownContainer.classList.contains('open')) {
+      dropdownContainer.classList.remove('open');
+    } else {
+      dropdownContainer.classList.add('open');
+    }
+  });
+  
+  // Handle calendar option selection
+  calendarOptions.forEach(option => {
+    option.addEventListener('click', function() {
+      // Remove selected class from all options
+      calendarOptions.forEach(opt => opt.classList.remove('selected'));
+      
+      // Add selected class to clicked option
+      this.classList.add('selected');
+      
+      // Update the selected calendar display
+      const calendarName = this.querySelector('span').textContent;
+      const calendarColor = this.dataset.color;
+      
+      // Update the button display
+      selectedCalendar.querySelector('span').textContent = calendarName;
+      selectedCalendar.querySelector('i').style.color = calendarColor;
+      
+      // Close dropdown
+      dropdownContainer.classList.remove('open');
+    });
+  });
+  
+  // Close dropdown when clicking outside
+  document.addEventListener('click', function(e) {
+    if (!dropdownContainer.contains(e.target)) {
+      dropdownContainer.classList.remove('open');
+    }
+  });
+  
+  // Set initial selected state for Personal calendar
+  const personalOption = sidebarElement.querySelector('.calendarapp-calendar-option[data-calendar="personal"]');
+  if (personalOption) {
+    personalOption.classList.add('selected');
+  }
+}
+
+function createEventFromSidebar() {
+  const titleInput = document.getElementById('event-title-input');
+  const title = titleInput?.value.trim();
+  
+  if (!title) {
+    alert('Please enter an event title');
+    return;
+  }
+  
+  // Get the current event creator data or use form data
+  if (currentEventCreator && currentEventCreator.eventData) {
+    const eventData = currentEventCreator.eventData;
+    
+    // Check if this is an agenda view event or week view event
+    if (eventData.row) {
+      // Agenda view event
+      const left = eventData.startX;
+      const width = eventData.width;
+      const startTimeSlot = eventData.startTimeSlot;
+      const endTimeSlot = eventData.endTimeSlot;
+      const calendar = eventData.calendar || 'personal';
+      
+      // Pass minute-level data if available
+      const startMinuteSlots = eventData.startMinuteSlots;
+      const endMinuteSlots = eventData.endMinuteSlots;
+      
+      // Create the agenda event
+      createAgendaEvent(eventData.row, title, left, width, startTimeSlot, endTimeSlot, calendar, startMinuteSlots, endMinuteSlots);
+    } else if (eventData.column) {
+      // Week view event
+      const top = eventData.startY;
+      const slotHeight = eventData.slotHeight || 15; // Use stored slot height or fallback to 15px
+      const height = eventData.height || (slotHeight * 4); // Use stored height or default to 1 hour
+      const startTimeSlot = eventData.startTimeSlot || Math.floor(top / slotHeight);
+      const endTimeSlot = eventData.endTimeSlot || Math.floor((top + height) / slotHeight);
+      
+      // Pass minute-level data if available
+      const startMinuteSlots = eventData.startMinuteSlots;
+      const endMinuteSlots = eventData.endMinuteSlots;
+      
+      // Create the calendar event
+      createCalendarEvent(eventData.column, title, top, height, startTimeSlot, endTimeSlot, eventData.dayIndex, startMinuteSlots, endMinuteSlots);
+    }
+  } else {
+    // Create event from form data when no drag-created event exists
+    createEventFromFormData(title);
+  }
+  
+  // Hide the sidebar
+  hideAddEditEventSidebar();
+}
+
+function createEventFromFormData(title) {
+  // Get form values
+  const dateInput = document.getElementById('event-date-input');
+  const startTimeInput = document.getElementById('event-start-time-input');
+  const endTimeInput = document.getElementById('event-end-time-input');
+  
+  if (!dateInput?.value || !startTimeInput?.value || !endTimeInput?.value) {
+    alert('Please fill in all required fields');
+    return;
+  }
+  
+  // For now, just create a default event on the first day column
+  const calendarWindow = document.querySelector('.calendar-app-window');
+  const firstColumn = calendarWindow?.querySelector('.calendar-day-column');
+  
+  if (firstColumn) {
+    // Convert time to minute-based slots for precise positioning
+    const startTime = startTimeInput.value;
+    const [startHours, startMinutes] = startTime.split(':').map(Number);
+    const startMinuteSlots = timeToMinuteSlots(startHours, startMinutes);
+    
+    const endTime = endTimeInput.value;
+    const [endHours, endMinutes] = endTime.split(':').map(Number);
+    const endMinuteSlots = timeToMinuteSlots(endHours, endMinutes);
+    
+    // Convert to pixel positions for visual display
+    const top = minuteSlotsToPixels(startMinuteSlots);
+    const height = minuteSlotsToPixels(endMinuteSlots - startMinuteSlots);
+    
+    // Also calculate legacy time slots for compatibility
+    const adjustedStartTimeSlot = Math.floor(startMinuteSlots / 15);
+    const adjustedEndTimeSlot = Math.floor(endMinuteSlots / 15);
+    
+    // Create the calendar event with minute-level precision
+    createCalendarEvent(firstColumn, title, top, height, adjustedStartTimeSlot, adjustedEndTimeSlot, 0, startMinuteSlots, endMinuteSlots);
+  }
+}
+
+// Sync time inputs in sidebar with event creator
+function syncTimeInputsWithEventCreator(startTime, endTime) {
+  console.log('syncTimeInputsWithEventCreator called with:', startTime, endTime);
+  const startTimeInput = document.getElementById('event-start-time-input');
+  const endTimeInput = document.getElementById('event-end-time-input');
+  
+  console.log('Time inputs found:', !!startTimeInput, !!endTimeInput);
+  
+  if (startTimeInput && endTimeInput) {
+    // Only update if the sidebar is visible
+    const addEditSection = document.querySelector('.calendarapp-add-edit-event-section');
+    const isVisible = addEditSection && addEditSection.classList.contains('slide-in');
+    console.log('Sidebar visible:', isVisible);
+    
+    if (isVisible) {
+      // Convert from "2:30 AM" format to "14:30" format for HTML time inputs
+      const convertedStart = convertTo24HourFormat(startTime);
+      const convertedEnd = convertTo24HourFormat(endTime);
+      console.log('Converting times:', startTime, '->', convertedStart, '|', endTime, '->', convertedEnd);
+      
+      startTimeInput.value = convertedStart;
+      endTimeInput.value = convertedEnd;
+      console.log('Time inputs updated successfully');
+    }
+  }
+}
+
+// Convert time from "2:30 AM" format to "14:30" format
+function convertTo24HourFormat(timeString) {
+  if (!timeString || timeString === '--:-- --') return '';
+  
+  const match = timeString.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+  if (!match) return '';
+  
+  let hours = parseInt(match[1]);
+  const minutes = match[2];
+  const period = match[3].toUpperCase();
+  
+  if (period === 'AM' && hours === 12) {
+    hours = 0;
+  } else if (period === 'PM' && hours !== 12) {
+    hours += 12;
+  }
+  
+  return `${String(hours).padStart(2, '0')}:${minutes}`;
+}
+
+// Convert time to minute-based slots (for precise time input handling)
+function timeToMinuteSlots(hours, minutes) {
+  // Convert to total minutes from 6 AM start
+  const totalMinutes = (hours - 6) * 60 + minutes;
+  // Handle times before 6 AM (next day)
+  return totalMinutes < 0 ? totalMinutes + (24 * 60) : totalMinutes;
+}
+
+// Convert minute slots back to time format for display
+function minuteSlotsToTimeFormat(minuteSlots) {
+  // Calculate hours and minutes from 6 AM start
+  const totalMinutes = minuteSlots;
+  const hour = (Math.floor(totalMinutes / 60) + 6) % 24;
+  const minutes = totalMinutes % 60;
+  const period = hour >= 12 ? 'PM' : 'AM';
+  const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+  const displayMinutes = minutes.toString().padStart(2, '0');
+  return `${displayHour}:${displayMinutes} ${period}`;
+}
+
+// Convert minute slots to pixel position (1 minute = 1 pixel for fine control)
+function minuteSlotsToPixels(minuteSlots) {
+  // Convert minutes to 15-minute slot equivalent for visual positioning
+  return (minuteSlots / 15) * 15; // 15px per 15-minute visual slot
+}
+
+// Sync event creator with time inputs
+function syncEventCreatorWithTimeInputs() {
+  if (!currentEventCreator || !currentEventCreator.eventData) return;
+  
+  const startTimeInput = document.getElementById('event-start-time-input');
+  const endTimeInput = document.getElementById('event-end-time-input');
+  
+  if (!startTimeInput?.value || !endTimeInput?.value) return;
+  
+  // Convert time inputs to minute-based slots (accounting for 6 AM start)
+  const startTime = startTimeInput.value;
+  const [startHours, startMinutes] = startTime.split(':').map(Number);
+  const startMinuteSlots = timeToMinuteSlots(startHours, startMinutes);
+  
+  const endTime = endTimeInput.value;
+  const [endHours, endMinutes] = endTime.split(':').map(Number);
+  const endMinuteSlots = timeToMinuteSlots(endHours, endMinutes);
+  
+  // Convert to pixel positions for visual display
+  const top = minuteSlotsToPixels(startMinuteSlots);
+  const height = minuteSlotsToPixels(endMinuteSlots - startMinuteSlots);
+  
+  if (height > 0) {
+    // Update event creator position
+    currentEventCreator.style.top = `${top}px`;
+    currentEventCreator.style.height = `${height - 2}px`;
+    
+    // Update time display using minute-level precision
+    const formattedStartTime = minuteSlotsToTimeFormat(startMinuteSlots);
+    const formattedEndTime = minuteSlotsToTimeFormat(endMinuteSlots);
+    const timeDisplay = currentEventCreator.querySelector('.event-time-display');
+    if (timeDisplay) {
+      timeDisplay.textContent = `${formattedStartTime} - ${formattedEndTime}`;
+    }
+    
+    // Update event data with minute-level precision
+    currentEventCreator.eventData.startY = top;
+    currentEventCreator.eventData.height = height;
+    currentEventCreator.eventData.startMinuteSlots = startMinuteSlots;
+    currentEventCreator.eventData.endMinuteSlots = endMinuteSlots;
+    
+    // Also update legacy time slot data for compatibility
+    currentEventCreator.eventData.startTimeSlot = Math.floor(startMinuteSlots / 15);
+    currentEventCreator.eventData.endTimeSlot = Math.floor(endMinuteSlots / 15);
+  }
+}
+
+function setupCalendarSidebar(windowElement) {
+  // Setup New Event button in sidebar to show add event form
+  const newEventBtn = windowElement.querySelector('.compose-btn');
+  if (newEventBtn) {
+    newEventBtn.addEventListener('click', () => {
+      // Show the add/edit event sidebar without event data
+      showAddEditEventSidebar(null);
+    });
+  }
+  
+  // Setup keyboard shortcuts
+  windowElement.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      hideAddEditEventSidebar();
+    }
+  });
+}
+
+function deselectAllEvents(windowElement) {
+  const allEvents = windowElement.querySelectorAll('.calendar-event.selected');
+  allEvents.forEach(event => event.classList.remove('selected'));
+}
+
+function deleteEvent(eventElement) {
+  if (confirm('Delete this event?')) {
+    eventElement.remove();
+  }
+}
+
+// --- Initialize Existing Events ---
+function initializeExistingEvents(windowElement) {
+  const existingEvents = windowElement.querySelectorAll('.calendar-event');
+  
+  existingEvents.forEach(event => {
+    // Make existing events draggable (includes click handling)
+    setupEventDragging(event);
+  });
+}
+
+// --- Current Time Indicator ---
+function setupCurrentTimeIndicator(windowElement) {
+  const dayColumns = windowElement.querySelectorAll('.calendar-day-column');
+  const today = new Date();
+  const todayDateString = today.toDateString();
+  
+  // Find today's column (this is simplified - in a real app you'd match by date)
+  const todayColumn = Array.from(dayColumns).find((column, index) => {
+    // For demo purposes, assume the "today" column is the one with existing events
+    return column.querySelector('.calendar-event');
+  });
+  
+  if (todayColumn) {
+    updateCurrentTimeIndicator(todayColumn);
+    
+    // Update every minute
+    setInterval(() => {
+      updateCurrentTimeIndicator(todayColumn);
+    }, 60000);
+  }
+}
+
+function updateCurrentTimeIndicator(column) {
+  // Remove existing indicator
+  const existingIndicator = column.querySelector('.current-time-indicator');
+  if (existingIndicator) {
+    existingIndicator.remove();
+  }
+  
+  const now = new Date();
+  const hours = now.getHours();
+  const minutes = now.getMinutes();
+  
+  // Only show indicator if current time is within calendar range (6 AM - 6 AM next day)
+  if (hours < 6) {
+    // If before 6 AM, position at the end of calendar (next day)
+    const adjustedHours = hours + 24; // Add 24 hours for next day
+    const topPosition = ((adjustedHours - 6) * 60) + minutes; // Subtract 6 AM offset
+    
+    const indicator = document.createElement('div');
+    indicator.className = 'current-time-indicator';
+    indicator.style.top = `${topPosition}px`;
+    
+    column.appendChild(indicator);
+  } else {
+    // Normal case: after 6 AM
+    const topPosition = ((hours - 6) * 60) + minutes; // Subtract 6 AM offset
+    
+    const indicator = document.createElement('div');
+    indicator.className = 'current-time-indicator';
+    indicator.style.top = `${topPosition}px`;
+    
+    column.appendChild(indicator);
+  }
+}
+
+// --- POS Number Pad Functionality ---
+function setupPOSNumberPad() {
+  // Get the keyboard button and number pad elements
+  const keyboardBtn = document.querySelector('.point-of-sale-keyboard-btn');
+  const numberPad = document.getElementById('pos-number-pad');
+  
+  if (!keyboardBtn || !numberPad) {
+    return; // Elements not found, exit
+  }
+  
+  let isNumberPadVisible = false;
+  let currentInput = null; // Track which input field is currently focused
+  
+  // Function to show/hide number pad
+  function toggleNumberPad() {
+    isNumberPadVisible = !isNumberPadVisible;
+    
+    if (isNumberPadVisible) {
+      numberPad.style.display = 'block';
+      // Add a slight animation
+      numberPad.style.opacity = '0';
+      setTimeout(() => {
+        numberPad.style.opacity = '1';
+      }, 10);
+    } else {
+      numberPad.style.opacity = '0';
+      setTimeout(() => {
+        numberPad.style.display = 'none';
+      }, 200);
+    }
+  }
+  
+  // Function to handle number pad button clicks
+  function handleNumberPadClick(value, action) {
+    if (action === 'confirm') {
+      // Hide number pad on confirm
+      toggleNumberPad();
+      return;
+    }
+    
+    // Find the currently focused input or the first available input
+    if (!currentInput) {
+      // Look for common input fields in POS system
+      const possibleInputs = document.querySelectorAll(
+        'input[type="text"], input[type="number"], .pos-discount-input, .customer-form-input'
+      );
+      
+      // Find the first visible and enabled input
+      for (let input of possibleInputs) {
+        if (input.offsetParent !== null && !input.disabled) {
+          currentInput = input;
+          input.focus();
+          break;
+        }
+      }
+    }
+    
+    if (currentInput) {
+      // Insert the value at cursor position
+      const start = currentInput.selectionStart;
+      const end = currentInput.selectionEnd;
+      const currentValue = currentInput.value;
+      
+      const newValue = currentValue.substring(0, start) + value + currentValue.substring(end);
+      currentInput.value = newValue;
+      
+      // Move cursor to after inserted value
+      const newCursorPos = start + value.length;
+      currentInput.setSelectionRange(newCursorPos, newCursorPos);
+      
+      // Trigger input event to notify any listeners
+      currentInput.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+  }
+  
+  // Add click event listener to keyboard button
+  keyboardBtn.addEventListener('click', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleNumberPad();
+  });
+  
+  // Add click event listeners to number pad buttons
+  const numberPadButtons = numberPad.querySelectorAll('.number-pad-btn');
+  numberPadButtons.forEach(button => {
+    button.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      const number = this.getAttribute('data-number');
+      const action = this.getAttribute('data-action');
+      
+      if (number) {
+        handleNumberPadClick(number);
+      } else if (action) {
+        handleNumberPadClick(null, action);
+      }
+    });
+  });
+  
+  // Track input focus to know which field to input to
+  document.addEventListener('focusin', function(e) {
+    if (e.target.matches('input[type="text"], input[type="number"], .pos-discount-input, .customer-form-input')) {
+      currentInput = e.target;
+    }
+  });
+  
+  // Handle keyboard numpad input
+  document.addEventListener('keydown', function(e) {
+    // Only handle numpad keys when number pad is visible
+    if (!isNumberPadVisible) return;
+    
+    const key = e.key;
+    const code = e.code;
+    
+    // Handle numpad numbers (0-9)
+    if (code.startsWith('Numpad') && /^\d$/.test(key)) {
+      e.preventDefault();
+      handleNumberPadClick(key);
+    }
+    // Handle numpad decimal point
+    else if (code === 'NumpadDecimal' || (code === 'Period' && e.location === 3)) {
+      e.preventDefault();
+      handleNumberPadClick('.');
+    }
+    // Handle numpad enter for confirm
+    else if (code === 'NumpadEnter' || (code === 'Enter' && e.location === 3)) {
+      e.preventDefault();
+      handleNumberPadClick(null, 'confirm');
+    }
+    // Handle escape to close number pad
+    else if (key === 'Escape') {
+      e.preventDefault();
+      if (isNumberPadVisible) {
+        toggleNumberPad();
+      }
+    }
+  });
+  
+  // Close number pad when clicking outside
+  document.addEventListener('click', function(e) {
+    if (isNumberPadVisible && activeNumberPad &&
+        !activeNumberPad.contains(e.target) && 
+        !keyboardBtn.contains(e.target)) {
+      toggleNumberPad();
+    }
+  });
+}
+
+// Initialize POS Number Pad when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+  setupPOSNumberPad();
+  
+  // Also add global event delegation for keyboard button clicks
+  document.addEventListener('click', function(e) {
+    if (e.target.closest('.point-of-sale-keyboard-btn')) {
+      console.log('Global keyboard button click detected');
+      handleGlobalKeyboardClick(e);
+    }
+  });
+});
+
+// Global handler for keyboard button clicks (fallback)
+function handleGlobalKeyboardClick(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  
+  const button = e.target.closest('.point-of-sale-keyboard-btn');
+  const posWindow = button.closest('.point-of-sale-app-window');
+  
+  if (!posWindow) {
+    console.log('No POS window found for keyboard button');
+    return;
+  }
+  
+  // Find the visible number pad in this window
+  const numberPads = posWindow.querySelectorAll('.pos-number-pad');
+  let visibleNumberPad = null;
+  
+  for (let pad of numberPads) {
+    const section = pad.closest('.pos-order-footer');
+    if (section && section.offsetParent !== null) {
+      visibleNumberPad = pad;
+      break;
+    }
+  }
+  
+  if (!visibleNumberPad && numberPads.length > 0) {
+    visibleNumberPad = numberPads[0]; // Fallback to first pad
+  }
+  
+  if (visibleNumberPad) {
+    console.log('Toggling number pad visibility');
+    const isVisible = visibleNumberPad.style.display === 'block';
+    
+    if (isVisible) {
+      visibleNumberPad.style.opacity = '0';
+      setTimeout(() => {
+        visibleNumberPad.style.display = 'none';
+      }, 200);
+    } else {
+      visibleNumberPad.style.display = 'block';
+      visibleNumberPad.style.opacity = '0';
+      setTimeout(() => {
+        visibleNumberPad.style.opacity = '1';
+      }, 10);
+    }
+  } else {
+    console.log('No number pad found to toggle');
+  }
+}
+
+// Also initialize when the POS app window is opened
+function initializePOSApp(windowElement) {
+  // Setup number pad functionality for this specific POS window
+  const keyboardBtn = windowElement.querySelector('.point-of-sale-keyboard-btn');
+  const numberPads = windowElement.querySelectorAll('.pos-number-pad');
+  
+  if (!keyboardBtn || numberPads.length === 0) {
+    console.log('POS Number pad initialization failed:', {
+      keyboardBtn: !!keyboardBtn,
+      numberPadsCount: numberPads.length
+    });
+    return;
+  }
+  
+  console.log('Initializing POS number pad with', numberPads.length, 'pads found');
+  
+  let isNumberPadVisible = false;
+  let currentInput = null;
+  let activeNumberPad = null;
+  
+  function getVisibleNumberPad() {
+    // Find the number pad in the currently visible section
+    for (let pad of numberPads) {
+      const section = pad.closest('.pos-order-footer');
+      if (section && section.offsetParent !== null) {
+        return pad;
+      }
+    }
+    // Fallback to first number pad if none are clearly visible
+    return numberPads[0];
+  }
+  
+  function toggleNumberPad() {
+    activeNumberPad = getVisibleNumberPad();
+    if (!activeNumberPad) return;
+    
+    isNumberPadVisible = !isNumberPadVisible;
+    
+    if (isNumberPadVisible) {
+      activeNumberPad.style.display = 'block';
+      activeNumberPad.style.opacity = '0';
+      setTimeout(() => {
+        activeNumberPad.style.opacity = '1';
+      }, 10);
+    } else {
+      activeNumberPad.style.opacity = '0';
+      setTimeout(() => {
+        activeNumberPad.style.display = 'none';
+      }, 200);
+    }
+  }
+  
+  function handleNumberPadClick(value, action) {
+    if (action === 'confirm') {
+      toggleNumberPad();
+      return;
+    }
+    
+    if (!currentInput) {
+      const possibleInputs = windowElement.querySelectorAll(
+        'input[type="text"], input[type="number"], .pos-discount-input, .customer-form-input'
+      );
+      
+      for (let input of possibleInputs) {
+        if (input.offsetParent !== null && !input.disabled) {
+          currentInput = input;
+          input.focus();
+          break;
+        }
+      }
+    }
+    
+    if (currentInput) {
+      const start = currentInput.selectionStart;
+      const end = currentInput.selectionEnd;
+      const currentValue = currentInput.value;
+      
+      const newValue = currentValue.substring(0, start) + value + currentValue.substring(end);
+      currentInput.value = newValue;
+      
+      const newCursorPos = start + value.length;
+      currentInput.setSelectionRange(newCursorPos, newCursorPos);
+      
+      currentInput.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+  }
+  
+  keyboardBtn.addEventListener('click', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('Keyboard button clicked');
+    toggleNumberPad();
+  });
+  
+  // Add event listeners to all number pad buttons
+  numberPads.forEach(numberPad => {
+    const numberPadButtons = numberPad.querySelectorAll('.number-pad-btn');
+    numberPadButtons.forEach(button => {
+      button.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const number = this.getAttribute('data-number');
+        const action = this.getAttribute('data-action');
+        
+        if (number) {
+          handleNumberPadClick(number);
+        } else if (action) {
+          handleNumberPadClick(null, action);
+        }
+      });
+    });
+  });
+  
+  windowElement.addEventListener('focusin', function(e) {
+    if (e.target.matches('input[type="text"], input[type="number"], .pos-discount-input, .customer-form-input')) {
+      currentInput = e.target;
+    }
+  });
+  
+  windowElement.addEventListener('keydown', function(e) {
+    if (!isNumberPadVisible) return;
+    
+    const key = e.key;
+    const code = e.code;
+    
+    if (code.startsWith('Numpad') && /^\d$/.test(key)) {
+      e.preventDefault();
+      handleNumberPadClick(key);
+    }
+    else if (code === 'NumpadDecimal' || (code === 'Period' && e.location === 3)) {
+      e.preventDefault();
+      handleNumberPadClick('.');
+    }
+    else if (code === 'NumpadEnter' || (code === 'Enter' && e.location === 3)) {
+      e.preventDefault();
+      handleNumberPadClick(null, 'confirm');
+    }
+    else if (key === 'Escape') {
+      e.preventDefault();
+      if (isNumberPadVisible) {
+        toggleNumberPad();
+      }
+    }
+  });
+  
+  document.addEventListener('click', function(e) {
+    if (isNumberPadVisible && 
+        !numberPad.contains(e.target) && 
+        !keyboardBtn.contains(e.target)) {
+      toggleNumberPad();
+    }
+  });
+}
+
+// --- ENHANCED MOBILE SWIPE DETECTION FOR WIDGETS SCREEN ---
+// Robust mobile swipe detection system with improved debugging and reliability
+document.addEventListener('DOMContentLoaded', function() {
+  const MOBILE_BREAKPOINT = 1023;
+  
+  // Enhanced mobile detection
+  function isMobile() {
+    return window.innerWidth <= MOBILE_BREAKPOINT;
+  }
+  
+  // Only initialize on mobile devices
+  if (!isMobile()) {
+    console.log('Mobile swipe: Not mobile device, skipping initialization');
+    return;
+  }
+  
+  const mainContentArea = document.querySelector('.main-content-area');
+  const desktopArea = document.querySelector('.desktop-area');
+  const widgetsScreen = document.getElementById('widgets-screen');
+  const notificationsScreen = document.getElementById('notifications-screen');
+  
+  if (!mainContentArea || !desktopArea || !widgetsScreen || !notificationsScreen) {
+    console.warn('Mobile swipe: Required elements not found', {
+      mainContentArea: !!mainContentArea,
+      desktopArea: !!desktopArea,
+      widgetsScreen: !!widgetsScreen,
+      notificationsScreen: !!notificationsScreen
+    });
+    return;
+  }
+  
+  console.log('Mobile swipe: All required elements found, initializing...');
+  
+  let currentState = 'desktop'; // 'notifications', 'desktop', or 'widgets'
+  let isTransitioning = false;
+  let touchStartX = 0;
+  let touchStartY = 0;
+  let touchStartTime = 0;
+  let lastTouchX = 0;
+  let isDragging = false;
+  let hasMoved = false;
+  
+  const SWIPE_THRESHOLD = 50; // Minimum distance for swipe
+  const SWIPE_VELOCITY_THRESHOLD = 0.3; // Minimum velocity for swipe
+  const MAX_VERTICAL_DRIFT = 100; // Maximum vertical movement allowed
+  const TRANSITION_DURATION = 350; // CSS transition duration
+  
+  // Enhanced mobile state update with better logging
+  function updateMobileState(state) {
+    if (isTransitioning) {
+      console.log('Mobile swipe: Transition in progress, ignoring state change');
+      return;
+    }
+    
+    console.log(`Mobile swipe: Updating state from ${currentState} to ${state}`);
+    isTransitioning = true;
+    currentState = state;
+    
+    // Remove existing state classes
+    document.body.classList.remove('mobile-icons-active', 'mobile-widgets-active', 'mobile-notifications-active');
+    
+    // Add new state class
+    if (state === 'widgets') {
+      document.body.classList.add('mobile-widgets-active');
+      console.log('Mobile swipe: Added mobile-widgets-active class');
+    } else if (state === 'notifications') {
+      document.body.classList.add('mobile-notifications-active');
+      console.log('Mobile swipe: Added mobile-notifications-active class');
+    } else {
+      document.body.classList.add('mobile-icons-active');
+      console.log('Mobile swipe: Added mobile-icons-active class');
+    }
+    
+    // Reset transition flag after animation completes
+    setTimeout(() => {
+      isTransitioning = false;
+      console.log('Mobile swipe: Transition completed');
+    }, TRANSITION_DURATION);
+  }
+  
+  // Enhanced touch start handler
+  function handleTouchStart(e) {
+    if (isTransitioning) {
+      console.log('Mobile swipe: Touch start ignored - transitioning');
+      return;
+    }
+    
+    const touch = e.touches[0];
+    touchStartX = touch.clientX;
+    touchStartY = touch.clientY;
+    touchStartTime = Date.now();
+    lastTouchX = touchStartX;
+    isDragging = false;
+    hasMoved = false;
+    
+    console.log(`Mobile swipe: Touch start at (${touchStartX}, ${touchStartY}) in state: ${currentState}`);
+  }
+  
+  // Enhanced touch move handler
+  function handleTouchMove(e) {
+    if (isTransitioning) return;
+    
+    const touch = e.touches[0];
+    const currentX = touch.clientX;
+    const currentY = touch.clientY;
+    
+    const deltaX = currentX - touchStartX;
+    const deltaY = currentY - touchStartY;
+    
+    // Check if this is a horizontal swipe
+    if (!isDragging && Math.abs(deltaX) > 10) {
+      if (Math.abs(deltaY) < MAX_VERTICAL_DRIFT) {
+        isDragging = true;
+        hasMoved = true;
+        console.log(`Mobile swipe: Started dragging - deltaX: ${deltaX}, deltaY: ${deltaY}`);
+      }
+    }
+    
+    lastTouchX = currentX;
+  }
+  
+  // Enhanced touch end handler with better swipe detection
+  function handleTouchEnd(e) {
+    if (isTransitioning || !hasMoved) {
+      console.log('Mobile swipe: Touch end ignored - transitioning or no movement');
+      return;
+    }
+    
+    const touchEndTime = Date.now();
+    const touchDuration = touchEndTime - touchStartTime;
+    const deltaX = lastTouchX - touchStartX;
+    const deltaY = Math.abs(e.changedTouches[0].clientY - touchStartY);
+    
+    console.log(`Mobile swipe: Touch end - deltaX: ${deltaX}, deltaY: ${deltaY}, duration: ${touchDuration}ms`);
+    
+    // Check if vertical movement is within acceptable range
+    if (deltaY > MAX_VERTICAL_DRIFT) {
+      console.log('Mobile swipe: Vertical drift too large, ignoring');
+      isDragging = false;
+      hasMoved = false;
+      return;
+    }
+    
+    const velocity = Math.abs(deltaX) / touchDuration;
+    const distance = Math.abs(deltaX);
+    
+    console.log(`Mobile swipe: Distance: ${distance}px, Velocity: ${velocity}px/ms`);
+    
+    // Determine if this is a valid swipe
+    const isValidSwipe = distance > SWIPE_THRESHOLD || velocity > SWIPE_VELOCITY_THRESHOLD;
+    
+    if (isValidSwipe && isDragging) {
+      console.log(`Mobile swipe: Valid swipe detected - deltaX: ${deltaX}, current state: ${currentState}`);
+      
+      if (deltaX > 0) {
+        // Swipe right
+        if (currentState === 'widgets') {
+          console.log('Mobile swipe: Swiping right from widgets to desktop');
+          updateMobileState('desktop');
+        } else if (currentState === 'desktop') {
+          console.log('Mobile swipe: Swiping right from desktop to notifications');
+          updateMobileState('notifications');
+        }
+      } else if (deltaX < 0) {
+        // Swipe left
+        if (currentState === 'notifications') {
+          console.log('Mobile swipe: Swiping left from notifications to desktop');
+          updateMobileState('desktop');
+        } else if (currentState === 'desktop') {
+          console.log('Mobile swipe: Swiping left from desktop to widgets');
+          updateMobileState('widgets');
+        }
+      } else {
+        console.log(`Mobile swipe: Invalid direction - deltaX: ${deltaX}, state: ${currentState}`);
+      }
+    } else {
+      console.log('Mobile swipe: Not a valid swipe');
+    }
+    
+    isDragging = false;
+    hasMoved = false;
+  }
+  
+  // Scroll handler removed - using pure transform approach to prevent multiple empty screens
+  
+  // Add event listeners with better error handling
+  try {
+    mainContentArea.addEventListener('touchstart', handleTouchStart, { passive: true });
+    mainContentArea.addEventListener('touchmove', handleTouchMove, { passive: true });
+    mainContentArea.addEventListener('touchend', handleTouchEnd, { passive: true });
+    console.log('Mobile swipe: Event listeners attached successfully');
+  } catch (error) {
+    console.error('Mobile swipe: Error attaching event listeners:', error);
+  }
+  
+  // Enhanced window resize handler
+  function handleResize() {
+    if (!isMobile()) {
+      console.log('Mobile swipe: Switched to desktop, removing mobile classes and event listeners');
+      // Remove mobile classes when switching to desktop
+      document.body.classList.remove('mobile-icons-active', 'mobile-widgets-active', 'mobile-notifications-active');
+      // Remove event listeners
+      mainContentArea.removeEventListener('touchstart', handleTouchStart);
+      mainContentArea.removeEventListener('touchmove', handleTouchMove);
+      mainContentArea.removeEventListener('touchend', handleTouchEnd);
+    }
+  }
+  
+  window.addEventListener('resize', handleResize);
+  
+  // Initialize with desktop state
+  updateMobileState('desktop');
+  
+  // Initialize notifications screen
+  renderNotificationsScreen();
+  
+  // Add some sample notifications for testing
+  if (notifications.length === 0) {
+    addNotification({
+      title: 'Welcome to the Dashboard',
+      desc: 'Your new OS-style dashboard is ready to use!',
+      meta: '2 minutes ago',
+      iconClass: 'fa-rocket',
+      iconBgClass: 'notif-bg-blue',
+      avatar: 'img/avatar.png',
+      unread: true
+    });
+    
+    addNotification({
+      title: 'System Update Available',
+      desc: 'A new system update is available for download.',
+      meta: '1 hour ago',
+      iconClass: 'fa-download',
+      iconBgClass: 'notif-bg-green',
+      avatar: 'img/avatar.png',
+      unread: true
+    });
+    
+    addNotification({
+      title: 'New Message',
+      desc: 'You have received a new message from John Doe.',
+      meta: '3 hours ago',
+      iconClass: 'fa-envelope',
+      iconBgClass: 'notif-bg-orange',
+      avatar: 'img/avatar.png',
+      unread: false
+    });
+  }
+  
+  console.log('Mobile swipe detection initialized successfully');
+  
+  // Add debug function to window for testing
+  window.debugMobileSwipe = function() {
+    return {
+      currentState,
+      isTransitioning,
+      isMobile: isMobile(),
+      elements: {
+        mainContentArea: !!mainContentArea,
+        desktopArea: !!desktopArea,
+        widgetsScreen: !!widgetsScreen,
+        notificationsScreen: !!notificationsScreen
+      },
+      classes: {
+        mobileIconsActive: document.body.classList.contains('mobile-icons-active'),
+        mobileWidgetsActive: document.body.classList.contains('mobile-widgets-active'),
+        mobileNotificationsActive: document.body.classList.contains('mobile-notifications-active')
+      }
+    };
+  };
+});

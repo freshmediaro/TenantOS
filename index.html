@@ -89,6 +89,11 @@
           
         </div> <!-- End desktop-area -->
 
+        <!-- Notifications Screen START -->
+        <div id="notifications-screen">
+          <!-- Notifications will be dynamically generated here by JavaScript -->
+        </div> <!-- Notifications Screen END -->
+
         <!-- Widgets Screen START -->
         <div id="widgets-screen">
           <!-- Widgets will be dynamically generated here by JavaScript -->
@@ -119,6 +124,18 @@
 
           <!-- New Right Sidebar -->
           <div class="start-menu-right-sidebar">
+            <div class="start-menu-right-sidebar-header">
+              <div class="start-menu-right-sidebar-header-left">
+                <img src="img/avatar.png" alt="Site Logo" class="site-logo-round start-menu-right-sidebar-avatar">
+                <span class="start-menu-right-sidebar-header-left-name">Michael Muchmore</span>
+                <span class="start-menu-right-sidebar-header-website-url">mywebsite.ro</span>
+
+              </div>
+              <div class="start-menu-right-sidebar-header-right">
+              </div>
+            </div>
+
+            <div class="start-menu-right-sidebar-body">
             <div class="menu-section">
               <h3>WEBSITE</h3>
               <ul class="menu-links-list">
@@ -140,6 +157,7 @@
                 <li><a href="#" class="menu-item"><i class="fas fa-users-cog"></i><span>Administrators</span></a></li>
               </ul>
             </div>
+          </div>
           </div>
         </div>
 
@@ -477,6 +495,7 @@
     <template id="settings-app-template">
       <div class="window" id="settings-app-window">
         <div class="window-header">
+          <button class="menu-toggle"><i class="fas fa-bars"></i></button>
           <button class="back-btn" style="display:none;"><i class="fas fa-chevron-left"></i></button>
           <div class="window-title">
             <div class="window-icon green-icon"><i class="fas fa-cog"></i></div>
@@ -641,7 +660,348 @@
                 </div>
               </div>
             </div>
-            <!-- Other sections (General, Wi-Fi, etc.) would go here, hidden by default -->
+
+            <!-- Admin Access Content -->
+            <div class="settings-section-content admin-access-content" style="display: none;">
+              <div class="setting-group">
+                <label class="group-title">Administrator Access</label>
+                <div class="setting-row">
+                  <label>Require admin password for changes</label>
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked>
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+                <div class="setting-row">
+                  <label>Allow remote administration</label>
+                  <label class="toggle-switch">
+                    <input type="checkbox">
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Integrations Content -->
+            <div class="settings-section-content integrations-content" style="display: none;">
+              <div class="setting-group">
+                <label class="group-title">Available Integrations</label>
+                <div class="setting-row">
+                  <label>Google Analytics</label>
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked>
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+                <div class="setting-row">
+                  <label>Facebook Pixel</label>
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked>
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+                <div class="setting-row">
+                  <label>Mailchimp</label>
+                  <label class="toggle-switch">
+                    <input type="checkbox">
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Privacy & Security Content -->
+            <div class="settings-section-content privacy-security-content" style="display: none;">
+              <div class="setting-group">
+                <label class="group-title">Privacy Settings</label>
+                <div class="setting-row">
+                  <label>Analytics tracking</label>
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked>
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+                <div class="setting-row">
+                  <label>Cookie consent banner</label>
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked>
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+              </div>
+              <div class="setting-group">
+                <label class="group-title">Security</label>
+                <div class="setting-row">
+                  <label>Two-factor authentication</label>
+                  <label class="toggle-switch">
+                    <input type="checkbox">
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+                <div class="setting-row">
+                  <label>SSL certificate</label>
+                  <span style="color: #34c759;">Active</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Notifications Content -->
+            <div class="settings-section-content notifications-content" style="display: none;">
+              <div class="setting-group">
+                <label class="group-title">Email Notifications</label>
+                <div class="setting-row">
+                  <label>Order notifications</label>
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked>
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+                <div class="setting-row">
+                  <label>Marketing emails</label>
+                  <label class="toggle-switch">
+                    <input type="checkbox">
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+              </div>
+              <div class="setting-group">
+                <label class="group-title">Push Notifications</label>
+                <div class="setting-row">
+                  <label>Browser notifications</label>
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked>
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Active Services Content -->
+            <div class="settings-section-content active-services-content" style="display: none;">
+              <div class="setting-group">
+                <label class="group-title">Running Services</label>
+                <div class="setting-row">
+                  <label>Website hosting</label>
+                  <span style="color: #34c759;">Running</span>
+                </div>
+                <div class="setting-row">
+                  <label>Database service</label>
+                  <span style="color: #34c759;">Running</span>
+                </div>
+                <div class="setting-row">
+                  <label>CDN service</label>
+                  <span style="color: #34c759;">Running</span>
+                </div>
+                <div class="setting-row">
+                  <label>Email service</label>
+                  <span style="color: #ff9500;">Maintenance</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Products Settings Content -->
+            <div class="settings-section-content products-settings-content" style="display: none;">
+              <div class="setting-group">
+                <label class="group-title">Product Management</label>
+                <div class="setting-row">
+                  <label>Auto-publish products</label>
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked>
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+                <div class="setting-row">
+                  <label>Inventory tracking</label>
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked>
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+                <div class="setting-row">
+                  <label>Low stock alerts</label>
+                  <div class="select-wrapper">
+                    <select>
+                      <option value="5">5 items</option>
+                      <option value="10" selected>10 items</option>
+                      <option value="20">20 items</option>
+                    </select>
+                    <i class="fas fa-chevron-down"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Payments Settings Content -->
+            <div class="settings-section-content payments-settings-content" style="display: none;">
+              <div class="setting-group">
+                <label class="group-title">Payment Methods</label>
+                <div class="setting-row">
+                  <label>PayPal</label>
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked>
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+                <div class="setting-row">
+                  <label>Stripe</label>
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked>
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+                <div class="setting-row">
+                  <label>Bank transfer</label>
+                  <label class="toggle-switch">
+                    <input type="checkbox">
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+              </div>
+              <div class="setting-group">
+                <label class="group-title">Currency</label>
+                <div class="setting-row">
+                  <label>Default currency</label>
+                  <div class="select-wrapper">
+                    <select>
+                      <option value="USD" selected>USD ($)</option>
+                      <option value="EUR">EUR (€)</option>
+                      <option value="RON">RON (lei)</option>
+                    </select>
+                    <i class="fas fa-chevron-down"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Shipping Settings Content -->
+            <div class="settings-section-content shipping-settings-content" style="display: none;">
+              <div class="setting-group">
+                <label class="group-title">Shipping Options</label>
+                <div class="setting-row">
+                  <label>Free shipping threshold</label>
+                  <div class="select-wrapper">
+                    <select>
+                      <option value="50">$50</option>
+                      <option value="100" selected>$100</option>
+                      <option value="200">$200</option>
+                    </select>
+                    <i class="fas fa-chevron-down"></i>
+                  </div>
+                </div>
+                <div class="setting-row">
+                  <label>Express shipping</label>
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked>
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+                <div class="setting-row">
+                  <label>International shipping</label>
+                  <label class="toggle-switch">
+                    <input type="checkbox">
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Customers & Privacy Settings Content -->
+            <div class="settings-section-content customers-privacy-settings-content" style="display: none;">
+              <div class="setting-group">
+                <label class="group-title">Customer Data</label>
+                <div class="setting-row">
+                  <label>Require account for purchases</label>
+                  <label class="toggle-switch">
+                    <input type="checkbox">
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+                <div class="setting-row">
+                  <label>Newsletter signup on checkout</label>
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked>
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+              </div>
+              <div class="setting-group">
+                <label class="group-title">Data Retention</label>
+                <div class="setting-row">
+                  <label>Delete inactive accounts after</label>
+                  <div class="select-wrapper">
+                    <select>
+                      <option value="12">12 months</option>
+                      <option value="24" selected>24 months</option>
+                      <option value="36">36 months</option>
+                    </select>
+                    <i class="fas fa-chevron-down"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Emails Settings Content -->
+            <div class="settings-section-content emails-settings-content" style="display: none;">
+              <div class="setting-group">
+                <label class="group-title">Email Templates</label>
+                <div class="setting-row">
+                  <label>Order confirmation</label>
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked>
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+                <div class="setting-row">
+                  <label>Shipping notification</label>
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked>
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+                <div class="setting-row">
+                  <label>Welcome email</label>
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked>
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Billing Settings Content -->
+            <div class="settings-section-content billing-settings-content" style="display: none;">
+              <div class="setting-group">
+                <label class="group-title">Billing Information</label>
+                <div class="setting-row">
+                  <label>Auto-renewal</label>
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked>
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+                <div class="setting-row">
+                  <label>Billing cycle</label>
+                  <div class="select-wrapper">
+                    <select>
+                      <option value="monthly" selected>Monthly</option>
+                      <option value="yearly">Yearly</option>
+                    </select>
+                    <i class="fas fa-chevron-down"></i>
+                  </div>
+                </div>
+              </div>
+              <div class="setting-group">
+                <label class="group-title">Invoices</label>
+                <div class="setting-row">
+                  <label>Email invoices</label>
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked>
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
           </div>
 
           <!-- MOBILE-ONLY: iOS-style sliding panels -->
@@ -1824,7 +2184,7 @@
         <!-- Email List -->
         <section class="email-list-section ">
           <div class="window-toolbar">
-            <label class="toggle-switch" id="window-sidebar-toggle-label" style="margin-right: 14px;">
+            <label class="toggle-switch toggle-switch-S" id="window-sidebar-toggle-label" style="margin-right: 14px;">
               <input type="checkbox" class="window-sidebar-toggle" id="window-sidebar-toggle">
               <span class="slider"></span>
             </label>
@@ -1909,6 +2269,604 @@
     </div>
   </div>
 </template>
+
+
+
+
+
+<!-- Calendar App Template -->
+<template id="calendar-app-template">
+  <div class="window calendar-app-window">
+    <div class="window-header">
+      <button class="menu-toggle"><i class="fas fa-bars"></i></button>
+      <div class="window-title">
+        <div class="window-icon pink-icon">
+          <i class="fas fa-calendar"></i>
+        </div>
+        <span>Calendar</span>
+      </div>
+      <div class="window-controls">
+        <button class="window-minimize" title="Minimize"><i class="fas fa-minus"></i></button>
+        <button class="window-popout" title="Pop out"><i class="fas fa-up-right-from-square"></i></button>
+        <button class="window-maximize" title="Maximize"><i class="fas fa-expand"></i></button>
+        <button class="window-close" title="Close"><i class="fas fa-times"></i></button>
+      </div>
+    </div>
+    <div class="window-content calendarapp-app-content" style="display: flex; height: 100%;">
+      <!-- Sidebar -->
+      <div class="sidebar-overlay"></div>
+      <div class="window-sidebar">
+        <div class="sidebar-section">
+
+          <button class="compose-btn"><i class="fas fa-plus"></i><span>New Event</span></button>
+        </div>
+        
+        <!-- Mini Calendar -->
+        <div class="sidebar-section">
+          <div class="sidebar-section-header"><h4>Calendar</h4></div>
+          <div class="mini-calendar">
+            <div class="mini-calendar-header">
+              <button class="mini-calendar-nav" id="mini-prev-btn"><i class="fas fa-chevron-left"></i></button>
+              <span class="mini-calendar-month" id="mini-calendar-month">February 2023</span>
+              <button class="mini-calendar-nav" id="mini-next-btn"><i class="fas fa-chevron-right"></i></button>
+            </div>
+            <div class="mini-calendar-grid" id="mini-calendar-grid">
+              <!-- Mini calendar days will be generated by JavaScript -->
+            </div>
+          </div>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-header"><h4>My Calendars</h4> <i class="fas fa-plus"></i></div>
+          <div class="sidebar-item active">
+            <div class="sidebar-item-menu"><i class="fas fa-circle" style="color: #4285f4;"></i><span>Personal</span></div>
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-circle" style="color: #ea4335;"></i><span>Work</span></div>
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-circle" style="color: #34a853;"></i><span>Family</span></div>
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-circle" style="color: #fbbc04;"></i><span>Holidays</span></div>
+          </div>
+        </div>
+        
+        <div class="sidebar-section">
+          <div class="sidebar-section-header"><h4>Other Calendars</h4> <i class="fas fa-plus"></i></div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-circle" style="color: #9c27b0;"></i><span>Birthdays</span></div>
+          </div>
+          <div class="sidebar-item">
+            <div class="sidebar-item-menu"><i class="fas fa-circle" style="color: #ff9800;"></i><span>Team Events</span></div>
+          </div>
+        </div>
+        
+        <div class="sidebar-section meta-info-section">
+          <div class="meta-info-section-text">Sync your calendar with other apps in <a href="#" style="color:#FF6B6B;">settings</a>.</div>
+        </div>
+      </div>
+      <!-- Main Content Split -->
+      <div class="window-main-content" style="display: flex; flex: 1; height: 100%;">
+
+        <!-- Calendar Content -->
+        <section class="calendarapp-content-section" >
+          <div class="window-toolbar" >
+            
+      <div class="calendarapp-toolbar-content">
+        <div class="calendarapp-toolbar-left">
+              <label class="toggle-switch" id="calendarapp-sidebar-toggle-label" style="margin-right: 14px;">
+        <input type="checkbox" class="window-sidebar-toggle" id="calendarapp-sidebar-toggle">
+        <span class="slider"></span>
+      </label>
+         <div class="calendarapp-list-header-left">
+                <i class="fas fa-search"></i>
+                <input type="text" class="calendarapp-search" placeholder="Search...">
+          </div>
+   
+        </div>
+        <div class="calendarapp-toolbar-center">
+          <div class="view-selector">
+            <button class="view-btn" data-view="month">Month</button>
+            <button class="view-btn active" data-view="week">Week</button>
+            <button class="view-btn" data-view="day">Day</button>
+            <button class="view-btn" data-view="agenda">Agenda</button>
+          </div>
+
+        
+          <div class="period-selector">
+            <button class="period-nav-btn" id="prev-period"><i class="fas fa-chevron-left"></i></button>
+            <span class="current-period">February 2025</span>
+            <button class="period-nav-btn" id="next-period"><i class="fas fa-chevron-right"></i></button>
+          </div>
+        
+
+        <div class="calendarapp-toolbar-right">
+          <div class="calendarapp-sort">Sort <i class="fas fa-chevron-down" style="font-size:12px;"></i></div>
+          <div class="calendarapp-view">View <i class="fas fa-chevron-down" style="font-size:12px;"></i></div>
+        </div></div>
+      </div>
+          </div>
+          
+          <div class="calendarapp-content">
+            <!-- Main Calendar View -->
+            <div class="main-calendar-container">
+              <!-- Fixed Time Column -->
+             
+
+                <!-- Calendar Body -->
+                
+              </div>
+            </div>
+          
+          
+          <!-- Calendar Status Bar -->
+          <div class="window-statusbar">
+            <div class="status-left">
+              <label class="toggle-switch" id="calendarapp-sidebar-toggle-label" style="margin-right: 14px;">
+                <input type="checkbox" class="window-sidebar-toggle" id="calendarapp-sidebar-toggle">
+                <span class="slider"></span>
+              </label>
+
+              <span>February 2025</span>
+              <span class="status-separator">•</span>
+              <span>Today: Wed, Feb 26</span>
+            </div>
+            <div class="status-right">
+              <span>Week 9 of 52</span>
+              <span class="status-separator">•</span>
+              <span>3 events</span>
+            </div>
+          </div></div>
+        
+        </section>
+
+                <!-- calendarapp Current Order -->
+                <section class="calendarapp-pay-for-event-section" style="display: none;">
+                  <div class="window-toolbar">
+                    <div class="toolbar-buttons-left" >
+                      <div class="calendarapp-current-order-header-item"><h3>Payment</h3> <i class="fas fa-chevron-down"></i></div>
+        
+                    </div>
+                    <div class="toolbar-buttons-right">
+                      <button class="toolbar-button" title="Save"><i class="fas fa-save"></i> <span>Save</span></button>
+                      <button class="toolbar-button" title="Delete"><i class="fas fa-trash"></i> <span>Delete</span></button>
+                      <button class="toolbar-button mailmore-btn" title="More"><i class="fas fa-ellipsis-h"></i></button>
+                    </div>
+                  </div>
+                  <div class="calendarapp-current-order-content">
+                    <!-- Order Items Section (Scrollable) -->
+                    <div class="calendarapp-order-items-container">
+                      <div class="calendarapp-order-item" onclick="toggleOrderItem(this)">
+                        <div class="calendarapp-item-main-row">
+                          <div class="calendarapp-item-image">
+                            <img src="img/appsimg/camera.png" alt="Product" class="item-image">
+                          </div>
+                          <div class="calendarapp-item-details">
+                            <div class="calendarapp-item-name">Denumire</div>
+                            <div class="calendarapp-item-price">50 lei</div>
+                          </div>
+                          <div class="calendarapp-item-quantity">
+                            <button class="qty-btn qty-decrease" title="Decrease"><i class="fas fa-minus"></i></button>
+                            <span class="qty-value">1</span>
+                            <button class="qty-btn qty-increase" title="Increase"><i class="fas fa-plus"></i></button>
+                          </div>
+                          <button class="calendarapp-item-remove-btn" onclick="removeOrderItem(this)" title="Remove item">
+                            <i class="fas fa-xmark"></i>
+                          </button>
+                        </div>
+                        
+                        <!-- Expanded Content -->
+                        <div class="calendarapp-item-expanded-content">
+                          <div class="calendarapp-item-options-row">
+                            <!-- Quantity Section -->
+                            <div class="calendarapp-item-quantity-section">
+                              <div class="calendarapp-item-quantity-label">Quantity</div>
+                              <div class="calendarapp-item-quantity-controls">
+                                <button class="qty-btn qty-decrease" title="Decrease"><i class="fas fa-minus"></i></button>
+                                <span class="qty-value">1</span>
+                                <button class="qty-btn qty-increase" title="Increase"><i class="fas fa-plus"></i></button>
+                              </div>
+                            </div>
+                            
+                            <!-- Discount Section -->
+                            <div class="calendarapp-item-discount-section">
+                              <div class="calendarapp-item-discount-label">Discount</div>
+                              <div class="calendarapp-item-discount-controls">
+                                <input type="number" class="calendarapp-discount-input" value="0" min="0" max="100">
+                                <span class="calendarapp-discount-type">%</span>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <!-- Action Buttons -->
+                          <div class="calendarapp-item-actions">
+                            <button class="calendarapp-item-action-btn">Note</button>
+                            <button class="calendarapp-item-action-btn">Duplicate</button>
+                            <button class="calendarapp-item-action-btn calendarapp-item-apply-btn">Apply</button>
+                          </div>
+                        </div>
+                      </div>
+        
+                      <div class="calendarapp-order-item" onclick="toggleOrderItem(this)">
+                        <div class="calendarapp-item-main-row">
+                          <div class="calendarapp-item-image">
+                            <img src="img/appsimg/macbook-pro.png" alt="Product" class="item-image">
+                          </div>
+                          <div class="calendarapp-item-details">
+                            <div class="calendarapp-item-name">Denumire</div>
+                            <div class="calendarapp-item-personalization">50 lei</div>
+                          </div>
+                          <div class="calendarapp-item-price">
+                            <div class="calendarapp-item-main-price">50 lei</div>
+                            <div class="calendarapp-item-price-discount">-10%</div>
+                          </div>
+                          <button class="calendarapp-item-remove-btn" onclick="removeOrderItem(this)" title="Remove item">
+                            <i class="fas fa-xmark"></i>
+                          </button>
+                        </div>
+                        
+                        <!-- Expanded Content -->
+                        <div class="calendarapp-item-expanded-content">
+                          <div class="calendarapp-item-options-row">
+                            <!-- Quantity Section -->
+                            <div class="calendarapp-item-quantity-section">
+                              <div class="calendarapp-item-quantity-label">Quantity</div>
+                              <div class="calendarapp-item-quantity-controls">
+                                <button class="qty-btn qty-decrease" title="Decrease"><i class="fas fa-minus"></i></button>
+                                <span class="qty-value">1</span>
+                                <button class="qty-btn qty-increase" title="Increase"><i class="fas fa-plus"></i></button>
+                              </div>
+                            </div>
+                            
+                            <!-- Discount Section -->
+                            <div class="calendarapp-item-discount-section">
+                              <div class="calendarapp-item-discount-label">Discount</div>
+                              <div class="calendarapp-item-discount-controls">
+                                <input type="number" class="calendarapp-discount-input" value="0" min="0" max="100">
+                                <span class="calendarapp-discount-type">%</span>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <!-- Action Buttons -->
+                          <div class="calendarapp-item-actions">
+                            <button class="calendarapp-item-action-btn">Note</button>
+                            <button class="calendarapp-item-action-btn">Duplicate</button>
+                            <button class="calendarapp-item-action-btn danger">Remove</button>
+                          </div>
+                        </div>
+                      </div>
+        
+                      <div class="calendarapp-order-item" onclick="toggleOrderItem(this)">
+                        <div class="calendarapp-item-main-row">
+                          <div class="calendarapp-item-image">
+                            <img src="img/appsimg/router.png" alt="Product" class="item-image">
+                          </div>
+                          <div class="calendarapp-item-details">
+                            <div class="calendarapp-item-name">Denumire</div>
+                            <div class="calendarapp-item-personalization">50 lei</div>
+                          </div>
+                          <div class="calendarapp-item-price">
+                            <div class="calendarapp-item-main-price">50 lei</div>
+                            <div class="calendarapp-item-price-discount">-10%</div>
+                          </div>
+                          <button class="calendarapp-item-remove-btn" onclick="removeOrderItem(this)" title="Remove item">
+                            <i class="fas fa-xmark"></i>
+                          </button>
+                        </div>
+                        
+                        <!-- Expanded Content -->
+                        <div class="calendarapp-item-expanded-content">
+                          <div class="calendarapp-item-options-row">
+                            <!-- Quantity Section -->
+                            <div class="calendarapp-item-quantity-section">
+                              <div class="calendarapp-item-quantity-label">Quantity</div>
+                              <div class="calendarapp-item-quantity-controls">
+                                <button class="qty-btn qty-decrease" title="Decrease"><i class="fas fa-minus"></i></button>
+                                <span class="qty-value">1</span>
+                                <button class="qty-btn qty-increase" title="Increase"><i class="fas fa-plus"></i></button>
+                              </div>
+                            </div>
+                            
+                            <!-- Discount Section -->
+                            <div class="calendarapp-item-discount-section">
+                              <div class="calendarapp-item-discount-label">Discount</div>
+                              <div class="calendarapp-item-discount-controls">
+                                <input type="number" class="calendarapp-discount-input" value="0" min="0" max="100">
+                                <span class="calendarapp-discount-type">%</span>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <!-- Action Buttons -->
+                          <div class="calendarapp-item-actions">
+                            <button class="calendarapp-item-action-btn">Edit</button>                    
+                            <button class="calendarapp-item-action-btn">Note</button>
+                            <button class="calendarapp-item-action-btn">Duplicate</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+        
+                    <!-- Order Summary Footer -->
+                    <div class="calendarapp-order-footer">
+                      <!-- Discount Section -->
+                      <div class="calendarapp-discount-section">
+                        <div class="calendarapp-discount-label">Discount fix</div>
+                        <div class="calendarapp-discount-value">500 lei</div>
+                      </div>
+        
+                      <!-- Total Section -->
+                      <div class="calendarapp-total-section">
+                        <div class="calendarapp-total-row">
+                          <span class="calendarapp-total-label">Total</span>
+                          <span class="calendarapp-total-amount">5525 lei</span>
+                        </div>
+                        <div class="calendarapp-subtotal-row">
+                          <span class="calendarapp-subtotal-label">4524 fara TVA • 1547 TVA</span>
+                        </div>
+                      </div>
+        
+                      <!-- Payment Methods -->
+                      <div class="calendarapp-payment-methods">
+                        <button class="calendarapp-payment-btn calendarapp-payment-cash">
+                          <i class="fas fa-money-bill"></i>
+                          <span>Cash</span>
+                        </button>
+                        <button class="calendarapp-payment-btn calendarapp-payment-card">
+                          <i class="fas fa-credit-card"></i>
+                          <span>Card</span>
+                        </button>
+                        <button class="calendarapp-payment-btn calendarapp-payment-ticket">
+                          <i class="fas fa-ticket-alt"></i>
+                          <span>Ticket</span>
+                        </button>
+                        <button class="calendarapp-payment-btn calendarapp-payment-delivery">
+                          <i class="fas fa-truck"></i>
+                          <span>Delivery</span>
+                        </button>
+                      </div>
+        
+                      <!-- Action Buttons -->
+                      <div class="calendarapp-action-buttons">
+                        <button class="calendarapp-action-btn calendarapp-checkout-btn">
+                          <i class="fas fa-plus"></i>
+                          <span>Incaseaza</span>
+                        </button>
+                      </div>
+        
+                      <!-- Bottom Action Buttons -->
+                      <div class="calendarapp-bottom-actions">
+                        <button class="calendarapp-bottom-btn">Vezi ultimul bon</button>
+                        <button class="calendarapp-bottom-btn">Storno</button>
+                        <button class="calendarapp-bottom-btn">Discount</button>
+                      </div>
+                    </div>
+        
+                  </div>
+        
+                </section>
+
+                <!-- New Add/Edit Event Section -->
+                <section class="calendarapp-add-edit-event-section" style="display: none;">
+                  <div class="window-toolbar">
+                    <div class="toolbar-buttons-left">
+                      <div class="calendarapp-current-order-header-item">
+                        <h3>Add Event</h3> 
+                        <i class="fas fa-chevron-down"></i>
+                      </div>
+                    </div>
+                    <div class="toolbar-buttons-right">
+                      <button class="toolbar-button calendarapp-close-event-sidebar" title="Close">
+                        <i class="fas fa-times"></i> 
+                        <span>Close</span>
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div class="calendarapp-event-form-content">
+                    <!-- Event Title -->
+                    <div class="calendarapp-form-group">
+                      <label class="calendarapp-form-label">Add title</label>
+                      <input type="text" class="calendarapp-form-input" id="event-title-input" placeholder="Add title">
+                    </div>
+
+                    <!-- Event Time -->
+                    <div class="calendarapp-form-group">
+                      <div class="calendarapp-time-row">
+                        <div class="calendarapp-time-section">
+                          <label class="calendarapp-form-label">Date</label>
+                          <div class="calendarapp-date-time-input">
+                            <input type="date" class="calendarapp-form-input" id="event-date-input">
+                          </div>
+                        </div>
+                        <div class="calendarapp-time-all-day">
+                          <div class="calendarapp-time-all-day-content">
+                            <span class="calendarapp-checkbox-label">All day</span>
+                            <label class="toggle-switch toggle-switch-L">
+                              <input type="checkbox" id="all-day-toggle">
+                              <span class="slider"></span>
+                            </label>
+
+                        </div></div>
+                      </div>
+                      <div class="calendarapp-time-row">
+                        <div class="calendarapp-time-section">
+                          <label class="calendarapp-form-label">Start time</label>
+                          <input type="time" class="calendarapp-form-input" id="event-start-time-input" step="60">
+                        </div>
+                        <div class="calendarapp-time-section">
+                          <label class="calendarapp-form-label">End time</label>
+                          <input type="time" class="calendarapp-form-input" id="event-end-time-input" step="60">
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Event Description -->
+                    <div class="calendarapp-form-group">
+                      <label class="calendarapp-form-label">Add description</label>
+                      <textarea class="calendarapp-form-textarea" id="event-description-input" placeholder="Add description" rows="3"></textarea>
+                    </div>
+
+                    <!-- Contacts -->
+                    <div class="calendarapp-form-group">
+                      <label class="calendarapp-form-label">Contacts</label>
+                      <div class="calendarapp-guests-input-container">
+                        <input type="text" class="calendarapp-form-input" id="event-guests-input" placeholder="Search by name, phone, email, CNP, etc.">
+                        <div class="calendarapp-guests-permissions">
+                          <div class="calendarapp-checkbox-row">
+                            <label class="toggle-switch toggle-switch-L">
+                              <input type="checkbox" id="modify-event-toggle" checked>
+                              <span class="slider"></span>
+                            </label>
+                            <span class="calendarapp-checkbox-label">Modify event</span>
+                          </div>
+                          <div class="calendarapp-checkbox-row">
+                            <label class="toggle-switch toggle-switch-L">
+                              <input type="checkbox" id="invite-others-toggle" checked>
+                              <span class="slider"></span>
+                            </label>
+                            <span class="calendarapp-checkbox-label">Invite others</span>
+                          </div>
+                          <div class="calendarapp-checkbox-row">
+                            <label class="toggle-switch toggle-switch-L">
+                              <input type="checkbox" id="see-guest-list-toggle" checked>
+                              <span class="slider"></span>
+                            </label>
+                            <span class="calendarapp-checkbox-label">See guest list</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Event Details -->
+
+
+                    <!-- Calendar Selection -->
+                    <div class="calendarapp-form-group">
+                      <label class="calendarapp-form-label">Calendar</label>
+                      <div class="calendarapp-calendar-dropdown-container">
+                        <button class="calendarapp-add-meet-btn calendarapp-calendar-dropdown-btn" type="button">
+                          <div class="calendarapp-selected-calendar">
+                            <i class="fas fa-circle" style="color: #4285f4;"></i>
+                            <span>Personal</span>
+                          </div>
+                          <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="calendarapp-calendar-dropdown-menu">
+                          <div class="calendarapp-calendar-group">
+                            <div class="calendarapp-calendar-option" data-calendar="personal" data-color="#4285f4">
+                              <i class="fas fa-circle" style="color: #4285f4;"></i>
+                              <span>Personal</span>
+                            </div>
+                            <div class="calendarapp-calendar-option" data-calendar="work" data-color="#ea4335">
+                              <i class="fas fa-circle" style="color: #ea4335;"></i>
+                              <span>Work</span>
+                            </div>
+                            <div class="calendarapp-calendar-option" data-calendar="family" data-color="#34a853">
+                              <i class="fas fa-circle" style="color: #34a853;"></i>
+                              <span>Family</span>
+                            </div>
+                            <div class="calendarapp-calendar-option" data-calendar="holidays" data-color="#fbbc04">
+                              <i class="fas fa-circle" style="color: #fbbc04;"></i>
+                              <span>Holidays</span>
+                            </div>
+                          </div>
+                          <div class="calendarapp-calendar-separator"></div>
+                          <div class="calendarapp-calendar-group">
+                            <div class="calendarapp-calendar-option" data-calendar="birthdays" data-color="#9c27b0">
+                              <i class="fas fa-circle" style="color: #9c27b0;"></i>
+                              <span>Birthdays</span>
+                            </div>
+                            <div class="calendarapp-calendar-option" data-calendar="team-events" data-color="#ff9800">
+                              <i class="fas fa-circle" style="color: #ff9800;"></i>
+                              <span>Team Events</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Add Location -->
+                    <div class="calendarapp-form-group">
+                      <button class="calendarapp-add-location-btn" type="button">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>Add location</span>
+                      </button>
+                    </div>
+
+
+   <!-- Default Visibility -->
+   <div class="calendarapp-form-group">
+    <label class="calendarapp-form-label">Calendar</label>
+    <select class="calendarapp-form-select">
+      <option value="default">Default visibility</option>
+      <option value="public">Public</option>
+      <option value="private">Private</option>
+    </select>
+  </div>
+
+
+
+                    <!-- Notifications -->
+                    <div class="calendarapp-form-group">
+                      <label class="calendarapp-form-label">Notifications</label>
+                      <div class="calendarapp-notification-row">
+                        <select class="calendarapp-form-select">
+                          <option value="email">Email</option>
+                          <option value="notification" style="color: #333;">SMS</option>
+                        </select>
+                        <select class="calendarapp-form-select">
+                          <option value="10">10 minutes</option>
+                          <option value="30">30 minutes</option>
+                          <option value="60">1 hour</option>
+                        </select>
+                        <button class="calendarapp-remove-notification-btn" type="button">
+                          <i class="fas fa-times"></i>
+                        </button>
+                      </div>
+                      <button class="calendarapp-add-notification-btn" type="button">
+                        <span>Add notification</span>
+                      </button>
+                    </div>
+
+                
+                 
+                  </div>
+                    <!-- Order Summary Footer -->
+                    <div class="calendarapp-order-footer">
+                      <!-- Payment Methods -->
+                      <div class="calendarapp-payment-methods">
+                        <button class="calendarapp-payment-btn calendarapp-payment-free active" data-payment-type="free">
+                          <i class="fas fa-gift"></i>
+                          <span>Free</span>
+                        </button>
+                        <button class="calendarapp-payment-btn calendarapp-payment-paid" data-payment-type="paid">
+                          <i class="fas fa-credit-card"></i>
+                          <span>Paid</span>
+                        </button>
+                      </div>
+
+                      <!-- Action Buttons -->
+                      <div class="calendarapp-action-buttons">
+                        <button class="calendarapp-action-btn calendarapp-schedule-event-btn">
+                          <i class="fas fa-calendar-plus"></i>
+                          <span>Schedule Event</span>
+                        </button>
+                      </div>
+                    </div>
+                  
+                </section>
+      </div>
+ 
+    </div>
+  </div>
+</template>
+
+
+
+
 
 
 <!-- Point of sale POS App Template -->
@@ -2004,19 +2962,17 @@
         <!-- point-of-sale Content -->
         <section class="point-of-sale-content-section" >
           <div class="window-toolbar" >
-            <label class="toggle-switch" id="window-sidebar-toggle-label" style="margin-right: 14px;">
-              <input type="checkbox" class="window-sidebar-toggle" id="window-sidebar-toggle">
-              <span class="slider"></span>
-            </label>
+           
             <div class="point-of-sale-list-header">
               <div class="point-of-sale-list-header-left">
                 <i class="fas fa-search"></i>
                 <input type="text" class="point-of-sale-search" placeholder="Search...">
               </div>
               <div class="point-of-sale-list-header-right">
-                <div class="pos-autoscan-barcode"><input type="checkbox" class="point-of-sale-list-sort-checkbox" id="point-of-sale-list-sort-checkbox"> Auto add scanned bar codes</div>
+                <div class="pos-autoscan-barcode"><input type="checkbox" class="point-of-sale-list-sort-checkbox" id="point-of-sale-list-sort-checkbox"> Auto add scanned codes</div>
                 <div class="point-of-sale-list-sort">Sort <i class="fas fa-chevron-down" style="font-size:12px;"></i></div>
                 <div class="point-of-sale-list-sort">View <i class="fas fa-chevron-down" style="font-size:12px;"></i></div>
+                <button class="point-of-sale-keyboard-btn"> <i class="fas fa-keyboard" style="font-size:22px;"></i></button>
 
               </div>
               </div>
@@ -2173,6 +3129,24 @@
 
             </div>
             
+          </div>
+          
+          <!-- Point of Sale Status Bar -->
+          <div class="window-statusbar">
+            <div class="status-left">
+              <label class="toggle-switch" id="calendarapp-sidebar-toggle-label" style="margin-right: 14px;">
+                <input type="checkbox" class="window-sidebar-toggle" id="calendarapp-sidebar-toggle">
+                <span class="slider"></span>
+              </label>
+              <span>Point of Sale</span>
+              <span class="status-separator">•</span>
+              <span>12 items available</span>
+            </div>
+            <div class="status-right">
+              <span>Session: Active</span>
+              <span class="status-separator">•</span>
+              <span>Auto-scan: On</span>
+            </div>
           </div>
         
         </section>
@@ -2347,6 +3321,26 @@
         
                     <!-- Order Summary Footer -->
                     <div class="pos-order-footer">
+                      <!-- Number Pad (Hidden by default) -->
+                      <div class="pos-number-pad" id="pos-number-pad" style="display: none;">
+                        <div class="number-pad-grid">
+                          <button class="number-pad-btn" data-number="1">1</button>
+                          <button class="number-pad-btn" data-number="2">2</button>
+                          <button class="number-pad-btn" data-number="3">3</button>
+                          <button class="number-pad-btn" data-number="4">4</button>
+                          <button class="number-pad-btn" data-number="5">5</button>
+                          <button class="number-pad-btn" data-number="6">6</button>
+                          <button class="number-pad-btn" data-number="7">7</button>
+                          <button class="number-pad-btn" data-number="8">8</button>
+                          <button class="number-pad-btn" data-number=".">.</button>
+                          <button class="number-pad-btn" data-number="9">9</button>
+                          <button class="number-pad-btn" data-number="0">0</button>
+                          <button class="number-pad-btn number-pad-confirm" data-action="confirm">
+                            <i class="fas fa-check"></i>
+                          </button>
+                        </div>
+                      </div>
+                      
                       <!-- Discount Section -->
                       <div class="pos-discount-section">
                         <div class="pos-discount-label">Discount fix</div>
@@ -2394,7 +3388,7 @@
         
                       <!-- Bottom Action Buttons -->
                       <div class="pos-bottom-actions">
-                        <button class="pos-bottom-btn">Vezi ultimul bon</button>
+                        <button class="pos-bottom-btn">Adauga CUI</button>
                         <button class="pos-bottom-btn">Storno</button>
                         <button class="pos-bottom-btn">Discount</button>
                       </div>
@@ -3156,12 +4150,76 @@
   <div id="ai-chat-window" class="ai-chat-window" style="display: none;">
     <div class="ai-chat-header">
       <button class="ai-menu-toggle" aria-label="Menu"><i class="fas fa-bars"></i></button>
-      <div class="ai-chat-title"><i class="fas fa-robot"></i> <span> Alien Intelligence</span></div>
+      <div class="ai-chat-title">            <div class="ai-chat-content-ai-answer-avatar">
+        <img src="img/alien.png" alt="User" class="user-avatar">
+        </div></i> <span> Alien Intelligence</span></div>
       <button id="ai-chat-close-btn" class="panel-close-btn" aria-label="Close chat"><i class="fas fa-times"></i></button>
       
     </div>
     <div class="ai-chat-window-inner" style="height: calc(100vh - 50px); margin-top: 0; display: flex; flex-direction: column;">
       <!-- Chat content goes here -->
+       <div class="ai-chat-content">
+          <div class="ai-chat-content-ai-answer">
+            <div class="ai-chat-content-ai-answer-avatar">
+              <img src="img/alien.png" alt="User" class="user-avatar">
+              </div>
+            <div class="ai-chat-content-answer">
+              <span>Alien Intelligence lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos. Alien Intelligence lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos</span>
+              <div class="ai-chat-content-ai-answer-actions">
+                <button class="ai-chat-action-btn"><i class="fas fa-copy"></i></button>
+                <button class="ai-chat-action-btn"><i class="fas fa-thumbs-up"></i></button>
+                <button class="ai-chat-action-btn"><i class="fas fa-thumbs-down"></i></button>
+                <button class="ai-chat-action-btn"><i class="fas fa-volume-high"></i></button> 
+                <button class="ai-chat-action-btn"><i class="fas fa-flag"></i></button>
+              </div>
+            </div>
+          </div>
+          <div class="ai-chat-content-user-question">
+            <div class="ai-chat-content-question">
+              <span>What is the meaning of life?</span>
+
+            </div>
+          </div>
+          <div class="ai-chat-content-ai-answer">
+            <div class="ai-chat-content-ai-answer-avatar">
+            <img src="img/alien.png" alt="User" class="user-avatar">
+            </div>
+            <div class="ai-chat-content-answer">
+              <span>Alien Intelligence lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos. Alien Intelligence lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos Alien Intelligence lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos</span>
+              <div class="ai-chat-content-ai-answer-actions">
+                <button class="ai-chat-action-btn"><i class="fas fa-copy"></i></button>
+                <button class="ai-chat-action-btn"><i class="fas fa-thumbs-up"></i></button>
+                <button class="ai-chat-action-btn"><i class="fas fa-thumbs-down"></i></button>
+                <button class="ai-chat-action-btn"><i class="fas fa-volume-high"></i></button> 
+                <button class="ai-chat-action-btn"><i class="fas fa-flag"></i></button>
+              </div>
+            </div>
+          </div>
+          <div class="ai-chat-content-user-question">
+            <div class="ai-chat-content-question">
+              <span>What is the meaning of life? Alien Intelligence lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos</span>
+
+            </div>
+          </div>
+          </div>
+          <div class="ai-chat-box">
+            <div class="ai-chat-box-content">
+              <textarea type="text" class="ai-chat-input" placeholder="Type your message here..." ></textarea>
+            </div>
+          
+          <div class="ai-chat-content-actions">
+            <div class="ai-chat-content-actions-left">
+            <button class="ai-chat-action-btn"><i class="fas fa-microphone"></i></button>
+            <button class="ai-chat-action-btn"><i class="fas fa-camera"></i></button>
+            <button class="ai-chat-action-btn"><i class="fas fa-image"></i></button>
+            <button class="ai-chat-action-btn"><i class="fas fa-file-alt"></i></button>
+            <button class="ai-chat-action-btn"><i class="fas fa-link"></i></button>
+          </div>
+          <div class="ai-chat-content-actions-right">
+            <button class="ai-chat-send-btn"><i class="fas fa-paper-plane"></i></button>
+          </div>
+        </div>
+       </div>
     </div>
   </div>
   
@@ -3207,7 +4265,7 @@
   </div>
   
   <div id="calendar-panel" class="calendar-panel" style="display:none;">
-    <div class="calendar-header">
+    <div class="calendar-panel-header">
       <span id="calendar-month">April 2024</span>
       <div class="calendar-header-icons" style="display: flex; align-items: center; gap: 8px;">
         <button id="calendar-prev-btn" title="Previous Month"><i class="fas fa-chevron-up"></i></button>

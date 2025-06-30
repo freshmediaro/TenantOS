@@ -123,6 +123,16 @@ Not supports in Firefox and IE */
   z-index: 100 !important;
 } */
 
+
+
+h3 {
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 15px;
+  color: #fff;
+}
+
+
 body {
   user-select: none !important;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
@@ -570,7 +580,7 @@ margin-right: 5px;
   height: 5px;
   border-top: none;
   z-index: -1;
-  background-color: var(--accent-color);
+  background-color: var(--accent-color-light);
   border-radius: 10px;
   width: 15px;
   pointer-events: none;
@@ -739,7 +749,7 @@ margin-right: 5px;
   /* More rounded corners */
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
   /* Restore shadow for elevation */
-  overflow: hidden;
+  overflow: visible;
   /* Keep, handled by flex children if they scroll */
   z-index: 1100;
   /* Ensure it's above the taskbar (taskbar is 1000) */
@@ -843,6 +853,7 @@ margin-right: 5px;
   /* Slightly larger */
   font-weight: 500;
   color: #E0E0E0;
+  margin-bottom: 0;
 }
 
 .start-menu-category-link {
@@ -864,7 +875,24 @@ margin-right: 5px;
   margin-top: 20px;
 }
 
+.start-menu-style-windows11 .start-menu-right-sidebar-header {
+  display: none;
+}
 
+
+.start-menu-style-windows11 .start-menu-right-sidebar-body {
+  width: 100%;
+  max-width: none;
+  padding: 0 32px 0 32px;
+  box-sizing: border-box;
+  display: flex
+;
+  justify-content: space-between;
+  overflow-y: auto;
+  max-height: 150px;
+  position: relative;
+  z-index: 1;
+}
 
 .app-grid-section:first-child h4 {
   margin-top: 0;
@@ -934,9 +962,9 @@ margin-right: 5px;
   /* Fixed width for the sidebar */
   flex-shrink: 0;
   /* Prevent shrinking */
-  padding: 10px 20px;
+  padding: 0;
   /* Space from the left panel (if gap isn't enough or for border) */
-  overflow-y: auto;
+  overflow-y: hidden;
 }
 
 .start-menu-right-sidebar .menu-section {
@@ -947,7 +975,11 @@ margin-right: 5px;
   margin-bottom: 0;
 }
 
-
+.start-menu-right-sidebar-body {
+  padding: 20px;
+  overflow-y: auto;
+  max-height: calc(100vh - 450px);
+}
 
 .menu-links-list {
   list-style: none;
@@ -1019,6 +1051,7 @@ margin-right: 5px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   /*background-color: rgba(0, 0, 0, 0.15);*/
   /* Slightly darker footer background */
+  height: 51px;
 }
 
 /* Updated Search Bar Styling for Footer */
@@ -1026,13 +1059,15 @@ margin-right: 5px;
   flex-grow: 1;
   display: flex;
   align-items: center;
-  background-color: var(--input-bg);
+  background-color: transparent;
   /* Darker search input bg */
   padding: 2px 15px;
   /* More padding */
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  border-right: 1px solid var(--border-color);
+  height: 100%;
 }
 
 .start-menu-footer .start-menu-search-bar-bottom:active, .start-menu-footer .start-menu-search-bar-bottom:focus, .start-menu-footer .start-menu-search-bar-bottom:hover, .start-menu-footer .start-menu-search-bar-bottom:target {
@@ -1079,10 +1114,11 @@ margin-right: 5px;
   transition: background-color 0.2s, color 0.2s;
   justify-content: center;
   width: 180px;
+  height: 100%;
 }
 
 .start-menu-logout-button:hover {
-  background-color: var(--primary-bg);
+  background-color: var(--accent-color);
   color: #FFFFFF;
 }
 
@@ -1139,7 +1175,7 @@ margin-right: 5px;
   position: absolute;
   background-color: var(--window-bg);
   border-radius: 12px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  box-shadow: 0px 0px 40px rgb(0 0 0 / 50%);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -1683,6 +1719,7 @@ body.light-windows .file-info {
   color: var(--os-gray);
   z-index: 20;
   background: #100f21;
+  border-radius: 0 0 15px 15px;
 }
 
 .status-right {
@@ -1701,6 +1738,23 @@ body.light-windows .file-info {
   pointer-events: auto;
   user-select: none;
   /* Removed: overflow-y, overflow-x, scrollbar-width */
+}
+
+/* NEW: Notifications Screen (left side panel) */
+#notifications-screen {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 300px;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 15px 15px 65px 15px;
+  pointer-events: auto;
+  user-select: none;
+  background: var(--window-bg);
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: none; /* Hidden on desktop by default */
 }
 
 /* Hide scrollbar for Webkit browsers - moved to desktop media query */
@@ -2740,11 +2794,6 @@ body.light-windows .settings-sidebar-search input {
   margin-right: 30px !important;
 }
 
-.window-statusbar .status-left {
-  display: flex;
-  align-items: center;
-}
-
 .toggle-switch input {
   opacity: 0;
   width: 0;
@@ -2913,6 +2962,7 @@ input:checked+.slider:before {
   align-items: center;
   align-content: center;
   padding: 15px 20px 15px 20px;
+  background: linear-gradient(180deg, #ffffff0a, #05021700);
 }
 
 .notifications-header {
@@ -4312,7 +4362,7 @@ body.light-windows .settings-content .badge {
   top: auto;
   bottom: 60px;
   height: calc(100vh - 70px);
-  width: 420px;
+  width: 400px;
   z-index: 4000;
   background: #050217c5;
   box-shadow: -4px 0 24px rgba(0, 0, 0, 0.25);
@@ -4323,6 +4373,7 @@ body.light-windows .settings-content .badge {
   flex-direction: column;
   overflow: hidden;
   backdrop-filter: blur(30px);
+  border: 1px solid var(--border-color);
 }
 
 .ai-chat-window.ai-chat-visible {
@@ -4333,9 +4384,9 @@ body.light-windows .settings-content .badge {
 .ai-chat-window-inner {
   flex: 1;
   overflow-y: auto;
-  padding: 24px 24px 16px 24px;
   display: flex;
   flex-direction: column;
+  justify-content: flex-end !important;
 }
 
 .ai-chat-close-btn {
@@ -4347,6 +4398,14 @@ body.light-windows .settings-content .badge {
   z-index: 10;
   opacity: 0.7;
   transition: opacity 0.2s;
+}
+
+
+.ai-chat-title {
+  display: flex
+;
+    align-items: center;
+    gap: 15px;
 }
 
 .ai-chat-title i {
@@ -4548,6 +4607,7 @@ body.light-windows .settings-content .badge {
   flex-direction: column;
   overflow: hidden;
   backdrop-filter: blur(30px);
+  border: 1px solid var(--border-color);
 }
 
 .notifications-panel.notifications-visible {
@@ -5026,10 +5086,6 @@ font-weight: 600;
   transition: height 0.5s cubic-bezier(0.23, 1, 0.32, 1), margin 0.5s cubic-bezier(0.23, 1, 0.32, 1), padding 0.5s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
-.notif-list .notif-card {
-  transition: margin 0.5s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.18s cubic-bezier(0.4, 0, 0.2, 1), height 0.5s cubic-bezier(0.23, 1, 0.32, 1), padding 0.5s cubic-bezier(0.23, 1, 0.32, 1);
-}
-
 .desktop-area,
 .desktop-icons {
   overflow: hidden;
@@ -5164,166 +5220,116 @@ font-weight: 600;
     z-index: 2;
   }
 
-  .mobile-icons-active .desktop-area {
-    transform: translateX(0);
-  }
-
-  .mobile-icons-active #widgets-screen {
-    transform: translateX(100vw);
-  }
-
-  .mobile-widgets-active .desktop-area {
-    transform: translateX(-100vw);
-  }
-
-  .mobile-widgets-active #widgets-screen {
-    transform: translateX(0);
-  }
-
-  .main-content-area {
-    overflow-x: hidden !important;
-    overflow-y: hidden !important;
-    position: relative !important;
-    width: 100vw !important;
-    height: 100vh !important;
-  }
-
-  .desktop-area,
-  #widgets-screen {
-    position: absolute !important;
+  #notifications-screen {
+    position: absolute;
     top: 0;
     left: 0;
-    width: 100vw !important;
-    height: 100vh !important;
-    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-    will-change: transform;
-  }
-
-  .desktop-area {
-    z-index: 1;
-  }
-
-  #widgets-screen {
+    width: 100vw;
+    height: 100%;
     z-index: 2;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 20px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
+
+  .mobile-notifications-screen {
+    /* Additional styles for mobile notifications screen */
+    background: transparent;
+  }
+
+  .mobile-notifications-screen .no-notifications-msg {
+    color: #fff;
+  }
+
+  .mobile-notifications-screen .notifications-panel-content {
+    /* Additional styles for mobile notifications screen */
+    width: 100%;
+    padding: 20px;
+
+  }
+
+ 
 
   .mobile-icons-active .desktop-area {
     transform: translateX(0);
+  }
+
+  .mobile-icons-active #notifications-screen {
+    transform: translateX(-100vw);
   }
 
   .mobile-icons-active #widgets-screen {
     transform: translateX(100vw);
   }
 
+  .mobile-notifications-active .desktop-area {
+    transform: translateX(100vw);
+  }
+
+  .mobile-notifications-active #notifications-screen {
+    transform: translateX(0);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: none !important;
+  }
+
+  .mobile-notifications-active #widgets-screen {
+    transform: translateX(200vw);
+  }
+
   .mobile-widgets-active .desktop-area {
     transform: translateX(-100vw);
   }
 
+  .mobile-widgets-active #notifications-screen {
+    transform: translateX(-200vw);
+  }
+
   .mobile-widgets-active #widgets-screen {
     transform: translateX(0);
+    padding: 20px;
+    overflow-x: hidden;
   }
 
-  .main-content-area {
-    display: flex !important;
-    flex-direction: row !important;
-    width: 100vw !important;
-    height: calc(100vh - 50px) !important;
-    overflow-x: auto !important;
-    overflow-y: hidden !important;
-    position: relative !important;
+  .mobile-notifications-active .notif-card {
+    background-color: #09011f40;
+    backdrop-filter: blur(18px);
+    border-radius: 18px;
+    border: 1px solid var(--border-color);
   }
 
-  .desktop-area {
-    width: 100vw !important;
-    min-width: 100vw !important;
-    max-width: 100vw !important;
-    height: calc(100vh - 50px) !important;
-    min-height: 0 !important;
-    max-height: 100% !important;
-    flex-shrink: 0 !important;
-    position: relative !important;
-    scroll-snap-align: start;
-    display: flex !important;
-    flex-direction: column !important;
+
+  .mobile-notifications-active .notif-card.unread {
+    background-color: var(--widget-bg);
+    backdrop-filter: blur(18px);
+    border-radius: 18px;
   }
 
-  #widgets-screen {
-    display: block !important;
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    box-sizing: border-box !important;
-    padding: 20px 0 !important;
-    background: none !important;
-    background-color: transparent !important;
-    z-index: 1;
-    /* Remove height, min-height, max-height */
-  }
 
-  .widget {
-    width: 90vw !important;
-    max-width: 500px !important;
-    margin: 0 auto 18px auto !important;
-    height: auto !important;
-    min-height: unset !important;
-    max-height: unset !important;
-    align-self: unset !important;
-  }
+
+  /* Second duplicate desktop-area/widgets-screen rules removed - using unified rules above */
+
+  /* Duplicate element rules removed - using unified rules above */
+
+
 
   .taskbar-icon#widgets-toggle-btn {
     display: none !important;
   }
 
-  .main-content-area {
-    display: flex !important;
-    flex-direction: row !important;
-    height: 100vh !important;
-    overflow-x: auto !important;
-    position: relative !important;
-    overflow-y: hidden !important;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    /* Remove width: 100vw, min-width, max-width */
-  }
+  /* Scroll-based rules removed to prevent multiple empty screens */
 
-  .main-content-area::-webkit-scrollbar {
-    display: none !important;
-  }
-
-  .desktop-area,
-  #widgets-screen {
-    width: 100vw !important;
-    min-width: 100vw !important;
-    max-width: 100vw !important;
-    height: 100vh !important;
-    flex-shrink: 0 !important;
-    position: relative !important;
-    scroll-snap-align: start;
-    z-index: 1;
-  }
-
-  .main-content-area {
-    overflow-x: auto !important;
-    overflow-y: hidden !important;
-  }
-
-  .desktop-area {
-    position: relative !important;
-    left: unset !important;
-    right: unset !important;
-    top: unset !important;
-    bottom: unset !important;
-    /* Already have width: 100vw, flex-shrink: 0 */
-  }
+  /* Additional scroll-based rules removed */
 
   .taskbar.taskbar-hidden-mobile {
     display: none !important;
   }
 
-  .desktop-area {
-    display: flex !important;
-    flex-direction: column !important;
-  }
+  /* Duplicate desktop-area rule removed to prevent conflicts */
 
   .os-container {
     display: block !important;
@@ -5331,27 +5337,7 @@ font-weight: 600;
     overflow: hidden !important;
   }
 
-  .main-content-area {
-    display: flex !important;
-    flex-direction: row !important;
-    height: 100vh !important;
-    width: 100vw !important;
-    overflow: hidden !important;
-    position: relative !important;
-  }
-
-  .desktop-area {
-    display: flex !important;
-    flex-direction: column !important;
-    height: 100vh !important;
-    width: 100vw !important;
-    min-width: 100vw !important;
-    max-width: 100vw !important;
-    flex-shrink: 0 !important;
-    position: relative !important;
-    margin: 0 !important;
-    padding: 0 !important;
-  }
+  /* Duplicate main-content-area rules removed to prevent conflicts */
 
 
   .taskbar {
@@ -5373,24 +5359,7 @@ font-weight: 600;
     overflow: hidden !important;
   }
 
-  .main-content-area {
-    display: flex !important;
-    flex-direction: row !important;
-    height: 100vh !important;
-    width: 100vw !important;
-    overflow-x: auto !important;
-    overflow-y: hidden !important;
-    position: relative !important;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-  }
-
-  .main-content-area::-webkit-scrollbar {
-    display: none !important;
-    height: 0 !important;
-    background: transparent !important;
-  }
+  /* Final scroll-based rules removed to use pure transform approach */
 
 
   html,
@@ -5421,38 +5390,10 @@ font-weight: 600;
     background: inherit !important;
   }
 
-  .main-content-area {
-    max-width: 100vw !important;
-    width: 100vw !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    overflow-x: auto !important;
-    overflow-y: hidden !important;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none !important;
-  }
-
-  .main-content-area::-webkit-scrollbar {
-    display: none !important;
-    height: 0 !important;
-    background: transparent !important;
-  }
+  /* Conflicting scroll-based CSS rules removed to prevent jumping */
 
 
-  .main-content-area {
-    overflow-x: auto !important;
-    overflow-y: visible !important;
-    height: auto !important;
-    min-height: 0 !important;
-    max-height: none !important;
-  }
-
-  #widgets-screen {
-    touch-action: pan-y !important;
-    -ms-touch-action: pan-y !important;
-    overscroll-behavior-x: contain !important;
-    overscroll-behavior-y: auto !important;
-  }
+  /* Final conflicting scroll-based rules removed */
 
   #file-explorer-sidebar-toggle-label, .window-sidebar-toggle-label {
     display: none !important;
@@ -5467,6 +5408,9 @@ font-weight: 600;
 @media (max-width: 767px) {
 
   /* All rules from every scattered @media (max-width: 767px) go here */
+.app-launcher-footer {
+  display: none !important;
+}
 
 
   .mobile-profile-top-bar {
@@ -5603,7 +5547,14 @@ font-weight: 600;
   }
 
   .app-launcher-grid {
-    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)) !important;
+    display: grid
+;
+    gap: 25px;
+    justify-items: center;
+    grid-template-columns: repeat(4, 1fr) !important;
+    grid-auto-rows: 110px !important;
+    gap: 32px 0 !important;  
+  min-width: 100%;
   }
 
   .taskbar-app-icon .icon-container {
@@ -5645,7 +5596,22 @@ font-weight: 600;
 
   .start-menu-left-panel {
     min-height: calc(100vh - 110px);
+    width: 100%;
+    min-width: 100%;
+    padding: 0;
   }
+
+  .app-grid {
+    display: grid
+;
+    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+    gap: 25px;
+    justify-items: center;
+    grid-template-columns: repeat(4, 1fr) !important;
+    grid-auto-rows: 110px !important;
+    gap: 32px 0 !important;
+}
+
 
   .start-menu-footer {
     display: none;
@@ -6096,49 +6062,14 @@ font-weight: 600;
     min-height: 0 !important;
     max-height: none !important;
     width: 100vw !important;
-    overflow-x: auto !important;
+    overflow-x: hidden !important;
     overflow-y: hidden !important;
-    display: flex !important;
-    flex-direction: row !important;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
     position: relative !important;
   }
 
-  .desktop-area {
-    flex: 1 1 auto !important;
-    height: auto !important;
-    min-height: 0 !important;
-    max-height: none !important;
-    width: 100vw !important;
-    min-width: 100vw !important;
-    max-width: 100vw !important;
-    flex-shrink: 0 !important;
-    position: relative !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    scroll-snap-align: start;
-    display: flex !important;
-    flex-direction: column !important;
-  }
+  /* Conflicting flex-based desktop-area rules removed to use pure transform approach */
 
-  #widgets-screen {
-    flex: 1 1 auto !important;
-    height: 100% !important;
-    min-height: 0 !important;
-    max-height: none !important;
-    width: 100vw !important;
-    min-width: 100vw !important;
-    max-width: 100vw !important;
-    flex-shrink: 0 !important;
-    position: relative !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    scroll-snap-align: start;
-    display: block !important;
-    flex-direction: column !important;
-  }
+  /* Conflicting flex-based widgets-screen rules removed to use pure transform approach */
 
 }
 
@@ -6267,6 +6198,11 @@ font-weight: 600;
     height: 100vh !important;
     width: 100vw !important;
   }
+
+  /* Hide calendar today panel on mobile devices */
+  .calendar-today-panel-slide {
+    display: none;
+  }
 }
 
 #widgets-screen {
@@ -6364,6 +6300,75 @@ font-weight: 600;
 
 
 
+/* Mini Calendar in Sidebar */
+.mini-calendar {
+  padding: 10px 5px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  margin-bottom: 16px;
+  width: 100% !important;
+}
+
+.mini-calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.mini-calendar-nav {
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.mini-calendar-nav:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.mini-calendar-month {
+  font-weight: 600;
+  font-size: 14px;
+  color: #fff;
+}
+
+.mini-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  font-size: 12px;
+}
+
+.mini-calendar-day {
+  padding: 6px 4px;
+  text-align: center;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: background-color 0.2s;
+  font-weight: 500;
+}
+
+.mini-calendar-day:hover {
+  background: var(--accent-color);
+  color: #fff;
+}
+
+.mini-calendar-day.today {
+  background: var(--accent-color);
+  color: white;
+}
+
+.mini-calendar-day.other-month {
+  opacity: 0.4;
+}
+
+
+
+
 .sidebar-collapsed .sidebar-item span {
   opacity: 0;
   width: 0;
@@ -6391,7 +6396,8 @@ font-weight: 600;
 
 .sidebar-collapsed .sidebar-section h4,
 .sidebar-collapsed .settings-nav a span,
-.sidebar-collapsed .window-title.easy-mode-window-title span {
+.sidebar-collapsed .window-title.easy-mode-window-title span,
+.sidebar-collapsed .mini-calendar {
   opacity: 0;
   width: 0;
   margin-left: 0;
@@ -6405,7 +6411,8 @@ font-weight: 600;
 .sidebar-collapsed.sidebar-hovered .sidebar-section h4,
 .sidebar-collapsed.sidebar-hovered .sidebar-item span,
 .sidebar-collapsed.sidebar-hovered .settings-nav a span,
-.sidebar-collapsed.sidebar-hovered .window-title.easy-mode-window-title span {
+.sidebar-collapsed.sidebar-hovered .window-title.easy-mode-window-title span,
+.sidebar-collapsed.sidebar-hovered .mini-calendar {
   opacity: 1;
   width: auto;
   pointer-events: auto;
@@ -6837,7 +6844,8 @@ font-weight: 600;
     padding-bottom: 40px;
   }
 
-
+  .start-menu-body {
+    max-height: calc(100vh - 30px); }
 
   /* Header for both screens */
   .settings-mobile-header {
@@ -6973,6 +6981,196 @@ font-weight: 600;
   }
 
   /* Add more as needed for your controls */
+
+  /* Mobile adapted content styles */
+  .settings-mobile-options .mobile-adapted-content {
+    padding: 0;
+    margin: 0;
+    background: transparent;
+  }
+
+  .settings-mobile-options .mobile-adapted-content .setting-group {
+    margin: 0 0 20px 0;
+    background: var(--window-content);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+
+  .settings-mobile-options .mobile-adapted-content .group-title {
+    display: block;
+    padding: 12px 16px 8px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #8e8e93;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: transparent;
+    margin: 0;
+  }
+
+  .settings-mobile-options .mobile-adapted-content .appearance-options {
+    display: flex;
+    padding: 12px 16px;
+    gap: 12px;
+    background: var(--window-content);
+  }
+
+  .settings-mobile-options .mobile-adapted-content .appearance-option {
+    flex: 1;
+    text-align: center;
+    padding: 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .settings-mobile-options .mobile-adapted-content .appearance-option.active {
+    background: #007aff;
+    color: white;
+  }
+
+  .settings-mobile-options .mobile-adapted-content .appearance-option img {
+    width: 100%;
+    max-width: 60px;
+    height: auto;
+    border-radius: 4px;
+    margin-bottom: 4px;
+  }
+
+  .settings-mobile-options .mobile-adapted-content .accent-color-options {
+    display: flex;
+    padding: 12px 16px;
+    gap: 12px;
+    flex-wrap: wrap;
+    background: var(--window-content);
+  }
+
+  .settings-mobile-options .mobile-adapted-content .color-swatch {
+    width: 32px;
+    height: 32px;
+    border-radius: 16px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: border-color 0.2s;
+  }
+
+  .settings-mobile-options .mobile-adapted-content .color-swatch.active {
+    border-color: #fff;
+    box-shadow: 0 0 0 2px #007aff;
+  }
+
+  .settings-mobile-options .mobile-adapted-content .setting-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: var(--window-content);
+    border-bottom: 1px solid #23242a;
+    min-height: 44px;
+  }
+
+  .settings-mobile-options .mobile-adapted-content .setting-row:last-child {
+    border-bottom: none;
+  }
+
+  .settings-mobile-options .mobile-adapted-content .setting-row label {
+    flex: 1;
+    font-size: 17px;
+    color: #fff;
+    margin: 0;
+  }
+
+  .settings-mobile-options .mobile-adapted-content .select-wrapper {
+    position: relative;
+    min-width: 120px;
+  }
+
+  .settings-mobile-options .mobile-adapted-content .select-wrapper select {
+    width: 100%;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 8px;
+    background: #2c2c2e;
+    color: #fff;
+    font-size: 15px;
+    appearance: none;
+  }
+
+  .settings-mobile-options .mobile-adapted-content .toggle-switch {
+    position: relative;
+    width: 50px;
+    height: 30px;
+  }
+
+  .settings-mobile-options .mobile-adapted-content .toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .settings-mobile-options .mobile-adapted-content .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #39393d;
+    transition: 0.3s;
+    border-radius: 15px;
+  }
+
+  .settings-mobile-options .mobile-adapted-content .slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    transition: 0.3s;
+    border-radius: 50%;
+  }
+
+  .settings-mobile-options .mobile-adapted-content input:checked + .slider {
+    background-color: #007aff;
+  }
+
+  .settings-mobile-options .mobile-adapted-content input:checked + .slider:before {
+    transform: translateX(20px);
+  }
+
+  .settings-mobile-options .mobile-adapted-content .radio-group {
+    background: var(--window-content);
+  }
+
+  .settings-mobile-options .mobile-adapted-content .radio-option {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid #23242a;
+  }
+
+  .settings-mobile-options .mobile-adapted-content .radio-option:last-child {
+    border-bottom: none;
+  }
+
+  .settings-mobile-options .mobile-adapted-content .radio-option input[type="radio"] {
+    margin-right: 12px;
+    transform: scale(1.2);
+  }
+
+  .settings-mobile-options .mobile-adapted-content .radio-option label {
+    flex: 1;
+    font-size: 17px;
+    color: #fff;
+    margin: 0;
+    cursor: pointer;
+  }
+
+  .settings-mobile-options .mobile-adapted-content .setting-group.padded {
+    margin-bottom: 20px;
+  }
 }
 
 /* --- Light mode for iOS Settings --- */
@@ -7019,6 +7217,54 @@ font-weight: 600;
 
   body.light-windows .settings-mobile-list li button span {
     color: #100f21 !important;
+  }
+
+  /* Light mode styles for mobile adapted content */
+  body.light-windows .settings-mobile-options .mobile-adapted-content .setting-group {
+    background: #f7f7fa !important;
+  }
+
+  body.light-windows .settings-mobile-options .mobile-adapted-content .group-title {
+    color: #6d6d70 !important;
+  }
+
+  body.light-windows .settings-mobile-options .mobile-adapted-content .appearance-options {
+    background: #f7f7fa !important;
+  }
+
+  body.light-windows .settings-mobile-options .mobile-adapted-content .accent-color-options {
+    background: #f7f7fa !important;
+  }
+
+  body.light-windows .settings-mobile-options .mobile-adapted-content .setting-row {
+    background: #f7f7fa !important;
+    border-bottom: 1px solid #e0e0e0 !important;
+  }
+
+  body.light-windows .settings-mobile-options .mobile-adapted-content .setting-row label {
+    color: #222 !important;
+  }
+
+  body.light-windows .settings-mobile-options .mobile-adapted-content .select-wrapper select {
+    background: #fff !important;
+    color: #222 !important;
+    border: 1px solid #e0e0e0 !important;
+  }
+
+  body.light-windows .settings-mobile-options .mobile-adapted-content .slider {
+    background-color: #e0e0e0 !important;
+  }
+
+  body.light-windows .settings-mobile-options .mobile-adapted-content .radio-group {
+    background: #f7f7fa !important;
+  }
+
+  body.light-windows .settings-mobile-options .mobile-adapted-content .radio-option {
+    border-bottom: 1px solid #e0e0e0 !important;
+  }
+
+  body.light-windows .settings-mobile-options .mobile-adapted-content .radio-option label {
+    color: #222 !important;
   }
 
   .settings-content-header {
@@ -7501,6 +7747,7 @@ font-weight: 600;
   display: flex;
   flex-direction: column;
   position: relative;
+  border: 1px solid var(--border-color);
 }
 
 .music-panel-content {
@@ -7681,6 +7928,7 @@ font-weight: 600;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
+  border: 1px solid var(--border-color);
 }
 
 .volume-slider-panel {
@@ -7779,6 +8027,7 @@ font-weight: 600;
   flex-direction: column;
   overflow: hidden;
   backdrop-filter: blur(30px);
+  border: 1px solid var(--border-color);
 }
 
 #wallet-sidebar.wallet-sidebar-visible {
@@ -7901,7 +8150,6 @@ font-weight: 600;
 .start-menu.start-menu-list-style .start-menu-right-sidebar {
   width: 240px;
   transition: all 0.3s;
-  padding: 10px;
 }
 
 .start-menu.start-menu-list-style .app-grid-section {
@@ -8092,7 +8340,6 @@ font-weight: 600;
 .start-menu.start-menu-style-windows11 .start-menu-right-sidebar {
   width: 100%;
   max-width: none;
-  padding: 0 32px 0 32px;
   box-sizing: border-box;
   display: flex;
   justify-content: space-between;
@@ -8235,13 +8482,20 @@ font-weight: 600;
 }
 
 .alert-btn {
-  padding: 9px 28px;
+  padding: 8px 28px;
   border-radius: 8px;
   border: none;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 500;
   cursor: pointer;
 }
+
+.alert-btn:focus-visible {
+  outline: none !important;
+}
+
+
+
 
 .alert-btn.alert-ok {
   background: #0078d4;
@@ -8682,7 +8936,7 @@ font-weight: 600;
 
 .event-title {
   font-size: 14px;
-  color: #E0E0E0;
+  color: #ffffff;
 }
 
 /* Widget Mode Animations */
@@ -9017,6 +9271,7 @@ font-weight: 600;
   backdrop-filter: blur(24px);
 -webkit-backdrop-filter: blur(24px); /* for Safari */
 height: 360px;
+border: 1px solid var(--border-color);
 }
 .calendar-panel.visible {
   bottom: 60px !important;
@@ -9039,7 +9294,7 @@ height: 360px;
 }
 
 
-.calendar-header {
+.calendar-panel-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -9168,7 +9423,7 @@ button#calendar-today-btn {
   transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
   transform: translateY(300%);
   height: calc(100vh - 430px);
-
+  border: 1px solid var(--border-color);
 }
 
 .calendar-today-panel-slide.active {
@@ -9359,12 +9614,14 @@ button#calendar-today-btn {
   margin: 25px 0 15px 0;
   text-align: center;
   font-weight: 700;
+  line-height: 1.5;
 }
 
 .app-card p {
   color: #b0b0b0;
   font-size: 13px;
   text-align: center;
+  line-height: 1.5;
 }
 
 
@@ -9652,6 +9909,7 @@ body.light-windows .icon-container {
     line-height: 1.6;
     margin-bottom: 20px;
     font-size: 20px;
+    font-weight: 500;
   }
 
   .app-detail-needsinstall {
@@ -9745,8 +10003,8 @@ body.light-windows .icon-container {
   }
 
   .app-detail-moreinfo-list h4 {
-    margin-bottom: 15px;
-    font-size: 16px;
+    margin-bottom: 25px;
+    font-size: 18px;
 
   }
 
@@ -9778,7 +10036,7 @@ border-radius: 20px;
 }
 
 .app-detail-reviews-list-item-stars {
-  font-size: 20px;
+  font-size: 12px;
   font-weight: 100 !important;
   color: var(--yellow-accent);
 }
@@ -9973,11 +10231,11 @@ padding: 10px 15px;
   overflow-x: auto !important;
   overflow-y: auto !important;
   min-height: 0;
-  padding: 32px 32px 32px 32px;
   color: #333;
   background: #fff;
   min-width: 650px;
   border-radius: 0 0 0 15px;
+  padding: 30px;
 }
 
 .email-content-body {
@@ -9988,7 +10246,8 @@ padding: 10px 15px;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 18px;
+  margin-bottom: 30px;
+  width: 100%;
 }
 
 .email-list-item:hover {
@@ -10288,11 +10547,11 @@ align-items: center;
   .email-app-window .email-content-subject {
     color: var(--os-gray-dark) !important;
     border-bottom: 1px solid #646a8642;
-    padding-bottom: 30px;
-    margin-bottom: 30px;
     font-size: 18px;
-    margin-top: 30px;
     font-weight: 600;
+    margin-top: 30px;
+    margin-bottom: 30px;
+    padding-bottom: 30px;
   }
 
   .email-app-window .email-content-avatar {
@@ -11554,6 +11813,24 @@ font-size: 14px;
     overflow: hidden !important;
     position: relative !important;
   }
+
+  .opened-email-meta {
+    width: 100px;
+  }
+
+  .email-app-window .window-toolbar .toolbar-buttons-right button span, .email-app-window .toolbar-buttons-left button.mailback-btn span {
+    display: none !important;
+  }
+
+
+  .opened-email-meta-date {
+    align-items: flex-end;
+    flex-direction: column-reverse;
+  }
+
+  .opened-email-meta-size {
+    display: none !important;
+  };
   
     .contact-app-window .contact-list-section,
   .contact-app-window .contact-content-section {
@@ -13500,11 +13777,6 @@ height: 36px;
   cursor: pointer;
 }
 
-.products-sidebar-header .mailbox-name-chevrone {
-  display: flex;
-  align-items: center;
-}
-
 .products-manager-window .window-toolbar {
   padding: 8px 20px;
   background: var(--window-toolbar-bg);
@@ -15156,8 +15428,8 @@ body.light-windows .browser-window .toolbar-button:hover:not(:disabled) {
 }
 
 body.light-windows .browser-window .browser-url-address {
-  background: #fff;
-  border: 1px solid #e0e0e0;
+  background: #fff !important;
+  border: 1px solid #e0e0e0 !important;
 }
 
 body.light-windows .browser-window .browser-url-address i {
@@ -15165,7 +15437,7 @@ body.light-windows .browser-window .browser-url-address i {
 }
 
 body.light-windows .browser-window .browser-url-address span {
-  color: #333;
+  color: #333 !important;
 }
 
 
@@ -15673,6 +15945,7 @@ align-items: center;
     font-weight: 500;
     color: #8A8A9E;
     font-size: 15px;
+    margin-bottom: 0;
   }
 
   .pos-autoscan-barcode {
@@ -15687,7 +15960,7 @@ align-items: center;
     ;
         gap: 20px;
         align-items: center;
-        width: 510px;
+        min-width: 360px;
   }
 
   .point-of-sale-list-header-left {
@@ -15776,7 +16049,7 @@ align-items: center;
 .pos-order-item {
   display: flex;
   flex-direction: column;
-  padding: 12px 12px 12px 16px;
+  padding: 12px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
@@ -15975,7 +16248,7 @@ align-items: center;
 
 .pos-checkout-btn {
   width: 100%;
-  padding: 8px;
+  padding: 10px;
   background: var(--accent-color);
   border: none;
   color: #ffffff;
@@ -16021,6 +16294,105 @@ body.light-windows .pos-bottom-btn:hover  {
   color: var(--os-gray-dark);
   border-color: var(--os-gray-dark);
   opacity: 1;
+}
+
+/* Number Pad Styling */
+.pos-number-pad {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.number-pad-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 12px;
+  margin: 0 auto;
+}
+
+.number-pad-btn {
+  height: 50px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  border-radius: 8px;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.number-pad-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+.number-pad-btn:active {
+  transform: translateY(0);
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.number-pad-confirm {
+  background: var(--accent-color) !important;
+  border-color: var(--accent-color) !important;
+}
+
+.number-pad-confirm:hover {
+  background: var(--accent-color-light) !important;
+  border-color: var(--accent-color-light) !important;
+}
+
+/* Light theme styling for number pad */
+body.light-windows .pos-number-pad {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+body.light-windows .number-pad-btn {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.1);
+  color: var(--os-gray-dark);
+}
+
+body.light-windows .number-pad-btn:hover {
+  background: rgba(0, 0, 0, 0.1);
+  border-color: rgba(0, 0, 0, 0.2);
+}
+
+body.light-windows .number-pad-btn:active {
+  background: rgba(0, 0, 0, 0.15);
+}
+
+/* Point of Sale Keyboard Button */
+
+.point-of-sale-keyboard-btn:hover {
+  color: #ffffff;
+}
+
+.point-of-sale-keyboard-btn:active {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(1px);
+}
+
+body.light-windows .point-of-sale-keyboard-btn {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.1);
+  color: var(--os-gray-dark);
+}
+
+body.light-windows .point-of-sale-keyboard-btn:hover {
+  background: rgba(0, 0, 0, 0.1);
+  border-color: rgba(0, 0, 0, 0.2);
+}
+
+body.light-windows .point-of-sale-keyboard-btn:active {
+  background: rgba(0, 0, 0, 0.15);
 }
 
 
@@ -16201,8 +16573,8 @@ body.light-windows .qty-value {
   color: #8A8A9E;
   font-size: 14px;
   cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
+  padding: 8px 0 8px 8px;
+  border-radius: 6px;
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
@@ -16220,6 +16592,7 @@ body.light-windows .qty-value {
   display: flex;
   gap: 8px;
   margin-bottom: 12px;
+  margin-top: 12px;
 }
 
 /* Scrollbar Styling for Order Items */
@@ -16505,7 +16878,7 @@ color: var(--accent-color);
   }
 
   .booking-toolbar-left .point-of-sale-list-header-left {
-    width: 199px;
+    width: 236px;
   }
 
 
@@ -16535,6 +16908,8 @@ color: var(--accent-color);
   display: flex;
   align-items: center;
   gap: 20px;
+  width: 100%;
+  justify-content: space-between;
 }
 
 .view-mode-selector {
@@ -16573,13 +16948,13 @@ color: var(--accent-color);
 }
 
 .period-nav-btn {
-  background: var(--input-bg);
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  padding: 6px 8px;
+  border-radius: 8px;
+  padding: 8px;
   color: var(--text-color);
   cursor: pointer;
   transition: all 0.2s ease;
+  min-width: 33px;
+  font-size: 16px;
 }
 
 .period-nav-btn:hover {
@@ -16588,7 +16963,7 @@ color: var(--accent-color);
 }
 
 .current-period {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 500;
   color: var(--text-color);
   min-width: 150px;
@@ -16673,7 +17048,7 @@ color: var(--accent-color);
 
 .rooms-list {
   flex: 1;
-  overflow-y: auto;
+  overflow-y: hidden;
 }
 
 .room-item {
@@ -16820,7 +17195,7 @@ color: var(--accent-color);
 .calendar-scroll-area {
   flex: 1;
   overflow-x: auto;
-  overflow-y: hidden;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   width: 500px;
@@ -16828,7 +17203,21 @@ color: var(--accent-color);
   border-radius: 0 0 15px 0;
 }
 
+.calendar-header {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: var(--window-content);
+  border-bottom: 1px solid var(--border-color);
+}
 
+.calendar-scroll-area .calendar-body {
+  display: flex;
+  flex-direction: column;
+  min-width: max-content;
+  flex: 1;
+  padding: 0;
+}
 
 .days-row {
   display: flex;
@@ -16877,12 +17266,6 @@ color: var(--accent-color);
 
 .calendar-cell.today-column:hover {
   background: rgba(53, 118, 246, 0.1);
-}
-
-.calendar-body {
-  display: flex;
-  flex-direction: column;
-  min-width: max-content;
 }
 
 .room-row {
@@ -17185,6 +17568,10 @@ body.light-windows .calendar-header {
   border-bottom-color: #e9ecef;
 }
 
+body.light-windows .calendar-scroll-area .calendar-header {
+  background: #f8f9fa;
+}
+
 body.light-windows .days-row {
   background: #f1f3f4;
 }
@@ -17320,6 +17707,26 @@ body.light-windows .calendar-room-label.selected {
   order: 1;
   flex: 1;
   min-width: 650px;
+  position: relative;
+}
+
+/* Point of Sale Status Bar */
+
+.point-of-sale-app-window .point-of-sale-content-section .status-left,
+.point-of-sale-app-window .point-of-sale-content-section .status-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.point-of-sale-app-window .point-of-sale-content-section .status-separator {
+  color: var(--os-gray);
+  font-weight: normal;
+}
+
+/* Ensure content has room for statusbar */
+.point-of-sale-app-window .point-of-sale-content-section .point-of-sale-content {
+  padding-bottom: 24px; /* Make room for statusbar */
 }
 
 .point-of-sale-booking-content-section {
@@ -17328,10 +17735,32 @@ body.light-windows .calendar-room-label.selected {
   display: flex;
   flex-direction: column;
   order: 1;
+  position: relative;
+}
+
+/* Point of Sale Booking Status Bar */
+
+
+.point-of-sale-app-window .point-of-sale-booking-content-section .status-left,
+.point-of-sale-app-window .point-of-sale-booking-content-section .status-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.point-of-sale-app-window .point-of-sale-booking-content-section .status-separator {
+  color: var(--os-gray);
+  font-weight: normal;
+}
+
+/* Ensure booking content has room for statusbar */
+.point-of-sale-app-window .point-of-sale-booking-content-section .booking-content {
+  padding-bottom: 37px; /* Make room for statusbar */
 }
 
 .point-of-sale-booking-content-section .calendar-header {
   padding: 0;
+  z-index: 99;
 }
 
 .point-of-sale-booking-content-section .day-number {
@@ -17441,7 +17870,7 @@ body.light-windows .calendar-room-label.selected {
   display: flex
 ;
     gap: 10px;
-    padding: 15px 5px 5px 5px;
+    padding: 5px;
     margin-bottom: 20px;
 }
 
@@ -17542,7 +17971,7 @@ padding: 5px;
 
 .pos-add-booking-btn {
   width: 100%;
-  padding: 8px;
+  padding: 10px;
   background: var(--accent-color);
   border: none;
   color: #ffffff;
@@ -17739,7 +18168,7 @@ padding: 5px;
   font-weight: 500;
   color: #fff;
   text-align: left;
-
+margin-bottom: 0;
   overflow: hidden;
     width: 100%;
     display: -webkit-box;
@@ -17851,6 +18280,28 @@ body.light-windows .view-mode-btn.active {
 body.light-windows .view-mode-btn:hover {
   color: #fff !important;
   background: var(--accent-color);
+}
+
+/* Light mode point-of-sale statusbar */
+body.light-windows .point-of-sale-app-window .point-of-sale-content-section .window-statusbar {
+  background: rgba(255, 255, 255, 0.95);
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  color: #333;
+}
+
+body.light-windows .point-of-sale-app-window .point-of-sale-content-section .status-separator {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+/* Light mode point-of-sale booking statusbar */
+body.light-windows .point-of-sale-app-window .point-of-sale-booking-content-section .window-statusbar {
+  background: rgba(255, 255, 255, 0.95);
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  color: #333;
+}
+
+body.light-windows .point-of-sale-app-window .point-of-sale-booking-content-section .status-separator {
+  color: rgba(0, 0, 0, 0.5);
 }
 
 /* Active Booking Section Styles */
@@ -18134,3 +18585,2915 @@ margin-top: 10px;
   .booking-search-container h3 {
     margin: 40px 10px 20px 10px;
   }
+
+ 
+  
+  .booking-check-availability-header {
+    padding: 5px;
+  }
+
+
+
+
+  /* Calendar app */
+
+.calendarapp-list-section {
+  margin-right: 5px;
+  min-width: 350px;
+  max-width: 400px;
+}
+
+.calendarapp-list-section .calendarapp-list {
+  padding: 10px !important;
+  overflow-y: auto !important;
+}
+
+.calendarapp-app-content .compose-btn {
+  padding: 8px 0; 
+  background: var(--accent-color); 
+  color: #fff; 
+  border: none; 
+  border-radius: 8px; 
+  font-weight: 600; 
+  font-size: 15px;
+  width: 100%;
+  margin-bottom: 10px;
+  margin-top: 10px;
+  text-wrap: nowrap;
+}
+
+.calendarapp-app-content .compose-btn:hover {
+  background-color: var(--accent-color-light);
+}
+
+.calendarapp-sidebar-header {
+margin-bottom: 8px;
+padding: 10px 15px;
+cursor: pointer;
+}
+
+.calendarapp-sidebar-header i {
+font-size: 12px; 
+  }
+
+.calendarapp-sidebar-header:hover {
+  background-color: var(--dark-mode-hover);
+  border-radius: 10px;
+  }
+
+.mailbox-name {
+  font-size: 14px;
+  font-weight: 600;
+  text-wrap: nowrap;
+}
+
+.calendarapp-sidebar-header .mailbox-name-chevrone {
+font-weight: 600; 
+  color: #fff; 
+  font-size: 16px; 
+  margin-bottom: 2px;
+  display: flex;
+    justify-content: space-between;
+    align-items: center;
+} 
+
+.calendar-app-window .window-toolbar {
+ height: 45px;
+ border-radius: 15px 15px 0 0;
+ min-height: 45px;
+ max-height: 45px;
+}
+
+.calendar-app-window .window-toolbar .toolbar-buttons-left button span {
+font-size: 14px;
+margin-left: 10px !important;
+}
+
+.calendar-app-window .window-toolbar .toolbar-buttons-right button span {
+  font-size: 14px;
+  margin-left: 10px !important;
+  }
+
+.calendarapp-list-item {
+border-bottom: 1px solid var(--border-color);
+cursor: pointer;
+display: flex;
+align-items: flex-start;
+padding: 10px 15px;
+}
+
+.calendarapp-content {
+  flex: 1 1 auto;
+  /* Remove overflow: hidden to allow calendar scrolling */
+  min-height: 0;
+  color: #333;
+  background: var(--window-content);
+  border-radius: 0 0 15px 15px;
+  height: calc(100% - 45px);
+  width: 100%;
+  position: relative; /* Enable proper positioning for sticky elements */
+}
+
+body.light-windows .calendarapp-content  {
+  background: transparent;
+}
+
+.calendarapp-content-body {
+  font-size: 15px; line-height: 1.7; color:var(--os-gray-dark);
+}
+
+.calendarapp-content-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.calendarapp-list-item:hover {
+  background: var(--dark-mode-hover);
+  border-bottom: 1px solid var(--window-content) !important;
+  border-radius: 10px;
+  }
+
+.calendarapp-list-sender-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.calendarapp-list-item .calendarapp-list-sender {
+  color:rgb(255 255 255 / 70%); font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+
+.calendarapp-list-item .calendarapp-list-subject {
+  font-size:14px; color:rgb(255 255 255 / 70%); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  margin-top: 3px;
+}
+
+
+.calendarapp-list-item .calendarapp-list-preview {
+  font-size:13px; color:#8A8A9E; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  margin-top: 3px;
+}
+
+.calendarapp-search {
+width: 100%;  
+border-radius: 6px; border: none; background: transparent; color: #fff; font-size: 14px;
+height: 36px;
+}
+.calendarapp-search:focus-visible {
+  outline: none !important;
+}
+
+
+
+.calendarapp-list-item.unread .calendarapp-list-sender:before {
+  content: '';
+  display: block;
+  width: 7px;
+  height: 7px;
+  background: var(--accent-color);
+  border-radius: 50%;
+  margin-right: 7px;
+}
+
+
+
+.calendarapp-list-item .calendarapp-list-item-subject {
+  font-weight: 500;
+}
+
+.calendarapp-list-item.unread .calendarapp-list-item-subject {
+  font-weight: 600;
+}
+
+.calendarapp-list-item.unread .calendarapp-list-item-preview {
+  font-weight: 600;
+}
+
+.calendarapp-list-item.unread .calendarapp-list-item-date {
+  font-weight: 600;
+}
+
+.calendarapp-list-meta {
+  text-align:right; 
+flex-direction: row;
+justify-content: space-between;
+height: 100%;
+display: flex;
+align-items: center;
+}
+
+
+.calendarapp-list-item.selected {
+  background: var(--dark-mode-hover);
+  border-bottom: 1px solid transparent !important;
+  border-radius: 10px;
+}
+
+.calendarapp-list-avatar {
+  width:36px; height:36px; border-radius:50%; background:#232345; display:flex; align-items:center; justify-content:center; font-size:18px;
+}
+
+
+
+.calendarapp-list-header {
+  display: flex;
+      justify-content: space-between;
+      width: 100%;
+      align-items: center;
+}
+
+.calendarapp-list-header i {
+  color: #8A8A9E;
+  font-size: 14px;
+}
+
+.calendarapp-list-sort {
+  color:#8A8A9E; font-size:14px;
+  margin-right: 5px;
+}
+
+.calendarapp-list-avatar-meta {
+  display: flex
+;
+    flex-direction: column;
+    align-content: center;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.calendarapp-list-size {
+  display: block;
+  color: #8A8A9E;
+  font-size: 10px;
+  margin-top: 10px;
+}
+
+.calendarapp-list-main {
+  margin-left: 12px;
+}
+
+.calendarapp-pay-for-event-section.toggle-switch {
+  height: 15px;
+  width: 30px;
+  zoom: 0.75;
+}
+
+.calendarapp-current-order-section.toggle-switch .slider:before {
+  height: 11px;
+  width: 11px;
+}
+.calendarapp-pay-for-event-section.toggle-switch input:checked+.slider:before {
+  transform: translateX(11px);
+}
+
+.calendar-app-window .compose-btn span {
+  margin-left: 10px;
+}
+
+.calendar-app-window .compose-btn i {
+  display: none;
+}
+
+.calendar-app-window .sidebar-collapsed .compose-btn span {
+  opacity: 0;
+  margin-left: 0;
+  pointer-events: none;
+  display: inline-block;
+  text-wrap: nowrap;
+  transition: opacity 0.25s, width 0.25s, margin 0.25s;
+
+}
+
+.calendar-app-window .sidebar-collapsed.sidebar-hovered .compose-btn i {
+  opacity: 0;
+  width: 0;
+  margin-left: 0;
+  pointer-events: none;
+  display: inline-block;
+  text-wrap: nowrap;
+  transition: opacity 0.25s, width 0.25s, margin 0.25s;
+  display: none;
+
+}
+
+.calendar-app-window .sidebar-collapsed .compose-btn i {
+  opacity: 1;
+  width: auto;
+  width: 100%;
+  pointer-events: auto;
+  transition: opacity 0.25s, width 0.25s, margin 0.25s;
+  display: inline-block;
+
+}
+
+
+.calendar-app-window .sidebar-collapsed.sidebar-hovered .compose-btn span {
+  opacity: 1;
+  width: auto;
+  margin-left: 8px;
+  pointer-events: auto;
+  transition: opacity 0.25s, width 0.25s, margin 0.25s;
+  display: inline-block;
+
+}
+
+
+
+.calendar-app-window .sidebar-collapsed.sidebar-hovered .sidebar-item {
+  
+  display: flex;
+  justify-content: space-between !important;
+  text-wrap: nowrap;
+} 
+
+  .calendar-app-window .window-main-content {
+    background-color: transparent;
+  }
+
+  .calendar-app-window .calendarapp-pay-for-event-section{
+    border-radius: 15px;
+    overflow-x: auto !important;
+    width: 350px;
+    min-width: 350px;
+    transform: translateX(100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    z-index: 10;
+  }
+
+  .calendar-app-window .calendarapp-pay-for-event-section.slide-in {
+    transform: translateX(0);
+  }
+
+  .calendarapp-pay-for-event-section .window-toolbar {
+        margin-left: 10px !important;
+        display: flex
+        ;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 16px 8px 16px 16px;
+            border-radius: 15px;
+            border-bottom: none;
+            width: 330px;
+            margin: auto;
+  }
+
+  .calendar-app-window .calendarapp-pay-for-event-section{
+    display: flex; flex-direction: column; height: 100%;
+  }
+
+  .calendar-app-window .window-main-content {
+    overflow: hidden !important;
+    min-width: 100px;
+  }
+
+  .calendar-app-window .calendarapp-content-subject {
+    color: var(--os-gray-dark) !important;
+    border-bottom: 1px solid #646a8642;
+    padding-bottom: 30px;
+    margin-bottom: 30px;
+    font-size: 18px;
+    margin-top: 30px;
+    font-weight: 600;
+  }
+ 
+
+
+  .calendar-app-window  .toolbar-buttons-left {
+    display: flex;
+    align-items: center;
+  }
+
+  .calendar-app-window  .toolbar-buttons-right {
+    display: flex;
+    align-items: center;
+    height: 43px;
+
+  }
+
+  .calendar-app-window  .toolbar-buttons-left  button.toolbar-button {
+    width: fit-content !important;
+  }
+
+  .calendar-app-window  .toolbar-buttons-right  button.toolbar-button {
+    width: fit-content !important;
+    padding: 10px;
+    border-radius: 6px;
+    font-size: 14px;
+    margin-right: 0;
+  }
+  
+  .calendarapp-content-section {
+    width: 100%;
+  }
+
+  .calendarapp-current-order-header-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .calendarapp-current-order-header-item h3 {
+    font-weight: 500;
+    color: #8A8A9E;
+    font-size: 15px;
+    margin-bottom: 0;
+  }
+
+  .pos-autoscan-barcode {
+    display: flex
+    ;
+        align-items: center;
+        gap: 10px;
+  }
+
+  .calendarapp-list-header-right {
+    display: flex
+    ;
+        gap: 20px;
+        align-items: center;
+        width: 510px;
+  }
+
+  .calendarapp-list-header-left {
+    display: flex;
+        align-items: center;
+        gap: 10px;
+        width: -webkit-fill-available;
+  }
+
+/* Calendar App Styles */
+.calendarapp-current-order-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+
+.calendarapp-content .pos-item-image {
+  width: 60px;
+  height: 60px;
+}
+.calendarapp-current-order-header-item i {
+  font-size: 11px;
+}
+
+
+/* Window main content overflow handling for smooth transitions */
+.calendar-app-window .window-main-content {
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: row;
+}
+
+/* Ensure proper stacking context for order sections */
+.calendar-app-window .window-main-content {
+  contain: layout;
+}
+
+
+/* Ensure proper positioning for sliding animation */
+.calendarapp-customer-info-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: inherit;
+  z-index: 10;
+}
+
+.booking-pos-order-section .calendarapp-current-order-content {
+  transition: transform 0.3s ease-in-out;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.calendarapp-customer-info-content .calendarapp-current-order-content {
+  display: flex;
+  flex-direction: column;
+  height: calc(100% - 45px); }
+  
+   .calendarapp-customer-info-content .pos-item-main-row {
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-color);
+    padding-top: 12px;
+  }
+
+/* Calendar App Styles */
+
+/* Main Calendar Container - Using POS Booking Calendar Structure */
+.main-calendar-container {
+  flex: 1;
+  display: flex;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Calendar Time Column (Fixed Left Side) */
+.calendar-time-column {
+  width: 60px;
+  min-width: 60px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  background: #191826;
+  overflow: hidden;
+}
+
+body.light-windows .calendar-time-column {
+  background-color: #f1f1f5 !important;
+  border-right: 1px solid #e0e0e0;
+}
+
+
+
+
+
+/* Time Column Header */
+.calendar-time-column-header {
+  height: 71px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.05);
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Time Column Body */
+.calendar-time-column-body {
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  padding-bottom: 15px;
+}
+
+.calendar-time-column-body::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+.time-slot {
+  height: 60px;
+  min-height: 60px;
+  padding: 8px 4px;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.7);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Calendar Scroll Area (Like POS Booking Calendar) */
+.calendar-scroll-area {
+  flex: 1;
+  overflow-x: auto;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  background: var(--window-content);
+}
+
+/* Calendar Header (Sticky) */
+
+
+/* Days Row */
+.calendar-days-row {
+  display: flex;
+  background: #191826;
+  min-width: max-content;
+}
+
+body.light-windows .calendar-days-row {
+  background-color: #f1f1f5 !important;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.calendar-day-header {
+  min-width: 200px;
+  padding: 6px 4px;
+  text-align: center;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.calendar-day-header.today {
+  background: rgba(66, 133, 244, 0.1);
+  border-bottom: 2px solid #4285f4;
+}
+
+
+
+.calendar-day-header .day-number {
+  font-size: 30px;
+  font-weight: 500;
+  color: #fff;
+}
+
+.calendar-day-header.today .day-number {
+  color: #4285f4;
+}
+
+/* Calendar Body */
+.calendar-body {
+  display: flex;
+  flex-direction: column;
+  min-width: max-content;
+  flex: 1;
+}
+
+/* Calendar Days Grid */
+.calendar-days-grid {
+  display: flex;
+  min-width: max-content;
+  position: relative;
+}
+
+.calendar-day-column {
+  min-width: 200px;
+  position: relative;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  min-height: 1440px; /* 24 hours * 60px */
+  height: 1440px; /* Ensure consistent height */
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 59px,
+    rgba(255, 255, 255, 0.1) 59px,
+    rgba(255, 255, 255, 0.1) 60px
+  );
+}
+
+.calendar-day-column:last-child {
+  border-right: none;
+}
+
+/* Calendar Events */
+.calendar-event {
+  position: absolute;
+  left: 2px;
+  right: 2px;
+  border-radius: 8px;
+  padding: 4px 6px;
+  font-size: 12px;
+  color: white;
+  cursor: pointer;
+  z-index: 10;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.calendar-event:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+.calendar-event.dragging {
+  opacity: 0.8;
+  transform: scale(1.02);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+  cursor: grabbing !important;
+  transition: none;
+}
+
+.calendar-event {
+  cursor: grab;
+  display: flex
+  ;
+      flex-direction: row;
+      align-items: center;
+}
+
+.event-title {
+  font-weight: 600;
+  margin-bottom: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 100%;
+}
+
+.event-time {
+  font-size: 10px;
+  opacity: 0.9;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 100%;
+}
+
+/* Calendar View Controls */
+.view-selector {
+  display: flex;
+  gap: 4px;
+  margin-right: 16px;
+}
+
+.view-btn {
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 4px;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+
+.view-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+
+.view-btn.active {
+  background: #4285f4;
+  color: white;
+}
+
+/* Agenda View Styles */
+.main-calendar-container.agenda-view {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+}
+
+.calendar-categories-column {
+  width: 150px;
+  min-width: 150px;
+  background: rgba(255, 255, 255, 0.05);
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+.calendar-categories-header {
+  height: 41px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.calendar-categories-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.category-slot {
+  height: 60px;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.category-slot:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.category-slot i {
+  font-size: 12px;
+}
+
+.category-slot span {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.agenda-scroll-area {
+  flex: 1;
+  overflow-x: auto;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.agenda-header {
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.calendar-hours-row {
+  display: flex;
+  height: 40px;
+}
+
+.calendar-hour-header {
+  width: 120px;
+  min-width: 120px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.agenda-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.calendar-categories-grid {
+  display: flex;
+  flex-direction: column;
+}
+
+.calendar-category-row {
+  height: 60px;
+  display: flex;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  position: relative;
+  user-select: none;
+}
+
+.calendar-hour-slot {
+  width: 120px;
+  min-width: 120px;
+  flex-shrink: 0;
+  height: 100%;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+}
+
+
+
+/* Agenda Events */
+.agenda-event {
+  position: absolute;
+  top: 4px;
+  height: calc(100% - 8px);
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s;
+  overflow: hidden;
+}
+
+.agenda-event:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.agenda-event .event-title {
+  font-weight: 600;
+  font-size: 11px;
+  line-height: 1.2;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.agenda-event .event-time {
+  font-size: 10px;
+  opacity: 0.8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.agenda-event.selected {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.5);
+}
+
+.calendar-event.selected {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.5);
+}
+
+/* Agenda Event Creator */
+.agenda-event-creator {
+  background: rgba(66, 133, 244, 0.9);
+  border: 2px solid #4285f4;
+  border-radius: 4px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 35px;
+  transition: all 0.1s ease-out;
+  cursor: col-resize;
+  backdrop-filter: blur(8px);
+}
+
+.agenda-event-creator .event-creator-input {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+  color: white;
+  font-size: 11px;
+  padding: 4px 6px;
+  width: 100%;
+  outline: none;
+}
+
+.agenda-event-creator .event-creator-input::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.agenda-event-creator .event-creator-input:focus {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.agenda-event-creator .event-time-display {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 10px;
+  text-align: center;
+  font-weight: 500;
+}
+
+.agenda-event-creator .event-creator-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.agenda-event-creator .event-creator-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+  color: white;
+  font-size: 10px;
+  padding: 4px 8px;
+  cursor: pointer;
+  flex: 1;
+  transition: all 0.2s;
+}
+
+.agenda-event-creator .event-creator-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+.agenda-event-creator .event-creator-btn.save {
+  background: rgba(76, 175, 80, 0.8);
+  border-color: rgba(76, 175, 80, 1);
+}
+
+.agenda-event-creator .event-creator-btn.save:hover {
+  background: rgba(76, 175, 80, 1);
+}
+
+.agenda-event-creator .event-creator-btn.cancel {
+  background: rgba(244, 67, 54, 0.8);
+  border-color: rgba(244, 67, 54, 1);
+}
+
+.agenda-event-creator .event-creator-btn.cancel:hover {
+  background: rgba(244, 67, 54, 1);
+}
+
+/* Light theme agenda styles */
+body.light-windows .calendar-categories-column {
+  background: rgb(241 241 245);
+  border-right: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+body.light-windows .calendar-categories-header {
+  color: #333;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  background: rgba(0, 0, 0, 0.02);
+}
+
+body.light-windows .category-slot {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+body.light-windows .category-slot:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+body.light-windows .category-slot span {
+  color: #333;
+}
+
+body.light-windows .agenda-header {
+  background: rgba(0, 0, 0, 0.02);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+body.light-windows .calendar-hour-header {
+  border-right: 1px solid rgba(0, 0, 0, 0.1);
+  color: #666;
+}
+
+body.light-windows .calendar-category-row {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+body.light-windows .calendar-hour-slot {
+  border-right: 1px solid rgba(0, 0, 0, 0.1);
+  /* 15-minute grid lines for light theme */
+}
+
+
+
+body.light-windows .agenda-event-creator {
+  background: rgba(66, 133, 244, 0.95);
+  border-color: #4285f4;
+}
+
+.calendar-current-date {
+  font-weight: 600;
+  color: #fff;
+  margin-left: 16px;
+  display: flex;
+  align-items: center;
+}
+
+/* Calendar App Window Specific Styles */
+.calendar-app-window .window-main-content {
+  display: flex;
+  flex: 1;
+  height: 100%;
+  min-width: 0; /* Allow content to shrink */
+  /* Remove overflow: hidden to allow calendar scrolling */
+}
+
+.calendar-app-window .calendarapp-content-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-width: 0; /* Allow shrinking */
+  position: relative;
+  overflow: hidden;
+}
+
+/* Calendar Status Bar */
+
+
+.calendar-app-window .status-left,
+.calendar-app-window .status-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.calendar-app-window .status-separator {
+  color: var(--os-gray);
+  font-weight: normal;
+}
+
+/* Ensure horizontal scrollbar appears above statusbar */
+.calendar-app-window .calendarapp-content {
+  padding-bottom: 37px; /* Make room for statusbar */
+}
+
+
+
+.calendar-app-window .main-calendar-container {
+  position: relative;
+  z-index: 1;
+}
+
+/* Light Windows Theme Support */
+body.light-windows .mini-calendar {
+  background: rgb(255 255 255 / 65%);
+}
+
+body.light-windows .mini-calendar:hover {
+  background: #fff;
+}
+
+body.light-windows .mini-calendar-nav {
+  color: #333;
+}
+
+body.light-windows .mini-calendar-nav:hover {
+  background: var(--accent-color);
+}
+
+body.light-windows .mini-calendar-month {
+  color: #333;
+}
+
+body.light-windows .calendarapp-header {
+  background: rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+body.light-windows .calendar-day-header {
+  border-right: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+body.light-windows .calendar-day-header .day-name {
+  color: rgba(0, 0, 0, 0.7);
+}
+
+body.light-windows .calendar-day-header .day-number {
+  color: #333;
+}
+
+body.light-windows .calendar-grid .calendar-time-column {
+  border-right: 1px solid rgba(0, 0, 0, 0.1);
+  background: rgba(0, 0, 0, 0.02);
+}
+
+body.light-windows .time-slot {
+  color: rgba(0, 0, 0, 0.7);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+body.light-windows .calendar-day-column {
+  border-right: 1px solid rgba(0, 0, 0, 0.1);
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 59px,
+    rgba(0, 0, 0, 0.1) 59px,
+    rgba(0, 0, 0, 0.1) 60px
+  );
+}
+
+body.light-windows .view-btn {
+  background: rgba(0, 0, 0, 0.1);
+  color: rgba(0, 0, 0, 0.7);
+}
+
+body.light-windows .view-btn:hover {
+  background: rgba(0, 0, 0, 0.15);
+  color: #333;
+}
+
+body.light-windows .calendar-current-date {
+  color: #333;
+}
+
+body.light-windows .calendar-app-window .calendarapp-current-order-header-item h3 {
+  color: #333;
+}
+
+body.light-windows .calendar-app-window .calendarapp-current-order-header-item i {
+  color: rgba(0, 0, 0, 0.7);
+}
+
+/* Light mode calendar statusbar */
+body.light-windows .calendar-app-window .window-statusbar {
+  background: rgba(255, 255, 255, 0.95);
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  color: #333;
+}
+
+body.light-windows .calendar-app-window .status-separator {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+/* Light mode event creator styles */
+body.light-windows .calendar-event-creator {
+  background: rgba(66, 133, 244, 0.95);
+  border-color: #4285f4;
+}
+
+body.light-windows .event-creator-input {
+  color: white;
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+body.light-windows .event-creator-input:focus {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+body.light-windows .event-creator-input::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+body.light-windows .event-time-display {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+body.light-windows .event-creator-btn {
+  color: white;
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+body.light-windows .event-creator-btn:hover {
+  background: rgba(255, 255, 255, 0.35);
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+/* Light theme dragging styles */
+body.light-windows .calendar-event.dragging {
+  opacity: 0.8;
+  transform: scale(1.02);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.calendarapp-customer-info {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  gap: 12px;
+}
+
+.calendarapp-customer-avatar {
+  flex-shrink: 0;
+}
+
+.customer-avatar-img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.calendarapp-customer-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.calendarapp-customer-name {
+  font-weight: 600;
+  color: #ffffff;
+  font-size: 14px;
+}
+
+.calendarapp-customer-email {
+  font-size: 12px;
+  color: #8A8A9E;
+}
+
+.calendarapp-change-customer-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.calendarapp-change-customer-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Order Items Container */
+.calendarapp-order-items-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 10px;
+}
+
+.booking-order-items-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 15px;
+}
+
+.calendarapp-order-item {
+  display: flex;
+  flex-direction: column;
+  padding: 12px 12px 12px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.calendarapp-item-main-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.calendarapp-order-item:last-child {
+  border-bottom: none;
+}
+
+.calendarapp-product-image {
+  width: 50px;
+  height: 50px;
+  border-radius: 8px;
+  object-fit: cover;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.calendarapp-product-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.calendarapp-product-name {
+  font-weight: 500;
+  color: #ffffff;
+  font-size: 14px;
+}
+
+.calendarapp-product-price {
+  font-size: 13px;
+  color: #8A8A9E;
+}
+
+.calendarapp-quantity-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.calendarapp-quantity-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.calendarapp-quantity-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.calendarapp-quantity-display {
+  min-width: 30px;
+  text-align: center;
+  font-weight: 500;
+  color: #ffffff;
+  font-size: 14px;
+}
+
+/* Order Footer */
+.calendarapp-order-footer {
+  background: rgba(255, 255, 255, 0.03);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  border-radius: 15px;
+  margin-bottom: 10px;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+/* Discount Section */
+.calendarapp-discount-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.calendarapp-discount-label {
+  font-size: 14px;
+  color: #8A8A9E;
+}
+
+.calendarapp-discount-amount {
+  font-weight: 600;
+  color: #ffffff;
+  font-size: 14px;
+}
+
+/* Total Section */
+.calendarapp-total-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.calendarapp-main-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.calendarapp-total-label {
+  font-size: 18px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.calendarapp-total-amount {
+  font-size: 24px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.calendarapp-subtotal {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: #8A8A9E;
+}
+
+/* Payment Methods */
+.calendarapp-payment-methods {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.calendarapp-payment-btn {
+  flex: 1;
+  padding: 6px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.calendarapp-payment-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.calendarapp-payment-btn.active {
+  background: #4A90E2;
+  border-color: #4A90E2;
+}
+
+/* Main Action Button */
+
+
+
+
+/* Bottom Action Buttons */
+.calendarapp-bottom-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.calendarapp-action-btn {
+  flex: 1;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #8A8A9E;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.calendarapp-action-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.calendarapp-checkout-btn {
+  width: 100%;
+  padding: 8px;
+  background: var(--accent-color);
+  border: none;
+  color: #ffffff;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.calendarapp-checkout-btn:hover {
+  background: var(--accent-color-light);
+}
+
+/* Bottom Action Buttons */
+.calendarapp-bottom-btn {
+  flex: 1;
+  padding: 5px 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #8A8A9E;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+  text-wrap-mode: nowrap;
+}
+
+.calendarapp-bottom-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+body.light-windows .calendarapp-bottom-btn  {
+  color: var(--os-gray-dark);
+  border-color: var(--os-gray-dark);
+  opacity: 0.7;
+}
+
+body.light-windows .calendarapp-bottom-btn:hover  {
+  color: var(--os-gray-dark);
+  border-color: var(--os-gray-dark);
+  opacity: 1;
+}
+
+
+
+
+
+/* Order Item Styling */
+.calendarapp-item-image {
+  width: 50px;
+  height: 50px;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+
+.calendarapp-item-image .item-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.calendarapp-item-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.calendarapp-item-name, .calendarapp-item-main-price  {
+  font-weight: 600;
+  color: #ffffff;
+  font-size: 14px;
+}
+
+.calendarapp-item-personalization {
+  color: #8A8A9E;
+  font-size: 13px;
+}
+
+.calendarapp-item-price {
+  color: #8A8A9E;
+  font-size: 13px;
+  gap: 4px;
+  display: flex;
+  flex-direction: column;
+}
+
+.calendarapp-item-quantity {
+  display: flex;
+  align-items: center;
+}
+
+
+
+/* Discount Section */
+.calendarapp-discount-value {
+  font-weight: 600;
+  color: #ffffff;
+  font-size: 14px;
+}
+
+/* Total Section Rows */
+.calendarapp-total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.calendarapp-subtotal-row {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.calendarapp-subtotal-label {
+  font-size: 12px;
+  color: #8A8A9E;
+}
+
+/* Payment Method Specific Buttons */
+.calendarapp-payment-cash {
+  background: rgba(34, 197, 94, 0.1);
+  border-color: rgba(34, 197, 94, 0.3);
+}
+
+.calendarapp-payment-cash:hover {
+  background: rgba(34, 197, 94, 0.2);
+}
+
+.calendarapp-payment-card {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+.calendarapp-payment-card:hover {
+  background: rgba(59, 130, 246, 0.2);
+}
+
+.calendarapp-payment-ticket {
+  background: rgba(168, 85, 247, 0.1);
+  border-color: rgba(168, 85, 247, 0.3);
+}
+
+.calendarapp-payment-ticket:hover {
+  background: rgba(168, 85, 247, 0.2);
+}
+
+.calendarapp-payment-btn i {
+  margin-right: 6px;
+  font-size: 14px;
+}
+
+.calendarapp-payment-btn span {
+  font-size: 12px;
+}
+
+/* Remove button styling */
+.calendarapp-item-remove-btn {
+  background: none;
+  border: none;
+  color: #8A8A9E;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+}
+
+.calendarapp-item-remove-btn:hover {
+  color: #dc3545;
+  transform: scale(1.5);
+}
+
+/* Action Buttons Container */
+.calendarapp-action-buttons {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+/* Scrollbar Styling for Order Items */
+.calendarapp-order-items-container::-webkit-scrollbar {
+  width: 4px;
+}
+
+.calendarapp-order-items-container::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 2px;
+}
+
+.calendarapp-order-items-container::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+}
+
+.calendarapp-order-items-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+
+
+.calendarapp-order-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* Expandable Order Item */
+.calendarapp-order-item {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.calendarapp-order-item.expanded {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+}
+
+/* Expanded Content */
+.calendarapp-item-expanded-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease, padding 0.3s ease;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  width: 100%;
+}
+
+.calendarapp-order-item:not(.expanded) .calendarapp-item-expanded-content {
+  display: none;
+  transition: all 0.3s ease;
+}
+
+
+
+.calendarapp-order-item.expanded .calendarapp-item-expanded-content {
+  max-height: 100%;
+  padding: 20px;
+  margin-top: 10px;
+  display: block;
+}
+
+/* Expanded Options Row */
+.calendarapp-item-options-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+/* Quantity Section in Expanded */
+.calendarapp-item-quantity-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.calendarapp-item-quantity-label {
+  font-size: 12px;
+  color: #8A8A9E;
+  font-weight: 500;
+}
+
+.calendarapp-item-quantity-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Discount Section in Expanded */
+.calendarapp-item-discount-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.calendarapp-item-discount-label {
+  font-size: 12px;
+  color: #8A8A9E;
+  font-weight: 500;
+}
+
+.calendarapp-item-discount-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.calendarapp-discount-input {
+  width: 60px;
+  padding: 4px 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  color: #ffffff;
+  font-size: 12px;
+  text-align: center;
+}
+
+.calendarapp-discount-input:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.calendarapp-discount-type {
+  font-size: 12px;
+  color: #8A8A9E;
+}
+
+/* Expanded Action Buttons */
+.calendarapp-item-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.calendarapp-item-action-btn {
+  flex: 1;
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #8A8A9E;
+  border-radius: 4px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.calendarapp-item-action-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.calendarapp-item-action-btn.danger {
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+
+
+.calendarapp-item-action-btn.danger:hover {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.5);
+}
+
+
+.calendarapp-item-apply-btn {
+border: 1px solid var(--accent-color);
+color: var(--accent-color);
+}
+
+.calendarapp-item-apply-btn:hover {
+  border: 1px solid var(--accent-color);
+  color: #fff;
+  background: var(--accent-color);
+}
+
+/* Responsive Calendar Improvements */
+@media (max-width: 768px) {
+  .calendar-day-column {
+    flex: 0 0 150px;
+    min-width: 150px;
+  }
+  
+  .calendar-day-header {
+    flex: 0 0 150px;
+    min-width: 150px;
+    padding: 4px 2px;
+  }
+  
+  .calendar-day-header .day-number {
+    font-size: 16px;
+  }
+  
+  .time-slot {
+    height: 50px;
+    font-size: 10px;
+  }
+  
+  .calendar-day-column {
+    min-height: 1200px; /* 24 hours * 50px */
+  }
+  
+  .calendar-event {
+    font-size: 11px;
+    padding: 2px 4px;
+  }
+  
+  .event-creator-input {
+    font-size: 11px;
+  }
+  
+  .event-creator-btn {
+    padding: 1px 4px;
+    font-size: 9px;
+  }
+}
+
+/* Calendar Event Creator Styles */
+.calendar-event-creator {
+  position: absolute;
+  left: 2px;
+  right: 2px;
+  background: rgba(66, 133, 244, 0.95);
+  border: 0px solid #4285f4;
+  border-radius: 8px;
+  padding: 6px 8px;
+  z-index: 30;
+  transition: all 0.2s ease;
+  min-height: 15px;
+}
+
+.event-creator-input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  outline: none;
+  margin-bottom: 4px;
+  padding: 4px 6px;
+}
+
+.event-creator-input:focus {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.event-creator-input::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.event-time-display {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.event-creator-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.event-creator-btn {
+  padding: 4px 8px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex: 1;
+}
+
+.event-creator-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-1px);
+}
+
+.event-creator-btn.save {
+  background: rgba(76, 175, 80, 0.8);
+  border-color: #4caf50;
+}
+
+.event-creator-btn.save:hover {
+  background: #4caf50;
+}
+
+.event-creator-btn.cancel {
+  background: rgba(244, 67, 54, 0.8);
+  border-color: #f44336;
+}
+
+.event-creator-btn.cancel:hover {
+  background: #f44336;
+}
+
+/* Event Color Styles */
+.event-blue {
+  background: #4285f4;
+}
+
+.event-red {
+  background: #ea4335;
+}
+
+.event-green {
+  background: #34a853;
+}
+
+.event-yellow {
+  background: #fbbc05;
+  color: #000;
+}
+
+.event-purple {
+  background: #9c27b0;
+}
+
+.event-orange {
+  background: #ff9800;
+}
+
+.event-teal {
+  background: #009688;
+}
+
+@media (max-width: 480px) {
+  .calendar-day-column {
+    flex: 0 0 120px;
+    min-width: 120px;
+  }
+  
+  .calendar-day-header {
+    flex: 0 0 120px;
+    min-width: 120px;
+  }
+  
+  .calendar-time-column {
+    width: 50px;
+  }
+  
+  .time-slot {
+    height: 40px;
+    font-size: 9px;
+    padding: 4px 2px;
+  }
+  
+  .calendar-day-column {
+    min-height: 960px; /* 24 hours * 40px */
+  }
+}
+
+/* Calendar keyboard shortcuts help */
+.calendar-shortcuts-help {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 11px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+.calendar-shortcuts-help.visible {
+  opacity: 1;
+}
+
+.calendar-shortcuts-help h4 {
+  margin: 0 0 4px 0;
+  font-size: 12px;
+  color: #4285f4;
+}
+
+.calendar-shortcuts-help div {
+  margin: 2px 0;
+}
+
+.calendar-shortcuts-help kbd {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 1px 4px;
+  border-radius: 2px;
+  font-size: 10px;
+}
+
+/* Calendar Add/Edit Event Section */
+.calendarapp-add-edit-event-section {
+  border-radius: 15px;
+  overflow-x: auto !important;
+  width: 350px;
+  min-width: 350px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  transform: translateX(100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  z-index: 10;
+}
+
+.calendarapp-add-edit-event-section.slide-in {
+  transform: translateX(0);
+}
+
+.calendarapp-add-edit-event-section .window-toolbar {
+  border-radius: 15px 0 0 0;
+  display: flex;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 16px 8px 16px 16px;
+  border-radius: 15px;
+  border-bottom: none;
+  width: 330px;
+  margin: auto;
+}
+
+.calendarapp-event-form-content {
+  flex: 1;
+  padding: 22px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.calendarapp-form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+
+
+.calendarapp-form-input,
+.calendarapp-form-textarea,
+.calendarapp-form-select {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 10px;
+  color: #ffffff;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.calendarapp-form-input:focus,
+.calendarapp-form-textarea:focus,
+.calendarapp-form-select:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.calendarapp-form-input::placeholder,
+.calendarapp-form-textarea::placeholder {
+  color: #8A8A9E;
+}
+
+.calendarapp-form-textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.calendarapp-time-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.calendarapp-time-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.calendarapp-time-section input i {
+  color: #ffffff;
+}
+
+.calendarapp-checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.calendarapp-checkbox-label {
+  font-size: 14px;
+  color: #ffffff;
+}
+
+.calendarapp-guests-input-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.calendarapp-guests-permissions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+}
+
+.calendarapp-form-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  font-weight: 500;
+  color: #ffffff;
+}
+
+.calendarapp-section-toggle {
+  background: none;
+  border: none;
+  color: var(--accent-color);
+  font-size: 14px;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.calendarapp-section-toggle:hover {
+  opacity: 0.8;
+}
+
+.calendarapp-add-meet-btn,
+.calendarapp-add-location-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.calendarapp-add-meet-btn:hover,
+.calendarapp-add-location-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Calendar Dropdown Styles */
+.calendarapp-calendar-dropdown-container {
+  position: relative;
+}
+
+.calendarapp-calendar-dropdown-btn {
+  width: 100%;
+  justify-content: space-between;
+}
+
+.calendarapp-selected-calendar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.calendarapp-calendar-dropdown-menu {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.2s ease;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+
+  background-color: var(--context-menu-bg);
+  display: block;
+  font-size: 13px;
+  color: rgb(224, 224, 224);
+  backdrop-filter: blur(30px);
+  border-image: initial;
+  padding: 10px;
+
+
+  background: rgb(21 16 33);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+}
+
+.calendarapp-calendar-dropdown-container.open .calendarapp-calendar-dropdown-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.calendarapp-calendar-group-header {
+  padding: 8px 16px 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #8A8A9E;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.calendarapp-calendar-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #ffffff;
+  font-size: 13px;
+}
+
+.calendarapp-calendar-option:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+}
+
+.calendarapp-calendar-option.selected {
+  background: rgba(66, 133, 244, 0.2);
+  border-radius: 8px;
+}
+
+.calendarapp-calendar-separator {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 8px 0;
+}
+
+.calendarapp-calendar-dropdown-btn .fas.fa-chevron-down {
+  transition: transform 0.2s ease;
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.calendarapp-calendar-dropdown-container.open .calendarapp-calendar-dropdown-btn .fas.fa-chevron-down {
+  transform: rotate(180deg);
+}
+
+.calendarapp-notification-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.calendarapp-notification-row .calendarapp-form-select {
+  flex: 1;
+}
+
+.calendarapp-remove-notification-btn {
+  background: none;
+  border: none;
+  color: #8A8A9E;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.calendarapp-remove-notification-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.calendarapp-add-notification-btn {
+  background: none;
+  border: none;
+  color: var(--accent-color);
+  font-size: 14px;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.calendarapp-add-notification-btn:hover {
+  opacity: 0.8;
+}
+
+.calendarapp-user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.calendarapp-user-avatar {
+  flex-shrink: 0;
+}
+
+.calendarapp-avatar-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.calendarapp-user-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.calendarapp-user-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #ffffff;
+}
+
+.calendarapp-visibility-select {
+  max-width: 120px;
+}
+
+.calendarapp-payment-free.active {
+  background: #34a853;
+  border-color: #34a853;
+}
+
+.calendarapp-payment-paid.active {
+  background: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+.calendarapp-schedule-event-btn {
+  background: var(--accent-color);
+  border: none;
+  color: #ffffff;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  width: 100%;
+  justify-content: center;
+  margin-top: 12px;
+}
+
+.calendarapp-schedule-event-btn:hover {
+  background: var(--accent-color-light);
+}
+
+/* Light mode styles for add/edit event section */
+body.light-windows .calendarapp-add-edit-event-section .window-toolbar {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+body.light-windows .calendarapp-form-label,
+body.light-windows .calendarapp-checkbox-label,
+body.light-windows .calendarapp-user-name {
+  color: #333;
+}
+
+body.light-windows .calendarapp-form-input,
+body.light-windows .calendarapp-form-textarea,
+body.light-windows .calendarapp-form-select {
+  background: rgb(255 255 255 / 65%);
+  border-color: rgba(0, 0, 0, 22%);
+  color: #333;
+}
+
+body.light-windows .calendarapp-form-input:focus,
+body.light-windows .calendarapp-form-textarea:focus,
+body.light-windows .calendarapp-form-select:focus {
+  background: #fff;
+  border-color: rgba(0, 0, 0, 32%);
+
+}
+
+
+body.light-windows .calendarapp-add-meet-btn,
+body.light-windows .calendarapp-add-location-btn {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.1);
+  color: #333;
+}
+
+body.light-windows .calendarapp-add-meet-btn:hover,
+body.light-windows .calendarapp-add-location-btn:hover {
+  background: rgba(0, 0, 0, 0.08);
+  border-color: rgba(0, 0, 0, 0.2);
+}
+
+/* Light mode calendar dropdown styles */
+body.light-windows .calendarapp-calendar-dropdown-menu {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+body.light-windows .calendarapp-calendar-group-header {
+  color: #666;
+}
+
+body.light-windows .calendarapp-calendar-option {
+  color: #333;
+}
+
+body.light-windows .calendarapp-calendar-option:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+body.light-windows .calendarapp-calendar-option.selected {
+  background: rgba(66, 133, 244, 0.1);
+}
+
+body.light-windows .calendarapp-calendar-separator {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+body.light-windows .calendarapp-remove-notification-btn {
+  color: #666;
+}
+
+body.light-windows .calendarapp-remove-notification-btn:hover {
+  color: #333;
+  background: rgba(0, 0, 0, 0.1);
+}
+
+/* Ensure payment section has proper styling when shown */
+.calendarapp-pay-for-event-section .calendarapp-order-footer {
+  margin-top: auto;
+}
+
+/* Hide event creator buttons and input in simplified mode */
+.calendar-event-creator .event-creator-actions,
+.calendar-event-creator .event-creator-input {
+  display: none;
+}
+
+.calendar-event-creator {
+  min-height: 15px;
+  padding: 4px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Temporary event creator for sync (invisible but functional) */
+.calendar-event-creator[style*="opacity: 0"] {
+  background: rgba(66, 133, 244, 0.3);
+  border: 1px dashed #4285f4;
+}
+
+
+
+
+
+.calendarapp-toolbar-content {
+  display: flex
+;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 20px;
+}
+
+
+.calendarapp-toolbar-left {
+display: flex
+;
+    align-items: center;
+    gap: 10px;
+    border-right: 1px solid #333;
+}
+
+.calendarapp-list-header-left {
+  display: flex
+  ;
+      align-items: center;
+      gap: 10px;
+      width: -webkit-fill-available;
+}
+
+.calendarapp-search {
+  width: 100%;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: #fff;
+  font-size: 14px;
+  height: 36px;
+}
+
+
+.calendarapp-toolbar-center {
+  display: flex
+;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+  justify-content: space-between;
+}
+
+
+.calendarapp-toolbar-right {
+    display: flex
+;
+    align-items: center;
+    gap: 15px;
+}
+
+.calendarapp-sort, .calendarapp-view {
+  display: flex
+;
+  align-items: center;
+  gap: 5px;
+  color: var(--os-gray);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+
+.app-detail-moreinfo-list-item-text h5 {
+  font-weight: 500;
+}
+
+
+.toggle-switch-L {
+  width: 32px !important;
+    height: 20px !important;
+}
+
+.toggle-switch-L .slider:before {
+  height: 16px !important;
+  width: 16px !important;
+  left: 2px !important;
+  bottom: 2px !important;
+}
+
+.toggle-switch-L input:checked+.slider:before {
+ transform: translateX(12px) !important;
+}
+
+
+
+.toggle-switch-S {
+  width: 26px !important;
+    height: 16px !important;
+}
+
+.toggle-switch-S .slider:before {
+  height: 13px !important;
+  width: 13px !important;
+  left: 2px !important;
+  bottom: 1px !important;
+}
+
+.toggle-switch-S input:checked+.slider:before {
+ transform: translateX(9px) !important;
+}
+
+
+.toggle-switch-XS {
+  width: 20px !important;
+    height: 12px !important;
+}
+
+.toggle-switch-XS .slider:before {
+  height: 10px !important;
+  width: 10px !important;
+  left: 2px !important;
+  bottom: 1px !important;
+}
+
+.toggle-switch-XS input:checked+.slider:before {
+ transform: translateX(6px) !important;
+}
+
+
+.ai-chat-content-ai-answer {
+  display: flex;
+    gap: 15px;
+    align-content: flex-start;
+    align-items: flex-start;
+}
+
+.ai-chat-content {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    line-height: 1.5;
+}
+
+.ai-chat-content-user-question {
+  display: flex  ;
+      justify-content: flex-end;
+      border-radius: 15px;
+      background-color: #ffffff0a;
+      width: fit-content;
+      max-width: 80%;
+      margin-left: auto;
+      padding: 12px 20px;
+      margin-bottom: 40px;
+
+}
+
+.ai-chat-box {
+    width: 100%;
+    background-color: #ffffff0a;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding-top: 10px;
+}
+
+.ai-chat-box-content textarea {
+  color: #fff;
+    background: transparent;
+    border: none;
+    width: 100%;
+    height: 60px;
+    resize: none;
+    font-size: 14px;
+    line-height: 1.5;
+    padding: 0 15px;
+    height: 64px;
+  }
+
+.ai-chat-content-actions {
+  display: flex;
+    justify-content: space-between;
+    flex-direction: row;
+    align-items: center;
+    padding: 0 10px;
+    margin-bottom: 10px;
+}
+
+.ai-chat-content-actions-left {
+  display: flex;
+  gap: 2px;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.ai-chat-content-actions-right {
+  display: flex;
+  gap: 2px;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.ai-chat-content-actions button {
+  color: var(--os-gray);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 10px;
+  border-radius: 5px;
+  transition: all 0.2s ease;
+  display: flex;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  align-items: center;
+}
+
+.ai-chat-content-actions button:hover {
+  color: #fff;
+  background: #ffffff0a;
+}
+
+.ai-chat-send-btn {
+  font-size: 18px !important;
+}
+
+.ai-chat-content-ai-answer-avatar {
+  min-width: 18px;
+  max-width: 18px;
+  width: 16px;
+  display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.calendarapp-time-all-day {
+    display: flex;
+      align-items: center;
+      height: 41px;
+      margin-top: auto;
+      flex: 1;
+      justify-content: center;
+}
+
+.calendarapp-time-all-day-content {
+  display: flex;
+      align-items: center;
+      gap: 12px;
+}
+
+.ai-chat-content-ai-answer-actions {
+  visibility: hidden;
+height: 30px;
+display: flex;
+flex-direction: row;
+align-items: flex-start;
+justify-content: flex-start;
+gap: 3px;
+border-radius: 15px;
+margin-top: 5px;
+margin-bottom: 15px;
+}
+
+.ai-chat-content-ai-answer:hover .ai-chat-content-ai-answer-actions {
+ visibility: visible;
+ display: flex;
+    flex-direction: row;
+
+}
+
+
+.ai-chat-content-ai-answer-actions button {
+  color: var(--os-gray);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 10px;
+  border-radius: 5px;
+  transition: all 0.2s ease;
+  display: flex;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  align-items: center;
+}
+
+.ai-chat-content-ai-answer-actions button:hover {
+  color: #fff;
+  background: #ffffff0a;
+}
+
+.start-menu-right-sidebar-avatar {
+  position: absolute;
+  top: -50px;
+  width: 100px;
+  height: 100px;
+  margin: auto;
+  border: 3px solid #08041fcc;
+  outline: 1px solid var(--border-color);
+}
+
+
+.start-menu-right-sidebar-header-left {
+  display: flex
+  ;
+      justify-content: center;
+      margin-top: 40px;
+      margin-bottom: 20px;
+      flex-direction: column;
+      align-items: center;
+}
+
+.start-menu-right-sidebar-header-website-url {
+  opacity: 0.5;
+  color: var(--os-gray);
+  font-size: 14px;
+  margin-top: 5px;
+}
+
+.start-menu-right-sidebar-header-left-name {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+
+.mobile-notifications-screen#notifications-screen {
+  padding: 0;
+  background: transparent;
+}
+
+.mobile-notifications-screen#notifications-screen .notifications-header {
+  padding: 0;
+}
+
+.mobile-notifications-screen#notifications-screen .notifications-header .notif-title span {
+  font-size: 16px;
+  font-weight: 500;
+  color: #fff;
+}
+
+
+.mobile-notifications-screen#notifications-screen .notifications-header .notif-title i {
+  font-size: 16px;
+  color: #fff;
+}
+
+
+.mobile-notifications-screen#notifications-screen .notif-card {
+padding: 15px;
+gap: 15px;
+}
+
+.mobile-notifications-screen#notifications-screen .notif-card .notif-icon-bg {
+  width: 42px;
+  height: 42px;
+  font-size: 20px;
+  }
+
