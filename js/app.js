@@ -631,11 +631,13 @@ function setupSiteBuilderApp(windowElement) {
           <div class="window-main-content" style="width: 100%; height: 100%; display: flex; flex-direction: column; flex: 1;">
             <div class="window-toolbar" style="display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-bottom: 1px solid var(--border-color); flex-shrink: 0;">
               <button disabled class="toolbar-button" style="opacity: 0.5;"><i class="fas fa-arrow-left"></i></button>
+              <button disabled class="toolbar-button" style="opacity: 0.5;"><i class="fas fa-arrow-right"></i></button>
               <button class="toolbar-button refresh-btn" title="Refresh"><i class="fas fa-redo"></i></button>
               <div class="browser-url-address" style="flex: 1; background: var(--input-bg); border-radius: 20px; padding: 8px 12px; display: flex; align-items: center; border: 1px solid var(--border-color);">
                 <i class="fas fa-lock" style="margin-right: 8px; color: var(--os-gray);"></i>
                 <span style="color: var(--text-color); font-size: 13px;">${url}</span>
               </div>
+              <button class="toolbar-button" style="opacity: 0.5;"><i class="fas fa-ellipsis-h"></i></button>
             </div>
             <div class="window-app-content" style="flex: 1; position: relative; overflow: hidden; min-height: 0;">
               <iframe src="https://${url}" style="width: 100%; height: 100%; border: none; background: white; display: block;" frameborder="0" allowfullscreen sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-top-navigation"></iframe>
@@ -3589,7 +3591,7 @@ function setupEmailApp(windowElement) {
                   </div>
                   <div class="email-content-subject" >${email.subject}</div>
                   <div class="email-content-body" >${email.content}</div>
-                </div>
+                  
               </section>
             `;
           }
@@ -3679,6 +3681,12 @@ function setupEmailApp(windowElement) {
       </div>
       <div class="email-content-subject">${email.subject}</div>
       <div class="email-content-body">${email.content}</div>
+                                        <div class="email-footer-controls">
+                                                      <button class="toolbar-button" title="Reply"><i class="fas fa-reply"></i><span>Reply</span></button>
+                    <button class="toolbar-button" title="Reply All"><i class="fas fa-reply-all"></i><span>Reply all</span></button>
+                    <button class="toolbar-button" title="Forward"><i class="fas fa-share"></i><span>Forward</span></button>
+                    </div>
+                </div>
     `;
     section.appendChild(content);
 
@@ -16347,19 +16355,22 @@ function renderNotificationsScreen() {
   notificationsContent.appendChild(todayList);
   
   if (notifications.length === 0) {
+    console.log('renderNotificationsScreen: Showing empty message, notifications.length =', notifications.length);
     const emptyMsg = document.createElement('div');
     emptyMsg.className = 'no-notifications-msg';
     emptyMsg.textContent = 'No new notifications';
     emptyMsg.style.cssText = 'display: flex; align-items: center; justify-content: center; height: 100%; color: #888; font-size: 1.15rem; font-weight: 500; text-align: center; margin-top: 60px;';
     notificationsContent.appendChild(emptyMsg);
+  } else {
+    console.log('renderNotificationsScreen: Not showing empty message, notifications.length =', notifications.length);
   }
   
-  // Add event listeners for clear all and delete buttons
+    // Add event listeners for clear all and delete buttons
   const clearAllBtn = notificationsContent.querySelector('.notif-clear');
   if (clearAllBtn) {
     clearAllBtn.addEventListener('click', clearAllNotifications);
   }
-  
+
   const deleteButtons = notificationsContent.querySelectorAll('.notif-delete-btn');
   deleteButtons.forEach(btn => {
     btn.addEventListener('click', function(e) {
@@ -16375,6 +16386,11 @@ function renderNotificationsScreen() {
       }
     });
   });
+
+  // Enable swipe-to-delete functionality for mobile notifications screen
+  if (typeof enableNotificationSwipeToDelete === 'function') {
+    enableNotificationSwipeToDelete();
+  }
 }
 
 function renderNotificationsPanel() {
@@ -16436,13 +16452,15 @@ function renderNotificationsPanel() {
   });
   todaySection.appendChild(todayList);
   if (notifications.length === 0) {
+    console.log('renderNotificationsPanel: Showing empty message, notifications.length =', notifications.length);
     const emptyMsg = document.createElement('div');
     emptyMsg.className = 'no-notifications-msg';
     emptyMsg.textContent = 'No new notifications';
     emptyMsg.style.cssText = 'display: flex; align-items: center; justify-content: center; height: 100%; color: #888; font-size: 1.15rem; font-weight: 500; text-align: center; margin-top: 60px;';
     todaySection.appendChild(emptyMsg);
+  } else {
+    console.log('renderNotificationsPanel: Not showing empty message, notifications.length =', notifications.length);
   }
-  if (typeof enableNotificationSwipeToDelete === 'function') enableNotificationSwipeToDelete();
   if (typeof updateNotificationsBadge === 'function') updateNotificationsBadge();
   renderNotificationsScreen(); // Also render the mobile notifications screen
   // Clear the lastAddedNotificationId after rendering
@@ -17239,8 +17257,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const widgetTemplates = {
       'my-files': app => `<div class="widget"><div class="widget-header"><span>${app.name}</span></div><div class="widget-content notification-widget"><div class="big-number">23</div><div class="widget-subtitle">No more events today</div></div></div>`,
       'this-pc': app => `<div class="widget"><div class="widget-header"><span>${app.name}</span></div><div class="widget-content disk-space-widget"><div class="big-number">23%</div><div class="progress-bar"><div class="progress" style="width: 23%"></div></div><div class="widget-subtitle">15 GB / 50 GB</div></div></div>`,
-      'web-files': app => `<div class="widget" style="width: 46%; float: right;"><div class="widget-content email-widget"><div class="widget-icon"><i class="fas fa-headphones"></i></div><div class="widget-data"><div class="big-number">23</div><div class="widget-subtitle">Unread emails</div></div></div></div>`,
-      'trash-sm': app => `<div class="widget" style="width: 46%;"><div class="widget-content messages-widget"><div class="widget-icon"><i class="fas fa-dollar-sign"></i></div><div class="widget-data"><div class="big-number">23</div><div class="widget-subtitle">Unread messages</div></div></div></div>`,
+      'web-files': app => `<div class="widget" style="width: 48%; float: right;"><div class="widget-content email-widget"><div class="widget-icon"><i class="fas fa-headphones"></i></div><div class="widget-data"><div class="big-number">23</div><div class="widget-subtitle">Unread emails</div></div></div></div>`,
+      'trash-sm': app => `<div class="widget" style="width: 48%;"><div class="widget-content messages-widget"><div class="widget-icon"><i class="fas fa-dollar-sign"></i></div><div class="widget-data"><div class="big-number">23</div><div class="widget-subtitle">Unread messages</div></div></div></div>`,
       'settings-sm': app => `<div class="widget"><div class="widget-header"><span>${app.name}</span></div><div class="widget-content"><div class="big-number">Settings</div><div class="widget-subtitle">Configure your system</div></div></div>`,
       'site-builder-sm': app => `<div class="widget"><div class="widget-header"><span>${app.name}</span></div><div class="widget-content"><div class="big-number">Site</div><div class="widget-subtitle">Build your website</div></div></div>`,
       'app-store-sm': app => `<div class="widget"><div class="widget-header"><span>${app.name}</span></div><div class="widget-content"><div class="big-number">Store</div><div class="widget-subtitle">Find new apps</div></div></div>`,
@@ -25257,6 +25275,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (notifications.length === 0) {
       notifications.push(
         {
+          id: 'notif-' + Date.now() + '-' + Math.random().toString(36).slice(2),
           title: 'New sale',
           desc: 'New sale from Andrei Caramitru',
           meta: '1m',
@@ -25266,6 +25285,7 @@ document.addEventListener('DOMContentLoaded', function () {
           unread: true
         },
         {
+          id: 'notif-' + (Date.now() + 1) + '-' + Math.random().toString(36).slice(2),
           title: 'Andrei Caramitru made a new <b>sale</b>',
           desc: 'in total of <b>4500 lei</b>',
           meta: '20m',
@@ -25275,6 +25295,7 @@ document.addEventListener('DOMContentLoaded', function () {
           unread: true
         },
         {
+          id: 'notif-' + (Date.now() + 2) + '-' + Math.random().toString(36).slice(2),
           title: 'Andrei Caramitru made a new sale',
           desc: 'in total of 4500 lei',
           meta: '40m',
@@ -25284,6 +25305,7 @@ document.addEventListener('DOMContentLoaded', function () {
           unread: false
         },
         {
+          id: 'notif-' + (Date.now() + 3) + '-' + Math.random().toString(36).slice(2),
           title: 'Andrei Caramitru posted a <b>review</b>',
           desc: 'on <b>Blugi de blana imblaniti misto</b>',
           meta: '1h ago',
@@ -25640,13 +25662,34 @@ window.addEventListener('resize', function () {
 
 // --- SWIPE TO DELETE FOR NOTIFICATIONS ---
 function enableNotificationSwipeToDelete() {
-  const notifCards = document.querySelectorAll('.notif-card');
+  console.log('enableNotificationSwipeToDelete called');
+  // Wait a moment for DOM to be ready, then find cards
+  setTimeout(() => {
+    const notifCards = document.querySelectorAll('.notif-card');
+    console.log('Found notification cards:', notifCards.length);
+    
+    if (notifCards.length === 0) {
+      console.log('No notification cards found, trying mobile screen selector');
+      const mobileNotifCards = document.querySelectorAll('#notifications-screen .notif-card');
+      console.log('Found mobile notification cards:', mobileNotifCards.length);
+      if (mobileNotifCards.length > 0) {
+        setupSwipeForCards(mobileNotifCards);
+        return;
+      }
+    } else {
+      setupSwipeForCards(notifCards);
+    }
+  }, 100);
+}
+
+function setupSwipeForCards(notifCards) {
   notifCards.forEach(card => {
     let startX = 0;
     let currentX = 0;
     let translateX = 0;
     let swiping = false;
-    const threshold = 80; // px to trigger delete
+    let hasMoved = false; // Track if touch has moved at all
+    const threshold = 60; // Reduced from 80px to make it more responsive
 
     // Create a background for delete if not present
     let swipeBg = card.querySelector('.notif-swipe-bg');
@@ -25658,47 +25701,135 @@ function enableNotificationSwipeToDelete() {
     }
 
     card.addEventListener('touchstart', function (e) {
+      console.log('Touch start detected on notification card');
       if (e.touches.length !== 1) return;
+      e.stopPropagation(); // Prevent global touch handlers from interfering
       startX = e.touches[0].clientX;
+      currentX = startX;
+      translateX = 0;
       swiping = true;
+      hasMoved = false;
       card.style.transition = 'none';
     });
 
     card.addEventListener('touchmove', function (e) {
       if (!swiping) return;
+      e.stopPropagation(); // Prevent global touch handlers from interfering
       currentX = e.touches[0].clientX;
       translateX = Math.max(0, currentX - startX); // Only allow right swipe
+      
+      // Mark that touch has moved if there's any movement
+      if (Math.abs(currentX - startX) > 5) {
+        hasMoved = true;
+      }
+      
       card.style.transform = `translateX(${translateX}px)`;
       swipeBg.style.opacity = Math.min(1, Math.abs(translateX) / threshold);
     });
 
     card.addEventListener('touchend', function (e) {
       if (!swiping) return;
+      e.stopPropagation(); // Prevent global touch handlers from interfering
       swiping = false;
       card.style.transition = 'transform 0.2s';
+      
+      // Calculate final translateX from current position if not set by touchmove
+      if (!hasMoved && e.changedTouches && e.changedTouches[0]) {
+        currentX = e.changedTouches[0].clientX;
+        translateX = Math.max(0, currentX - startX);
+      }
+      
+      console.log('Touch end: translateX =', translateX, 'threshold =', threshold, 'hasMoved =', hasMoved);
+      
       if (translateX > threshold) { // Only if swiped right enough
         card.style.transform = `translateX(120%)`;
         card.classList.add('notif-card-removing');
+        
+        // Remove from notifications array using the data-notif-id
+        const notifId = card.dataset.notifId;
+        if (notifId) {
+          const notifIndex = notifications.findIndex(n => n.id === notifId);
+          if (notifIndex !== -1) {
+            notifications.splice(notifIndex, 1);
+            console.log('Mobile swipe: Deleted notification', notifId, 'remaining:', notifications.length);
+            
+            // Update both screens and badge
+            if (typeof updateNotificationsBadge === 'function') {
+              updateNotificationsBadge();
+            }
+          } else {
+            console.log('Mobile swipe: Could not find notification with ID', notifId);
+          }
+        } else {
+          console.log('Mobile swipe: No notifId found on card');
+        }
+        
         card.addEventListener('transitionend', function handler() {
           card.removeEventListener('transitionend', handler);
           const notifList = card.parentElement;
-          card.remove();
+          
+          // Use the existing collapsing animation for smooth height transition
+          const cardHeight = card.offsetHeight;
+          card.style.height = cardHeight + 'px';
+          
+          // Preserve the border-radius during collapse to avoid visual jump
+          const computedStyle = window.getComputedStyle(card);
+          const borderRadius = computedStyle.borderRadius;
+          
+          card.classList.add('notif-card-collapsing');
+          
+          // Force preserve the border-radius
+          card.style.borderRadius = borderRadius;
+          
+          // Animate height to 0
+          requestAnimationFrame(() => {
+            card.style.height = '0px';
+          });
+          
+          // Wait for collapse animation to complete before removing
+          card.addEventListener('transitionend', function collapseHandler() {
+            card.removeEventListener('transitionend', collapseHandler);
+            card.remove();
 
-          // Check if this was the last notification in the section
-          if (notifList && notifList.classList.contains('notif-list') && notifList.querySelectorAll('.notif-card').length === 0) {
-            const sectionLabel = notifList.previousElementSibling;
-            if (sectionLabel && sectionLabel.classList.contains('notif-section-label')) {
-              fadeOutSectionLabel(sectionLabel);
-              // Remove the empty list after animation
-              setTimeout(() => notifList.remove(), 400);
+            // Check if this was the last notification in the section
+            if (notifList && notifList.classList.contains('notif-list') && notifList.querySelectorAll('.notif-card').length === 0) {
+              const sectionLabel = notifList.previousElementSibling;
+              if (sectionLabel && sectionLabel.classList.contains('notif-section-label')) {
+                if (typeof fadeOutSectionLabel === 'function') {
+                  fadeOutSectionLabel(sectionLabel);
+                }
+                // Remove the empty list after animation
+                setTimeout(() => notifList.remove(), 400);
+              }
             }
-          }
 
-          // Check if all notifications are gone
-          setTimeout(checkNoNotifications, 400);
+            // Use the exact same logic as the X button click (which works perfectly)
+            setTimeout(() => {
+              console.log(`Mobile swipe: After DOM cleanup, notifications.length = ${notifications.length}`);
+              
+              // Match exactly what the X button does - renderNotificationsScreen FIRST
+              renderNotificationsScreen();
+              renderNotificationsPanel(); // Also update the panel if it exists
+              if (typeof updateNotificationsBadge === 'function') updateNotificationsBadge();
+              
+              console.log('Mobile swipe: Completed using X button logic');
+            }, 150);
+          });
         });
       } else {
         // Snap back
+        card.style.transform = '';
+        swipeBg.style.opacity = 0;
+      }
+    });
+    
+    // Add touchcancel handler to reset state if touch is interrupted
+    card.addEventListener('touchcancel', function (e) {
+      if (swiping) {
+        console.log('Touch cancelled, resetting card position');
+        swiping = false;
+        hasMoved = false;
+        card.style.transition = 'transform 0.2s';
         card.style.transform = '';
         swipeBg.style.opacity = 0;
       }
@@ -29391,7 +29522,7 @@ function initializePOSApp(windowElement) {
   });
 }
 
-// --- ENHANCED MOBILE SWIPE DETECTION FOR WIDGETS SCREEN ---
+// --- ENHANCED MOBILE SWIPE DETECTION FOR WIDGETS SCREEN AND APP SIDEBARS ---
 // Robust mobile swipe detection system with improved debugging and reliability
 document.addEventListener('DOMContentLoaded', function() {
   const MOBILE_BREAKPOINT = 1023;
@@ -29399,6 +29530,83 @@ document.addEventListener('DOMContentLoaded', function() {
   // Enhanced mobile detection
   function isMobile() {
     return window.innerWidth <= MOBILE_BREAKPOINT;
+  }
+  
+  // Function to check if any apps are currently open
+  function hasOpenApps() {
+    if (typeof openWindows === 'undefined') return false;
+    const openApps = Object.keys(openWindows).filter(id => {
+      const win = openWindows[id];
+      return win && win.element && !win.element.classList.contains('minimized');
+    });
+    return openApps.length > 0;
+  }
+  
+  // Function to get the active (top-most) window element
+  function getActiveWindow() {
+    if (typeof activeWindow !== 'undefined' && activeWindow) {
+      return activeWindow;
+    }
+    // Fallback: find the topmost non-minimized window
+    const openApps = Object.keys(openWindows).filter(id => {
+      const win = openWindows[id];
+      return win && win.element && !win.element.classList.contains('minimized');
+    });
+    if (openApps.length > 0) {
+      return openWindows[openApps[openApps.length - 1]].element;
+    }
+    return null;
+  }
+  
+  // Function to toggle app sidebar
+  function toggleAppSidebar(windowElement, show) {
+    if (!windowElement) {
+      console.log('Mobile swipe: toggleAppSidebar called with null window element');
+      return false;
+    }
+    
+    // Don't toggle sidebar for settings app - it has its own navigation
+    if (windowElement.classList.contains('settings-app-window')) {
+      console.log('Mobile swipe: Skipping sidebar toggle for settings app');
+      return false;
+    }
+    
+    const sidebar = windowElement.querySelector('.window-sidebar');
+    const overlay = windowElement.querySelector('.sidebar-overlay');
+    const contentArea = windowElement.querySelector('.window-main-content, .settings-content, .app-store-main-content');
+    
+    if (sidebar && overlay) {
+      if (show) {
+        // Use the same classes as menu-toggle functionality
+        sidebar.classList.add('show');
+        overlay.classList.add('show');
+        if (contentArea) {
+          contentArea.classList.add('sidebar-push-active');
+        }
+        // Add interaction blocking like menu-toggle does
+        windowElement.classList.add('sidebar-block-interaction');
+        console.log('Mobile swipe: App sidebar opened');
+        return true;
+      } else {
+        // Remove the same classes as menu-toggle functionality
+        sidebar.classList.remove('show');
+        overlay.classList.remove('show');
+        if (contentArea) {
+          contentArea.classList.remove('sidebar-push-active');
+        }
+        // Remove interaction blocking
+        windowElement.classList.remove('sidebar-block-interaction');
+        console.log('Mobile swipe: App sidebar closed');
+        return true;
+      }
+    } else {
+      console.log('Mobile swipe: Required sidebar elements not found', {
+        sidebar: !!sidebar,
+        overlay: !!overlay,
+        contentArea: !!contentArea
+      });
+      return false;
+    }
   }
   
   // Only initialize on mobile devices
@@ -29432,6 +29640,7 @@ document.addEventListener('DOMContentLoaded', function() {
   let lastTouchX = 0;
   let isDragging = false;
   let hasMoved = false;
+  let appSidebarOpen = false;
   
   const SWIPE_THRESHOLD = 50; // Minimum distance for swipe
   const SWIPE_VELOCITY_THRESHOLD = 0.3; // Minimum velocity for swipe
@@ -29469,6 +29678,14 @@ document.addEventListener('DOMContentLoaded', function() {
       isTransitioning = false;
       console.log('Mobile swipe: Transition completed');
     }, TRANSITION_DURATION);
+    
+    // Safety timeout in case transition gets stuck
+    setTimeout(() => {
+      if (isTransitioning) {
+        isTransitioning = false;
+        console.log('Mobile swipe: Transition safety timeout triggered');
+      }
+    }, TRANSITION_DURATION * 2);
   }
   
   // Enhanced touch start handler
@@ -29545,33 +29762,107 @@ document.addEventListener('DOMContentLoaded', function() {
     if (isValidSwipe && isDragging) {
       console.log(`Mobile swipe: Valid swipe detected - deltaX: ${deltaX}, current state: ${currentState}`);
       
-      if (deltaX > 0) {
-        // Swipe right
-        if (currentState === 'widgets') {
-          console.log('Mobile swipe: Swiping right from widgets to desktop');
-          updateMobileState('desktop');
-        } else if (currentState === 'desktop') {
-          console.log('Mobile swipe: Swiping right from desktop to notifications');
-          updateMobileState('notifications');
-        }
-      } else if (deltaX < 0) {
-        // Swipe left
-        if (currentState === 'notifications') {
-          console.log('Mobile swipe: Swiping left from notifications to desktop');
-          updateMobileState('desktop');
-        } else if (currentState === 'desktop') {
-          console.log('Mobile swipe: Swiping left from desktop to widgets');
-          updateMobileState('widgets');
+      const appsOpen = hasOpenApps();
+      console.log(`Mobile swipe: Apps open: ${appsOpen}`);
+      
+      if (appsOpen) {
+        // Sync sidebar state before processing swipe
+        syncSidebarState();
+        
+        // When an app is open, check if it's settings app with special behavior
+        const activeWindow = getActiveWindow();
+        const isSettingsApp = activeWindow && activeWindow.classList.contains('settings-app-window');
+        
+        if (isSettingsApp) {
+          // Special handling for settings app
+          const isShowingPanel = activeWindow.classList.contains('show-panel');
+          console.log(`Mobile swipe: Settings app detected - isShowingPanel: ${isShowingPanel}, deltaX: ${deltaX}`);
+          
+          if (deltaX > 0 && isShowingPanel) {
+            // Swipe right when panel is shown - go back to sidebar
+            const headerBackBtn = activeWindow.querySelector('.window-header .back-btn');
+            console.log(`Mobile swipe: Settings app back button found: ${!!headerBackBtn}`);
+            if (headerBackBtn) {
+              headerBackBtn.click();
+              console.log('Mobile swipe: Settings app - went back to sidebar');
+            }
+          } else {
+            console.log('Mobile swipe: Settings app - no action (not showing panel or wrong swipe direction)');
+          }
+          // For settings app, don't handle sidebar toggle - only back navigation
+        } else {
+          // Regular app behavior - handle sidebar toggle
+          if (deltaX > 0) {
+            // Swipe right (left to right) - open sidebar
+            if (!appSidebarOpen) {
+              const success = toggleAppSidebar(activeWindow, true);
+              if (success) {
+                appSidebarOpen = true;
+                console.log('Mobile swipe: Opened app sidebar');
+              } else {
+                console.log('Mobile swipe: Failed to open app sidebar');
+              }
+            } else {
+              console.log('Mobile swipe: App sidebar already open, ignoring swipe right');
+            }
+          } else if (deltaX < 0) {
+            // Swipe left - close sidebar if it's open
+            if (appSidebarOpen) {
+              const success = toggleAppSidebar(activeWindow, false);
+              if (success) {
+                appSidebarOpen = false;
+                console.log('Mobile swipe: Closed app sidebar');
+              } else {
+                console.log('Mobile swipe: Failed to close app sidebar');
+                // Force reset the state if toggle failed
+                appSidebarOpen = false;
+              }
+            } else {
+              console.log('Mobile swipe: App sidebar already closed, ignoring swipe left');
+            }
+          }
         }
       } else {
-        console.log(`Mobile swipe: Invalid direction - deltaX: ${deltaX}, state: ${currentState}`);
+        // When on home screen (no apps open), allow normal navigation
+        if (deltaX > 0) {
+          // Swipe right
+          if (currentState === 'widgets') {
+            console.log('Mobile swipe: Swiping right from widgets to desktop');
+            updateMobileState('desktop');
+          } else if (currentState === 'desktop') {
+            console.log('Mobile swipe: Swiping right from desktop to notifications');
+            updateMobileState('notifications');
+          }
+        } else if (deltaX < 0) {
+          // Swipe left
+          if (currentState === 'notifications') {
+            console.log('Mobile swipe: Swiping left from notifications to desktop');
+            updateMobileState('desktop');
+          } else if (currentState === 'desktop') {
+            console.log('Mobile swipe: Swiping left from desktop to widgets');
+            updateMobileState('widgets');
+          }
+        }
       }
     } else {
       console.log('Mobile swipe: Not a valid swipe');
     }
     
+    // Always reset touch state to prevent getting stuck
     isDragging = false;
     hasMoved = false;
+    isTransitioning = false; // Also reset transition flag if touch sequence completes
+  }
+  
+  // Reset function to clear stuck states
+  function resetTouchState() {
+    isDragging = false;
+    hasMoved = false;
+    touchStartX = 0;
+    touchStartY = 0;
+    touchStartTime = 0;
+    lastTouchX = 0;
+    console.log('Mobile swipe: Touch state reset');
   }
   
   // Scroll handler removed - using pure transform approach to prevent multiple empty screens
@@ -29581,17 +29872,125 @@ document.addEventListener('DOMContentLoaded', function() {
     mainContentArea.addEventListener('touchstart', handleTouchStart, { passive: true });
     mainContentArea.addEventListener('touchmove', handleTouchMove, { passive: true });
     mainContentArea.addEventListener('touchend', handleTouchEnd, { passive: true });
+    
+    // Add touchcancel listener to handle interrupted touches
+    mainContentArea.addEventListener('touchcancel', function(e) {
+      console.log('Mobile swipe: Touch cancelled, resetting state');
+      resetTouchState();
+    }, { passive: true });
+    
     console.log('Mobile swipe: Event listeners attached successfully');
   } catch (error) {
     console.error('Mobile swipe: Error attaching event listeners:', error);
   }
+
+  // Add click handler for sidebar overlay to close sidebar
+  document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('sidebar-overlay') && 
+        e.target.classList.contains('show')) {
+      closeAppSidebar();
+    }
+  });
+
+  // Monitor for app state changes to close sidebar when needed
+  const originalOpenApp = window.openApp;
+  const originalCloseWindow = window.closeWindow;
   
+  // Override openApp to close sidebar when switching apps
+  if (typeof originalOpenApp === 'function') {
+    window.openApp = function(...args) {
+      closeAppSidebar();
+      return originalOpenApp.apply(this, args);
+    };
+  }
+  
+  // Monitor for window close/minimize events via MutationObserver
+  const observer = new MutationObserver(function(mutations) {
+    mutations.forEach(function(mutation) {
+      if (mutation.type === 'childList') {
+        // Check if any windows were removed (app closed)
+        mutation.removedNodes.forEach(function(node) {
+          if (node.nodeType === Node.ELEMENT_NODE && node.classList && 
+              node.classList.contains('window')) {
+            closeAppSidebar();
+          }
+        });
+      } else if (mutation.type === 'attributes' && 
+                 mutation.attributeName === 'class' &&
+                 mutation.target.classList.contains('window')) {
+        // Check if a window was minimized
+        if (mutation.target.classList.contains('minimized')) {
+          // Check if no apps are visible anymore
+          setTimeout(() => {
+            if (!hasOpenApps()) {
+              closeAppSidebar();
+            }
+          }, 100);
+        }
+      }
+    });
+  });
+  
+  // Start observing
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true,
+    attributes: true,
+    attributeFilter: ['class']
+  });
+  
+  // Function to check and sync the actual sidebar state
+  function syncSidebarState() {
+    const activeWindow = getActiveWindow();
+    if (!activeWindow || activeWindow.classList.contains('settings-app-window')) {
+      // No active window or settings app - force close state
+      appSidebarOpen = false;
+      return false;
+    }
+    
+    const sidebar = activeWindow.querySelector('.window-sidebar');
+    const actuallyOpen = sidebar && sidebar.classList.contains('show');
+    
+    if (appSidebarOpen !== actuallyOpen) {
+      console.log(`Mobile swipe: Sidebar state sync - was ${appSidebarOpen}, actually ${actuallyOpen}`);
+      appSidebarOpen = actuallyOpen;
+    }
+    
+    return appSidebarOpen;
+  }
+
+  // Function to close app sidebar when switching contexts
+  function closeAppSidebar() {
+    // First sync the state to get accurate info
+    syncSidebarState();
+    
+    if (appSidebarOpen) {
+      const activeWindow = getActiveWindow();
+      const isSettingsApp = activeWindow && activeWindow.classList.contains('settings-app-window');
+      
+      if (!isSettingsApp && activeWindow) {
+        // Only close sidebar for non-settings apps
+        const success = toggleAppSidebar(activeWindow, false);
+        if (success || !activeWindow) {
+          appSidebarOpen = false;
+          console.log('Mobile swipe: Closed app sidebar on context switch');
+        }
+      } else if (!activeWindow) {
+        // No active window, force reset the state
+        appSidebarOpen = false;
+        console.log('Mobile swipe: Reset sidebar state - no active window');
+      }
+    }
+  }
+
   // Enhanced window resize handler
   function handleResize() {
     if (!isMobile()) {
       console.log('Mobile swipe: Switched to desktop, removing mobile classes and event listeners');
       // Remove mobile classes when switching to desktop
       document.body.classList.remove('mobile-icons-active', 'mobile-widgets-active', 'mobile-notifications-active');
+      // Close any open app sidebar
+      closeAppSidebar();
       // Remove event listeners
       mainContentArea.removeEventListener('touchstart', handleTouchStart);
       mainContentArea.removeEventListener('touchmove', handleTouchMove);
@@ -29600,6 +29999,28 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
   window.addEventListener('resize', handleResize);
+  
+  // Add event listeners for state cleanup
+  window.addEventListener('blur', function() {
+    resetTouchState();
+    console.log('Mobile swipe: Window lost focus, resetting touch state');
+  });
+  
+  window.addEventListener('visibilitychange', function() {
+    if (document.hidden) {
+      resetTouchState();
+      console.log('Mobile swipe: Page hidden, resetting touch state');
+    }
+  });
+  
+  // Add orientation change listener for additional cleanup
+  window.addEventListener('orientationchange', function() {
+    setTimeout(() => {
+      resetTouchState();
+      syncSidebarState();
+      console.log('Mobile swipe: Orientation changed, resetting state');
+    }, 100);
+  });
   
   // Initialize with desktop state
   updateMobileState('desktop');
@@ -29644,10 +30065,16 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Add debug function to window for testing
   window.debugMobileSwipe = function() {
+    const activeWindow = getActiveWindow();
     return {
       currentState,
       isTransitioning,
+      appSidebarOpen,
+      isDragging,
+      hasMoved,
       isMobile: isMobile(),
+      hasOpenApps: hasOpenApps(),
+      activeWindow: activeWindow ? activeWindow.className : 'none',
       elements: {
         mainContentArea: !!mainContentArea,
         desktopArea: !!desktopArea,
@@ -29658,7 +30085,284 @@ document.addEventListener('DOMContentLoaded', function() {
         mobileIconsActive: document.body.classList.contains('mobile-icons-active'),
         mobileWidgetsActive: document.body.classList.contains('mobile-widgets-active'),
         mobileNotificationsActive: document.body.classList.contains('mobile-notifications-active')
+      },
+      sidebarState: activeWindow ? {
+        hasSidebar: !!activeWindow.querySelector('.window-sidebar'),
+        sidebarVisible: activeWindow.querySelector('.window-sidebar')?.classList.contains('show'),
+        overlayVisible: activeWindow.querySelector('.sidebar-overlay')?.classList.contains('show')
+      } : null
+    };
+  };
+  
+  // Add function to manually reset if needed
+  window.resetMobileSwipe = function() {
+    resetTouchState();
+    syncSidebarState();
+    isTransitioning = false;
+    console.log('Mobile swipe: Manual reset performed');
+    return window.debugMobileSwipe();
+  };
+});
+
+// =============================
+// ORIENTATION CONTROL
+// Force portrait mode on mobile phones, allow rotation on tablets
+// =============================
+
+(function() {
+  'use strict';
+  
+  // Device detection
+  function isMobilePhone() {
+    return window.innerWidth <= 767;
+  }
+  
+  function isTablet() {
+    return window.innerWidth >= 768 && window.innerWidth <= 1023;
+  }
+  
+  function isDesktop() {
+    return window.innerWidth >= 1024;
+  }
+  
+  // Orientation detection
+  function isLandscape() {
+    return window.innerWidth > window.innerHeight;
+  }
+  
+  function isPortrait() {
+    return window.innerHeight > window.innerWidth;
+  }
+  
+  // Screen orientation lock (if supported)
+  function lockToPortrait() {
+    if (screen.orientation && screen.orientation.lock) {
+      screen.orientation.lock('portrait').catch(err => {
+        console.log('Screen orientation lock not supported or failed:', err);
+      });
+    }
+  }
+  
+  function unlockOrientation() {
+    if (screen.orientation && screen.orientation.unlock) {
+      screen.orientation.unlock();
+    }
+  }
+  
+  // Force portrait overlay for mobile phones in landscape
+  function createPortraitOverlay() {
+    let overlay = document.querySelector('.force-portrait-mode');
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.className = 'force-portrait-mode';
+      overlay.innerHTML = `
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
+          <div style="font-size: 48px;">📱</div>
+          <h2 style="margin: 0; font-size: 24px;">Please rotate your device</h2>
+          <p style="margin: 0; opacity: 0.8;">This app works best in portrait mode on mobile devices</p>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+    }
+    return overlay;
+  }
+  
+  function removePortraitOverlay() {
+    const overlay = document.querySelector('.force-portrait-mode');
+    if (overlay) {
+      overlay.remove();
+    }
+  }
+  
+  // Create landscape warning overlay
+  function createLandscapeWarning() {
+    let warning = document.querySelector('.force-landscape-warning');
+    if (!warning) {
+      warning = document.createElement('div');
+      warning.className = 'force-landscape-warning';
+      warning.innerHTML = `
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 20px; text-align: center;">
+          <div style="font-size: 64px;">📱</div>
+          <h2 style="margin: 0; font-size: 28px; font-weight: 600;">Please rotate your device</h2>
+          <p style="margin: 0; opacity: 0.9; font-size: 18px; max-width: 300px; line-height: 1.4;">
+            This application is optimized for portrait mode on mobile devices
+          </p>
+          <div style="margin-top: 20px; font-size: 48px; animation: bounce 2s infinite;">
+            ↻
+          </div>
+        </div>
+      `;
+      document.body.appendChild(warning);
+      
+      // Add bounce animation
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes bounce {
+          0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+          40% { transform: translateY(-10px); }
+          60% { transform: translateY(-5px); }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+    return warning;
+  }
+  
+  function removeLandscapeWarning() {
+    const warning = document.querySelector('.force-landscape-warning');
+    if (warning) {
+      warning.remove();
+    }
+  }
+
+  // Main orientation handler
+  function handleOrientationChange() {
+    const actualWidth = Math.max(window.innerWidth, window.outerWidth || 0);
+    const actualHeight = Math.max(window.innerHeight, window.outerHeight || 0);
+    
+    console.log('Orientation change detected:', {
+      width: actualWidth,
+      height: actualHeight,
+      innerWidth: window.innerWidth,
+      innerHeight: window.innerHeight,
+      isMobilePhone: isMobilePhone(),
+      isTablet: isTablet(),
+      isDesktop: isDesktop(),
+      isLandscape: isLandscape(),
+      isPortrait: isPortrait(),
+      orientation: screen.orientation ? screen.orientation.angle : 'unknown'
+    });
+    
+    if (isMobilePhone()) {
+      // Mobile phones: Show warning overlay in landscape
+      if (isLandscape()) {
+        console.log('Mobile phone in landscape - showing warning overlay');
+        createLandscapeWarning();
+        document.body.classList.add('orientation-locked');
+        document.body.style.overflow = 'hidden';
+        
+        // Try to lock orientation
+        if (screen.orientation && screen.orientation.lock) {
+          screen.orientation.lock('portrait').catch(err => {
+            console.log('Cannot lock orientation:', err);
+          });
+        }
+      } else {
+        console.log('Mobile phone in portrait - removing overlay');
+        removeLandscapeWarning();
+        removePortraitOverlay();
+        document.body.classList.remove('orientation-locked');
+        document.body.style.overflow = '';
+      }
+    } else if (isTablet()) {
+      // Tablets: Allow both orientations
+      console.log('Tablet device - allowing both orientations');
+      removeLandscapeWarning();
+      removePortraitOverlay();
+      unlockOrientation();
+      document.body.classList.remove('orientation-locked');
+      document.body.style.overflow = '';
+      
+      // Update tablet-specific responsive layouts (handled by CSS)
+      if (isLandscape()) {
+        document.body.classList.add('tablet-landscape');
+        document.body.classList.remove('tablet-portrait');
+      } else {
+        document.body.classList.add('tablet-portrait');
+        document.body.classList.remove('tablet-landscape');
+      }
+    } else {
+      // Desktop: No restrictions
+      console.log('Desktop device - no orientation restrictions');
+      removeLandscapeWarning();
+      removePortraitOverlay();
+      unlockOrientation();
+      document.body.classList.remove('orientation-locked', 'tablet-landscape', 'tablet-portrait');
+      document.body.style.overflow = '';
+    }
+  }
+  
+  // Initialize orientation control
+  function initOrientationControl() {
+    console.log('Initializing orientation control');
+    
+    // Handle initial load
+    handleOrientationChange();
+    
+    // Listen for orientation changes
+    window.addEventListener('orientationchange', () => {
+      // Small delay to ensure new dimensions are available
+      setTimeout(handleOrientationChange, 100);
+    });
+    
+    // Also listen for resize events (for desktop/browser testing)
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(handleOrientationChange, 250);
+    });
+    
+    // Listen for window focus (in case user switches apps and comes back)
+    window.addEventListener('focus', handleOrientationChange);
+  }
+  
+  // Enhanced viewport meta tag control
+  function updateViewportMeta() {
+    let viewport = document.querySelector('meta[name="viewport"]');
+    if (!viewport) {
+      viewport = document.createElement('meta');
+      viewport.name = 'viewport';
+      document.head.appendChild(viewport);
+    }
+    
+    if (isMobilePhone()) {
+      // Lock viewport for mobile phones
+      viewport.content = 'width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0, orientation=portrait';
+    } else if (isTablet()) {
+      // Allow scaling for tablets but maintain responsive design
+      viewport.content = 'width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=2.0, minimum-scale=0.5';
+    } else {
+      // Standard viewport for desktop
+      viewport.content = 'width=device-width, initial-scale=1.0';
+    }
+  }
+  
+  // Add debug function for orientation
+  window.debugOrientation = function() {
+    return {
+      dimensions: {
+        width: window.innerWidth,
+        height: window.innerHeight,
+        ratio: (window.innerWidth / window.innerHeight).toFixed(2)
+      },
+      device: {
+        isMobilePhone: isMobilePhone(),
+        isTablet: isTablet(),
+        isDesktop: isDesktop()
+      },
+      orientation: {
+        isLandscape: isLandscape(),
+        isPortrait: isPortrait(),
+        angle: screen.orientation ? screen.orientation.angle : 'unknown'
+      },
+      features: {
+        orientationLock: !!(screen.orientation && screen.orientation.lock),
+        orientationAPI: !!screen.orientation
+      },
+      classes: {
+        orientationLocked: document.body.classList.contains('orientation-locked'),
+        tabletLandscape: document.body.classList.contains('tablet-landscape'),
+        tabletPortrait: document.body.classList.contains('tablet-portrait')
       }
     };
   };
-});
+  
+  // Initialize when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initOrientationControl);
+  } else {
+    initOrientationControl();
+  }
+  
+  console.log('Orientation control module loaded');
+})();
