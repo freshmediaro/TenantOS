@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="theme-color" content="#2563eb">
+    <title>Domain - TenantOS</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="domain-page">
+    <div class="register-container">
+        <!-- Logo Section -->
+        <div class="logo-section">
+            <div class="logo-wrapper">
+                <a href="login.html"> <img src="img/logo.png" alt="TenantOS" class="logo"></a>
+            </div>
+        </div>
+
+        <!-- Main Content Card -->
+        <div class="main-card">
+
+                            <!-- Topbar controls -->
+                            <div class="cc-topbar">
+                                <button type="button" class="cc-icon-btn" onclick="history.back()" aria-label="Back">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                                        <path d="M15 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+                                    </svg>
+                                </button>
+                                <button type="button" class="cc-icon-btn" onclick="window.location.href='login.html'" aria-label="Close">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                                        <path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+                                    </svg>
+                                </button>
+                            </div>
+
+            <div class="card-content">
+                <!-- Header -->
+                <div class="form-header">
+                    <p class="subtitle">Add a domain name to your project</p>
+                    <h2 class="title">Domain name</h2>
+                </div>
+
+                <!-- Domain Search UI -->
+                <div class="domain-search">
+                    <div class="domain-searchbar">
+                        <input type="text" class="domain-input" id="domain_input" placeholder="mydomain.ro" aria-label="Domain name">
+                        <button class="domain-button" id="domain_search_btn" aria-label="Search domain">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M10 18a8 8 0 100-16 8 8 0 000 16z"></path>
+                                    </svg>
+                                 </button>
+                                </div>
+
+                                 
+                    <div class="domain-info" id="domain_info">
+                        <div class="domain-info-section">
+                            <div class="domain-info-muted-title">Connect domain to ALIEN.HOST</div>
+                            <h3 class="domain-info-title">If you own a domain</h3>
+                            <p class="domain-info-desc">To connect it to ALIEN.HOST search for the exact name (mydomain.ro), press "Is mine", and follow the instructions.</p>
+                                     </div>
+                        <div class="domain-info-section">
+                            <div class="domain-info-muted-title">Buy new domain</div>
+                            <h3 class="domain-info-title">If you don’t have a  dmoain name</h3>
+                            <p class="domain-info-desc">You can pick a available domain name you want from the list. We support over 100 TLDs.</p>
+                                     </div>
+                                 </div>
+                    <div class="domain-results hidden" id="domain_results"></div>
+                            </div>
+            </div>
+        </div>
+        
+        <!-- Footer Links -->
+        <div class="page-footer">
+            <div class="footer-links">
+                <a href="#" class="footer-link">Terms of use</a>
+                <span class="separator">|</span>
+                <a href="#" class="footer-link">Privacy policy</a>
+                <span class="separator">|</span>
+                <a href="#" class="footer-link">Cookies</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/javascript.js"></script>
+</body>
+</html> 

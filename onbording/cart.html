@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="theme-color" content="#2563eb">
+    <title>Cart - TenantOS</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="checkout-page">
+    <div class="register-container">
+        <!-- Logo Section -->
+        <div class="logo-section">
+            <div class="logo-wrapper">
+               <a href="login.html"> <img src="img/logo.png" alt="TenantOS" class="logo"></a>
+            </div>
+        </div>
+
+        <!-- Main Content Card -->
+        <div class="main-card">
+
+                            <!-- Topbar controls -->
+                            <div class="cc-topbar">
+                                <button type="button" class="cc-icon-btn" onclick="history.back()" aria-label="Back">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                                        <path d="M15 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+                                    </svg>
+                                </button>
+                                <button type="button" class="cc-icon-btn" onclick="window.location.href='login.html'" aria-label="Close">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                                        <path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+                                    </svg>
+                                </button>
+                            </div>
+
+            <div class="card-content">
+                <!-- Header -->
+                <div class="form-header">
+                    <p class="subtitle">Checkout</p>
+                    <h2 class="title">Cart</h2>
+                </div>
+                <!-- Payment Header 
+                <div class="cc-merchant">
+                    <div class="cc-merchant-label">Billing company:</div>
+                    <div class="cc-merchant-name">Fresh Media &amp; Marketing SRL</div>
+                </div>-->
+                <!-- Summary -->
+                <div class="co-summary">
+
+
+                    <div class="co-row">
+                        <div class="co-info">
+                            <div class="co-label">Website: <span class="co-strong">One man army</span></div>
+                            <div class="co-sub">Per month</div>
+                        </div>
+                        <a href="platform.html">
+                        <div class="co-toggle">
+                            <span class="co-price-chip">$43,99</span>
+                            <button class="co-change-btn" type="button">Change</button>
+                        </div>
+                    </a>
+                    </div>
+                    <div class="co-divider"></div>
+                    <div class="co-row">
+                        <div class="co-info">
+                            <div class="co-label">New Domain: <span class="co-strong">mydomain.ro</span></div>
+                            <div class="co-sub">Per year</div>
+                        </div>
+                        <a href="domain.html">
+                        <div class="co-toggle">
+                            <span class="co-price-chip">$43,99</span>
+                            <button class="co-change-btn" type="button">Change</button>
+                        </div>
+                    </a>
+                    </div>
+                    <div class="co-divider"></div>
+                </div>
+
+                <!-- Coupon -->
+                <div class="co-coupon">
+                    <div class="co-coupon-title">Discount code</div>
+                    <div id="co_coupon_area">
+                        <div class="co-coupon-form">
+                            <input id="co_coupon_input" type="text" class="co-coupon-input" placeholder="Add discount code" />
+                            <button id="co_apply_btn" class="co-apply-btn" type="button">Apply</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Total -->
+                <div class="co-total">
+                    <div class="co-total-label">Total</div>
+                    <div class="co-total-amount">$647.21</div>
+                </div>
+
+                <!-- Checkout CTA -->
+                <button class="submit-button" onclick="location.href='billing.html'" type="button">Add billing details <span class="co-arrow">→</span></button>
+            </div>
+        </div>
+        
+        <!-- Footer Links -->
+        <div class="page-footer">
+            <div class="footer-links">
+                <a href="#" class="footer-link">Terms of use</a>
+                <span class="separator">|</span>
+                <a href="#" class="footer-link">Privacy policy</a>
+                <span class="separator">|</span>
+                <a href="#" class="footer-link">Cookies</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/javascript.js"></script>
+</body>
+</html> 
