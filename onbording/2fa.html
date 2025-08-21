@@ -14,7 +14,7 @@
         <!-- Logo Section -->
         <div class="logo-section">
             <div class="logo-wrapper">
-                <a href="login.html"> <img src="img/logo.png" alt="Young Events & Travel" class="logo"></a>
+                <a href="login.html"> <img src="img/logo.png" alt="Alien Host Logo" class="logo"></a>
             </div>
         </div>
 
@@ -117,8 +117,8 @@
 
                     <!-- Submit Button -->
                     <div class="form-group">
-                        <button onclick="window.location.href='platform.html'"
-                            type="submit" 
+                        <button onclick="showLoadingScreen(); return false;"
+                            type="button" 
                             class="submit-button"
                         >
                             Verify identity
@@ -147,6 +147,13 @@
                 <a href="#" class="footer-link">Cookies</a>
             </div>
         </div>
+    </div>
+
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <img src="img/logo.png" alt="Alien Host Logo" class="loading-logo">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Loading...</div>
     </div>
 
     <script src="js/javascript.js"></script>

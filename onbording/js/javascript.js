@@ -967,51 +967,84 @@ document.addEventListener('DOMContentLoaded', function() {
     const formOptions = document.getElementById('formOptions');
     const loginForm = document.querySelector('.login-form');
     
-    let isPasswordStep = false;
-    
-    // Enable/disable continue button based on email input
-    emailInput.addEventListener('input', function() {
-        if (!isPasswordStep) {
-            const email = this.value.trim();
-            const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-            submitBtn.disabled = !isValidEmail;
-        }
-    });
-    
-    // Handle submit button click
-    submitBtn.addEventListener('click', function() {
-        if (!isPasswordStep) {
-            // First step: Show password field
-            const email = emailInput.value.trim();
-            if (email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-                // Show password field and form options
-                passwordField.classList.add('show');
-                formOptions.classList.add('show');
-                
-                // Change button text and behavior
-                submitBtn.textContent = 'Login';
-                submitBtn.type = 'submit';
-                isPasswordStep = true;
-                
-                // Focus on password input
-                setTimeout(() => {
-                    passwordInput.focus();
-                }, 300);
-            }
-        }
-        // If isPasswordStep is true, the button is now type="submit" so form will submit normally
-    });
-    
-    // Handle form submission
-    loginForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        const email = emailInput.value.trim();
-        const password = passwordInput.value;
+    // Only run this code if we're on the login page (elements exist)
+    if (emailInput && passwordInput && submitBtn && passwordField && formOptions && loginForm) {
+        let isPasswordStep = false;
         
-        if (email && password) {
-            // Here you would typically send the login data to your server
-            console.log('Login attempt:', { email, password });
-            // For demo purposes, you can add your actual login logic here
-        }
-    });
+        // Enable/disable continue button based on email input
+        emailInput.addEventListener('input', function() {
+            if (!isPasswordStep) {
+                const email = this.value.trim();
+                const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+                submitBtn.disabled = !isValidEmail;
+            }
+        });
+        
+        // Handle submit button click
+        submitBtn.addEventListener('click', function() {
+            if (!isPasswordStep) {
+                // First step: Show password field
+                const email = emailInput.value.trim();
+                if (email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                    // Show password field and form options
+                    passwordField.classList.add('show');
+                    formOptions.classList.add('show');
+                    
+                    // Change button text and behavior
+                    submitBtn.textContent = 'Login';
+                    submitBtn.type = 'submit';
+                    isPasswordStep = true;
+                    
+                    // Focus on password input
+                    setTimeout(() => {
+                        passwordInput.focus();
+                    }, 300);
+                }
+            }
+            // If isPasswordStep is true, the button is now type="submit" so form will submit normally
+        });
+        
+        // Handle form submission
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
+            
+            if (email && password) {
+                // Here you would typically send the login data to your server
+                console.log('Login attempt:', { email, password });
+                // For demo purposes, you can add your actual login logic here
+            }
+        });
+    }
 });
+
+    // Loading Screen functionality for 2FA page
+    function showLoadingScreen() {
+        const mainCard = document.querySelector('.main-card');
+        const pageFooter = document.querySelector('.page-footer');
+        const loadingScreen = document.getElementById('loadingScreen');
+        
+        if (!mainCard || !pageFooter || !loadingScreen) {
+            // Fallback: redirect to platform.html if elements not found
+            window.location.href = 'platform.html';
+            return;
+        }
+        
+        // Add fade-out classes to main content
+        mainCard.classList.add('fade-out');
+        pageFooter.classList.add('fade-out');
+        
+        // Show loading screen after a short delay
+        setTimeout(() => {
+            loadingScreen.classList.add('active');
+        }, 500);
+        
+        // Redirect to platform.html after loading animation completes
+        setTimeout(() => {
+            window.location.href = '../index.html';
+        }, 5000); // 3 seconds total loading time
+    }
+    
+    // Make function globally available
+    window.showLoadingScreen = showLoadingScreen;
