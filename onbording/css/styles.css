@@ -2370,3 +2370,16 @@ body {
 .submit-button {
   transition: all 0.3s ease;
 }
+
+.captcha-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+  background: #f9f9f9;
+    border-radius: 8px;
+}
+
+.captcha-icon {
+  width: 260px;
+}
