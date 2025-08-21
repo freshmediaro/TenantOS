@@ -54,8 +54,8 @@
                         </div>
                     </div>
 
-                    <!-- Password Input -->
-                    <div class="form-group">
+                    <!-- Password Input (Initially Hidden) -->
+                    <div class="form-group password-field" id="passwordField">
                         <div class="input-wrapper">
                             <input 
                                 type="password" 
@@ -90,8 +90,8 @@
                         </div>
                     </div>
 
-                    <!-- Remember Me & Forgot Password -->
-                    <div class="form-options">
+                    <!-- Remember Me & Forgot Password (Initially Hidden) -->
+                    <div class="form-options" id="formOptions">
                         <div class="checkbox-group">
                             <input 
                                 type="checkbox" 
@@ -111,10 +111,12 @@
                     <!-- Submit Button -->
                     <div class="form-group">
                         <button 
-                            type="submit" 
+                            type="button" 
                             class="submit-button"
+                            id="submitBtn"
+                            disabled
                         >
-                            Login
+                            Continue
                         </button>
                     </div>
 
@@ -142,5 +144,6 @@
     </div>
 
     <script src="js/javascript.js"></script>
+
 </body>
 </html> 

@@ -956,3 +956,62 @@
     };
 
 })(); 
+
+
+// Two-step login functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const submitBtn = document.getElementById('submitBtn');
+    const passwordField = document.getElementById('passwordField');
+    const formOptions = document.getElementById('formOptions');
+    const loginForm = document.querySelector('.login-form');
+    
+    let isPasswordStep = false;
+    
+    // Enable/disable continue button based on email input
+    emailInput.addEventListener('input', function() {
+        if (!isPasswordStep) {
+            const email = this.value.trim();
+            const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+            submitBtn.disabled = !isValidEmail;
+        }
+    });
+    
+    // Handle submit button click
+    submitBtn.addEventListener('click', function() {
+        if (!isPasswordStep) {
+            // First step: Show password field
+            const email = emailInput.value.trim();
+            if (email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                // Show password field and form options
+                passwordField.classList.add('show');
+                formOptions.classList.add('show');
+                
+                // Change button text and behavior
+                submitBtn.textContent = 'Login';
+                submitBtn.type = 'submit';
+                isPasswordStep = true;
+                
+                // Focus on password input
+                setTimeout(() => {
+                    passwordInput.focus();
+                }, 300);
+            }
+        }
+        // If isPasswordStep is true, the button is now type="submit" so form will submit normally
+    });
+    
+    // Handle form submission
+    loginForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const email = emailInput.value.trim();
+        const password = passwordInput.value;
+        
+        if (email && password) {
+            // Here you would typically send the login data to your server
+            console.log('Login attempt:', { email, password });
+            // For demo purposes, you can add your actual login logic here
+        }
+    });
+});
