@@ -9211,6 +9211,99 @@ font-weight: 600;
   animation: widgetsSlideInRight 0.45s cubic-bezier(0.4,0,0.2,1) forwards;
 }
 
+/* --- Initial Load Animations --- */
+@keyframes initialTaskbarSlideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes initialWidgetsSlideInRight {
+  0% {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes initialDesktopIconsSlideInLeft {
+  0% {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+
+
+
+@keyframes initialMobileProfileSlideDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Initial load animation classes */
+.taskbar.initial-load {
+  animation: initialTaskbarSlideUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+#widgets-screen.initial-load {
+  animation: initialWidgetsSlideInRight 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.desktop-icons.initial-load {
+  animation: initialDesktopIconsSlideInLeft 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.mobile-profile-top-bar.initial-load {
+  animation: initialMobileProfileSlideDown 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+
+/* Hide elements initially for animation */
+.taskbar.initial-load,
+#widgets-screen.initial-load,
+.desktop-icons.initial-load,
+.mobile-profile-top-bar.initial-load {
+  opacity: 0;
+}
+
+/* Ensure proper positioning during initial load */
+.taskbar.initial-load {
+  transform: translateY(100%);
+}
+
+#widgets-screen.initial-load {
+  transform: translateX(100%);
+}
+
+.desktop-icons.initial-load {
+  transform: translateX(-100%);
+}
+
+.mobile-profile-top-bar.initial-load {
+  transform: translateY(-20px);
+}
+
+
+
 @keyframes appLauncherProfileDropdownSlideDown {
   0% {
     opacity: 0;

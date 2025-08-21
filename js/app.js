@@ -16842,13 +16842,52 @@ document.addEventListener('DOMContentLoaded', function () {
     localStorage.removeItem('restore_windows11_style');
   }
 
+  // --- Initial Load Animations ---
+  function initializeLoadAnimations() {
+    // Get all elements that need initial load animations
+    const taskbar = document.querySelector('.taskbar');
+    const widgetsScreen = document.getElementById('widgets-screen');
+    const desktopIcons = document.querySelector('.desktop-icons');
+    const mobileProfileTopBar = document.querySelector('.mobile-profile-top-bar');
+    
+    // Function to remove initial-load class after animation completes
+    function removeInitialLoadClass(element, animationDuration = 600) {
+      if (element) {
+        setTimeout(() => {
+          element.classList.remove('initial-load');
+          // Ensure final state is correct
+          element.style.opacity = '';
+          element.style.transform = '';
+        }, animationDuration);
+      }
+    }
+    
+    // Let CSS handle the timing - remove classes after animation completes
+    if (taskbar) {
+      removeInitialLoadClass(taskbar, 600);
+    }
+    
+    if (desktopIcons) {
+      removeInitialLoadClass(desktopIcons, 600);
+    }
+    
+    if (widgetsScreen) {
+      removeInitialLoadClass(widgetsScreen, 600);
+    }
+        
+    if (mobileProfileTopBar) {
+      removeInitialLoadClass(mobileProfileTopBar, 600);
+    }
+    
+  }
+
   // --- Dynamically create the Taskbar ---
   function createTaskbar() {
     const desktopArea = document.getElementById('desktop-area');
     if (!desktopArea) return;
     // Create taskbar
     const taskbar = document.createElement('div');
-    taskbar.className = 'taskbar';
+    taskbar.className = 'taskbar initial-load';
     // Start button
     const startButton = document.createElement('div');
     startButton.className = 'start-button';
@@ -16930,6 +16969,9 @@ document.addEventListener('DOMContentLoaded', function () {
   
   // Apply saved taskbar style after a short delay to ensure DOM is ready
   setTimeout(applyTaskbarStyle, 100);
+  
+  // Initialize initial load animations
+  setTimeout(initializeLoadAnimations, 100);
 
 
 
@@ -18308,7 +18350,7 @@ function generateDesktopIcons() {
   if (!desktopIconsContainer) return;
   desktopIconsContainer.innerHTML = '';
   if (typeof startMenuApps !== 'undefined') {
-    startMenuApps.forEach(app => {
+    startMenuApps.forEach((app, index) => {
       if (!defaultDesktopAppIds.includes(app.id)) return;
       const icon = document.createElement('div');
       icon.className = 'desktop-icon';
@@ -18320,7 +18362,20 @@ function generateDesktopIcons() {
         <div class="icon-container ${app.iconBgClass}"><i class="fas ${app.iconClass}"></i></div>
         <span>${app.name}</span>
       `;
+      
+      // Add initial load animation with staggered timing
+      icon.style.opacity = '0';
+      icon.style.transform = 'translateY(20px)';
+      icon.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+      
       desktopIconsContainer.appendChild(icon);
+      
+      // Stagger the animation for each icon
+      setTimeout(() => {
+        icon.style.opacity = '1';
+        icon.style.transform = 'translateY(0)';
+      }, 0); // Start after main animations + stagger
+      
       if (typeof setupDesktopIcon === 'function') setupDesktopIcon(icon);
     });
   }
